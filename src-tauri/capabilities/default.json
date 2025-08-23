@@ -2,9 +2,36 @@
 	"$schema": "../gen/schemas/desktop-schema.json",
 	"identifier": "default",
 	"description": "Capability for the main window",
-	"windows": ["main"],
+	"windows": [
+		"main"
+	],
 	"permissions": [
 		"core:default",
-		"opener:default"
+		"opener:default",
+		"fs:default",
+		{
+			"identifier": "fs:allow-write-text-file",
+			"allow": [{ "path": "$PUBLIC/**" }]
+		},
+		{
+			"identifier": "fs:read-dirs",
+			"allow": [{ "path": "$PUBLIC/**" }, { "path": "$PUBLIC/" }]
+		},
+		{
+			"identifier": "fs:allow-read-text-file",
+			"allow": [{ "path": "$PUBLIC/**" }]
+		},
+		{
+			"identifier": "fs:allow-exists",
+			"allow": [{ "path": "$PUBLIC/**" }]
+		},
+		{
+			"identifier": "fs:allow-read-file",
+			"allow": [{ "path": "$PUBLIC/**" }]
+		},
+		{
+			"identifier": "fs:allow-write-file",
+			"allow": [{ "path": "$PUBLIC/**" }]
+		}
 	]
 }
