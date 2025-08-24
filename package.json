@@ -17,6 +17,7 @@
 		"sql.js": "^1.13.0",
 		"vue": "^3.5.13",
 		"vue-toastification": "^2.0.0-rc.5",
+		"vue3-smooth-dnd": "^0.0.6",
 		"vue3-starry-sky": "^0.1.0"
 	},
 	"devDependencies": {
