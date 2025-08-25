@@ -4,7 +4,7 @@ import * as path from '@tauri-apps/api/path';
 import constant from "./constant";
 import deck from "./deck";
 
-type ypkLike = Map<RegExp, Map<string, Blob>>;
+type ypkLike = Map<RegExp, Map<string, Blob | Uint8Array>>;
 
 class Fs {
 	dir : fs.ReadFileOptions;
@@ -50,8 +50,7 @@ class Fs {
 						const blob = new Blob([new Uint8Array(byte)], { type: 'text/plain' })
 						map.get(constant.reg.ini)!.set(name, blob);
 					} else if (name.match(constant.reg.database)) {
-						const blob = new Blob([new Uint8Array(byte)], { type: 'text/plain' })
-						map.get(constant.reg.database)!.set(name, blob);
+						map.get(constant.reg.database)!.set(name, byte);
 					}
 				}
 			} catch (error) {
