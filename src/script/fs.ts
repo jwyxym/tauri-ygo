@@ -1,7 +1,10 @@
-import { convertFileSrc } from "@tauri-apps/api/core";
+import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import * as fs from '@tauri-apps/plugin-fs';
-import * as zip  from '@zip.js/zip.js';
+import * as path from '@tauri-apps/api/path';
 import constant from "./constant";
+import deck from "./deck";
+
+type ypkLike = Map<RegExp, Map<string, Blob>>;
 
 class Fs {
 	dir : fs.ReadFileOptions;
@@ -11,65 +14,72 @@ class Fs {
 	};
 
 	read = {
-		database : async (path : string) : Promise<Uint8Array<ArrayBuffer> | undefined> => {
+		database : async (file : string) : Promise<Uint8Array<ArrayBuffer> | undefined> => {
 			try {
-				return await fs.readFile(await path, this.dir);
+				return await fs.readFile(await file, this.dir);
 			} catch (error) {
 				this.write.log(error.message)
 			}
 			return undefined;
 		},
-		zip : async (path : string) : Promise<Map<RegExp, Array<string | Blob>>> => {
-			let zipReader : zip.ZipReader<Uint8Array> | undefined = undefined;
+		zip : async (file : string) : Promise<ypkLike> => {
 			let map = new Map([
-				[constant.type.database, [] as  Array<string | Blob>],
-				[constant.type.picture, [] as  Array<string | Blob>],
-				[constant.type.conf, [] as  Array<string | Blob>],
-				[constant.type.ini, [] as  Array<string | Blob>]
+				[constant.reg.database, new Map],
+				[constant.reg.picture, new Map],
+				[constant.reg.conf, new Map],
+				[constant.reg.ini, new Map]
 			]);
 			try {
-				const file = await fs.readFile(await path, this.dir);
-				zipReader = new zip.ZipReader(new zip.Uint8ArrayReader(file));
-				const entries = await zipReader.getEntries();
-				const textWriter = new zip.TextWriter();
-				const uint8ArrayWriter = new zip.Uint8ArrayWriter();
-				const getMimeType = (filename: string) => {
-					return filename.endsWith('.png') ? 'image/png' : 'image/jpeg';
-				}
-				for (const entry of entries) {
-					if (!entry.getData) continue;
-					if (entry.filename.match(constant.type.conf)) {
-						const content = await entry.getData(textWriter)
-						map.get(constant.type.conf)!.push(content)
-					} else if (entry.filename.match(constant.type.ini)) {
-						const content = await entry.getData(textWriter)
-						map.get(constant.type.ini)!.push(content)
-					} else if (entry.filename.match(constant.type.picture)) {
-						const blob = await entry.getData(new zip.BlobWriter(getMimeType(entry.filename)));
-						map.get(constant.type.picture)!.push(blob)
+				const p = await path.join(await constant.system.basePath(), file);
+				const entries = await invoke<Array<[string, number[]]>>("read_zip_in_tauri", {
+					path : p,
+				});
+				for (const [name, byte] of entries) {
+					if (name.match(constant.reg.picture)) {
+						const blob = new Blob([new Uint8Array(byte)], { type: name.endsWith('png') ? 'image/png' : 'image/jpeg' })
+						let filename = name.replace(/\\/g, '/').split('/').filter(part => part.trim() !== '').pop() || '';
+						if (!filename.startsWith('.')) {
+							const dotIndex = filename.lastIndexOf('.');
+  							filename = dotIndex > 0 ? filename.slice(0, dotIndex) : filename;
+						}
+						map.get(constant.reg.picture)!.set(filename, blob);
+					} else if (name.match(constant.reg.conf)) {
+						const blob = new Blob([new Uint8Array(byte)], { type: 'text/plain' })
+						map.get(constant.reg.conf)!.set(name, blob);
+					} else if (name.match(constant.reg.ini)) {
+						const blob = new Blob([new Uint8Array(byte)], { type: 'text/plain' })
+						map.get(constant.reg.ini)!.set(name, blob);
+					} else if (name.match(constant.reg.database)) {
+						const blob = new Blob([new Uint8Array(byte)], { type: 'text/plain' })
+						map.get(constant.reg.database)!.set(name, blob);
 					}
 				}
 			} catch (error) {
-				this.write.log(error.message)
-			} finally {
-				if (zipReader !== undefined)
-					zipReader.close();
+				this.write.log(error)
 			}
 			return map;
 		},
-		picture : async (path : string) : Promise<string | undefined> => {
+		picture : async (file : string) : Promise<string | undefined> => {
 			try {
-				return convertFileSrc(path);
+				return convertFileSrc(file);
 			} catch (error) {
-				this.write.log(error.message)
+				this.write.log(error)
 			}
 			return undefined;
 		},
-		text : async (path : string) : Promise<string | undefined> => {
+		text : async (file : string) : Promise<string | undefined> => {
 			try {
-				return await fs.readTextFile(path, this.dir);
+				return await fs.readTextFile(file, this.dir);
 			} catch (error) {
-				this.write.log(error.message)
+				this.write.log(error)
+			}
+			return undefined;
+		},
+		ydk : async (file : string) : Promise<deck | undefined> => {
+			try {
+				return deck.fromYdkString(await fs.readTextFile(file, this.dir));
+			} catch (error) {
+				this.write.log(error)
 			}
 			return undefined;
 		}
@@ -77,11 +87,26 @@ class Fs {
 	};
 
 	write = {
-		log : async (log : string)  : Promise<boolean> => {
+		log : async (text : string)  : Promise<boolean> => {
 			try {
-				const file = await fs.open(constant.log.error, { append: true, baseDir : this.dir.baseDir });
-				await file.write(new TextEncoder().encode(`[${new Date().toLocaleString()}] ${log}${constant.system.lineFeed()}`));
-				await file.close();
+				const log = `[${new Date().toLocaleString()}] ${text}${constant.system.lineFeed()}`
+				if (await fs.exists(constant.log.error, this.dir)) {
+					const file = await fs.open(constant.log.error, { append: true, baseDir : this.dir.baseDir });
+					await file.write(new TextEncoder().encode(log));
+					await file.close();
+				} else {
+					const file = await fs.create(constant.log.error, this.dir)
+					await file.write(new TextEncoder().encode(log));
+					await file.close();
+				}
+				return true;
+			} catch (e) {
+				return false;
+			}
+		},
+		ydk : async (file : string, ydk : deck) : Promise<boolean> => {
+			try {
+				await fs.writeTextFile(file, ydk.toYdkString(), this.dir);
 				return true;
 			} catch (e) {
 				return false;
@@ -91,3 +116,4 @@ class Fs {
 }
 
 export default new Fs();
+export type { ypkLike };

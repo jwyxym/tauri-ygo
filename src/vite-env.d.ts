@@ -7,3 +7,4 @@ declare module "*.vue" {
 }
 declare module 'vue3-starry-sky';
 declare module 'vue3-smooth-dnd';
+declare module 'sql.js';

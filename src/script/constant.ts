@@ -35,13 +35,17 @@ class System {
 }
 
 class Constant {
-	type = {
+	reg = {
 		database : /\.(cdb)$/i,
 		picture : /\.(jpg|png|jpeg)$/i,
 		conf : /\.(conf)$/i,
 		ini : /\.(ini)$/i,
 		zip : /\.(ypk|zip)$/i,
 	};
+
+	str = {
+		blob : 'blob:http'
+	}
 
 	log = {
 		error : 'error.log'
