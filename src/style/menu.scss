@@ -1,0 +1,33 @@
+@use './font.scss';
+
+.menu {
+	transform: translateX(10%);
+	color: font.$text-color;
+	font-family: 'title';
+	height: 100%;
+	white-space: nowrap;
+	display: flex;
+	justify-items: center;
+	align-items: center;
+	.content {
+		height: 90%;
+		max-width: 20%;
+		display: flex;
+		flex-direction: column;
+		.titles {
+			height: 70%;
+			display: grid;
+			.title {
+				font-size: 7vh;
+				user-select: none;
+				&:hover {
+					cursor: pointer;
+				}
+			}
+		}
+		.version {
+			height: 20%;
+			font-size: 10vh;
+		}
+	}
+}
