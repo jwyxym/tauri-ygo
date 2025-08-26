@@ -45,7 +45,8 @@ class Constant {
 
 	str = {
 		blob : 'blob:http',
-		version : 'Tauri-YGO v0.0.1',
+		title : 'Tauri-YGO',
+		version : 'v0.0.1',
 		menu : [
 			'人机模式',
 			'联机模式',

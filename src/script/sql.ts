@@ -1,5 +1,6 @@
 import initSqlJs, { Database, QueryExecResult } from 'sql.js';
 import wasmUrl from "sql.js/dist/sql-wasm.wasm?url";
+import fs from './fs'
 
 type SQL = Awaited<ReturnType<typeof initSqlJs>>;
 
@@ -13,6 +14,7 @@ class SQLiteReader {
 		return this.SQL;
 	}
 
+	// @ts-ignore
 	private async execute<T>(database : Uint8Array, operation: (db: Database) => T): Promise<T> {
 		const SQL = await this.initSQLJS();
 		const db = new SQL.Database(database);
@@ -20,6 +22,8 @@ class SQLiteReader {
 		try {
 			const result = operation(db);
 			return result;
+		} catch(error) {
+			fs.write.log(error)
 		} finally {
 			db.close();
 		}
@@ -42,6 +46,7 @@ class SQLiteReader {
 		name ?: string;
 		desc ?: string;
 		hint ?: Array<string>;
+	// @ts-ignore
 	} = {}) : Promise<QueryExecResult> {
 		let key = `
 			SELECT * 
@@ -148,6 +153,7 @@ class SQLiteReader {
 		name ?: string;
 		desc ?: string;
 		hint ?: Array<string>;
+	// @ts-ignore
 	} = {}) : Promise<QueryExecResult> {
 		return this.execute(database, (db) => {
 			return db.exec(`BEGIN;

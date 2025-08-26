@@ -85,7 +85,17 @@
 				{
 					"path": "$RESOURCE/**"
 				}
-		
+			]
+		},
+		{
+			"identifier": "fs:allow-mkdir",
+			"allow": [
+				{
+					"path": "$PUBLIC/**"
+				},
+				{
+					"path": "$RESOURCE/**"
+				}
 			]
 		}
 	]

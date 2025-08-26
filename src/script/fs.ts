@@ -1,6 +1,8 @@
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import * as fs from '@tauri-apps/plugin-fs';
 import * as path from '@tauri-apps/api/path';
+import axios from "axios";
+
 import constant from "./constant";
 import deck from "./deck";
 
@@ -8,9 +10,20 @@ type ypkLike = Map<RegExp, Map<string, Blob | Uint8Array>>;
 
 class Fs {
 	dir : fs.ReadFileOptions;
+	path : Promise<string>;
 
 	constructor () {
 		this.dir = constant.system.baseDir();
+		this.path = constant.system.basePath();
+	};
+
+	exists = async (file : string) : Promise<boolean> => {
+		try {
+			return fs.exists(file, this.dir);
+		} catch (error) {
+			this.write.log(error.message)
+		}
+		return false;
 	};
 
 	read = {
@@ -60,7 +73,7 @@ class Fs {
 		},
 		picture : async (file : string) : Promise<string | undefined> => {
 			try {
-				return convertFileSrc(file);
+				return convertFileSrc(await path.join(await this.path, file));
 			} catch (error) {
 				this.write.log(error)
 			}
@@ -107,10 +120,42 @@ class Fs {
 			try {
 				await fs.writeTextFile(file, ydk.toYdkString(), this.dir);
 				return true;
-			} catch (e) {
-				return false;
+			} catch (error) {
+				this.write.log(error)
 			}
-		}
+			return false;
+		},
+		file : async (file : string, data : Uint8Array<ArrayBufferLike>) : Promise<boolean> => {
+			try {
+				const f = await fs.create(file, this.dir);
+				await f.write(data);
+				await f.close();
+				return true;
+			} catch (error) {
+				this.write.log(error)
+			}
+			return false;
+		},
+		dir : async (dir : string) : Promise<boolean> => {
+			try {
+				 await fs.mkdir(dir, this.dir)
+				return true;
+			} catch (error) {
+				this.write.log(error)
+			}
+			return false;
+		},
+		fromUrl : async (file : string, url : string) : Promise<boolean> => {
+			try {
+				const response = await axios.get(url, {
+					responseType: 'blob'
+				});
+				return await this.write.file(file, new Uint8Array(await response.data.arrayBuffer()));
+			} catch (error) {
+				this.write.log(error)
+			}
+			return false;
+		},
 	};
 }
 

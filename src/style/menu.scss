@@ -9,15 +9,16 @@
 	display: flex;
 	justify-items: center;
 	align-items: center;
+	z-index: 10;
 	.content {
 		height: 90%;
 		max-width: 20%;
 		display: flex;
 		flex-direction: column;
-		.titles {
+		.list {
 			height: 70%;
 			display: grid;
-			.title {
+			.item {
 				font-size: 7vh;
 				user-select: none;
 				&:hover {
@@ -25,7 +26,7 @@
 				}
 			}
 		}
-		.version {
+		.title {
 			height: 20%;
 			font-size: 10vh;
 		}
