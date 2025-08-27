@@ -47,7 +47,6 @@ class Gsap {
 			rotation : `+=0`,
 			duration : 0.5
 		}, 3.25);
-		console.log(angle)
 		tl.to(defender.selector, {
 			// rotation : pos.isLeft(p2, p1) ? `-=${Math.abs(270 - angle)}` : `-=${Math.abs(90 - angle)}`,
 			rotation : `${angle > 270 || (angle > 90 && angle <= 180) ? '+' : '-'}=${Math.abs(90 - (angle > 270 ? Math.abs(360 - angle) : angle > 180 ? Math.abs(270 - angle) : angle > 90 ? Math.abs(180 - angle) : angle))}`,

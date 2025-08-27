@@ -53,7 +53,17 @@ class Constant {
 			'编辑卡组',
 			'系统设置',
 			'退出游戏'
-		]
+		],
+		dirs : [
+			'textures',
+			'expansions',
+			'script',
+			'pics'
+		],
+		files : new Map([
+			[path.join('textures', 'cardI.jpg'), 'https://jwyxym.top:50028/pics/xiao/66666666.jpg'],
+			[path.join('textures', 'cardII.jpg'), 'https://jwyxym.top:50028/pics/xiao/66666666.jpg'],
+		])
 	}
 
 	log = {

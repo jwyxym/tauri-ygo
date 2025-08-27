@@ -34,7 +34,7 @@ class Position {
 			const p : posLike = element.$el.getBoundingClientRect();
 			return p;
 		} catch (error) {
-			fs.write.log(error)
+			fs.write.log(error);
 		}
 		return {
 			bottom : 0,
@@ -52,7 +52,7 @@ class Position {
 		try {
 			return p2.left - p1.left;
 		} catch (error) {
-			fs.write.log(error)
+			fs.write.log(error);
 		}
 		return 0;
 	};
@@ -61,7 +61,7 @@ class Position {
 		try {
 			return p1.top - p2.top;
 		} catch (error) {
-			fs.write.log(error)
+			fs.write.log(error);
 		}
 		return 0;
 	};
@@ -75,7 +75,7 @@ class Position {
 			const angle = Math.atan2(oppo, adjacent) * (180 / Math.PI)
 			return  angle > 0 ? angle : 360 + angle;
 		} catch (error) {
-			fs.write.log(error)
+			fs.write.log(error);
 		}
 		return 0;
 	};
@@ -86,7 +86,7 @@ class Position {
 		try {
 			return  p1.top < p2.top;
 		} catch (error) {
-			fs.write.log(error)
+			fs.write.log(error);
 		}
 		return false;
 	}
@@ -95,7 +95,7 @@ class Position {
 		try {
 			return  p1.left < p2.left;
 		} catch (error) {
-			fs.write.log(error)
+			fs.write.log(error);
 		}
 		return false;
 	}

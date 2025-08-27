@@ -9,7 +9,7 @@
 				:exit = '{ opacity: 0 }'
 				:style = "{ '--y' : `${position.height * 0.5}px`, '--x' : `${position.width * 0.1}px` }"
 				v-if = 'position.height > 0 && position.width > 0 && animation.show'
-				:src = 'url'
+				:src = 'url.I'
 			/>
 		</AnimatePresence>
 		<AnimatePresence>
@@ -21,7 +21,7 @@
 				:exit = '{ opacity: 0 }'
 				:style = "{ '--y' : `${position.height * 0.1}px`, '--x' : `${position.width * 0.3}px` }"
 				v-if = 'position.height > 0 && position.width > 0 && animation.show'
-				:src = 'url'
+				:src = 'url.II'
 			/>
 		</AnimatePresence>
 		
@@ -53,7 +53,10 @@
 		y : 0
 	});
 
-	let url : Ref<string> = ref('');
+	let url = reactive({
+		I : '',
+		II : ''
+	})
 
 	let animation = reactive({
 		on : async () : Promise<void> => {
@@ -63,7 +66,6 @@
 				animation.show = false;
 				tl.kill()
 			}
-			console.log(animation.count)
 			const tl = animation.count > 0 ? gsap.attack(100, { element : pic1.value!, selector : '#pic1', angle : 0 }, { element : pic2.value!, selector : '#pic2', angle : 0 }, kill) : gsap.attack(100, { element : pic2.value!, selector : '#pic2', angle : 180 }, { element : pic1.value!, selector : '#pic1', angle : 0 }, kill);
 		},
 		show : true,
@@ -71,11 +73,13 @@
 	});
 
 	onMounted(async () : Promise<void> => {
-		// await (new Promise(resolve => setTimeout(resolve, 500)));
 		pos.reactive.get(position, body.value!);
-		const file = await path.join('textures', 'card.jpg')
-		if (await fs.exists(file))
-			url.value = await fs.read.picture(file) ?? '';
+		const fileI = await path.join('textures', 'cardI.jpg')
+		const fileII = await path.join('textures', 'cardII.jpg')
+		if (await fs.exists(fileI))
+			url.I = await fs.read.picture(fileI) ?? '';
+		if (await fs.exists(fileII))
+			url.II = await fs.read.picture(fileII) ?? '';
 	});
 
 	watch(pic1, (n) : void => {

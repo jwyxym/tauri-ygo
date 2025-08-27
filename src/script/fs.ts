@@ -2,6 +2,7 @@ import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import * as fs from '@tauri-apps/plugin-fs';
 import * as path from '@tauri-apps/api/path';
 import axios from "axios";
+import { useToast } from 'vue-toastification'
 
 import constant from "./constant";
 import deck from "./deck";
@@ -21,7 +22,7 @@ class Fs {
 		try {
 			return fs.exists(file, this.dir);
 		} catch (error) {
-			this.write.log(error.message)
+			this.write.log(error);
 		}
 		return false;
 	};
@@ -31,7 +32,7 @@ class Fs {
 			try {
 				return await fs.readFile(await file, this.dir);
 			} catch (error) {
-				this.write.log(error.message)
+				this.write.log(error);
 			}
 			return undefined;
 		},
@@ -67,7 +68,7 @@ class Fs {
 					}
 				}
 			} catch (error) {
-				this.write.log(error)
+				this.write.log(error);
 			}
 			return map;
 		},
@@ -75,7 +76,7 @@ class Fs {
 			try {
 				return convertFileSrc(await path.join(await this.path, file));
 			} catch (error) {
-				this.write.log(error)
+				this.write.log(error);
 			}
 			return undefined;
 		},
@@ -83,7 +84,7 @@ class Fs {
 			try {
 				return await fs.readTextFile(file, this.dir);
 			} catch (error) {
-				this.write.log(error)
+				this.write.log(error);
 			}
 			return undefined;
 		},
@@ -91,7 +92,7 @@ class Fs {
 			try {
 				return deck.fromYdkString(await fs.readTextFile(file, this.dir));
 			} catch (error) {
-				this.write.log(error)
+				this.write.log(error);
 			}
 			return undefined;
 		}
@@ -101,6 +102,7 @@ class Fs {
 	write = {
 		log : async (text : string)  : Promise<boolean> => {
 			try {
+				useToast().error(text);
 				const log = `[${new Date().toLocaleString()}] ${text}${constant.system.lineFeed()}`
 				if (await fs.exists(constant.log.error, this.dir)) {
 					const file = await fs.open(constant.log.error, { append: true, baseDir : this.dir.baseDir });
@@ -112,7 +114,8 @@ class Fs {
 					await file.close();
 				}
 				return true;
-			} catch (e) {
+			} catch (error) {
+				useToast().error(error);
 				return false;
 			}
 		},
@@ -121,7 +124,7 @@ class Fs {
 				await fs.writeTextFile(file, ydk.toYdkString(), this.dir);
 				return true;
 			} catch (error) {
-				this.write.log(error)
+				this.write.log(error);
 			}
 			return false;
 		},
@@ -132,7 +135,7 @@ class Fs {
 				await f.close();
 				return true;
 			} catch (error) {
-				this.write.log(error)
+				this.write.log(error);
 			}
 			return false;
 		},
@@ -141,7 +144,7 @@ class Fs {
 				 await fs.mkdir(dir, this.dir)
 				return true;
 			} catch (error) {
-				this.write.log(error)
+				this.write.log(error);
 			}
 			return false;
 		},
@@ -152,7 +155,7 @@ class Fs {
 				});
 				return await this.write.file(file, new Uint8Array(await response.data.arrayBuffer()));
 			} catch (error) {
-				this.write.log(error)
+				this.write.log(error);
 			}
 			return false;
 		},
