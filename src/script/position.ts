@@ -50,7 +50,7 @@ class Position {
 
 	oppo = (p1 : posLike, p2 : posLike) : number => {
 		try {
-			return p2.left - p1.right;
+			return p2.left - p1.left;
 		} catch (error) {
 			fs.write.log(error)
 		}
@@ -68,7 +68,12 @@ class Position {
 
 	angle = (p1 : posLike, p2 : posLike) : number => {
 		try {
-			return  Math.atan(this.oppo(p1, p2) / this.adjacent(p1, p2)) * (180 / Math.PI);
+			const adjacent = this.adjacent(p1, p2);
+			const oppo = this.oppo(p1, p2);
+			if (adjacent == 0) return this.isLeft(p1, p2) ? 270 : 90;
+			else if (oppo == 0) return this.isHigh(p1, p2) ? 180 : 0;
+			const angle = Math.atan2(oppo, adjacent) * (180 / Math.PI)
+			return  angle > 0 ? angle : 360 + angle;
 		} catch (error) {
 			fs.write.log(error)
 		}
@@ -93,6 +98,10 @@ class Position {
 			fs.write.log(error)
 		}
 		return false;
+	}
+
+	isLeftorHigh = (p1 : posLike, p2 : posLike) : boolean => {
+		return this.isLeft(p1, p2) || this.isHigh(p1, p2)
 	}
 };
 
