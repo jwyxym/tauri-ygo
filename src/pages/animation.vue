@@ -34,7 +34,6 @@
 	import { motion, AnimatePresence } from "motion-v";
 
 	import fs from "../script/fs";
-	// import { pos, posLike, Compoute } from "../script/position";
 	import pos, { posLike } from "../script/position";
 	import gsap from '../script/gsap'
 
@@ -62,11 +61,12 @@
 		on : async () : Promise<void> => {
 			pos.reactive.get(position, body.value!);
 			animation.count = animation.count > 0 ? 0 : 1;
-			const kill = () => {
+			const kill = async () : Promise<void> => {
 				animation.show = false;
+				await (new Promise(resolve => setTimeout(resolve, 200)));
 				tl.kill()
 			}
-			const tl = animation.count > 0 ? gsap.attack(100, { element : pic1.value!, selector : '#pic1', angle : 0 }, { element : pic2.value!, selector : '#pic2', angle : 0 }, kill) : gsap.attack(100, { element : pic2.value!, selector : '#pic2', angle : 180 }, { element : pic1.value!, selector : '#pic1', angle : 0 }, kill);
+			const tl = animation.count > 0 ? gsap.attack(100, { element : pic1.value!, selector : '#pic1', angle : 0 }, { element : pic2.value!, selector : '#pic2', angle : 180 }, kill) : gsap.attack(100, { element : pic2.value!, selector : '#pic2', angle : 180 }, { element : pic1.value!, selector : '#pic1', angle : 0 }, kill);
 		},
 		show : true,
 		count : 0

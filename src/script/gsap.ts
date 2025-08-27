@@ -24,6 +24,11 @@ class Gsap {
 				rotation : attacker.angle,
 				duration : 0
 			}, 0);
+		if (defender.angle !== undefined)
+			tl.to(defender.selector, {
+				rotation : defender.angle,
+				duration : 0
+			}, 0);
 		tl.to(attacker.selector, {
 			rotation : angle,
 			duration : 0.5
@@ -35,33 +40,33 @@ class Gsap {
 		tl.to(attacker.selector, {
 			x : `${pos.isLeft(p1, p2) ? '-' : '+'}=${distanceX}`,
 			y : `${pos.isHigh(p1, p2) ? '-' : '+'}=${distanceY}`,
-			duration : 2
-		}, 1);
+			duration : 0.5
+		}, 0.75);
 		tl.to(attacker.selector, {
 			x : pos.isLeft(p1, p2) ? `+=${X + distanceX}` : `-=${X - distanceX}`,
 			y : pos.isHigh(p1, p2) ? `+=${Y - distanceX}` : `-=${Y + distanceY}`,
 			duration : 0.25,
 			ease : 'power2.inOut'
-		}, 3);
+		}, 1.25);
 		tl.to(attacker.selector, {
 			rotation : `+=0`,
 			duration : 0.5
-		}, 3.25);
-		tl.to(defender.selector, {
-			// rotation : pos.isLeft(p2, p1) ? `-=${Math.abs(270 - angle)}` : `-=${Math.abs(90 - angle)}`,
-			rotation : `${angle > 270 || (angle > 90 && angle <= 180) ? '+' : '-'}=${Math.abs(90 - (angle > 270 ? Math.abs(360 - angle) : angle > 180 ? Math.abs(270 - angle) : angle > 90 ? Math.abs(180 - angle) : angle))}`,
-			duration : 0.05
-		}, 3.15);
+		}, 1.5);
 		const attackedRadians = Math.PI / 2 - radians;
 		const attackedDistanceX = Math.abs(Math.cos(attackedRadians) * attackedDistance);
     	const attackedDistanceY = Math.abs(Math.sin(attackedRadians) * attackedDistance);
 		tl.to(defender.selector, {
 			x : `${pos.isLeft(p2, p1) ? '-' : '+'}=${attackedDistanceX}`,
 			y : `${pos.isHigh(p2, p1) ? '-' : '+'}=${attackedDistanceY}`,
-			duration : 0.2,
+			duration : 0.4,
 			ease : 'power2.out',
 			onComplete: () => { complete(); }
-		}, 3.2);
+		}, 1.4);
+		let rotation : string = (defender.angle && Math.abs(defender.angle) == 90) ? angle > 270 || (angle > 90 && angle <= 180) ? '-' : '+' : angle > 270 || (angle > 90 && angle <= 180) ? '+' : '-';
+		tl.to(defender.selector, {
+			rotation : `${rotation}=${360 * 1}`,
+			duration : 0.5,
+		}, 1.4);
 
 		return tl;
 	};

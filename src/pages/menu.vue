@@ -3,11 +3,12 @@
 		<div class = 'content'>
 			<span class = 'title'>{{ constant.str.title }}</span>
 			<div class = 'list'>
-				<AnimatePresence :initial = 'false' v-for = 'i in constant.str.menu'>
+				<AnimatePresence :initial = 'false' v-for = '(i, v) in constant.str.menu'>
 					<motion.span
 						:whileHover="{ scale: 1.1 }"
 						:whilePress="{ scale: 0.8 }"
 						class = 'item'
+						@click = 'select(v)'
 					>
 						{{ i }}
 					</motion.span>
@@ -16,9 +17,20 @@
 		</div>
 	</motion.div>
 </template>
-<script setup lang="ts">
-	import { motion, AnimatePresence } from "motion-v";
-	import constant from "../script/constant";
+<script setup lang = 'ts'>
+	import { motion, AnimatePresence } from 'motion-v';
+	import constant from '../script/constant';
+	import { defineProps } from 'vue';
+
+	const props = defineProps(['select']);
+	const select = (v : number) : void => {
+		switch (v) {
+			case 2:
+				props.select.deck();
+				break;
+		}
+	}
+
 </script>
 <style scoped lang = 'scss'>
 	@use '../style/menu.scss';

@@ -3,13 +3,21 @@
 		<starry-sky :stars-count = '1500' :distance = '800' id = 'back'/>
 		<div class = 'body'>
 			<AnimatePresence :initial = 'false'>
+				<Deck
+					:initial = '{ opacity: 0, scale: 0 }'
+					:animate = '{ opacity: 1, scale: 1 }'
+					:exit = '{ opacity: 0, scale: 0 }'
+					v-if = 'page.show.deck'
+				></Deck>
+			</AnimatePresence>
+			<AnimatePresence :initial = 'false'>
 				<Menu
-					:initial = '{ opacity: 0 }'
-					:animate = '{ opacity: 1 }'
-					:exit = '{ opacity: 0 }'
+					:initial = '{ opacity: 0, scale: 0 }'
+					:animate = '{ opacity: 1, scale: 1 }'
+					:exit = '{ opacity: 0, scale: 0 }'
 					v-if = 'page.show.menu'
-				>
-				</Menu>
+					:select = 'page.select'
+				></Menu>
 			</AnimatePresence>
 			<AnimatePresence :initial = 'false'>
 				<Animation
@@ -22,25 +30,50 @@
 		</div>
 	</div>
 </template>
-
 <script setup lang="ts">
 	import { ref, reactive, onMounted, onUnmounted, Ref, watch, onBeforeMount } from "vue";
 	import { AnimatePresence } from "motion-v";
+	import { Dialog } from '@varlet/ui'
 
 	import Menu from './pages/menu.vue';
 	import Animation from './pages/animation.vue';
+	import Deck from './pages/deck.vue';
+
 	import mainGame from './script/game';
+	import constant from "./script/constant";
 
 	let page = reactive({
 		show : {
-			menu : false
+			dialog : false,
+			menu : false,
+			deck : false
+		},
+		select : {
+			download : async () : Promise<void> => {
+				await mainGame.init.file();
+				page.show.menu = true;
+			},
+			deck : () : void => {
+				page.show.menu = false;
+				page.show.deck = true;
+			},
 		}
 	});
 
 	onMounted(async () => {
-		await mainGame.init();
-		await (new Promise(resolve => setTimeout(resolve, 500)));
-		page.show.menu = true;
+		await mainGame.init.dir();
+		page.show.dialog = !await mainGame.chk();
+		// await (new Promise(resolve => setTimeout(resolve, 500)));
+		page.show.menu = !page.show.dialog;
+		if (page.show.dialog)
+			Dialog({
+				message : constant.str.dialog.hint.download,
+				dialogClass : 'ground_glass',
+				cancelButtonTextColor : constant.str.dialog.button,
+				confirmButtonTextColor : constant.str.dialog.button,
+				onConfirm : page.select.download
+				// onCancel
+			});
 	});
 
 </script>
@@ -51,6 +84,7 @@
 			height: 97vh;
 			width: 100vw;
 			display: flex;
+			justify-content: center;
 		}
 		#back {
 			background: linear-gradient(#1c1a2e, #2f2434);
@@ -59,34 +93,6 @@
 
 </style>
 <style lang = 'scss'>
-	.Vue-Toastification__toast--default {
-		background: rgba(255, 255, 255, 0.3) !important;
-		border: 2px solid rgba($color: #1976d2, $alpha: 0.5) !important;
-		backdrop-filter: blur(10px) !important;
-		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-	}
-	.Vue-Toastification__toast--info {
-		background: rgba(255, 255, 255, 0.3) !important;
-		border: 2px solid rgba($color: #2196f3, $alpha: 0.5) !important;
-		backdrop-filter: blur(10px) !important;
-		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-	}
-	.Vue-Toastification__toast--success {
-		background: rgba(255, 255, 255, 0.3) !important;
-		border: 2px solid rgba($color: #4caf50, $alpha: 0.5) !important;
-		backdrop-filter: blur(10px) !important;
-		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-	}
-	.Vue-Toastification__toast--error {
-		background: rgba(255, 255, 255, 0.3) !important;
-		border: 2px solid rgba($color: #ff5252, $alpha: 0.5) !important;
-		backdrop-filter: blur(10px) !important;
-		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-	}
-	.Vue-Toastification__toast--warning {
-		background: rgba(255, 255, 255, 0.3) !important;
-		border: 2px solid rgba($color: #ffc107, $alpha: 0.5) !important;
-		backdrop-filter: blur(10px) !important;
-		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-	}
+	@use './style/toast.scss';
+    // @use './style/ground_glass.scss';
 </style>

@@ -58,12 +58,19 @@ class Constant {
 			'textures',
 			'expansions',
 			'script',
-			'pics'
+			'pics',
+			'deck'
 		],
 		files : new Map([
 			[path.join('textures', 'cardI.jpg'), 'https://jwyxym.top:50028/pics/xiao/66666666.jpg'],
 			[path.join('textures', 'cardII.jpg'), 'https://jwyxym.top:50028/pics/xiao/66666666.jpg'],
-		])
+		]),
+		dialog : {
+			button : '#e0e0e0',
+			hint : {
+				download : '是否下载资源包（此过程会消耗流量）'
+			}
+		}
 	}
 
 	log = {
