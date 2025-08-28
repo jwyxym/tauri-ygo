@@ -1,102 +1,103 @@
 {
-	"$schema": "../gen/schemas/desktop-schema.json",
-	"identifier": "default",
-	"description": "Capability for the main window",
-	"windows": [
-		"main"
-	],
-	"permissions": [
-		"core:default",
-		"opener:default",
-		"fs:default",
-		"os:default",
-		{
-			"identifier": "fs:allow-write-text-file",
-			"allow": [
-				{
-					"path": "$PUBLIC/**"
-				},
-				{
-					"path": "$RESOURCE/**"
-				}
-			]
-		},
-		{
-			"identifier": "fs:read-dirs",
-			"allow": [
-				{
-					"path": "$PUBLIC/**"
-				},
-				{
-					"path": "$RESOURCE/**"
-				}
-			]
-		},
-		{
-			"identifier": "fs:allow-read-text-file",
-			"allow": [
-				{
-					"path": "$PUBLIC/**"
-				},
-				{
-					"path": "$RESOURCE/**"
-				}
-			]
-		},
-		{
-			"identifier": "fs:allow-exists",
-			"allow": [
-				{
-					"path": "$PUBLIC/**"
-				},
-				{
-					"path": "$RESOURCE/**"
-				}
-			]
-		},
-		{
-			"identifier": "fs:allow-read-file",
-			"allow": [
-				{
-					"path": "$PUBLIC/**"
-				},
-				{
-					"path": "$RESOURCE/**"
-				}
-			]
-		},
-		{
-			"identifier": "fs:allow-write-file",
-			"allow": [
-				{
-					"path": "$PUBLIC/**"
-				},
-				{
-					"path": "$RESOURCE/**"
-				}
-			]
-		},
-		{
-			"identifier": "fs:allow-create",
-			"allow": [
-				{
-					"path": "$PUBLIC/**"
-				},
-				{
-					"path": "$RESOURCE/**"
-				}
-			]
-		},
-		{
-			"identifier": "fs:allow-mkdir",
-			"allow": [
-				{
-					"path": "$PUBLIC/**"
-				},
-				{
-					"path": "$RESOURCE/**"
-				}
-			]
-		}
-	]
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "opener:default",
+    "fs:default",
+    "os:default",
+    {
+      "identifier": "fs:allow-write-text-file",
+      "allow": [
+        {
+          "path": "$PUBLIC/**"
+        },
+        {
+          "path": "$RESOURCE/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:read-dirs",
+      "allow": [
+        {
+          "path": "$PUBLIC/**"
+        },
+        {
+          "path": "$RESOURCE/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-read-text-file",
+      "allow": [
+        {
+          "path": "$PUBLIC/**"
+        },
+        {
+          "path": "$RESOURCE/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-exists",
+      "allow": [
+        {
+          "path": "$PUBLIC/**"
+        },
+        {
+          "path": "$RESOURCE/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-read-file",
+      "allow": [
+        {
+          "path": "$PUBLIC/**"
+        },
+        {
+          "path": "$RESOURCE/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-write-file",
+      "allow": [
+        {
+          "path": "$PUBLIC/**"
+        },
+        {
+          "path": "$RESOURCE/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-create",
+      "allow": [
+        {
+          "path": "$PUBLIC/**"
+        },
+        {
+          "path": "$RESOURCE/**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-mkdir",
+      "allow": [
+        {
+          "path": "$PUBLIC/**"
+        },
+        {
+          "path": "$RESOURCE/**"
+        }
+      ]
+    },
+    "process:default"
+  ]
 }

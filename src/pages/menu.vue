@@ -18,15 +18,20 @@
 	</motion.div>
 </template>
 <script setup lang = 'ts'>
-	import { motion, AnimatePresence } from 'motion-v';
-	import constant from '../script/constant';
 	import { defineProps } from 'vue';
+	import { exit } from '@tauri-apps/plugin-process';
+	import { motion, AnimatePresence } from 'motion-v';
+
+	import constant from '../script/constant';
 
 	const props = defineProps(['select']);
-	const select = (v : number) : void => {
+	const select = async (v : number) : Promise<void> => {
 		switch (v) {
 			case 2:
 				props.select.deck();
+				break;
+			case 4:
+				await exit(1);
 				break;
 		}
 	}

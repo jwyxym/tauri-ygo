@@ -2,24 +2,24 @@
 	<motion.div class = 'body' ref = 'body'>
 		<AnimatePresence>
 			<motion.img
-				ref = 'pic1'
-				id = 'pic1'
+				ref = 'picI'
+				id = 'picI'
 				:initial = '{ opacity: 0 }'
 				:animate = '{ opacity: 1 }'
 				:exit = '{ opacity: 0 }'
-				:style = "{ '--y' : `${position.height * 0.5}px`, '--x' : `${position.width * 0.1}px` }"
+				:style = "{ '--y' : `${position.height * 0.5}px`, '--x' : `${position.width * -0.3}px` }"
 				v-if = 'position.height > 0 && position.width > 0 && animation.show'
 				:src = 'url.I'
 			/>
 		</AnimatePresence>
 		<AnimatePresence>
 			<motion.img
-				ref = 'pic2'
-				id = 'pic2'
+				ref = 'picII'
+				id = 'picII'
 				:initial = '{ opacity: 0 }'
 				:animate = '{ opacity: 1 }'
 				:exit = '{ opacity: 0 }'
-				:style = "{ '--y' : `${position.height * 0.1}px`, '--x' : `${position.width * 0.3}px` }"
+				:style = "{ '--y' : `${position.height * 0.1}px`, '--x' : `${position.width * 0.1}px` }"
 				v-if = 'position.height > 0 && position.width > 0 && animation.show'
 				:src = 'url.II'
 			/>
@@ -37,8 +37,8 @@
 	import pos, { posLike } from "../script/position";
 	import gsap from '../script/gsap'
 
-	const pic1 : Ref<HTMLElement | null> = ref(null);
-	const pic2 : Ref<HTMLElement | null> = ref(null);
+	const picI : Ref<HTMLElement | null> = ref(null);
+	const picII : Ref<HTMLElement | null> = ref(null);
 	const body : Ref<HTMLElement | null> = ref(null);
 
 	let position : Reactive<posLike> = reactive({
@@ -59,14 +59,13 @@
 
 	let animation = reactive({
 		on : async () : Promise<void> => {
-			pos.reactive.get(position, body.value!);
 			animation.count = animation.count > 0 ? 0 : 1;
 			const kill = async () : Promise<void> => {
 				animation.show = false;
 				await (new Promise(resolve => setTimeout(resolve, 200)));
 				tl.kill()
 			}
-			const tl = animation.count > 0 ? gsap.attack(100, { element : pic1.value!, selector : '#pic1', angle : 0 }, { element : pic2.value!, selector : '#pic2', angle : 180 }, kill) : gsap.attack(100, { element : pic2.value!, selector : '#pic2', angle : 180 }, { element : pic1.value!, selector : '#pic1', angle : 0 }, kill);
+			const tl = animation.count > 0 ? gsap.attack(100, { element : picI.value!, selector : '#picI', angle : 0 }, { element : picII.value!, selector : '#picII', angle : 180 }, kill) : gsap.attack(100, { element : picII.value!, selector : '#picII', angle : 180 }, { element : picI.value!, selector : '#picI', angle : 0 }, kill);
 		},
 		show : true,
 		count : 0
@@ -82,7 +81,7 @@
 			url.II = await fs.read.picture(fileII) ?? '';
 	});
 
-	watch(pic1, (n) : void => {
+	watch(picI, (n) : void => {
 		if (n === null) return;
 		animation.on();
 	});

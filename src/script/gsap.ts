@@ -43,8 +43,8 @@ class Gsap {
 			duration : 0.5
 		}, 0.75);
 		tl.to(attacker.selector, {
-			x : pos.isLeft(p1, p2) ? `+=${X + distanceX}` : `-=${X - distanceX}`,
-			y : pos.isHigh(p1, p2) ? `+=${Y - distanceX}` : `-=${Y + distanceY}`,
+			x : pos.isLeft(p1, p2) ? `+=${X + distanceX}` : `-=${X + distanceX}`,
+			y : pos.isHigh(p1, p2) ? `+=${Y + distanceX}` : `-=${Y + distanceY}`,
 			duration : 0.25,
 			ease : 'power2.inOut'
 		}, 1.25);

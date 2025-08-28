@@ -46,11 +46,12 @@
 	}
 
 	.search, .main, .side, .extra {
+		// display: flex;
+		// flex-wrap: wrap;
 		.card {
 			display: inline-block;
-			vertical-align: top;
 			img {
-				height: 8vh;
+				width: 3.5vw;
 			}
 		}
 	}

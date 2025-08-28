@@ -13,28 +13,33 @@
 		<div
 			class = 'deck'
 		>
-			<Container
-				class = 'main'
-				groupName = 'deck'
-				@drop="onDrop"
-				:animation-duration = '100'
-				:drag-begin-delay = '20'
-				:removeOnDropOut = 'true'
-				:getChildPayload = "(i : number) => { return payload(i, 'main'); }"
-			>
-				<Draggable v-for = '(i, v) in deck.main' :key = 'v'>
-					<div class = 'card'>
-						<img :src = 'i'></img>
-					</div>
-				</Draggable>
-			</Container>
+			<div class = 'main'>
+				<Container
+					groupName = 'deck'
+					@drop = 'onDrop'
+					:animation-duration = '100'
+					:drag-begin-delay = '20'
+					:removeOnDropOut = 'true'
+					:autoScrollEnabled = 'false'
+					:orientation = "'horizontal'"
+					:getChildPayload = "(i : number) => { return payload(i, 'main'); }"
+				>
+					<Draggable v-for = '(i, v) in deck.main' :key = 'v'>
+						<div class = 'card'>
+							<img :src = 'i'></img>
+						</div>
+					</Draggable>
+				</Container>
+			</div>
 			<Container
 				class = 'extra'
 				groupName = 'deck'
-				@drop="onDrop"
+				@drop = 'onDrop'
 				:animation-duration = '100'
 				:drag-begin-delay = '20'
 				:removeOnDropOut = 'true'
+				:autoScrollEnabled = 'false'
+				:orientation = "'horizontal'"
 				:getChildPayload = "(i : number) => { return payload(i, 'extra'); }"
 			>
 				<Draggable v-for = '(i, v) in deck.extra' :key = 'v'>
@@ -46,10 +51,12 @@
 			<Container
 				class = 'side'
 				groupName = 'deck'
-				@drop="onDrop"
+				@drop = 'onDrop'
 				:animation-duration = '100'
 				:drag-begin-delay = '20'
 				:removeOnDropOut = 'true'
+				:autoScrollEnabled = 'false'
+				:orientation = "'horizontal'"
 				:getChildPayload = "(i : number) => { return payload(i, 'side'); }"
 			>
 				<Draggable v-for = '(i, v) in deck.side' :key = 'v'>
@@ -62,10 +69,12 @@
 		<Container
 			class = 'search'
 			groupName = 'deck'
-			@drop="onDrop"
+			@drop = 'onDrop'
 			:animation-duration = '100'
 			:drag-begin-delay = '20'
 			:removeOnDropOut = 'true'
+			:autoScrollEnabled = 'false'
+			:orientation = "'horizontal'"
 			:getChildPayload = "(i : number) => { return payload(i, 'search'); }"
 		>
 			<Draggable v-for = '(i, v) in deck.search' :key = 'v'>
@@ -84,11 +93,12 @@
 	const src = 'https://jwyxym.top:50028/pics/xiao/66666666.jpg'
 	let deck = reactive({
 		main : [
-			src, src, src, src, src, src, src, src, src, src
+			src, src, src, src, src, src, src, src, src, src, src, src
 		],
 		extra : [],
 		side : [],
-		search : [],
+		search : [
+		],
 	})
 
 	function payload(i : number, str : string) : string | undefined {
