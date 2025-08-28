@@ -6,5 +6,5 @@ declare module "*.vue" {
   export default component;
 }
 declare module 'vue3-starry-sky';
-declare module 'vue3-smooth-dnd';
 declare module 'sql.js';
+declare module 'sortablejs';

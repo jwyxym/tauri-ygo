@@ -19,10 +19,10 @@
 </template>
 <script setup lang = 'ts'>
 	import { defineProps } from 'vue';
-	import { exit } from '@tauri-apps/plugin-process';
 	import { motion, AnimatePresence } from 'motion-v';
 
 	import constant from '../script/constant';
+	import mainGame from '../script/game';
 
 	const props = defineProps(['select']);
 	const select = async (v : number) : Promise<void> => {
@@ -31,7 +31,7 @@
 				props.select.deck();
 				break;
 			case 4:
-				await exit(1);
+				await mainGame.exit();
 				break;
 		}
 	}

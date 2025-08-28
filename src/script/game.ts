@@ -1,3 +1,4 @@
+import { exit } from '@tauri-apps/plugin-process';
 import { useToast } from 'vue-toastification'
 
 import fs from './fs'
@@ -18,9 +19,10 @@ class Game {
 				const i = await path;
 				if (!await fs.exists(i))
 					await fs.write.fromUrl(i, url);
+					await (new Promise(resolve => setTimeout(resolve, 500)));
 			}
 		}
-	}
+	};
 	
 	
 	chk = async () : Promise<boolean> => {
@@ -30,8 +32,16 @@ class Game {
 				return false;
 		}
 		return true;
-    }
-}
+    };
+
+	exit = async () : Promise<void> => {
+		return await exit(1);
+	};
+
+	isAnroid = () : boolean => {
+		return constant.system.system == 'android';
+	};
+};
 
 const mainGame = new Game();
 export default mainGame;

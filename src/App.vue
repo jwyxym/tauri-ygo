@@ -71,8 +71,8 @@
 				dialogClass : 'ground_glass',
 				cancelButtonTextColor : constant.str.dialog.button,
 				confirmButtonTextColor : constant.str.dialog.button,
-				onConfirm : page.select.download
-				// onCancel
+				onConfirm : page.select.download,
+				onCancel : mainGame.exit
 			});
 	});
 
