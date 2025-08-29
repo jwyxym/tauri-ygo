@@ -82,6 +82,11 @@ class Constant {
 			counter : '!counter',
 			setcode : '!setname',
 		},
+		ini : {
+			name : 'ServerName',
+			host : 'ServerHost',
+			port : 'ServerPort',
+		},
 		dialog : {
 			button : '#e0e0e0',
 			hint : {

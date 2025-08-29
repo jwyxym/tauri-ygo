@@ -124,6 +124,9 @@ class Game {
 						}
 					}
 				}
+				for (const [_, v] of ypk.get(constant.reg.ini) ?? new Map()) {
+					this.read.ini(v);
+				}
 			}
 			//读取cdb
 			for (const i of expnasionFiles.filter(i => i.name.match(constant.reg.database))) {
@@ -172,20 +175,21 @@ class Game {
 					}
 				}
 			}
-
+			//加载图片
 			for (const [code, card] of this.cards) {
-				if (pics.has(code)) {
-					if (typeof pics.get(code) === 'string')
-						card.updatePic(pics.get(code) as string);
-					else
-						card.updatePic(URL.createObjectURL(pics.get(code) as Blob));
-				} else {
-					card.updatePic(this.textures.get(constant.str.files.textures.unknown) ?? '');
-				}
+				const pic = pics.get(code);
+				card.updatePic(pic !== undefined ? 
+					(typeof pic === 'string' ?
+						pics.get(code) as string : URL.createObjectURL(pics.get(code) as Blob)
+					) : this.textures.get(constant.str.files.textures.unknown) ?? ''
+				);
 			}
-		console.log(new Date().toLocaleString())
-			
-
+			//读取ini
+			for (const i of expnasionFiles.filter(i => i.name.match(constant.reg.ini))) {
+				const string : string | undefined = await fs.read.text(i.name);
+				if (string !== undefined)
+					this.read.ini(string);
+			}
 		} catch (error) {
 			fs.write.log(error);
 		}
@@ -265,6 +269,30 @@ class Game {
 		database : async (db : Uint8Array<ArrayBuffer>) : Promise<void> => {
 			for (const i of await sql.find(db))
 				this.cards.set(parseInt(i[0]), new Card(i));
+		},
+		ini : (string : string) : void => {
+			const lines = string.split(/\r?\n/);
+			let name : string = '';
+			let host : string = '';
+			let port : string = '';
+			for (const l in lines) {
+				const line = l.trim();
+				if (line.startsWith(constant.str.ini.name)) {
+					const i = line.split('=');
+					if (i.length == 2)
+						name = i[1];
+				} else if (line.startsWith(constant.str.ini.host)) {
+					const i = line.split('=');
+					if (i.length == 2)
+						host = i[1];
+				} else if (line.startsWith(constant.str.ini.port)) {
+					const i = line.split('=');
+					if (i.length == 2)
+						port = i[1];
+				}
+			}
+			if (name.length > 0 && host.length > 0)
+				this.servers.set(name, `${host}${port.length > 0 ? `:${port}` : ''}`);
 		}
 	};
 
