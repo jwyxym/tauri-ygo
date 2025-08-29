@@ -9,7 +9,7 @@ interface gsapElement {
 };
 
 class Gsap {
-	timeline = (vars : gsap.TimelineVars) : gsap.core.Timeline => {
+	timeline = (vars : gsap.TimelineVars = {}) : gsap.core.Timeline => {
 		return gsap.timeline(vars);
 	};
 
@@ -18,7 +18,7 @@ class Gsap {
 		const p2 = pos.get(defender.element)
 		const angle = pos.angle(p1, p2);
 		const radians = angle * Math.PI / 180;
-		let tl = this.timeline({ repeat : -1, yoyo : true });
+		let tl = this.timeline();
 		if (attacker.angle !== undefined)
 			tl.to(attacker.selector, {
 				rotation : attacker.angle,

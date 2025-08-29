@@ -1,6 +1,7 @@
 import initSqlJs, { Database, QueryExecResult } from 'sql.js';
 import wasmUrl from "sql.js/dist/sql-wasm.wasm?url";
 import fs from './fs'
+import { cardLike } from './card';
 
 type SQL = Awaited<ReturnType<typeof initSqlJs>>;
 
@@ -30,24 +31,7 @@ class SQLiteReader {
 	}
 
 	//查找数据库
-	async find(database : Uint8Array, obj : {
-		ot ?: number;
-		id ?: number;
-		alias ?: number;
-		level ?: number;
-		scale ?: number;
-		atk ?: number;
-		def ?: number;
-		type ?: number;
-		race ?: number;
-		attribute ?: number;
-		category ?: number;
-		setcode ?: Array<string>;
-		name ?: string;
-		desc ?: string;
-		hint ?: Array<string>;
-	// @ts-ignore
-	} = {}) : Promise<QueryExecResult> {
+	async find(database : Uint8Array, obj : cardLike = {}) : Promise<Array<Array<string>>> {
 		let key = `
 			SELECT * 
 			FROM datas, texts 
@@ -132,39 +116,20 @@ class SQLiteReader {
 		}
 
 		return this.execute(database, (db) => {
-			return db.exec(key)[0];
+			return db.exec(key)[0].values;
 		});
 	}
 
 	//插入数据库
-	async add(database : Uint8Array, obj : {
-		ot ?: number;
-		id ?: number;
-		alias ?: number;
-		level ?: number;
-		scale ?: number;
-		atk ?: number;
-		def ?: number;
-		type ?: number;
-		race ?: number;
-		attribute ?: number;
-		category ?: number;
-		setcode ?: Array<string>;
-		name ?: string;
-		desc ?: string;
-		hint ?: Array<string>;
-	// @ts-ignore
-	} = {}) : Promise<QueryExecResult> {
+	async add(database : Uint8Array, obj : cardLike = {}) : Promise<Array<Array<string>>> {
 		return this.execute(database, (db) => {
 			return db.exec(`BEGIN;
 				INSERT OR REPLACE INTO datas VALUES(${obj.id}, ${obj.ot}, ${obj.alias}, 0x${(obj.setcode as Array<string>).map(i => i.padStart(4, '0')).join('')}, ${obj.type}, ${obj.atk}, ${obj.def}, ${obj.level}, ${obj.race}, ${obj.attribute}, ${obj.category});"
 				INSERT OR REPLACE INTO texts VALUES(${obj.id}, '${obj.name}', '${obj.desc}', ${(obj.hint as Array<string>).join(', ')};
 				COMMIT;
-			`)[0]
+			`)[0].values;
 		});
 	}
 }
 
-const SQL = new SQLiteReader()
-
-export default SQL;
+export default new SQLiteReader();

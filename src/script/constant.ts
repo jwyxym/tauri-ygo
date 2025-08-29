@@ -36,17 +36,19 @@ class System {
 
 class Constant {
 	reg = {
+		get_number_name : /\/(\d+)\./,
+		get_name : /\/([^.]*)\./,
 		database : /\.(cdb)$/i,
 		picture : /\.(jpg|png|jpeg)$/i,
 		conf : /\.(conf)$/i,
 		ini : /\.(ini)$/i,
 		zip : /\.(ypk|zip)$/i,
+		json : /\.(json)$/i
 	};
 
 	str = {
 		blob : 'blob:http',
 		title : 'Tauri-YGO',
-		version : 'v0.0.1',
 		menu : [
 			'人机模式',
 			'联机模式',
@@ -54,17 +56,32 @@ class Constant {
 			'系统设置',
 			'退出游戏'
 		],
-		dirs : [
-			'textures',
-			'expansions',
-			'script',
-			'pics',
-			'deck'
-		],
-		files : new Map([
-			[path.join('textures', 'cardI.jpg'), 'https://jwyxym.top:50028/pics/xiao/66666666.jpg'],
-			[path.join('textures', 'cardII.jpg'), 'https://jwyxym.top:50028/pics/xiao/66666666.jpg'],
-		]),
+		dirs : {
+			textures : 'textures',
+			expansions : 'expansions',
+			script : 'script',
+			pics : 'pics',
+			deck : 'deck',
+			language : 'language'
+		},
+		files : {
+			conf : {
+				strings : 'strings.conf',
+				lflist : 'lflist.conf',
+				system : 'system.conf',
+				servers : 'servers.conf'
+			},
+			textures : {
+				unknown : 'unknow.jpg'
+			},
+			database : 'cards.cdb'
+		},
+		string_conf : {
+			system : '!system',
+			victory : '!victory',
+			counter : '!counter',
+			setcode : '!setname',
+		},
 		dialog : {
 			button : '#e0e0e0',
 			hint : {

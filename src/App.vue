@@ -45,12 +45,12 @@
 	let page = reactive({
 		show : {
 			dialog : false,
-			menu : false,
+			menu : true,
 			deck : false
 		},
 		select : {
 			download : async () : Promise<void> => {
-				await mainGame.init.file();
+				// await mainGame.init.file();
 				page.show.menu = true;
 			},
 			deck : () : void => {
@@ -60,20 +60,19 @@
 		}
 	});
 
-	onMounted(async () => {
-		await mainGame.init.dir();
-		page.show.dialog = !await mainGame.chk();
-		// await (new Promise(resolve => setTimeout(resolve, 500)));
-		page.show.menu = !page.show.dialog;
-		if (page.show.dialog)
-			Dialog({
-				message : constant.str.dialog.hint.download,
-				dialogClass : 'ground_glass',
-				cancelButtonTextColor : constant.str.dialog.button,
-				confirmButtonTextColor : constant.str.dialog.button,
-				onConfirm : page.select.download,
-				onCancel : mainGame.exit
-			});
+	onBeforeMount(async () => {
+		await mainGame.init();
+		// page.show.dialog = !await mainGame.chk();
+		// page.show.menu = !page.show.dialog;
+		// if (page.show.dialog)
+		// 	Dialog({
+		// 		message : constant.str.dialog.hint.download,
+		// 		dialogClass : 'ground_glass',
+		// 		cancelButtonTextColor : constant.str.dialog.button,
+		// 		confirmButtonTextColor : constant.str.dialog.button,
+		// 		onConfirm : page.select.download,
+		// 		onCancel : mainGame.exit
+		// 	});
 	});
 
 </script>
@@ -94,5 +93,5 @@
 </style>
 <style lang = 'scss'>
 	@use './style/toast.scss';
-    // @use './style/ground_glass.scss';
+    @use './style/ground_glass.scss';
 </style>

@@ -7,8 +7,6 @@ import { useToast } from 'vue-toastification'
 import constant from "./constant";
 import deck from "./deck";
 
-type ypkLike = Map<RegExp, Map<string, Blob | Uint8Array>>;
-
 class Fs {
 	dir : fs.ReadFileOptions;
 	path : Promise<string>;
@@ -36,7 +34,7 @@ class Fs {
 			}
 			return undefined;
 		},
-		zip : async (file : string) : Promise<ypkLike> => {
+		zip : async (file : string) : Promise<Map<RegExp, Map<string, Blob | Uint8Array | string>>> => {
 			let map = new Map([
 				[constant.reg.database, new Map],
 				[constant.reg.picture, new Map],
@@ -45,12 +43,12 @@ class Fs {
 			]);
 			try {
 				const p = await path.join(await constant.system.basePath(), file);
-				const entries = await invoke<Array<[string, number[]]>>("read_zip_in_tauri", {
+				const entries = await invoke<Array<[string, { content : string | Uint8Array}]>>("read_zip", {
 					path : p,
 				});
-				for (const [name, byte] of entries) {
+				for (const [name, content] of entries) {
 					if (name.match(constant.reg.picture)) {
-						const blob = new Blob([new Uint8Array(byte)], { type: name.endsWith('png') ? 'image/png' : 'image/jpeg' })
+						const blob = new Blob([new Uint8Array(content.content as Uint8Array)], { type: name.endsWith('png') ? 'image/png' : 'image/jpeg' })
 						let filename = name.replace(/\\/g, '/').split('/').filter(part => part.trim() !== '').pop() || '';
 						if (!filename.startsWith('.')) {
 							const dotIndex = filename.lastIndexOf('.');
@@ -58,13 +56,11 @@ class Fs {
 						}
 						map.get(constant.reg.picture)!.set(filename, blob);
 					} else if (name.match(constant.reg.conf)) {
-						const blob = new Blob([new Uint8Array(byte)], { type: 'text/plain' })
-						map.get(constant.reg.conf)!.set(name, blob);
+						map.get(constant.reg.conf)!.set(name, content.content as string);
 					} else if (name.match(constant.reg.ini)) {
-						const blob = new Blob([new Uint8Array(byte)], { type: 'text/plain' })
-						map.get(constant.reg.ini)!.set(name, blob);
+						map.get(constant.reg.ini)!.set(name, content.content as string);
 					} else if (name.match(constant.reg.database)) {
-						map.get(constant.reg.database)!.set(name, byte);
+						map.get(constant.reg.database)!.set(name, content.content as Uint8Array);
 					}
 				}
 			} catch (error) {
@@ -95,6 +91,18 @@ class Fs {
 				this.write.log(error);
 			}
 			return undefined;
+		},
+		dir : async (dir : string) : Promise<Array<fs.DirEntry> | undefined> => {
+			try {
+				let result : Array<fs.DirEntry> = await fs.readDir(dir, this.dir);
+				for (const i of result) {
+					i.name = await path.join(dir, i.name)
+				}
+				return result;
+			} catch (error) {
+				this.write.log(error);
+			}
+			return undefined;
 		}
 
 	};
@@ -102,7 +110,8 @@ class Fs {
 	write = {
 		log : async (text : string)  : Promise<boolean> => {
 			try {
-				useToast().error(text);
+				console.error(text)
+				useToast().error(text.toString());
 				const log = `[${new Date().toLocaleString()}] ${text}${constant.system.lineFeed()}`
 				if (await fs.exists(constant.log.error, this.dir)) {
 					const file = await fs.open(constant.log.error, { append: true, baseDir : this.dir.baseDir });
@@ -115,7 +124,7 @@ class Fs {
 				}
 				return true;
 			} catch (error) {
-				useToast().error(error);
+				useToast().error(error.toString());
 				return false;
 			}
 		},
@@ -155,7 +164,7 @@ class Fs {
 				});
 				return await this.write.file(file, new Uint8Array(await response.data.arrayBuffer()));
 			} catch (error) {
-				this.write.log(error);
+				this.write.log(error.message ?? error);
 			}
 			return false;
 		},
@@ -163,4 +172,3 @@ class Fs {
 }
 
 export default new Fs();
-export type { ypkLike };

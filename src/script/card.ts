@@ -36,7 +36,7 @@ class Card {
 	hint : Array<string>;
 	pic : string;
   
-	constructor(row : Array<string|number>) {
+	constructor(row : Array<string | number>) {
 		this.id = row[0] as number;
 		this.ot = row[1] as number;
 		this.alias = row[2] as number;

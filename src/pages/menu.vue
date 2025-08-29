@@ -18,7 +18,6 @@
 	</motion.div>
 </template>
 <script setup lang = 'ts'>
-	import { defineProps } from 'vue';
 	import { motion, AnimatePresence } from 'motion-v';
 
 	import constant from '../script/constant';
