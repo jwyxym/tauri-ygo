@@ -5,11 +5,12 @@ import { DirEntry } from '@tauri-apps/plugin-fs';
 
 import fs from './fs'
 import constant from './constant';
+import Deck from './deck';
 import Card from './card';
-import sql from './sql';
+import textLike from './language/interface'
+import Zh_CN from './language/Zh-CN'
 
 class Game {
-	text : Map<string, object> = new Map;
 	strings : Map<string, Map<string, string>> = new Map([
 		[constant.str.string_conf.system, new Map],
 		[constant.str.string_conf.victory, new Map],
@@ -21,6 +22,7 @@ class Game {
 	servers : Map<string, string> = new Map;
 	cards : Map<number, Card> = new Map;
 	textures : Map<string, string> = new Map;
+	select = 'Zh_CN';
 
 	private lflist_now : string = '';
 
@@ -30,13 +32,6 @@ class Game {
 			for (const [_, i] of Object.entries(constant.str.dirs)) {
 				if (!await fs.exists(i))
 					await fs.write.dir(i);
-			}
-			//读取./language文件夹
-			for (const i of await fs.read.dir(constant.str.dirs.language) ?? []) {
-				if (i.name.match(constant.reg.json)) {
-					const text : string | undefined = await fs.read.text(i.name);
-					this.text.set(i.name, JSON.parse(text ?? "{}"));
-				}
 			}
 			//读取./textures文件夹
 			for (const i of await fs.read.dir(constant.str.dirs.textures) ?? []) {
@@ -72,12 +67,14 @@ class Game {
 					}
 				}
 			}
+			console.log(new Date().toLocaleString())
 			//读取目录下的cards.cdb
 			if (await fs.exists(constant.str.files.database)) {
-				const database : Uint8Array<ArrayBuffer> | undefined = await fs.read.database(constant.str.files.database);
+				const database : Array<Array<string | number>> | undefined = await fs.read.database(constant.str.files.database);
 				if (database !== undefined)
 					await this.read.database(database);
 			}
+			console.log(new Date().toLocaleString())
 			//读取pics文件夹
 			const pics : Map<number, string | Blob> = new Map();
 			for (const i of await fs.read.dir(constant.str.dirs.pics) ?? []) {
@@ -87,13 +84,17 @@ class Game {
 						pics.set(parseInt(name[1]), i.name);
 				}
 			}
+			console.log(new Date().toLocaleString())
 			//读取expnasions文件夹
 			const expnasionFiles : Array<DirEntry> = await fs.read.dir(constant.str.dirs.expansions) ?? [];
 			//读取ypk\zip
 			for (const i of expnasionFiles.filter(i => i.name.match(constant.reg.zip))) {
 				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(i.name);
-				for (const [_, v] of ypk.get(constant.reg.database) ?? new Map())
-					this.read.database(v as Uint8Array<ArrayBuffer>)
+				for (const [_, v] of ypk.get(constant.reg.database) ?? new Map()) {
+					const db = await fs.read.databaseInMemory(v as Uint8Array<ArrayBuffer>);
+					if (db !== undefined)
+						this.read.database(db);
+				}
 				for (const [i, v] of ypk.get(constant.reg.picture) ?? new Map()) {
 					if (i.match(constant.reg.picture)) {
 						const name = i.match(constant.reg.get_number_name) ?? [];
@@ -128,12 +129,14 @@ class Game {
 					this.read.ini(v);
 				}
 			}
+			console.log(new Date().toLocaleString())
 			//读取cdb
 			for (const i of expnasionFiles.filter(i => i.name.match(constant.reg.database))) {
-				const database : Uint8Array<ArrayBuffer> | undefined = await fs.read.database(i.name);
+				const database : Array<Array<string | number>> | undefined = await fs.read.database(i.name);
 				if (database !== undefined)
 					await this.read.database(database);
 			}
+			console.log(new Date().toLocaleString())
 			//读取conf
 			for (const i of expnasionFiles.filter(i => i.name.match(constant.reg.conf))) {
 				if (i.name.endsWith(constant.str.files.conf.strings)) {
@@ -180,10 +183,12 @@ class Game {
 				const pic = pics.get(code);
 				card.updatePic(pic !== undefined ? 
 					(typeof pic === 'string' ?
-						pics.get(code) as string : URL.createObjectURL(pics.get(code) as Blob)
+						await fs.read.picture(pics.get(code) as string) ?? (this.textures.get(constant.str.files.textures.unknown) ?? '')
+						: URL.createObjectURL(pics.get(code) as Blob)
 					) : this.textures.get(constant.str.files.textures.unknown) ?? ''
 				);
 			}
+			console.log(new Date().toLocaleString())
 			//读取ini
 			for (const i of expnasionFiles.filter(i => i.name.match(constant.reg.ini))) {
 				const string : string | undefined = await fs.read.text(i.name);
@@ -193,6 +198,29 @@ class Game {
 		} catch (error) {
 			fs.write.log(error);
 		}
+	};
+
+	getText = () : textLike => {
+		switch (this.select) {
+			case constant.str.language.Zh_CN:
+				return Zh_CN;
+		}
+		return Zh_CN;
+	};
+
+	loadDeck = async () : Promise<Array<Deck>> => {
+		let decks : Array<Deck> = [];
+		for (const i of await fs.read.dir(constant.str.dirs.deck) ?? []) {
+			if (i.name.match(constant.reg.deck)) {
+				const ydk : Deck | undefined = await fs.read.ydk(i.name);
+				const name = i.name.match(constant.reg.get_name) ?? [];
+				if (name.length >= 2 && ydk !== undefined) {
+					ydk.pushName(name[1])
+					decks.push(ydk);
+				}
+			}
+		}
+		return decks;
 	};
 
 	read = {
@@ -266,9 +294,9 @@ class Game {
 			if (key_value.length == 2)
 				this.system.set(key_value[0].trim(), key_value[1].trim())
 		},
-		database : async (db : Uint8Array<ArrayBuffer>) : Promise<void> => {
-			for (const i of await sql.find(db))
-				this.cards.set(parseInt(i[0]), new Card(i));
+		database : async (db : Array<Array<string | number>>) : Promise<void> => {
+			for (const i of db)
+				this.cards.set(i[0] as number, new Card(i));
 		},
 		ini : (string : string) : void => {
 			const lines = string.split(/\r?\n/);

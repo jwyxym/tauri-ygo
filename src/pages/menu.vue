@@ -3,7 +3,7 @@
 		<div class = 'content'>
 			<span class = 'title'>{{ constant.str.title }}</span>
 			<div class = 'list'>
-				<AnimatePresence :initial = 'false' v-for = '(i, v) in constant.str.menu'>
+				<AnimatePresence :initial = 'false' v-for = '(i, v) in mainGame.getText().menu'>
 					<motion.span
 						:whileHover="{ scale: 1.1 }"
 						:whilePress="{ scale: 0.8 }"

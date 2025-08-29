@@ -37,22 +37,17 @@
 
 	import Menu from './pages/menu.vue';
 	import Animation from './pages/animation.vue';
-	import Deck from './pages/deck.vue';
+	import Deck from './pages/decklist.vue';
 
 	import mainGame from './script/game';
-	import constant from "./script/constant";
 
 	let page = reactive({
 		show : {
 			dialog : false,
-			menu : true,
+			menu : false,
 			deck : false
 		},
 		select : {
-			download : async () : Promise<void> => {
-				// await mainGame.init.file();
-				page.show.menu = true;
-			},
 			deck : () : void => {
 				page.show.menu = false;
 				page.show.deck = true;
@@ -62,14 +57,15 @@
 
 	onBeforeMount(async () => {
 		await mainGame.init();
+		page.show.menu = true;
 		// page.show.dialog = !await mainGame.chk();
 		// page.show.menu = !page.show.dialog;
 		// if (page.show.dialog)
 		// 	Dialog({
-		// 		message : constant.str.dialog.hint.download,
+		// 		message : ,
 		// 		dialogClass : 'ground_glass',
-		// 		cancelButtonTextColor : constant.str.dialog.button,
-		// 		confirmButtonTextColor : constant.str.dialog.button,
+		// 		cancelButtonTextColor : 'white',
+		// 		confirmButtonTextColor : 'white',
 		// 		onConfirm : page.select.download,
 		// 		onCancel : mainGame.exit
 		// 	});

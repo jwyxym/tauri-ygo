@@ -1,5 +1,5 @@
 <template>
-	<motion.div class = 'deck_body'>
+	<motion.div class = 'deck_body ground_glass hover_ground'>
 		<var-card
 			title=""
 			subtitle=""
@@ -71,7 +71,7 @@
 </template>
 <script setup lang = 'ts'>
 	import { ref, reactive, onMounted, onUnmounted, Ref, watch, Reactive } from "vue";
-	import { motion, AnimatePresence } from 'motion-v';
+	import { motion } from 'motion-v';
 	import { createSwapy, Swapy } from 'swapy';
 	import Sortable from 'sortablejs';
 
@@ -159,4 +159,5 @@
 </script>
 <style lang = 'scss'>
 	@use '../style/deck.scss';
+	@use '../style/ground_glass.scss';
 </style>

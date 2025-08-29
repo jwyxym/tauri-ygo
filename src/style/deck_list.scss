@@ -1,0 +1,41 @@
+.deck_list {
+	display: flex;
+	.var-list {
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		width: 40%;
+		gap: 10px;
+		overflow-y: auto;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		&::-webkit-scrollbar {
+			display: none;
+		}
+	}
+	.deck_show {
+		width: 60%;
+		height: 100%;
+		-webkit-mask: radial-gradient(
+			circle,
+			white 0%,
+			white 20%,
+			transparent 100%
+		);
+		.deck {
+			display: grid;
+			.cards {
+				width: 100%;
+				.card {
+					width: 3.5vw;
+					height: 5.1vw;
+					display: inline-block;
+					img {
+						width: 100%;
+						height: 100%;
+					}
+				}
+			}
+		}
+	}
+}

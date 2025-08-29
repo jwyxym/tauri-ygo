@@ -31,7 +31,7 @@ class SQLiteReader {
 	}
 
 	//查找数据库
-	async find(database : Uint8Array, obj : cardLike = {}) : Promise<Array<Array<string>>> {
+	async find(database : Uint8Array, obj : cardLike = {}) : Promise<Array<Array<string | number>>> {
 		let key = `
 			SELECT * 
 			FROM datas, texts 

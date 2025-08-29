@@ -36,33 +36,26 @@ class System {
 
 class Constant {
 	reg = {
-		get_number_name : /\/(\d+)\./,
-		get_name : /\/([^.]*)\./,
+		get_number_name : /[\\/](\d+)\./,
+		get_name : /[\\/]([^.]*)\./,
 		database : /\.(cdb)$/i,
 		picture : /\.(jpg|png|jpeg)$/i,
 		conf : /\.(conf)$/i,
 		ini : /\.(ini)$/i,
 		zip : /\.(ypk|zip)$/i,
-		json : /\.(json)$/i
+		json : /\.(json)$/i,
+		deck : /\.(ydk)$/i,
 	};
 
 	str = {
 		blob : 'blob:http',
 		title : 'Tauri-YGO',
-		menu : [
-			'人机模式',
-			'联机模式',
-			'编辑卡组',
-			'系统设置',
-			'退出游戏'
-		],
 		dirs : {
 			textures : 'textures',
 			expansions : 'expansions',
 			script : 'script',
 			pics : 'pics',
-			deck : 'deck',
-			language : 'language'
+			deck : 'deck'
 		},
 		files : {
 			conf : {
@@ -87,11 +80,8 @@ class Constant {
 			host : 'ServerHost',
 			port : 'ServerPort',
 		},
-		dialog : {
-			button : '#e0e0e0',
-			hint : {
-				download : '是否下载资源包（此过程会消耗流量）'
-			}
+		language : {
+			Zh_CN : 'Zh_CN'
 		}
 	}
 

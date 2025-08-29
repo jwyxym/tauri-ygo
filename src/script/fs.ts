@@ -1,11 +1,12 @@
-import { invoke, convertFileSrc } from "@tauri-apps/api/core";
+import { invoke, convertFileSrc } from '@tauri-apps/api/core';
 import * as fs from '@tauri-apps/plugin-fs';
 import * as path from '@tauri-apps/api/path';
-import axios from "axios";
+import axios from 'axios';
 import { useToast } from 'vue-toastification'
 
-import constant from "./constant";
-import deck from "./deck";
+import constant from './constant';
+import Deck from './deck';
+import sql from './sql';
 
 class Fs {
 	dir : fs.ReadFileOptions;
@@ -26,9 +27,21 @@ class Fs {
 	};
 
 	read = {
-		database : async (file : string) : Promise<Uint8Array<ArrayBuffer> | undefined> => {
+		database : async (file : string) : Promise<Array<Array<string | number>> | undefined> => {
 			try {
-				return await fs.readFile(await file, this.dir);
+				const p = await path.join(await constant.system.basePath(), file);
+				const entries = await invoke<Array<[Array<number>, Array<string>]>>('read_db', {
+					path : p,
+				});
+				return entries.map(i => [...i[0], ...i[1]]);
+			} catch (error) {
+				this.write.log(error);
+			}
+			return undefined;
+		},
+		databaseInMemory : async (file : Uint8Array<ArrayBuffer>) : Promise<Array<Array<string | number>> | undefined> => {
+			try {
+				return await sql.find(file);
 			} catch (error) {
 				this.write.log(error);
 			}
@@ -43,7 +56,7 @@ class Fs {
 			]);
 			try {
 				const p = await path.join(await constant.system.basePath(), file);
-				const entries = await invoke<Array<[string, { content : string | Uint8Array}]>>("read_zip", {
+				const entries = await invoke<Array<[string, { content : string | Uint8Array}]>>('read_zip', {
 					path : p,
 				});
 				for (const [name, content] of entries) {
@@ -84,9 +97,9 @@ class Fs {
 			}
 			return undefined;
 		},
-		ydk : async (file : string) : Promise<deck | undefined> => {
+		ydk : async (file : string) : Promise<Deck | undefined> => {
 			try {
-				return deck.fromYdkString(await fs.readTextFile(file, this.dir));
+				return Deck.fromYdkString(await fs.readTextFile(file, this.dir));
 			} catch (error) {
 				this.write.log(error);
 			}
@@ -128,7 +141,7 @@ class Fs {
 				return false;
 			}
 		},
-		ydk : async (file : string, ydk : deck) : Promise<boolean> => {
+		ydk : async (file : string, ydk : Deck) : Promise<boolean> => {
 			try {
 				await fs.writeTextFile(file, ydk.toYdkString(), this.dir);
 				return true;
