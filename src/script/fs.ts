@@ -93,7 +93,6 @@ class Fs {
 			try {
 				return await fs.readTextFile(file, this.dir);
 			} catch (error) {
-			console.log(error)
 				this.write.log(error);
 			}
 			return undefined;
