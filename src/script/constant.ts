@@ -55,7 +55,8 @@ class Constant {
 			expansions : 'expansions',
 			script : 'script',
 			pics : 'pics',
-			deck : 'deck'
+			deck : 'deck',
+			cache : 'cache'
 		},
 		files : {
 			conf : {

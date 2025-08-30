@@ -5,7 +5,6 @@ import axios from 'axios';
 
 import constant from './constant';
 import Deck from './deck';
-import sql from './sql';
 import toast from './toast';
 
 class Fs {
@@ -41,7 +40,12 @@ class Fs {
 		},
 		databaseInMemory : async (file : Uint8Array<ArrayBuffer>) : Promise<Array<Array<string | number>> | undefined> => {
 			try {
-				return await sql.find(file);
+				const p = await path.join(constant.str.dirs.cache, constant.str.files.database)
+				if (await(this.write.file(p, file))) {
+					const result : Array<Array<string | number>> | undefined = await this.read.database(p);
+					await(this.delete(p));
+					return result;
+				}
 			} catch (error) {
 				this.write.log(error);
 			}

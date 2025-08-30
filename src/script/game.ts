@@ -71,7 +71,7 @@ class Game {
 				if (database !== undefined)
 					await this.read.database(database);
 			}
-			//读取expnasions文件夹
+			// 读取expnasions文件夹
 			const expnasionFiles : Array<DirEntry> = await fs.read.dir(constant.str.dirs.expansions) ?? [];
 			//读取cdb
 			for (const i of expnasionFiles.filter(i => i.name.match(constant.reg.database))) {
@@ -123,13 +123,6 @@ class Game {
 					if (db !== undefined)
 						this.read.database(db);
 				}
-				// for (const [i, v] of ypk.get(constant.reg.picture) ?? new Map()) {
-				// 	if (i.match(constant.reg.picture)) {
-				// 		const name = i.match(constant.reg.get_number_name) ?? [];
-				// 		if (name.length >= 2)
-				// 			pics.set(parseInt(name[1]), v as Blob);
-				// 	}
-				// }
 				for (const [i, v] of ypk.get(constant.reg.conf) ?? new Map()) {
 					if (i.endsWith(constant.str.files.conf.strings)) {
 						const lines : Array<string> = v.split(/\r?\n/);
