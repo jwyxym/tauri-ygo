@@ -93,6 +93,7 @@ class Fs {
 			try {
 				return await fs.readTextFile(file, this.dir);
 			} catch (error) {
+			console.log(error)
 				this.write.log(error);
 			}
 			return undefined;
@@ -123,8 +124,17 @@ class Fs {
 	write = {
 		log : async (text : string)  : Promise<boolean> => {
 			try {
+				const get_reason = (error : string) : string => {
+					const start = error.indexOf('error: ') + 'error: '.length;
+					const end = error.indexOf(' (', start);
+					
+					if (start >= 0 && end > start) {
+						return error.substring(start, end);
+					}
+					return error;
+				}
 				console.error(text)
-				useToast().error(text.toString());
+				useToast().error(get_reason(text));
 				const log = `[${new Date().toLocaleString()}] ${text}${constant.system.lineFeed()}`
 				if (await fs.exists(constant.log.error, this.dir)) {
 					const file = await fs.open(constant.log.error, { append: true, baseDir : this.dir.baseDir });
