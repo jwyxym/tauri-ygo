@@ -24,13 +24,21 @@
 				</var-menu-select>
 			</div>
 			<var-list>
-				<var-cell
+				<AnimatePresence
 					v-for = '(i, v) in list.decks'
-					class = 'ground_glass'
-					@click = 'list.selected(v)'
 				>
-					<span>{{ i.name }}</span>
-				</var-cell>
+					<motion.div
+						v-if = 'list.removing === undefined || list.removing?.deck !== i'
+						:exit = '{ opacity: 0, scale: 0 }'
+						@click = 'list.selected(v)'
+					>
+						<var-cell
+							class = 'ground_glass'
+						>
+							<span>{{ i.name }}</span>
+						</var-cell>
+					</motion.div>
+				</AnimatePresence>
 			</var-list>
 		</div>
 		<div class = 'deck_show'>
@@ -65,8 +73,8 @@
 		</div>
 		<AnimatePresence :initial = 'false'>
 			<motion.div
-				:initial = '{ opacity: 0 }'
-				:animate = '{ opacity: 1 }'
+				:initial = '{ opacity: 0, scale: 0 }'
+				:animate = '{ opacity: 1, scale: 1 }'
 				:exit = '{ opacity: 0 }'
 				v-if = 'list.select > -1'
 				class = 'deck_button'
@@ -76,7 +84,7 @@
 						color = 'white'
 						name = 'share'
 						:size = '30'
-						@click = 'list.copy()'
+						@click = 'list.copy'
 					/>
 				</div>
 				<div class = 'ground_glass'>
@@ -84,7 +92,7 @@
 						color = 'white'
 						name = 'delete'
 						:size = '30'
-						@click = 'select.menu'
+						@click = 'list.delete'
 					/>
 				</div>
 				<div class = 'ground_glass'>
@@ -92,7 +100,7 @@
 						color = 'white'
 						name = 'wrench'
 						:size = '30'
-						@click = 'select.menu'
+						@click = 'list.init'
 					/>
 				</div>
 			</motion.div>
@@ -103,38 +111,64 @@
 	import { ref, reactive, onMounted, onUnmounted, Ref, watch, onBeforeMount } from 'vue';
 	import { motion, AnimatePresence } from 'motion-v';
 	import { writeText } from '@tauri-apps/plugin-clipboard-manager'
+	import { join } from '@tauri-apps/api/path';
 
 	import mainGame from '../script/game';
 	import Deck from '../script/deck';
 	import constant from '../script/constant';
 	import toast from '../script/toast';
+	import fs from '../script/fs';
 
 	let list = reactive({
 		card : mainGame.cards,
 		select : -1,
 		decks : [] as Array<Deck>,
 		loading : false,
+		removing : undefined as { deck : Deck, count : number} | undefined,
 		load : async () : Promise<void> => {
-			list.decks = await mainGame.load_deck();
+			const decks = await mainGame.load_deck();
+			decks.forEach(i => {
+				if (list.decks.indexOf(i) === -1)
+					list.decks.push(i)
+			})
 		},
 		selected : async (v : number) : Promise<void> => {
-			list.select = -1;
-			const deck = list.decks[v];
-			await mainGame.load_pic([...deck.main, ...deck.side, ...deck.extra]);
-			setTimeout(() => {
-				list.select = v;
-			}, 400);
+			if (list.select != v) {
+				list.select = -1;
+				const deck = list.decks[v];
+				await mainGame.load_pic([...deck.main, ...deck.side, ...deck.extra]);
+				setTimeout(() => {
+					list.select = v;
+				}, 400);
+			} else
+				list.select = -1;
 		},
 		get_pic : (card : number) : string => {
 			const pic = list.card.get(card)?.pic;
 			return (pic ?? mainGame.textures.get(constant.str.files.textures.unknown)) ?? '';
 		},
-		copy : async() : Promise<void> => {
+		copy : async () : Promise<void> => {
 			if (list.select <= -1) return;
 			const text = list.decks[list.select].toYGOMobileDeckURL();
 			await writeText(text);
 			toast.info(mainGame.get_text().toast.copy)
 		},
+		delete : async () : Promise<void> => {
+			if (list.select <= -1) return;
+			if (await fs.delete(await join(constant.str.dirs.deck, `${list.decks[list.select].name!}.ydk`))) {
+				toast.info(mainGame.get_text().toast.delete);
+				list.removing = { deck : list.decks[list.select], count : list.select};
+				list.select = -1;
+				setTimeout(() => {
+					list.decks.splice(list.removing!.count, 1);
+					setTimeout(() => {
+						list.removing = undefined;
+					}, 200)
+				}, 400);
+			}
+		},
+		init : () : void => {
+		}
 	});
 
 	defineProps(['select']);

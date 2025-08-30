@@ -191,6 +191,15 @@ class Fs {
 			return false;
 		},
 	};
+	delete = async (file : string) : Promise<boolean> => {
+		try {
+			await fs.remove(file, this.dir);
+			return true;
+		} catch (error) {
+			this.write.log(error);
+		}
+		return false;
+	}
 }
 
 export default new Fs();

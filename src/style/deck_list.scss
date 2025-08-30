@@ -23,14 +23,20 @@
 			&::-webkit-scrollbar {
 				display: none;
 			}
-			span {
-				font-family: 'text';
+			div{
+				&:hover {
+					cursor: pointer;
+				}
+				span {
+					font-family: 'text';
+				}
 			}
 		}
 	}
 	.deck_show {
 		width: 60%;
 		height: 100%;
+		overflow: hidden;
 		mask:
 			radial-gradient(white 0%, white 20%, transparent 100%);
 		.deck {

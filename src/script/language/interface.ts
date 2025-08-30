@@ -7,6 +7,7 @@ interface textLike {
 	};
 	toast : {
 		copy : string;
+		delete : string;
 	};
 }
 

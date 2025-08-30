@@ -14,7 +14,8 @@ const Zh_CN : textLike = {
 		fromcode : '从卡组码导入'
 	},
 	toast : {
-		copy : '已复制到粘贴板'
+		copy : '已复制到粘贴板',
+		delete : '删除成功'
 	}
 }
 
