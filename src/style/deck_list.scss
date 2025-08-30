@@ -9,9 +9,7 @@
 		gap: 10px;
 		.button_list {
 			display: flex;
-			.button {
-
-			}
+			gap: 10px;
 		}
 		.var-list {
 			height: 100%;
@@ -25,39 +23,61 @@
 			&::-webkit-scrollbar {
 				display: none;
 			}
+			span {
+				font-family: 'text';
+			}
 		}
 	}
-	.deck_show {
+	.right {
 		width: 60%;
 		height: 100%;
-		-webkit-mask: radial-gradient(
-			circle,
-			white 0%,
-			white 20%,
-			transparent 100%
-		);
-		.deck {
-			display: grid;
-			.deck_name {
-				span {
-					color: font.$text-color;
-					font-family: 'title';
-					font-size: 10vh;
-					white-space: nowrap;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		.deck_show {
+			width: 100%;
+			height: 80%;
+			overflow: hidden;
+			-webkit-mask: radial-gradient(
+				circle,
+				white 0%,
+				white 20%,
+				transparent 100%
+			);
+			.deck {
+				display: grid;
+				.deck_name {
+					span {
+						color: font.$text-color;
+						font-family: 'title';
+						font-size: 10vh;
+						white-space: nowrap;
+					}
 				}
-			}
-			.cards {
-				width: 100%;
-				.card {
-					width: 3.5vw;
-					height: 5.1vw;
-					display: inline-block;
-					img {
-						width: 100%;
-						height: 100%;
+				.cards {
+					width: 100%;
+					.card {
+						width: 3.5vw;
+						height: 5.1vw;
+						display: inline-block;
+						img {
+							width: 100%;
+							height: 100%;
+						}
 					}
 				}
 			}
 		}
+		.deck_button {
+			display: flex;
+			flex-direction: row-reverse;
+			gap: 10px;
+		}
 	}
+}
+
+.var-menu-option {
+	background-color: gray !important;
+	color: font.$text-color !important;
+	font-family: 'text';
 }

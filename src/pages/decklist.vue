@@ -5,48 +5,96 @@
 				<div class = 'ground_glass'>
 					<var-icon
 						color = 'white'
-						animation-class = 'fade'
 						name = 'home'
-						:transition = '300'
 						:size = '30'
 						@click = 'select.menu'
 					/>
 				</div>
+				<var-menu-select class = 'ground_glass'>
+					<var-icon
+						color = 'white'
+						name = 'plus-circle-outline'
+						:size = '30'
+					/>
+					<template #options>
+						<var-menu-option label="吃饭"/>
+						<var-menu-option label="睡觉" />
+						<var-menu-option label="打游戏" />
+					</template>
+				</var-menu-select>
 			</div>
 			<var-list>
 				<var-cell
 					v-for = '(i, v) in list.decks'
-					class = 'deck ground_glass'
+					class = 'ground_glass'
 					@click = 'list.selected(v)'
-				>{{ i.name }}</var-cell>
+				>
+					<span>{{ i.name }}</span>
+				</var-cell>
 			</var-list>
 		</div>
-		<div class = 'deck_show'>
-			<AnimatePresence :initial = 'false' v-for = '(i, v) in list.decks'>
+		<div class = 'right'>
+			<div class = 'deck_show'>
+				<AnimatePresence :initial = 'false' v-for = '(i, v) in list.decks'>
+					<motion.div
+						:initial = '{ opacity: 0, scale: 0 }'
+						:animate = '{ opacity: 1, scale: 1 }'
+						:exit = '{ opacity: 0, scale: 0 }'
+						v-if = 'list.select == v'
+						class = 'deck'
+					>
+						<div class = 'deck_name'>
+							<span>{{ i.name }}</span>
+						</div>
+						<div class = 'cards'>
+							<div class = 'card' v-for = 'card in i.main'>
+								<img :src = "list.get_pic(card)">
+							</div>
+						</div>
+						<div class = 'cards'>
+							<div class = 'card' v-for = 'card in i.extra'>
+								<img :src = "list.get_pic(card)">
+							</div>
+						</div>
+						<div class = 'cards'>
+							<div class = 'card' v-for = 'card in i.side'>
+								<img :src = "list.get_pic(card)">
+							</div>
+						</div>
+					</motion.div>
+				</AnimatePresence>
+			</div>
+			<AnimatePresence :initial = 'false'>
 				<motion.div
-					:initial = '{ opacity: 0, scale: 0 }'
-					:animate = '{ opacity: 1, scale: 1 }'
-					:exit = '{ opacity: 0, scale: 0 }'
-					v-if = 'list.select == v'
-					class = 'deck'
+					:initial = '{ opacity: 0 }'
+					:animate = '{ opacity: 1 }'
+					:exit = '{ opacity: 0 }'
+					v-if = 'list.select > -1'
+					class = 'deck_button'
 				>
-					<div class = 'deck_name'>
-						<span>{{ i.name }}</span>
+					<div class = 'ground_glass'>
+						<var-icon
+							color = 'white'
+							name = 'share'
+							:size = '30'
+							@click = 'select.menu'
+						/>
 					</div>
-					<div class = 'cards'>
-						<div class = 'card' v-for = 'card in i.main'>
-							<img :src = "list.get_pic(card)">
-						</div>
+					<div class = 'ground_glass'>
+						<var-icon
+							color = 'white'
+							name = 'delete'
+							:size = '30'
+							@click = 'select.menu'
+						/>
 					</div>
-					<div class = 'cards'>
-						<div class = 'card' v-for = 'card in i.extra'>
-							<img :src = "list.get_pic(card)">
-						</div>
-					</div>
-					<div class = 'cards'>
-						<div class = 'card' v-for = 'card in i.side'>
-							<img :src = "list.get_pic(card)">
-						</div>
+					<div class = 'ground_glass'>
+						<var-icon
+							color = 'white'
+							name = 'wrench'
+							:size = '30'
+							@click = 'select.menu'
+						/>
 					</div>
 				</motion.div>
 			</AnimatePresence>
@@ -76,7 +124,6 @@
 			setTimeout(() => {
 				list.select = v;
 			}, 400);
-			
 		},
 		get_pic : (card : number) : string => {
 			const pic = list.card.get(card)?.pic;
