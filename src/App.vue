@@ -99,4 +99,9 @@
 <style lang = 'scss'>
 	@use './style/toast.scss';
     @use './style/ground_glass.scss';
+	.var-icon {
+		&:hover {
+			cursor: pointer;
+		}
+	}
 </style>

@@ -2,11 +2,11 @@ import { invoke, convertFileSrc } from '@tauri-apps/api/core';
 import * as fs from '@tauri-apps/plugin-fs';
 import * as path from '@tauri-apps/api/path';
 import axios from 'axios';
-import { useToast } from 'vue-toastification'
 
 import constant from './constant';
 import Deck from './deck';
 import sql from './sql';
+import toast from './toast';
 
 class Fs {
 	dir : fs.ReadFileOptions;
@@ -133,7 +133,7 @@ class Fs {
 					return error;
 				}
 				console.error(text)
-				useToast().error(get_reason(text));
+				toast.error(get_reason(text));
 				const log = `[${new Date().toLocaleString()}] ${text}${constant.system.lineFeed()}`
 				if (await fs.exists(constant.log.error, this.dir)) {
 					const file = await fs.open(constant.log.error, { append: true, baseDir : this.dir.baseDir });
@@ -146,7 +146,7 @@ class Fs {
 				}
 				return true;
 			} catch (error) {
-				useToast().error(error.toString());
+				toast.error(error.toString());
 				return false;
 			}
 		},

@@ -1,12 +1,11 @@
 import YGOProDeck, { YGOProDeckLike } from 'ygopro-deck-encode';
 
 class Deck extends YGOProDeck {
-	name : string = '';
 	constructor(init: Partial<YGOProDeckLike> = {}) {
 		super(init);
 	};
 
-	pushName (name : string) {
+	push_name (name : string) {
 		this.name = name;
 	}
 

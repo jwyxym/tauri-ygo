@@ -1,6 +1,4 @@
 import { exit } from '@tauri-apps/plugin-process';
-import { useToast } from 'vue-toastification';
-import * as path from '@tauri-apps/api/path';
 import { DirEntry } from '@tauri-apps/plugin-fs';
 
 import fs from './fs';
@@ -179,7 +177,7 @@ class Game {
 				const ydk : Deck | undefined = await fs.read.ydk(i.name);
 				const name = i.name.match(constant.reg.get_name) ?? [];
 				if (name.length >= 2 && ydk !== undefined) {
-					ydk.pushName(name[1])
+					ydk.push_name(name[1])
 					decks.push(ydk);
 				}
 			}
