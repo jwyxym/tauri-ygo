@@ -65,7 +65,7 @@ class Constant {
 				servers : 'servers.conf'
 			},
 			textures : {
-				unknown : 'unknow.jpg'
+				unknown : 'unknown'
 			},
 			database : 'cards.cdb'
 		},

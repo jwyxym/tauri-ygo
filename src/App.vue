@@ -6,15 +6,16 @@
 				<Deck
 					:initial = '{ opacity: 0, scale: 0 }'
 					:animate = '{ opacity: 1, scale: 1 }'
-					:exit = '{ opacity: 0, scale: 0 }'
+					:exit = '{ opacity: 0 }'
 					v-if = 'page.show.deck'
+					:select = 'page.select'
 				></Deck>
 			</AnimatePresence>
 			<AnimatePresence :initial = 'false'>
 				<Menu
 					:initial = '{ opacity: 0, scale: 0 }'
 					:animate = '{ opacity: 1, scale: 1 }'
-					:exit = '{ opacity: 0, scale: 0 }'
+					:exit = '{ opacity: 0 }'
 					v-if = 'page.show.menu'
 					:select = 'page.select'
 				></Menu>
@@ -48,9 +49,17 @@
 			deck : false
 		},
 		select : {
+			menu : () : void => {
+				page.show.deck = false;
+				setTimeout(() => {
+					page.show.menu = true;
+				}, 400);
+			},
 			deck : () : void => {
 				page.show.menu = false;
-				page.show.deck = true;
+				setTimeout(() => {
+					page.show.deck = true;
+				}, 400);
 			},
 		}
 	});

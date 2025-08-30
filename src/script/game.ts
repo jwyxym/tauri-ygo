@@ -1,14 +1,14 @@
 import { exit } from '@tauri-apps/plugin-process';
-import { useToast } from 'vue-toastification'
+import { useToast } from 'vue-toastification';
 import * as path from '@tauri-apps/api/path';
 import { DirEntry } from '@tauri-apps/plugin-fs';
 
-import fs from './fs'
+import fs from './fs';
 import constant from './constant';
 import Deck from './deck';
 import Card from './card';
-import textLike from './language/interface'
-import Zh_CN from './language/Zh-CN'
+import textLike from './language/interface';
+import Zh_CN from './language/Zh-CN';
 
 class Game {
 	strings : Map<string, Map<string, string>> = new Map([
@@ -67,76 +67,20 @@ class Game {
 					}
 				}
 			}
-			console.log(new Date().toLocaleString())
 			//读取目录下的cards.cdb
 			if (await fs.exists(constant.str.files.database)) {
 				const database : Array<Array<string | number>> | undefined = await fs.read.database(constant.str.files.database);
 				if (database !== undefined)
 					await this.read.database(database);
 			}
-			console.log(new Date().toLocaleString())
-			//读取pics文件夹
-			const pics : Map<number, string | Blob> = new Map();
-			for (const i of await fs.read.dir(constant.str.dirs.pics) ?? []) {
-				if (i.name.match(constant.reg.picture)) {
-					const name = i.name.match(constant.reg.get_number_name) ?? [];
-					if (name.length >= 2)
-						pics.set(parseInt(name[1]), i.name);
-				}
-			}
-			console.log(new Date().toLocaleString())
 			//读取expnasions文件夹
 			const expnasionFiles : Array<DirEntry> = await fs.read.dir(constant.str.dirs.expansions) ?? [];
-			//读取ypk\zip
-			for (const i of expnasionFiles.filter(i => i.name.match(constant.reg.zip))) {
-				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(i.name);
-				for (const [_, v] of ypk.get(constant.reg.database) ?? new Map()) {
-					const db = await fs.read.databaseInMemory(v as Uint8Array<ArrayBuffer>);
-					if (db !== undefined)
-						this.read.database(db);
-				}
-				for (const [i, v] of ypk.get(constant.reg.picture) ?? new Map()) {
-					if (i.match(constant.reg.picture)) {
-						const name = i.match(constant.reg.get_number_name) ?? [];
-						if (name.length >= 2)
-							pics.set(parseInt(name[1]), v as Blob);
-					}
-				}
-				for (const [i, v] of ypk.get(constant.reg.conf) ?? new Map()) {
-					if (i.endsWith(constant.str.files.conf.strings)) {
-						const lines : Array<string> = v.split(/\r?\n/);
-						for (const [_, i] of lines.entries()) {
-							const line : string = i.trim();
-							this.read.string_conf(line);
-						}
-					} else if (i.endsWith(constant.str.files.conf.servers)) {
-						const lines : Array<string> = v.split(/\r?\n/);
-						for (const [_, i] of lines.entries()) {
-							const line : string = i.trim();
-							this.read.servers_conf(line);
-						}
-					} else if (i.endsWith(constant.str.files.conf.lflist)) {
-						const lines : Array<string> = v.split(/\r?\n/);
-						for (const [v, i] of lines.entries()) {
-							const line : string = i.trim();
-							this.read.lflist_conf(line);
-							if (v === (lines.length - 1))
-								this.lflist_now = '';
-						}
-					}
-				}
-				for (const [_, v] of ypk.get(constant.reg.ini) ?? new Map()) {
-					this.read.ini(v);
-				}
-			}
-			console.log(new Date().toLocaleString())
 			//读取cdb
 			for (const i of expnasionFiles.filter(i => i.name.match(constant.reg.database))) {
 				const database : Array<Array<string | number>> | undefined = await fs.read.database(i.name);
 				if (database !== undefined)
 					await this.read.database(database);
 			}
-			console.log(new Date().toLocaleString())
 			//读取conf
 			for (const i of expnasionFiles.filter(i => i.name.match(constant.reg.conf))) {
 				if (i.name.endsWith(constant.str.files.conf.strings)) {
@@ -167,40 +111,60 @@ class Game {
 					}
 				}
 			}
-			//读取pics
-			const expansionPics = await path.join(constant.str.dirs.expansions, 'pics');
-			if (await fs.exists(expansionPics)) {
-				for (const i of await fs.read.dir(expansionPics) ?? []) {
-					if (i.name.match(constant.reg.picture)) {
-						const name = i.name.match(constant.reg.get_number_name) ?? [];
-						if (name.length >= 2)
-							pics.set(parseInt(name[1]), i.name);
-					}
-				}
-			}
-			//加载图片
-			for (const [code, card] of this.cards) {
-				const pic = pics.get(code);
-				card.updatePic(pic !== undefined ? 
-					(typeof pic === 'string' ?
-						await fs.read.picture(pics.get(code) as string) ?? (this.textures.get(constant.str.files.textures.unknown) ?? '')
-						: URL.createObjectURL(pics.get(code) as Blob)
-					) : this.textures.get(constant.str.files.textures.unknown) ?? ''
-				);
-			}
-			console.log(new Date().toLocaleString())
 			//读取ini
 			for (const i of expnasionFiles.filter(i => i.name.match(constant.reg.ini))) {
 				const string : string | undefined = await fs.read.text(i.name);
 				if (string !== undefined)
 					this.read.ini(string);
 			}
+			//读取ypk\zip
+			for (const i of expnasionFiles.filter(i => i.name.match(constant.reg.zip))) {
+				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(i.name);
+				for (const [_, v] of ypk.get(constant.reg.database) ?? new Map()) {
+					const db = await fs.read.databaseInMemory(v as Uint8Array<ArrayBuffer>);
+					if (db !== undefined)
+						this.read.database(db);
+				}
+				// for (const [i, v] of ypk.get(constant.reg.picture) ?? new Map()) {
+				// 	if (i.match(constant.reg.picture)) {
+				// 		const name = i.match(constant.reg.get_number_name) ?? [];
+				// 		if (name.length >= 2)
+				// 			pics.set(parseInt(name[1]), v as Blob);
+				// 	}
+				// }
+				for (const [i, v] of ypk.get(constant.reg.conf) ?? new Map()) {
+					if (i.endsWith(constant.str.files.conf.strings)) {
+						const lines : Array<string> = v.split(/\r?\n/);
+						for (const [_, i] of lines.entries()) {
+							const line : string = i.trim();
+							this.read.string_conf(line);
+						}
+					} else if (i.endsWith(constant.str.files.conf.servers)) {
+						const lines : Array<string> = v.split(/\r?\n/);
+						for (const [_, i] of lines.entries()) {
+							const line : string = i.trim();
+							this.read.servers_conf(line);
+						}
+					} else if (i.endsWith(constant.str.files.conf.lflist)) {
+						const lines : Array<string> = v.split(/\r?\n/);
+						for (const [v, i] of lines.entries()) {
+							const line : string = i.trim();
+							this.read.lflist_conf(line);
+							if (v === (lines.length - 1))
+								this.lflist_now = '';
+						}
+					}
+				}
+				for (const [_, v] of ypk.get(constant.reg.ini) ?? new Map()) {
+					this.read.ini(v);
+				}
+			}
 		} catch (error) {
 			fs.write.log(error);
 		}
 	};
 
-	getText = () : textLike => {
+	get_text = () : textLike => {
 		switch (this.select) {
 			case constant.str.language.Zh_CN:
 				return Zh_CN;
@@ -208,7 +172,7 @@ class Game {
 		return Zh_CN;
 	};
 
-	loadDeck = async () : Promise<Array<Deck>> => {
+	load_deck = async () : Promise<Array<Deck>> => {
 		let decks : Array<Deck> = [];
 		for (const i of await fs.read.dir(constant.str.dirs.deck) ?? []) {
 			if (i.name.match(constant.reg.deck)) {
@@ -222,6 +186,28 @@ class Game {
 		}
 		return decks;
 	};
+
+	load_pic = async (deck : Array<number>) : Promise<void> => {
+		const filter = (i : number, v : number, a : Array<number>) => {
+			const card = this.cards.get(i);
+			return a.indexOf(i) === v && card != undefined && card.pic === ''
+		}
+		if (deck.filter(filter).length === 0) return;
+		const expnasionFiles : Array<DirEntry> = await fs.read.dir(constant.str.dirs.expansions) ?? [];
+		for (const i of expnasionFiles.filter(i => i.name.match(constant.reg.zip))) {
+			const pics = deck.filter(filter);
+			const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(i.name, pics.map(num => num.toString()));
+			for (const code of pics) {
+				const blob = ypk.get(constant.reg.picture)!.get(code.toString());
+				if (blob != undefined)
+					this.cards.get(code)!.update_pic(URL.createObjectURL(blob as Blob));
+			}	
+		}
+		const pics = deck.filter(filter);
+		for (const code of pics) {
+			await this.cards.get(code)!.find_pic();
+		}
+	}
 
 	read = {
 		servers_conf : (line : string) : void => {

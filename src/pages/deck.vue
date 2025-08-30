@@ -144,7 +144,6 @@
 			{ array : side_card, swapy : deck.side.swapy, element : side}
 		])
 			watch(() => { return i.array; }, () => {
-				console.log(1)
 				if (i.element.value === null) return;
 				if (i.swapy === undefined) {
 					i.swapy = createSwapy(i.element.value, {
