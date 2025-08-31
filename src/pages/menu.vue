@@ -1,5 +1,5 @@
 <template>
-	<motion.div class = 'menu'>
+	<div class = 'menu'>
 		<div class = 'content'>
 			<span class = 'title'>{{ constant.str.title }}</span>
 			<div class = 'list'>
@@ -15,7 +15,7 @@
 				</AnimatePresence>
 			</div>
 		</div>
-	</motion.div>
+	</div>
 </template>
 <script setup lang = 'ts'>
 	import { motion, AnimatePresence } from 'motion-v';

@@ -4,6 +4,11 @@ interface textLike {
 		new : string;
 		fromurl : string;
 		fromcode : string;
+		name : string;
+		name_rule : {
+			exist : string;
+			unlawful : string;
+		}
 	};
 	toast : {
 		copy : string;

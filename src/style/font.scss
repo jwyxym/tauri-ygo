@@ -9,7 +9,7 @@ $text-color: white;
 
 @font-face {
 	font-family: 'text';
-	src: url('../font/text.woff');
+	src: url('../font/text.woff2') format('woff2');
 	font-weight: normal;
 	font-style: normal;
 }

@@ -4,13 +4,19 @@
 			<div class = 'deck_list hover_ground' v-if = 'page.list'>
 				<div class = 'list'>
 					<div class = 'button_list'>
-						<Button @click = 'select.menu' :icon_name = "'home'"></Button>
-						<var-menu-select class = 'ground_glass'>
-							<var-icon
-								color = 'white'
-								name = 'plus-circle-outline'
-								:size = '30'
-							/>
+						<Button @click = 'select.menu' icon_name = 'home'></Button>
+						<var-menu-select>
+							<var-button
+								text outline container
+								type = 'primary'
+								text-color = 'white'
+							>
+								<var-icon
+									color = 'white'
+									name = 'plus-circle-outline'
+									:size = '30'
+								/>
+							</var-button>
 							<template #options>
 								<var-menu-option :label = 'mainGame.get_text().deck.new'/>
 								<var-menu-option :label = 'mainGame.get_text().deck.fromcode' />
@@ -25,14 +31,15 @@
 						>
 							<div
 								v-if = 'list.removing === undefined || list.removing?.deck !== i'
-								:exit = '{ opacity: 0, scale: 0 }'
-								@click = 'list.selected(v)'
 							>
-								<var-cell
-									class = 'ground_glass'
-								>
-									<span>{{ i.name }}</span>
-								</var-cell>
+								<var-button
+									text outline container block
+									size = 'large'
+									type = 'primary'
+									text-color = 'white'
+									:loading = 'list.loading === v'
+									@click = 'list.selected(v)'
+								>{{ i.name }}</var-button>
 							</div>
 						</transition>
 					</var-list>
@@ -69,20 +76,15 @@
 						v-if = 'list.select > -1'
 						class = 'deck_button'
 					>
-						<Button @click = 'list.copy' :icon_name = "'share'"></Button>
-						<Button @click = 'list.delete' :icon_name = "'delete'"></Button>
-						<Button @click = 'page.indeck' :icon_name = "'wrench'"></Button>
+						<Button @click = 'list.copy' icon_name = 'share'></Button>
+						<Button @click = 'list.delete' icon_name = 'delete'></Button>
+						<Button @click = 'page.indeck' icon_name = 'wrench'></Button>
 					</div>
 				</transition>
 			</div>
 		</transition>
 		<transition name = 'opacity'>
-			<DeckPage v-if = 'page.deck' :this_deck = 'list.decks[list.select]'></DeckPage>
-		</transition>
-		<transition name = 'opacity'>
-			<div class = 'deckpage_button' v-if = 'page.deck'>
-				<Button @click = 'page.offdeck' :icon_name = "'home'"></Button>
-			</div>
+			<DeckPage v-if = 'page.deck' :this_deck = 'list.decks[list.select]' :offdeck = 'page.offdeck'></DeckPage>
 		</transition>
 	</div>
 </template>
@@ -122,22 +124,21 @@
 		card : mainGame.cards,
 		select : -1,
 		decks : [] as Array<Deck>,
-		loading : false,
+		loading : -1,
 		removing : undefined as { deck : Deck, count : number} | undefined,
 		load : async () : Promise<void> => {
 			const decks = await mainGame.load_deck();
-			decks.forEach(i => {
-				if (list.decks.indexOf(i) === -1)
-					list.decks.push(i)
-			})
+			list.decks = decks;
 		},
 		selected : async (v : number) : Promise<void> => {
 			if (list.select != v) {
 				list.select = -1;
+				list.loading = v;
 				const deck = list.decks[v];
 				await mainGame.load_pic([...deck.main, ...deck.side, ...deck.extra]);
 				setTimeout(() => {
 					list.select = v;
+					list.loading = -1;
 				}, 400);
 			} else
 				list.select = -1;
@@ -176,4 +177,5 @@
 	@use '../../style/ground_glass.scss';
 	@use '../../style/deck_list.scss';
     @use '../../style/transition.scss';
+	@use '../../style/card.scss';
 </style>

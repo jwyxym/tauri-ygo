@@ -45,6 +45,7 @@ class Constant {
 		zip : /\.(ypk|zip)$/i,
 		json : /\.(json)$/i,
 		deck : /\.(ydk)$/i,
+		name : /[\\/:*?"<>|]/
 	};
 
 	str = {

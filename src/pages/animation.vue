@@ -1,5 +1,5 @@
 <template>
-	<motion.div class = 'body' ref = 'body'>
+	<div class = 'body' ref = 'body'>
 		<AnimatePresence>
 			<motion.img
 				ref = 'picI'
@@ -24,8 +24,7 @@
 				:src = 'url.II'
 			/>
 		</AnimatePresence>
-		
-	</motion.div>
+	</div>
 </template>
 <script setup lang="ts">
 	import { ref, onMounted, Ref, watch, Reactive, reactive } from "vue";

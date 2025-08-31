@@ -3,21 +3,36 @@
 		<div class = 'cardinfo' ref = 'info'>
 			<var-card
 				:elevation = '0'
-				:title = 'cardinfo.name'
-				:subtitle = 'cardinfo.name'
 				:src = 'cardinfo.pic'
 				image-height = '15.3vw'
 				image-width = '10.5vw'
 				ref = 'card'
 			/>
-			<div class = 'description' :style = "{ '--height' : `${height}px` }">
-				{{ cardinfo.description }}
+			<div class = 'description'>
+				<h2>{{ cardinfo.name }}</h2>
+				<span>{{ cardinfo.name }}</span>
+				<br></br>
+				<span>{{ cardinfo.description }}</span>
 			</div>
 		</div>
 		<var-card
 			class = 'deck'
 			:elevation = '4'
 		>
+			<div class = 'head'>
+				<var-input
+					variant = 'outlined'
+					:placeholder = 'mainGame.get_text().deck.name'
+					:rules = 'deck.name_rule'
+					:clearable = 'true'
+					v-model = 'deck.name'
+					text-color = 'white'
+				/>
+				<div class = 'button_list'>
+					<Button @click = 'offdeck' icon_name = 'home'></Button>
+					<Button @click = 'offdeck' icon_name = 'wrench'></Button>
+				</div>
+			</div>
 			<div
 				class = 'main'
 				ref = 'main'
@@ -84,22 +99,29 @@
 
 	import mainGame from '../../script/game';
 	import constant from '../../script/constant';
+	import pos, { posLike } from '../../script/position';
+	import fs from '../../script/fs';
 
-	const props = defineProps(['this_deck']);
-	import pos, { posLike } from "../../script/position";
+	import Button from '../varlet/button.vue';
 
-	let height = ref(0);
-	const info : Ref<HTMLElement | null> = ref(null);
-	const card : Ref<HTMLElement | null> = ref(null);
+	const props = defineProps(['this_deck', 'offdeck']);
 
 	let deck = reactive({
 		main : [],
 		extra : [],
 		side : [],
 		search : [],
+		name : '',
 		get_pic : (card : string) : string => {
 			const pic = mainGame.cards.get(parseInt(card))?.pic;
 			return (pic ?? mainGame.textures.get(constant.str.files.textures.unknown)) ?? '';
+		},
+		name_rule : async (name : string) : Promise<string | boolean> => {
+			if (name.match(constant.reg.name))
+				return mainGame.get_text().deck.name_rule.unlawful;
+			if ((await mainGame.load_deck()).filter(i => i.name === name).length > 0 && props.this_deck ? props.this_deck.name !== name : true)
+				return mainGame.get_text().deck.name_rule.exist;
+			return true;
 		}
 	})
 
@@ -130,6 +152,9 @@
 		search : undefined as Swapy | undefined
 	}
 
+	let height = ref(0);
+	const info : Ref<HTMLElement | null> = ref(null);
+	const card : Ref<HTMLElement | null> = ref(null);
 	let main : Ref<HTMLElement | null> = ref(null);
 	let extra : Ref<HTMLElement | null> = ref(null);
 	let side : Ref<HTMLElement | null> = ref(null);
@@ -140,11 +165,11 @@
 	let search_card : Ref<Array<HTMLElement> | null> = ref(null);
 
 	onBeforeMount(() => {
-		console.log(props.this_deck)
 		if (props.this_deck) {
 			deck.main = props.this_deck.main;
 			deck.extra = props.this_deck.extra;
 			deck.side = props.this_deck.side;
+			deck.name = props.this_deck.name;
 		}
 	});
 
@@ -182,6 +207,7 @@
 <style lang = 'scss'>
 	@use '../../style/deck.scss';
 	@use '../../style/ground_glass.scss';
+	@use '../../style/card.scss';
 	.var-card {
 		background-color: transparent;
 	}

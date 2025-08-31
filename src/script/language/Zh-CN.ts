@@ -11,7 +11,12 @@ const Zh_CN : textLike = {
 	deck : {
 		new : '新建卡组',
 		fromurl : '从url导入',
-		fromcode : '从卡组码导入'
+		fromcode : '从卡组码导入',
+		name : '卡组名称',
+		name_rule : {
+			exist : '卡组已存在',
+			unlawful : '文件名非法'
+		}
 	},
 	toast : {
 		copy : '已复制到粘贴板',
