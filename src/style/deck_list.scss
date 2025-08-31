@@ -1,76 +1,85 @@
 @use './font.scss';
-.deck_list {
-	display: flex;
-	gap: 10px;
-	.list {
-		width: 40%;
+.body {
+	.deck_list {
 		display: flex;
-		flex-direction: column;
 		gap: 10px;
-		.button_list {
-			display: flex;
-			gap: 10px;
-		}
-		.var-list {
-			height: 100%;
-			width: 80%;
+		.list {
+			width: 40%;
 			display: flex;
 			flex-direction: column;
 			gap: 10px;
-			overflow-y: auto;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-			&::-webkit-scrollbar {
-				display: none;
+			.button_list {
+				display: flex;
+				gap: 10px;
 			}
-			div{
-				&:hover {
-					cursor: pointer;
+			.var-list {
+				height: 100%;
+				width: 80%;
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+				overflow-y: auto;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				&::-webkit-scrollbar {
+					display: none;
 				}
-				span {
-					font-family: 'text';
-				}
-			}
-		}
-	}
-	.deck_show {
-		width: 60%;
-		height: 100%;
-		overflow: hidden;
-		mask:
-			radial-gradient(white 0%, white 20%, transparent 100%);
-		.deck {
-			display: grid;
-			justify-items: center;
-			.deck_name {
-				span {
-					color: font.$text-color;
-					font-family: 'title';
-					font-size: 10vh;
-					white-space: nowrap;
-				}
-			}
-			.cards {
-				width: 100%;
-				.card {
-					width: 3.5vw;
-					height: 5.1vw;
-					display: inline-block;
-					img {
-						width: 100%;
-						height: 100%;
+				div{
+					&:hover {
+						cursor: pointer;
+					}
+					span {
+						font-family: 'text';
 					}
 				}
 			}
 		}
+		.deck_show {
+			width: 60%;
+			height: 100%;
+			overflow: hidden;
+			mask: radial-gradient(circle, white 0%, white 20%, transparent 100%);
+			-webkit-mask: radial-gradient(circle, white 0%, white 20%, transparent 100%);
+			.deck {
+				display: grid;
+				justify-items: center;
+				.deck_name {
+					span {
+						color: font.$text-color;
+						font-family: 'title';
+						font-size: 10vh;
+						white-space: nowrap;
+					}
+				}
+				.cards {
+					width: 100%;
+					.card {
+						width: 3.5vw;
+						height: 5.1vw;
+						display: inline-block;
+						img {
+							width: 100%;
+							height: 100%;
+						}
+					}
+				}
+			}
+		}
+		.deck_button {
+			position: absolute;
+			display: flex;
+			flex-direction: row-reverse;
+			gap: 10px;
+			right: 10%;
+			bottom: 10%;
+		}
 	}
-	.deck_button {
+	.deckpage_button {
 		position: absolute;
 		display: flex;
-		flex-direction: row-reverse;
 		gap: 10px;
-		right: 10%;
-		bottom: 10%;
+		right: 96%;
+		top: 5%;
 	}
 }
 

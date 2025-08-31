@@ -2,43 +2,33 @@
 	<div class = 'main'>
 		<starry-sky :stars-count = '1500' :distance = '800' id = 'back'/>
 		<div class = 'body'>
-			<AnimatePresence :initial = 'false'>
+			<transition name = 'opacity'>
 				<Deck
-					:initial = '{ opacity: 0, scale: 0 }'
-					:animate = '{ opacity: 1, scale: 1 }'
-					:exit = '{ opacity: 0 }'
 					v-if = 'page.show.deck'
 					:select = 'page.select'
 				></Deck>
-			</AnimatePresence>
-			<AnimatePresence :initial = 'false'>
+			</transition>
+			<transition name = 'opacity'>
 				<Menu
-					:initial = '{ opacity: 0, scale: 0 }'
-					:animate = '{ opacity: 1, scale: 1 }'
-					:exit = '{ opacity: 0 }'
 					v-if = 'page.show.menu'
 					:select = 'page.select'
 				></Menu>
-			</AnimatePresence>
-			<AnimatePresence :initial = 'false'>
+			</transition>
+			<transition name = 'opacity'>
 				<Animation
-					:initial = '{ opacity: 0 }'
-					:animate = '{ opacity: 1 }'
-					:exit = '{ opacity: 0 }'
 					v-if = 'page.show.menu'
 				></Animation>
-			</AnimatePresence>
+			</transition>
 		</div>
 	</div>
 </template>
 <script setup lang="ts">
 	import { ref, reactive, onMounted, onUnmounted, Ref, watch, onBeforeMount } from "vue";
-	import { AnimatePresence } from "motion-v";
 	import { Dialog } from '@varlet/ui'
 
 	import Menu from './pages/menu.vue';
 	import Animation from './pages/animation.vue';
-	import Deck from './pages/decklist.vue';
+	import Deck from './pages/deck/deck_list.vue';
 
 	import mainGame from './script/game';
 
@@ -99,6 +89,7 @@
 <style lang = 'scss'>
 	@use './style/toast.scss';
     @use './style/ground_glass.scss';
+    @use './style/transition.scss';
 	.var-icon {
 		&:hover {
 			cursor: pointer;

@@ -1,33 +1,45 @@
+@use './font.scss';
 .deck_body {
 	border-radius: 16px;
 	display: flex;
 	justify-content: center;
 	gap: 0;
-	.description {
-		width: 20%;
-		--card-background: transparent;
-		border: 2px solid rgba($color: #000000, $alpha: 0.5);
+	position: relative;
+	.var-card {
+		--card-background: transparent !important;
+		--card-title-color: font.$text-color !important;
+		color: font.$text-color !important;
+		font-family: 'text' !important;
+		.var-card__subtitle {
+			color: font.$text-color !important;
+		}
+	}
+	.cardinfo {
+		width: calc(100% - 70vw - 64px);
+		.description {
+			color: font.$text-color;
+			font-family: 'text';
+			overflow-y: auto;
+			height: 90%;
+			width: calc(100% - 32px);
+			&::-webkit-scrollbar {
+				display: none;
+			}
+		}
 	}
 	.deck {
-		width: 50%;
-		border: 2px solid rgba($color: #000000, $alpha: 0.5);
+		width: calc(52.5vw + 32px);
 		display: flex;
 		flex-direction: column;
 		.main {
-			height: 60%;
-			border-bottom: 2px solid rgba($color: #000000, $alpha: 0.5);
+			height: 20.4vw;
 		}
 		.side, .extra {
-			border-top: 2px solid rgba($color: #000000, $alpha: 0.5);
-			height: 20%;
-		}
-		.extra {
-			border-bottom: 2px solid rgba($color: #000000, $alpha: 0.5);
+			height: 10.2vw;
 		}
 	}
 	.search {
-		width: 30%;
-		border: 2px solid rgba($color: #000000, $alpha: 0.5);
+		width: calc(17.5vw + 32px);
 	}
 
 	.search, .main, .side, .extra {

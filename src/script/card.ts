@@ -53,9 +53,9 @@ class Card {
 		this.race = row[8] as number;
 		this.attribute = row[9] as number;
 		this.category = row[10] as number;
-		this.name = row[12] as string;
-		this.desc = row[13] as string;
-		this.hint = row.slice(14, 30) as Array<string>;
+		this.name = row[11] as string;
+		this.desc = row[12] as string;
+		this.hint = row.slice(13, 29) as Array<string>;
 		this.pic = '';
 	}
 
