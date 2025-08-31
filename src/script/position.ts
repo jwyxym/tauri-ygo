@@ -16,7 +16,7 @@ class Position {
 	reactive = {
 		get : (pos : Reactive<posLike>, element : HTMLElement) : void => {
 			// @ts-ignore
-			const p : posLike = element.$el.getBoundingClientRect();
+			const p : posLike = element.$el !== undefined ? element.$el.getBoundingClientRect() : element.getBoundingClientRect();
 			pos.bottom = p.bottom;
 			pos.height = p.height;
 			pos.left = p.left;

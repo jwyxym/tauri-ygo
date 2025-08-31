@@ -1,6 +1,6 @@
 <template>
 	<div class = 'deck_body hover_ground'>
-		<div class = 'cardinfo'>
+		<div class = 'cardinfo' ref = 'info'>
 			<var-card
 				:elevation = '0'
 				:title = 'cardinfo.name'
@@ -8,8 +8,9 @@
 				:src = 'cardinfo.pic'
 				image-height = '15.3vw'
 				image-width = '10.5vw'
+				ref = 'card'
 			/>
-			<div class = 'description'>
+			<div class = 'description' :style = "{ '--height' : `${height}px` }">
 				{{ cardinfo.description }}
 			</div>
 		</div>
@@ -85,6 +86,11 @@
 	import constant from '../../script/constant';
 
 	const props = defineProps(['this_deck']);
+	import pos, { posLike } from "../../script/position";
+
+	let height = ref(0);
+	const info : Ref<HTMLElement | null> = ref(null);
+	const card : Ref<HTMLElement | null> = ref(null);
 
 	let deck = reactive({
 		main : [],
@@ -102,10 +108,18 @@
 		description : '',
 		name : '',
 		select : (i : string) : void => {
+			cardinfo.get_height();
 			cardinfo.pic = deck.get_pic(i);
 			const card = mainGame.cards.get(parseInt(i));
 			cardinfo.name = card?.name ?? '';
 			cardinfo.description = card?.desc ?? '';
+		},
+		get_height : () : void => {
+			let info_pos : posLike = {} as posLike;
+			let card_pos : posLike = {} as posLike;
+			pos.reactive.get(info_pos, info.value!)
+			pos.reactive.get(card_pos, card.value!)
+			height.value = info_pos.height - card_pos.height;
 		}
 	});
 
@@ -135,6 +149,7 @@
 	});
 
 	onMounted(() => {
+		cardinfo.get_height();
 		if (mainGame.isAnroid())
 			for (const i of [main, extra, side, search]) {
 				if (i.value === null) continue;

@@ -20,7 +20,7 @@
 			color: font.$text-color;
 			font-family: 'text';
 			overflow-y: auto;
-			height: 90%;
+			max-height: var(--height);
 			width: calc(100% - 32px);
 			&::-webkit-scrollbar {
 				display: none;
