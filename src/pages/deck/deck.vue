@@ -27,6 +27,7 @@
 					:clearable = 'true'
 					v-model = 'deck.name'
 					text-color = 'white'
+					size = 'small'
 				/>
 				<div class = 'button_list'>
 					<Button @click = 'offdeck' icon_name = 'home'></Button>

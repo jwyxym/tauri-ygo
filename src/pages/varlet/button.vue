@@ -3,6 +3,7 @@
 		text outline container
 		type = 'primary'
 		text-color = 'white'
+		size = 'small'
 	>
 		<var-icon
 			color = 'white'

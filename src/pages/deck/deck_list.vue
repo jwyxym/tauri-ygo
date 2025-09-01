@@ -6,17 +6,7 @@
 					<div class = 'button_list'>
 						<Button @click = 'select.menu' icon_name = 'home'></Button>
 						<var-menu-select>
-							<var-button
-								text outline container
-								type = 'primary'
-								text-color = 'white'
-							>
-								<var-icon
-									color = 'white'
-									name = 'plus-circle-outline'
-									:size = '30'
-								/>
-							</var-button>
+							<Button @click = 'select.menu' icon_name = 'plus-circle-outline'></Button>
 							<template #options>
 								<var-menu-option :label = 'mainGame.get_text().deck.new'/>
 								<var-menu-option :label = 'mainGame.get_text().deck.fromcode' />
@@ -37,7 +27,7 @@
 									size = 'large'
 									type = 'primary'
 									text-color = 'white'
-									:loading = 'list.loading === v'
+									:loading = 'list.loading.includes(v)'
 									@click = 'list.selected(v)'
 								>{{ i.name }}</var-button>
 							</div>
@@ -45,26 +35,26 @@
 					</var-list>
 				</div>
 				<div class = 'deck_show'>
-					<transition name = 'opacity' v-for = '(i, v) in list.decks'>
+					<transition name = 'opacity'>
 						<div
-							v-if = 'list.select == v'
+							v-if = 'list.select > -1'
 							class = 'deck'
 						>
 							<div class = 'deck_name'>
-								<span>{{ i.name }}</span>
+								<span>{{ list.decks[list.select].name }}</span>
 							</div>
 							<div class = 'cards'>
-								<div class = 'card' v-for = 'card in i.main'>
+								<div class = 'card' v-for = 'card in list.decks[list.select].main'>
 									<img :src = "list.get_pic(card)">
 								</div>
 							</div>
 							<div class = 'cards'>
-								<div class = 'card' v-for = 'card in i.extra'>
+								<div class = 'card' v-for = 'card in list.decks[list.select].extra'>
 									<img :src = "list.get_pic(card)">
 								</div>
 							</div>
 							<div class = 'cards'>
-								<div class = 'card' v-for = 'card in i.side'>
+								<div class = 'card' v-for = 'card in list.decks[list.select].side'>
 									<img :src = "list.get_pic(card)">
 								</div>
 							</div>
@@ -124,7 +114,7 @@
 		card : mainGame.cards,
 		select : -1,
 		decks : [] as Array<Deck>,
-		loading : -1,
+		loading : [] as Array<number>,
 		removing : undefined as { deck : Deck, count : number} | undefined,
 		load : async () : Promise<void> => {
 			const decks = await mainGame.load_deck();
@@ -133,12 +123,12 @@
 		selected : async (v : number) : Promise<void> => {
 			if (list.select != v) {
 				list.select = -1;
-				list.loading = v;
+				list.loading.push(v);
 				const deck = list.decks[v];
 				await mainGame.load_pic([...deck.main, ...deck.side, ...deck.extra]);
 				setTimeout(() => {
 					list.select = v;
-					list.loading = -1;
+					list.loading.splice(list.loading.indexOf(v), 1);
 				}, 400);
 			} else
 				list.select = -1;
