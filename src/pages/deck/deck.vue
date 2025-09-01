@@ -79,9 +79,16 @@
 		</var-card>
 		<div
 			class = 'search'
-			ref = 'search'
 		>
-			<div
+			<var-input
+				variant = 'outlined'
+				:placeholder = 'mainGame.get_text().deck.search.name'
+				:clearable = 'true'
+				v-model = 'search.name'
+				text-color = 'white'
+				size = 'small'
+			/>
+			<!-- <div
 				v-for = '(i, v) in deck.search'
 				:data-swapy-slot = '`search_card${v}`'
 				class = 'card'
@@ -89,20 +96,28 @@
 				<div :data-swapy-item = '`search_card${v}`'>
 					<img :src = 'deck.get_pic(i)' ref = 'search_card'></img>
 				</div>
-			</div>
+			</div> -->
+			<var-list
+				:finished = 'search.finished'
+				v-model:loading = 'search.loading'
+				@scroll = 'search.load_on'
+				@load = 'search.load'
+			>
+				<var-cell :key="item" v-for="item in search.list">
+				列表项: {{ item }}
+				</var-cell>
+			</var-list>
 		</div>
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { ref, reactive, onMounted, onUnmounted, Ref, watch, Reactive, onBeforeMount } from "vue";
+	import { ref, reactive, onMounted, Ref, watch, onBeforeMount } from "vue";
 	import { createSwapy, Swapy } from 'swapy';
 	import Sortable from 'sortablejs';
 
 	import mainGame from '../../script/game';
 	import constant from '../../script/constant';
 	import pos, { posLike } from '../../script/position';
-	import fs from '../../script/fs';
-
 	import Button from '../varlet/button.vue';
 
 	const props = defineProps(['this_deck', 'offdeck']);
@@ -111,7 +126,6 @@
 		main : [],
 		extra : [],
 		side : [],
-		search : [],
 		name : '',
 		get_pic : (card : string) : string => {
 			const pic = mainGame.cards.get(parseInt(card))?.pic;
@@ -127,9 +141,9 @@
 	})
 
 	let cardinfo = reactive({
-		pic : '',
+		pic : mainGame.textures.get(constant.str.files.textures.unknown),
+		name : mainGame.get_text().deck.info,
 		description : '',
-		name : '',
 		select : (i : string) : void => {
 			cardinfo.get_height();
 			cardinfo.pic = deck.get_pic(i);
@@ -146,6 +160,37 @@
 		}
 	});
 
+	let search = reactive({
+		name : '',
+		finished : false,
+		loading : false,
+		list : [] as Array<number>,
+		result : [] as Array<number>,
+		load_on : () => {
+			if (search.loading || search.finished) return;
+			search.loading = true;
+			search.load();
+		},
+		load : () => {
+			console.log(search.loading)
+			setTimeout(() => {
+				// for (let i = 0; i < 20; i++) {
+				// 	search.list.push(list.value.length + 1)
+				// }
+				let i = 0;
+				const length = search.list.length;
+				while (search.list.length < search.result.length) {
+					search.list.push(search.result[length + i]);
+					i++;
+					if (i == 20) break;
+				}
+
+				search.loading = false;
+				search.finished = search.list.length >= search.result.length;
+			}, 1000)
+		}
+	});
+
 	let swapy = {
 		main : undefined as Swapy | undefined,
 		extra : undefined as Swapy | undefined,
@@ -159,7 +204,6 @@
 	let main : Ref<HTMLElement | null> = ref(null);
 	let extra : Ref<HTMLElement | null> = ref(null);
 	let side : Ref<HTMLElement | null> = ref(null);
-	let search : Ref<HTMLElement | null> = ref(null);
 	let main_card : Ref<Array<HTMLElement> | null> = ref(null);
 	let extra_card : Ref<Array<HTMLElement> | null> = ref(null);
 	let side_card : Ref<Array<HTMLElement> | null> = ref(null);
@@ -177,7 +221,7 @@
 	onMounted(() => {
 		cardinfo.get_height();
 		if (mainGame.isAnroid())
-			for (const i of [main, extra, side, search]) {
+			for (const i of [main, extra, side]) {
 				if (i.value === null) continue;
 				Sortable.create(i.value, {
 					animation : 150,

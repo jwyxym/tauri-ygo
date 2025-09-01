@@ -25,8 +25,5 @@
 		['home', Home],
 		['add', Add]
 	]);
-	const svg : Ref<null | Component> = ref(null);
-	onBeforeMount(() => {
-		svg.value = svgs.get(props.icon_name) ?? null;
-	});
+	const svg : null | Component = svgs.get(props.icon_name) ?? null;
 </script>

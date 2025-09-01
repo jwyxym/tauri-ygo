@@ -5,14 +5,18 @@ interface textLike {
 		fromurl : string;
 		fromcode : string;
 		name : string;
+		info : string;
+		search : {
+			name : string;
+		};
 		delete : {
 			title : string;
 			message : string;
-		}
+		};
 		name_rule : {
 			exist : string;
 			unlawful : string;
-		}
+		};
 	};
 	toast : {
 		copy : string;

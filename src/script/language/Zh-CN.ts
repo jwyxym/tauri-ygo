@@ -13,6 +13,10 @@ const Zh_CN : textLike = {
 		fromurl : '从url导入',
 		fromcode : '从卡组码导入',
 		name : '卡组名称',
+		info : '欢迎使用tauri-ygo',
+		search : {
+			name : '卡片搜索'
+		},
 		delete : {
 			title : '确定要删除卡组吗',
 			message : '[{:?}]将会永久消失！（真的很久！）'
