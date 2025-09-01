@@ -5,6 +5,10 @@ interface textLike {
 		fromurl : string;
 		fromcode : string;
 		name : string;
+		delete : {
+			title : string;
+			message : string;
+		}
 		name_rule : {
 			exist : string;
 			unlawful : string;

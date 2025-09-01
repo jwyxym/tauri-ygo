@@ -28,7 +28,7 @@
 					&:hover {
 						cursor: pointer;
 					}
-					span {
+					.var-button {
 						font-family: 'text';
 						color: font.$text-color;
 					}
@@ -70,6 +70,6 @@
 
 .var-menu-option {
 	background-color: transparent !important;
-	color: font.$text-color !important;
+	// color: font.$text-color !important;
 	font-family: 'text';
 }

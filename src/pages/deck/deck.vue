@@ -31,7 +31,7 @@
 				/>
 				<div class = 'button_list'>
 					<Button @click = 'offdeck' icon_name = 'home'></Button>
-					<Button @click = 'offdeck' icon_name = 'wrench'></Button>
+					<Button @click = 'offdeck' icon_name = 'save'></Button>
 				</div>
 			</div>
 			<div
@@ -205,7 +205,7 @@
 			}, { deep : true });
 
 </script>
-<style lang = 'scss'>
+<style scoped lang = 'scss'>
 	@use '../../style/deck.scss';
 	@use '../../style/ground_glass.scss';
 	@use '../../style/card.scss';

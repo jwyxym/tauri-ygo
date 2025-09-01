@@ -6,7 +6,7 @@
 					<div class = 'button_list'>
 						<Button @click = 'select.menu' icon_name = 'home'></Button>
 						<var-menu-select>
-							<Button @click = 'select.menu' icon_name = 'plus-circle-outline'></Button>
+							<Button icon_name = 'add'></Button>
 							<template #options>
 								<var-menu-option :label = 'mainGame.get_text().deck.new'/>
 								<var-menu-option :label = 'mainGame.get_text().deck.fromcode' />
@@ -68,7 +68,7 @@
 					>
 						<Button @click = 'list.copy' icon_name = 'share'></Button>
 						<Button @click = 'list.delete' icon_name = 'delete'></Button>
-						<Button @click = 'page.indeck' icon_name = 'wrench'></Button>
+						<Button @click = 'page.indeck' icon_name = 'deck'></Button>
 					</div>
 				</transition>
 			</div>
@@ -82,6 +82,7 @@
 	import { ref, reactive, onMounted, onUnmounted, Ref, watch, onBeforeMount } from 'vue';
 	import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 	import { join } from '@tauri-apps/api/path';
+	import { Dialog } from '@varlet/ui'
 
 	import mainGame from '../../script/game';
 	import Deck from '../../script/deck';
@@ -90,7 +91,7 @@
 	import fs from '../../script/fs';
 
 	import Button from '../varlet/button.vue';
-	import DeckPage from './deck.vue'
+	import DeckPage from './deck.vue';
 
 	let page = reactive({
 		deck : false,
@@ -145,17 +146,27 @@
 		},
 		delete : async () : Promise<void> => {
 			if (list.select <= -1) return;
-			if (await fs.delete(await join(constant.str.dirs.deck, `${list.decks[list.select].name!}.ydk`))) {
-				toast.info(mainGame.get_text().toast.delete);
-				list.removing = { deck : list.decks[list.select], count : list.select};
-				list.select = -1;
-				setTimeout(() => {
-					list.decks.splice(list.removing!.count, 1);
+			const confirm = async () : Promise<void> => {
+				if (await fs.delete(await join(constant.str.dirs.deck, `${list.decks[list.select].name!}.ydk`))) {
+					toast.info(mainGame.get_text().toast.delete);
+					list.removing = { deck : list.decks[list.select], count : list.select};
+					list.select = -1;
 					setTimeout(() => {
-						list.removing = undefined;
-					}, 200)
-				}, 400);
+						list.decks.splice(list.removing!.count, 1);
+						setTimeout(() => {
+							list.removing = undefined;
+						}, 200)
+					}, 400);
+				}
 			}
+			Dialog({
+				title : mainGame.get_text().deck.delete.title,
+				message : mainGame.get_text().deck.delete.message.replace('{:?}', list.decks[list.select].name ?? ''),
+				dialogClass : 'ground_glass',
+				cancelButtonTextColor : 'white',
+				confirmButtonTextColor : 'white',
+				onConfirm : confirm
+			});
 		}
 	});
 
