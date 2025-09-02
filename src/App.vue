@@ -23,8 +23,7 @@
 	</div>
 </template>
 <script setup lang="ts">
-	import { ref, reactive, onMounted, onUnmounted, Ref, watch, onBeforeMount } from "vue";
-	import { Dialog } from '@varlet/ui'
+	import { reactive, onBeforeMount } from "vue";
 
 	import Menu from './pages/menu.vue';
 	import Animation from './pages/animation.vue';
@@ -90,9 +89,20 @@
 	@use './style/toast.scss';
     @use './style/ground_glass.scss';
     @use './style/transition.scss';
+    @use './style/font.scss';
 	.var-icon {
 		&:hover {
 			cursor: pointer;
 		}
+	}
+	:root {
+		--dialog-message-color: font.$text-color !important;
+		--dialog-title-color: font.$text-color !important;
+		--card-background: transparent !important;
+		--list-loading-color: font.$text-color !important;
+		--list-finished-color: font.$text-color !important;
+		--list-error-color: font.$text-color !important;
+		--popup-content-background-color: transparent !important;
+		--checkbox-text-color: font.$text-color !important;
 	}
 </style>

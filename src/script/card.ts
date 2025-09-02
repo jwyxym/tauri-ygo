@@ -2,24 +2,34 @@ import constant from './constant';
 import mainGame from './game';
 import fs from './fs'
 import * as path from '@tauri-apps/api/path';
-import { DirEntry } from '@tauri-apps/plugin-fs';
 
-interface cardLike {
+interface CardInfo {
+	ot : string;
+	level : string;
+	atk : string;
+	def : string;
+	link : string;
+	type : string;
+	race : string;
+	attribute : string;
+	category : string;
+	setcode : string;
+}
+
+interface Search {
 	ot ?: number;
-	id ?: number;
 	alias ?: number;
-	level ?: number;
-	scale ?: number;
-	atk ?: number;
-	def ?: number;
+	level ?: string;
+	scale ?: string;
+	atk ?: string;
+	def ?: string;
+	link ?: number;
 	type ?: number;
 	race ?: number;
 	attribute ?: number;
 	category ?: number;
-	setcode ?: Array<string>;
-	name ?: string;
+	setcode ?: number;
 	desc ?: string;
-	hint ?: Array<string>;
 }
 
 class Card {
@@ -34,7 +44,7 @@ class Card {
 	race : number;
 	attribute : number;
 	category : number;
-	setcode : Array<string>;
+	setcode : Array<number>;
 	name : string;
 	desc : string;
 	hint : Array<string>;
@@ -44,12 +54,13 @@ class Card {
 		this.id = row[0] as number;
 		this.ot = row[1] as number;
 		this.alias = row[2] as number;
-		this.setcode = row[3].toString(16).padStart(16, '0').match(/.{1,4}/g) as Array<string>;
+		this.setcode = row[3].toString(16).padStart(16, '0').match(/.{1,4}/g)!.map(str => parseInt(str));
 		this.type = row[4] as number;
 		this.atk = row[5] as number;
 		this.def = row[6] as number;
-		this.level = parseInt(row[7].toString(16).slice(-4)) | 0;
-		this.scale = parseInt(row[7].toString(16).slice(-4, -6)) | 0;
+		const level = row[7].toString(16).padStart(7, '0')
+		this.level = parseInt(level.slice(-4)) | 0;
+		this.scale = parseInt(level.slice(-6, -4)) | 0;
 		this.race = row[8] as number;
 		this.attribute = row[9] as number;
 		this.category = row[10] as number;
@@ -86,7 +97,61 @@ class Card {
 		if (url !== undefined)
 			this.update_pic(url);
 	}
+
+	get_info = () : CardInfo => {
+		const to_srting = (i : Array<string>) : string => {
+			return i.filter(i => i !== '').join('|')
+		}
+		let ot : Array<string> = [];
+		let link : Array<string> = [];
+		let type : Array<string> = [];
+		let race : Array<string> = [];
+		let attribute : Array<string> = [];
+		let category : Array<string> = [];
+		for (const i of [
+			{array : ot, key : constant.str.info_conf.ot, this : this.ot},
+			{array : link, key : constant.str.info_conf.link, this : this.def},
+			{array : type, key : constant.str.info_conf.type, this : this.type},
+			{array : race, key : constant.str.info_conf.race, this : this.race},
+			{array : attribute, key : constant.str.info_conf.attribute, this : this.attribute},
+			{array : category, key : constant.str.info_conf.category, this : this.category}
+		])
+			for (const [k, v] of mainGame.strings.get(i.key) ?? new Map) {
+				if ((i.this & k) == k)
+					i.array.push(v);
+			}
+			
+		const setcode = this.setcode.map(i => i > 0 ? mainGame.strings.get(constant.str.string_conf.setcode)?.get(i) ?? `0x${i.toString(16)}` : '');
+		return {
+			ot : to_srting(ot),
+			level : `${this.is_link() ? 'link-' : (this.is_xyz() ? '☆' : '★')}${this.level}`,
+			atk : this.atk >= 0 ? this.atk.toString() : '?',
+			def : this.is_link() ? '-' : this.def >= 0 ? this.def.toString() : '?',
+			link : this.is_link() ? to_srting(link) : '',
+			type : to_srting(type),
+			race : to_srting(race),
+			attribute : to_srting(attribute),
+			category : to_srting(category),
+			setcode : to_srting(setcode),
+		}
+	}
+
+	is_link = () : boolean => {
+		return (this.type & 0x4000000) === 0x4000000;
+	}
+
+	is_pendulum = () : boolean => {
+		return (this.type & 0x1000000) === 0x1000000;
+	}
+
+	is_xyz = () : boolean => {
+		return (this.type & 0x800000) === 0x800000;
+	}
+
+	is_monster = () : boolean => {
+		return (this.type & 0x1) === 0x1;
+	}
 }
 
 export default Card;
-export type { cardLike };
+export type { Search, CardInfo };

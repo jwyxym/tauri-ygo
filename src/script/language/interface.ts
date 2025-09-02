@@ -8,19 +8,40 @@ interface textLike {
 		info : string;
 		search : {
 			name : string;
+			link : string;
+			type : string;
+			category : string;
+			race : string;
+			ot : string;
+			attribute : string;
+			atk : string;
+			def : string;
+			level : string;
+			scale : string;
 		};
 		delete : {
 			title : string;
 			message : string;
 		};
-		name_rule : {
-			exist : string;
-			unlawful : string;
+		rule : {
+			name : {
+				exist : string;
+				unlawful : string;
+			};
+			atk : {
+				unlawful : string;
+			};
+			level : {
+				unlawful : string;
+			};
 		};
 	};
 	toast : {
 		copy : string;
 		delete : string;
+		error : {
+			search : string;
+		}
 	};
 }
 

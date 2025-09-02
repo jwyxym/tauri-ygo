@@ -4,13 +4,13 @@
 			<div class = 'deck_list hover_ground' v-if = 'page.list'>
 				<div class = 'list'>
 					<div class = 'button_list'>
-						<Button @click = 'select.menu' icon_name = 'home'></Button>
+						<Button @click = 'select.menu' icon_name = 'exit'></Button>
 						<var-menu-select>
 							<Button icon_name = 'add'></Button>
 							<template #options>
-								<var-menu-option :label = 'mainGame.get_text().deck.new'/>
-								<var-menu-option :label = 'mainGame.get_text().deck.fromcode' />
-								<var-menu-option :label = 'mainGame.get_text().deck.fromurl' />
+								<var-menu-option :label = 'mainGame.get.text().deck.new'/>
+								<var-menu-option :label = 'mainGame.get.text().deck.fromcode' />
+								<var-menu-option :label = 'mainGame.get.text().deck.fromurl' />
 							</template>
 						</var-menu-select>
 					</div>
@@ -93,7 +93,7 @@
 	import Button from '../varlet/button.vue';
 	import DeckPage from './deck.vue';
 
-	let page = reactive({
+	const page = reactive({
 		deck : false,
 		list : true,
 		indeck : () : void => {
@@ -111,14 +111,14 @@
 		}
 	})
 
-	let list = reactive({
+	const list = reactive({
 		card : mainGame.cards,
 		select : -1,
 		decks : [] as Array<Deck>,
 		loading : [] as Array<number>,
 		removing : undefined as { deck : Deck, count : number} | undefined,
 		load : async () : Promise<void> => {
-			const decks = await mainGame.load_deck();
+			const decks = await mainGame.load.deck();
 			list.decks = decks;
 		},
 		selected : async (v : number) : Promise<void> => {
@@ -126,7 +126,7 @@
 				list.select = -1;
 				list.loading.push(v);
 				const deck = list.decks[v];
-				await mainGame.load_pic([...deck.main, ...deck.side, ...deck.extra]);
+				await mainGame.load.pic([...deck.extra, ...deck.main, ...deck.side]);
 				setTimeout(() => {
 					list.select = v;
 					list.loading.splice(list.loading.indexOf(v), 1);
@@ -142,13 +142,13 @@
 			if (list.select <= -1) return;
 			const text = list.decks[list.select].toYGOMobileDeckURL();
 			await writeText(text);
-			toast.info(mainGame.get_text().toast.copy)
+			toast.info(mainGame.get.text().toast.copy)
 		},
 		delete : async () : Promise<void> => {
 			if (list.select <= -1) return;
 			const confirm = async () : Promise<void> => {
 				if (await fs.delete(await join(constant.str.dirs.deck, `${list.decks[list.select].name!}.ydk`))) {
-					toast.info(mainGame.get_text().toast.delete);
+					toast.info(mainGame.get.text().toast.delete);
 					list.removing = { deck : list.decks[list.select], count : list.select};
 					list.select = -1;
 					setTimeout(() => {
@@ -160,8 +160,8 @@
 				}
 			}
 			Dialog({
-				title : mainGame.get_text().deck.delete.title,
-				message : mainGame.get_text().deck.delete.message.replace('{:?}', list.decks[list.select].name ?? ''),
+				title : mainGame.get.text().deck.delete.title,
+				message : mainGame.get.text().deck.delete.message.replace('{:?}', list.decks[list.select].name ?? ''),
 				dialogClass : 'ground_glass',
 				cancelButtonTextColor : 'white',
 				confirmButtonTextColor : 'white',

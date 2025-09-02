@@ -40,7 +40,7 @@
 	const picII : Ref<HTMLElement | null> = ref(null);
 	const body : Ref<HTMLElement | null> = ref(null);
 
-	let position : Reactive<posLike> = reactive({
+	const position : Reactive<posLike> = reactive({
 		bottom : 0,
 		height : 0,
 		left : 0,
@@ -51,12 +51,12 @@
 		y : 0
 	});
 
-	let url = reactive({
+	const url = reactive({
 		I : '',
 		II : ''
 	})
 
-	let animation = reactive({
+	const animation = reactive({
 		on : async () : Promise<void> => {
 			animation.count = animation.count > 0 ? 0 : 1;
 			const kill = async () : Promise<void> => {

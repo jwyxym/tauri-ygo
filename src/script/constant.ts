@@ -45,7 +45,9 @@ class Constant {
 		zip : /\.(ypk|zip)$/i,
 		json : /\.(json)$/i,
 		deck : /\.(ydk)$/i,
-		name : /[\\/:*?"<>|]/
+		name : /[\\/:*?"<>|]/,
+		atk : /^[0-9?\s]*$/,
+		level : /^[0-9 ]*$/,
 	};
 
 	str = {
@@ -64,7 +66,8 @@ class Constant {
 				strings : 'strings.conf',
 				lflist : 'lflist.conf',
 				system : 'system.conf',
-				servers : 'servers.conf'
+				servers : 'servers.conf',
+				info : 'cardinfo.conf'
 			},
 			textures : {
 				unknown : 'unknown'
@@ -76,6 +79,14 @@ class Constant {
 			victory : '!victory',
 			counter : '!counter',
 			setcode : '!setname',
+		},
+		info_conf : {
+			ot : '!ot',
+			attribute : '!attribute',
+			link : '!link',
+			category : '!category',
+			race : '!race',
+			type : '!type'
 		},
 		ini : {
 			name : 'ServerName',

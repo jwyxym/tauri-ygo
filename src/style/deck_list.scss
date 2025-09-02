@@ -3,6 +3,7 @@
 	.deck_list {
 		display: flex;
 		gap: 10px;
+		position: relative;
 		.list {
 			width: 40%;
 			display: flex;
@@ -29,7 +30,6 @@
 						cursor: pointer;
 					}
 					.var-button {
-						font-family: 'text';
 						color: font.$text-color;
 					}
 				}
@@ -63,7 +63,7 @@
 			flex-direction: row-reverse;
 			gap: 10px;
 			right: 10%;
-			bottom: 10%;
+			bottom: 0%;
 		}
 	}
 }
@@ -71,5 +71,4 @@
 .var-menu-option {
 	background-color: transparent !important;
 	// color: font.$text-color !important;
-	font-family: 'text';
 }

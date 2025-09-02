@@ -1,15 +1,9 @@
 $text-color: white;
+$subtext-color: rgb(162, 162, 162);
 
 @font-face {
 	font-family: 'title';
 	src: url('../font/title.ttf');
-	font-weight: normal;
-	font-style: normal;
-}
-
-@font-face {
-	font-family: 'text';
-	src: url('../font/text.woff2') format('woff2');
 	font-weight: normal;
 	font-style: normal;
 }

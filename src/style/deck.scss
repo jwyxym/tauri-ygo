@@ -5,20 +5,30 @@
 	justify-content: center;
 	gap: 0;
 	position: relative;
-	.var-card {
-		--card-background: transparent !important;
-	}
 	.cardinfo {
 		width: calc((100% - 52.5vw - 32px) / 2);
 		.description {
 			color: font.$text-color;
-			font-family: 'text';
 			overflow-y: auto;
 			height: calc(100% - 15.3vw - 32px);
 			width: calc(100% - 10px);
 			font-size: 3vh;
+			white-space: pre-line;
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
 			&::-webkit-scrollbar {
 				display: none;
+			}
+			font-size: 2.5vh;
+			.title {
+				display: grid;
+				.name {
+					font-size: 5vh;
+				}
+			}
+			.content {
+				overflow-wrap: break-word;
 			}
 		}
 	}
@@ -34,6 +44,7 @@
 		}
 		.head {
 			display: flex;
+			align-items: start;
 			gap: 10px;
 			.button_list {
 				display: flex;
@@ -45,22 +56,50 @@
 	.search {
 		width: calc((100% - 52.5vw - 32px) / 2);
 		height: 100%;
+		.button_list {
+			display: flex;
+			gap: 10px;
+		}
 		.var-list {
-			--list-loading-color: font.$text-color !important;
-			--list-finished-color: font.$text-color !important;
-			--list-error-color: font.$text-color !important;
 			color: font.$text-color !important;
-			font-family: 'text';
 			width: 100%;
 			height: 90%;
 			overflow-y: auto;
 			&::-webkit-scrollbar {
 				display: none;
 			}
-			.var-cell {
-				color: font.$text-color !important;
-				font-size: 3vh;
+			.list {
+				display: flex;
+				gap: 10px;
+				.percard {
+					display: grid;
+					color: font.$text-color;
+					width: 50%;
+					overflow: hidden;
+					white-space: nowrap;
+					.title {
+						font-size: 3vh;
+					}
+					.description {
+						color: font.$subtext-color;
+						font-size: 2vh;
+					}
+				}
+				.Button {
+					margin-left: auto;
+				}
 			}
 		}
+	}
+}
+.var-popup {
+	.var-form {
+		width: 50vw;
+		.var-select, .var-input {
+			width: 50%;
+		}
+	}
+	&::-webkit-scrollbar {
+		display: none;
 	}
 }
