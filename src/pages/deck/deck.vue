@@ -33,55 +33,71 @@
 				/>
 				<div class = 'button_list'>
 					<Button @click = 'offdeck' icon_name = 'exit'></Button>
-					<Button @click = 'offdeck' icon_name = 'save'></Button>
+					<Button @click = 'deck.save' icon_name = 'save'></Button>
 				</div>
 			</div>
 			<div
 				class = 'main'
 				ref = 'main'
 			>
-				<div
-					v-for = '(i, v) in deck.main'
-					:data-swapy-slot = '`main_card:${v}:${i}`'
-					class = 'card'
-				>
-					<div :data-swapy-item = '`main_card:${v}:${i}`' @mousedown = 'cardinfo.select(i)'>
-						<img :src = 'deck.get_pic(i)' ref = 'main_card'></img>
+				<TransitionGroup tag = 'div' name = 'opacity'>
+					<div
+						v-for = '(i, v) in deck.main'
+						:data-swapy-slot = '`main_card:${v}:${i}`'
+						class = 'card'
+						:key = 'i'
+						:id = 'i.toString()'
+						@contextmenu = 'deck.remove($event, v, 0)'
+						@dblclick = 'deck.remove($event, v, 0)'
+					>
+							<div :data-swapy-item = '`main_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
+								<img :src = 'deck.get_pic(i)' ref = 'main_card'></img>
+							</div>
 					</div>
-				</div>
+				</TransitionGroup>
 			</div>
 			<div
 				class = 'extra'
 				ref = 'extra'
 			>
-				<div
-					v-for = '(i, v) in deck.extra'
-					:data-swapy-slot = '`extra_card:${v}:${i}`'
-					class = 'card'
-				>
-					<div :data-swapy-item = '`extra_card:${v}:${i}`' @mousedown = 'cardinfo.select(i)'>
-						<img :src = 'deck.get_pic(i)' ref = 'extra_card'></img>
+				<TransitionGroup tag = 'div' name = 'opacity'>
+					<div
+						v-for = '(i, v) in deck.extra'
+						:data-swapy-slot = '`extra_card:${v}:${i}`'
+						class = 'card'
+						:key = 'i'
+						:id = 'i.toString()'
+						@contextmenu = 'deck.remove($event, v, 1)'
+						@dblclick = 'deck.remove($event, v, 1)'
+					>
+							<div :data-swapy-item = '`extra_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
+								<img :src = 'deck.get_pic(i)' ref = 'extra_card'></img>
+							</div>
 					</div>
-				</div>
+				</TransitionGroup>
 			</div>
 			<div
 				class = 'side'
 				ref = 'side'
 			>
-				<div
-					v-for = '(i, v) in deck.side'
-					:data-swapy-slot = '`side_card:${v}:${i}`'
-					class = 'card'
-				>
-					<div :data-swapy-item = '`side_card:${v}:${i}`' @mousedown = 'cardinfo.select(i)'>
-						<img :src = 'deck.get_pic(i)' ref = 'side_card'></img>
+				<TransitionGroup tag = 'div' name = 'opacity'>
+					<div
+						v-for = '(i, v) in deck.side'
+						:data-swapy-slot = '`side_card:${v}:${i}`'
+						class = 'card'
+						:key = 'i'
+						:id = 'i.toString()'
+						@contextmenu = 'deck.remove($event, v, 2)'
+						@dblclick = 'deck.remove($event, v, 2)'
+					>
+							<div :data-swapy-item = '`side_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
+								<img :src = 'deck.get_pic(i)' ref = 'side_card'></img>
+							</div>
 					</div>
-				</div>
+				</TransitionGroup>
 			</div>
 		</div>
-		<div
-			class = 'search'
-		>
+		<div class = 'search'>
 			<Input
 				:placeholder = 'mainGame.get.text().deck.search.name'
 				:variant = 'true'
@@ -99,8 +115,20 @@
 				:immediate-check = 'false'
 			>
 				<div v-for = 'card in search.list' class = 'list'>
-					<img :src = 'card.pic' class = 'card' @click = 'cardinfo.select(card.id)'></img>
-					<div class = 'percard'>
+					<div ref = 'searcher'>
+						<img
+							:src = 'card.pic'
+							:id = 'card.id.toString()'
+							class = 'card'
+							@click = '($event) => {
+								cardinfo.select(card.id);
+								if (!mainGame.is_android())
+									deck.push($event, card, 0);
+							}'
+							@contextmenu = 'deck.push($event, card, 1)'
+						/>
+					</div>
+					<div class = 'card_name'>
 						<div class = 'title'>
 							<span>{{ card.name }}</span>
 						</div>
@@ -108,7 +136,6 @@
 							<span>{{ card.id }}</span>
 						</div>
 					</div>
-					<!-- <Button icon_name = 'deck'></Button> -->
 				</div>
 			</var-list>
 		</div>
@@ -120,6 +147,8 @@
 				<Select name = 'type' v-model = 'search.form.type' :multiple = 'true' :chip = 'true'></Select>
 				<Select name = 'link' v-model = 'search.form.link' :multiple = 'true' :chip = 'true'></Select>
 				<Select name = 'category' v-model = 'search.form.category' :multiple = 'true' :chip = 'true'></Select>
+				<Select name = 'lflist' v-model = 'search.info.lflist'></Select>
+				<Select name = 'forbidden' v-model = 'search.info.forbidden' :multiple = 'true' :chip = 'true' :readonly = 'search.rule.forbidden()'></Select>
 				<Input
 					:placeholder = 'mainGame.get.text().deck.search.atk'
 					:rules = 'search.rule.atk'
@@ -159,14 +188,17 @@
 	import Select from '../varlet/select.vue';
 	import Input from '../varlet/input.vue';
 	import Card, { CardInfo, Search } from '../../script/card';
+	import Deck from '../../script/deck';
 	import toast from '../../script/toast';
+	import fs from '../../script/fs';
+	import gsap from '../../script/gsap';
 
 	const props = defineProps(['this_deck', 'offdeck']);
 
 	const deck = reactive({
-		main : [],
-		extra : [],
-		side : [],
+		main : [] as Array<number>,
+		extra : [] as Array<number>,
+		side : [] as Array<number>,
 		name : '',
 		get_pic : (card : number) : string => {
 			const pic = mainGame.cards.get(card)?.pic;
@@ -175,9 +207,82 @@
 		name_rule : async (name : string) : Promise<string | boolean> => {
 			if (name.match(constant.reg.name))
 				return mainGame.get.text().deck.rule.name.unlawful;
-			if ((await mainGame.load.deck()).filter(i => i.name === name).length > 0 && props.this_deck ? props.this_deck.name !== name : true)
+			if ((await mainGame.load.deck()).filter(i => i.name === name).length > 0 && (props.this_deck ? props.this_deck.name !== name : true))
 				return mainGame.get.text().deck.rule.name.exist;
 			return true;
+		},
+		get_dom : (v : number, show_all : boolean = true) : Array<HTMLElement> => {
+			const get = () : Array<HTMLElement> => {
+				switch (v) {
+					case 0:
+						return Array.from(main.value!.children[0].children) as Array<HTMLElement>;
+					case 1:
+						return Array.from(extra.value!.children[0].children) as Array<HTMLElement>;
+					case 2:
+						return Array.from(side.value!.children[0].children) as Array<HTMLElement>;
+				}
+				return [];
+			}
+			return show_all ? get() : get().filter(i => i.style.display !== 'none');
+		},
+		save : async () : Promise<void> => {
+			if (typeof await deck.name_rule(deck.name) == 'boolean') {
+				let main_deck : Array<number>;
+				let extra_deck : Array<number>;
+				let side_deck : Array<number>;
+				if (mainGame.is_android()) {
+					main_deck = deck.get_dom(0, false).map(i => parseInt(i.id));
+					extra_deck = deck.get_dom(1, false).map(i => parseInt(i.id));
+					side_deck = deck.get_dom(2, false).map(i => parseInt(i.id));
+				} else {
+					main_deck = deck.get_dom(0, false).map(i => parseInt(i.children[0].id));
+					extra_deck = deck.get_dom(1, false).map(i => parseInt(i.children[0].id));
+					side_deck = deck.get_dom(2, false).map(i => parseInt(i.children[0].id));
+				}
+				const write_Deck = new Deck({
+					main : main_deck,
+					extra : extra_deck,
+					side : side_deck,
+					name : deck.name
+				});
+				const write = await fs.write.ydk(props.this_deck.name, write_Deck);
+				let rename = true;
+				if (write && deck.name !== props.this_deck.name) {
+					rename = await fs.rename.ydk(props.this_deck.name, deck.name);
+				}
+				if (write && rename)
+					toast.info(mainGame.get.text().toast.deck.save);
+			}
+		},
+		push : (event: MouseEvent, card : Card, to_deck : number) : void => {
+			event.preventDefault();
+			if (mainGame.is_android()) return;
+			switch(to_deck) {
+				case 0:
+					if (card.is_ex()) {
+						deck.extra.push(card.id);
+					} else {
+						deck.main.push(card.id);
+					}
+					break;
+				case 1:
+					deck.side.push(card.id);
+					break;
+			}
+		},
+		remove : async (event: MouseEvent, v : number, from_deck : number) : Promise<void> => {
+			event.preventDefault();
+			const el = deck.get_dom(from_deck)[v];
+			const class_name = `${from_deck}:${v}:${el.children[0].id}`;
+			el.classList.add(class_name);
+			const card = {
+				element : el,
+				selector : el
+			}
+			const complete = () : void => {
+				card.element.style.display = 'none';
+			}
+			gsap.leave(card, complete);
 		}
 	})
 
@@ -229,7 +334,7 @@
 			ot : [] as Array<number>,
 			type : [] as Array<number>,
 			link : [] as Array<number>,
-			category : [] as Array<number>,
+			category : [] as Array<number>
 		},
 		rule : {
 			atk : (atk : string) : string | boolean => {
@@ -241,6 +346,9 @@
 				if (!lv.match(constant.reg.level))
 					return mainGame.get.text().deck.rule.level.unlawful;
 				return true;
+			},
+			forbidden : () : boolean => {
+				return search.info.lflist === undefined || search.info.lflist === '';
 			}
 		},
 		info : {
@@ -256,7 +364,9 @@
 			attribute : 0,
 			category : 0,
 			setcode : 0,
-			desc : ''
+			desc : '',
+			forbidden : [],
+			lflist : ''
 		} as Search,
 		in_setting : () : void => {
 			search.show_setting = true;
@@ -302,7 +412,14 @@
 		main : undefined as Swapy | undefined,
 		extra : undefined as Swapy | undefined,
 		side : undefined as Swapy | undefined,
-		search : undefined as Swapy | undefined
+		search : undefined as Swapy | undefined,
+		create : (el : HTMLElement) : Swapy => {
+			const s = createSwapy(el, {
+				animation : 'dynamic'
+			});
+			s.enable(true);
+			return s;
+		}
 	}
 
 	const info : Ref<HTMLElement | null> = ref(null);
@@ -310,6 +427,7 @@
 	const main : Ref<HTMLElement | null> = ref(null);
 	const extra : Ref<HTMLElement | null> = ref(null);
 	const side : Ref<HTMLElement | null> = ref(null);
+	const searcher : Ref<Array<HTMLElement> | null> = ref(null);
 	const main_card : Ref<Array<HTMLElement> | null> = ref(null);
 	const extra_card : Ref<Array<HTMLElement> | null> = ref(null);
 	const side_card : Ref<Array<HTMLElement> | null> = ref(null);
@@ -324,15 +442,47 @@
 		await search.on();
 	});
 
+	interface SortableEvent {
+		dragged: HTMLElement;
+		draggedRect: DOMRect;
+		related: HTMLElement | null;
+		relatedRect: DOMRect | null;
+		to: HTMLElement;
+		from: HTMLElement;
+		item: HTMLElement;
+		clone: HTMLElement | null;
+		oldIndex: number;
+		newIndex: number;
+		pullMode?: string;
+		willInsertAfter?: boolean;
+	}
+
+	const sortable = {
+		move : (evt : SortableEvent) => {
+			if (evt.to.classList.contains('side')) {
+				return true;
+			}
+			const card = mainGame.cards.get(Number(evt.dragged.id));
+			if (card && card.is_ex() && evt.to.classList.contains('extra'))
+				return true;
+			else if (card && !card.is_ex() && evt.to.classList.contains('main'))
+				return true;
+			return false;
+		},
+		array : [] as Array<HTMLElement>
+	};
+
 	onMounted(() : void => {
-		if (mainGame.is_android())
+		if (mainGame.is_android()) {
 			for (const i of [main, extra, side]) {
-				if (i.value === null) continue;
 				Sortable.create(i.value, {
 					animation : 150,
 					draggable : '.card',
+					group : 'deck',
+					onMove : sortable.move
 				})
 			}
+		}
 	})
 
 	watch(() => { return search.form.ot; }, (n) => {
@@ -347,30 +497,52 @@
 	watch(() => { return search.form.category; }, (n) => {
 		search.info.category = (n ?? []).reduce((a, b) => a + b, 0);
 	});
+	watch(() => { return search.info.lflist; }, () => {
+		if (search.rule.forbidden())
+			search.info.forbidden = [];
+	});
 
-	if (!mainGame.is_android())
+	if (mainGame.is_android()) {
+		watch(searcher, (n) => {
+			n?.forEach(i => {
+				if (!sortable.array.includes(i)) {
+					Sortable.create(i, {
+						animation : 150,
+						draggable : '.card',
+						group: {
+							name : 'deck',
+							pull : 'clone',
+							put : false
+						},
+						sort : false,
+						onMove : sortable.move
+					});
+					sortable.array.push(i);
+				}
+			});
+		}, { deep : true });
+	} else {
 		for (const i of [
 			{ array : main_card, swapy : swapy.main, element : main},
 			{ array : extra_card, swapy : swapy.extra, element : extra},
 			{ array : side_card, swapy : swapy.side, element : side}
-		])
+		]) {
 			watch(() => { return i.array; }, () => {
 				if (i.element.value === null) return;
-				if (i.swapy === undefined) {
-					i.swapy = createSwapy(i.element.value, {
-						animation : 'dynamic'
-					});
-					i.swapy.enable(true);
-				} else {
+				if (i.swapy === undefined)
+					i.swapy = swapy.create(i.element.value);
+				else
 					i.swapy.update();
-				}
 			}, { deep : true });
+		}
+	}
 
 </script>
 <style scoped lang = 'scss'>
 	@use '../../style/deck.scss';
 	@use '../../style/ground_glass.scss';
 	@use '../../style/card.scss';
+	@use '../../style/transition.scss';
 	.var-card {
 		background-color: transparent;
 	}

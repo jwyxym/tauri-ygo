@@ -31,7 +31,7 @@ class Position {
 	get = (element : HTMLElement) : posLike => {
 		try {
 			// @ts-ignore
-			const p : posLike = element.$el.getBoundingClientRect();
+			const p : posLike = element.$el !== undefined ? element.$el.getBoundingClientRect() : element.getBoundingClientRect();
 			return p;
 		} catch (error) {
 			fs.write.log(error);

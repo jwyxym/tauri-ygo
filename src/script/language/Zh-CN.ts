@@ -25,7 +25,15 @@ const Zh_CN : textLike = {
 			atk : '攻击力',
 			def : '守备力',
 			level : '等级/阶级/连接数',
-			scale : '灵摆刻度'
+			scale : '灵摆刻度',
+			forbidden : '禁限',
+			lflist : '禁卡表'
+		},
+		lflist : {
+			forbidden : '禁止',
+			limit : '限制',
+			semi_limit : '准限制',
+			unlimit : '无限制'
 		},
 		delete : {
 			title : '确定要删除卡组吗',
@@ -46,10 +54,15 @@ const Zh_CN : textLike = {
 		}
 	},
 	toast : {
-		copy : '已复制到粘贴板',
-		delete : '删除成功',
+		deck_list : {
+			copy : '已复制到粘贴板',
+			delete : '删除成功'
+		},
 		error : {
 			search : '搜索词不合规'
+		},
+		deck : {
+			save : '保存成功'
 		}
 	}
 }

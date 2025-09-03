@@ -71,10 +71,10 @@
 			.list {
 				display: flex;
 				gap: 10px;
-				.percard {
+				.card_name {
 					display: grid;
 					color: font.$text-color;
-					width: 50%;
+					width: 100%;
 					overflow: hidden;
 					white-space: nowrap;
 					.title {
@@ -84,9 +84,6 @@
 						color: font.$subtext-color;
 						font-size: 2vh;
 					}
-				}
-				.Button {
-					margin-left: auto;
 				}
 			}
 		}

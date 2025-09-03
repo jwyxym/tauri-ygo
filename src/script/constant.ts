@@ -8,8 +8,8 @@ class System {
 		this.system = platform();
 	};
 
-	baseDir = () : fs.ReadFileOptions => {
-		return { baseDir: this.system == 'android' ? fs.BaseDirectory.Public : fs.BaseDirectory.Resource };
+	baseDir = () : number => {
+		return this.system == 'android' ? fs.BaseDirectory.Public : fs.BaseDirectory.Resource;
 	};
 
 	basePath = async () : Promise<string> => {

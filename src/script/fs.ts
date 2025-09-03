@@ -10,10 +10,16 @@ import toast from './toast';
 class Fs {
 	dir : fs.ReadFileOptions;
 	path : Promise<string>;
+	rename_dir : fs.RenameOptions;
 
 	constructor () {
-		this.dir = constant.system.baseDir();
+		const base_dir = constant.system.baseDir() 
+		this.dir = { baseDir: base_dir };
 		this.path = constant.system.basePath();
+		this.rename_dir = {
+			oldPathBaseDir : base_dir,
+			newPathBaseDir : base_dir
+		}
 	};
 
 	exists = async (file : string) : Promise<boolean> => {
@@ -43,7 +49,7 @@ class Fs {
 				const p = await path.join(constant.str.dirs.cache, constant.str.files.database)
 				if (await(this.write.file(p, file))) {
 					const result : Array<Array<string | number>> | undefined = await this.read.database(p);
-					await(this.delete(p));
+					await(this.delete.file(p));
 					return result;
 				}
 			} catch (error) {
@@ -109,12 +115,18 @@ class Fs {
 			}
 			return undefined;
 		},
-		dir : async (dir : string) : Promise<Array<fs.DirEntry> | undefined> => {
+		dir : async (dir : string, full_path : boolean = true, extension : boolean = true) : Promise<Array<fs.DirEntry> | undefined> => {
 			try {
 				let result : Array<fs.DirEntry> = await fs.readDir(dir, this.dir);
-				for (const i of result) {
-					i.name = await path.join(dir, i.name)
-				}
+				if (full_path)
+					for (const i of result) {
+						i.name = await path.join(dir, i.name)
+					}
+				if (!extension)
+					for (const i of result) {
+						const name = i.name;
+						i.name = name.split('.')[0];
+					}
 				return result;
 			} catch (error) {
 				this.write.log(error);
@@ -156,7 +168,7 @@ class Fs {
 		},
 		ydk : async (file : string, ydk : Deck) : Promise<boolean> => {
 			try {
-				await fs.writeTextFile(file, ydk.toYdkString(), this.dir);
+				await fs.writeTextFile(await path.join(constant.str.dirs.deck, `${file}.ydk`), ydk.toYdkString(), this.dir);
 				return true;
 			} catch (error) {
 				this.write.log(error);
@@ -195,15 +207,49 @@ class Fs {
 			return false;
 		},
 	};
-	delete = async (file : string) : Promise<boolean> => {
-		try {
-			await fs.remove(file, this.dir);
-			return true;
-		} catch (error) {
-			this.write.log(error);
-		}
-		return false;
-	}
+	delete = {
+		file : async (file : string) : Promise<boolean> => {
+			try {
+				await fs.remove(file, this.dir);
+				return true;
+			} catch (error) {
+				this.write.log(error);
+			}
+			return false;
+		},
+		ydk : async (file : string) : Promise<boolean> => {
+			try {
+				await this.delete.file(await path.join(constant.str.dirs.deck, `${file}.ydk`));
+				return true;
+			} catch (error) {
+				this.write.log(error);
+			}
+			return false;
+		},
+	};
+	rename = {
+		file : async (old_path : string, new_path : string) : Promise<boolean> => {
+			try {
+				await fs.rename(old_path, new_path, this.rename_dir);
+				return true;
+			} catch (error) {
+				this.write.log(error);
+			}
+			return false;
+		},
+		ydk : async (old_path : string, new_path : string) : Promise<boolean> => {
+			try {
+				await this.rename.file(
+					await path.join(constant.str.dirs.deck, `${old_path}.ydk`),
+					await path.join(constant.str.dirs.deck, `${new_path}.ydk`)
+				);
+				return true;
+			} catch (error) {
+				this.write.log(error);
+			}
+			return false;
+		},
+	};
 }
 
 export default new Fs();

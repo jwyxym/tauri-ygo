@@ -30,6 +30,8 @@ interface Search {
 	category ?: number;
 	setcode ?: number;
 	desc ?: string;
+	forbidden ?: Array<number>;
+	lflist ?: string;
 }
 
 class Card {
@@ -150,6 +152,10 @@ class Card {
 
 	is_monster = () : boolean => {
 		return (this.type & 0x1) === 0x1;
+	}
+
+	is_ex = () : boolean => {
+		return (this.type & 0x4802040) > 0;
 	}
 }
 

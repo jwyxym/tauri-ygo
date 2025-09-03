@@ -4,7 +4,7 @@ import pos, { posLike } from './position';
 
 interface gsapElement {
 	element : HTMLElement;
-	selector : string;
+	selector : string | HTMLElement;
 	angle ?: number;
 };
 
@@ -18,7 +18,7 @@ class Gsap {
 		const p2 = pos.get(defender.element)
 		const angle = pos.angle(p1, p2);
 		const radians = angle * Math.PI / 180;
-		let tl = this.timeline();
+		const tl = this.timeline();
 		if (attacker.angle !== undefined)
 			tl.to(attacker.selector, {
 				rotation : attacker.angle,
@@ -70,6 +70,23 @@ class Gsap {
 
 		return tl;
 	};
+
+	leave = (card : gsapElement, complete : Function = () => {}) : gsap.core.Timeline => {
+		const p = pos.get(card.element)
+		console.log(p)
+		const tl = this.timeline();
+		tl.to(card.element, {
+			x : '+=50vw',
+			y : '-=50vh',
+			duration : 0.5,
+		});
+		tl.to(card.element, {
+			opacity: 0,
+			duration : 0.3,
+			onComplete: () => { complete(); }
+		}, 0.2);
+		return tl;
+	}
 };
 
 export default new Gsap();

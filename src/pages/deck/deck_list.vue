@@ -81,7 +81,6 @@
 <script setup lang='ts'>
 	import { ref, reactive, onMounted, onUnmounted, Ref, watch, onBeforeMount } from 'vue';
 	import { writeText } from '@tauri-apps/plugin-clipboard-manager'
-	import { join } from '@tauri-apps/api/path';
 	import { Dialog } from '@varlet/ui'
 
 	import mainGame from '../../script/game';
@@ -142,13 +141,13 @@
 			if (list.select <= -1) return;
 			const text = list.decks[list.select].toYGOMobileDeckURL();
 			await writeText(text);
-			toast.info(mainGame.get.text().toast.copy)
+			toast.info(mainGame.get.text().toast.deck_list.copy)
 		},
 		delete : async () : Promise<void> => {
 			if (list.select <= -1) return;
 			const confirm = async () : Promise<void> => {
-				if (await fs.delete(await join(constant.str.dirs.deck, `${list.decks[list.select].name!}.ydk`))) {
-					toast.info(mainGame.get.text().toast.delete);
+				if (await fs.delete.ydk(list.decks[list.select].name!)) {
+					toast.info(mainGame.get.text().toast.deck_list.delete);
 					list.removing = { deck : list.decks[list.select], count : list.select};
 					list.select = -1;
 					setTimeout(() => {

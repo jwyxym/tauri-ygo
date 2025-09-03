@@ -404,8 +404,14 @@ class Game {
 			const atk = search.atk?.split(' ') ?? [];
 			const def = search.def?.split(' ') ?? [];
 			const link = search.link === undefined ? 0 : search.link;
-			
+			const lflist = search.lflist !== undefined && this.lflist.has(search.lflist) ? this.lflist.get(search.lflist)! : new Map;
+			const forbidden = search.forbidden ?? [];
 			const filter = (card : Card) : boolean => {
+				if (forbidden.length > 0) {
+					const ct = lflist.get(card.id);
+					if (ct === undefined ? !forbidden.includes(3) : !forbidden.includes(ct))
+						return false;
+				}
 				if ((search.desc ?? '').length > 0) {
 					for (const i of desc) {
 						const id = Number(i);
