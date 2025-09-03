@@ -40,15 +40,15 @@
 				class = 'main'
 				ref = 'main'
 			>
-				<TransitionGroup tag = 'div' name = 'opacity'>
+				<TransitionGroup tag = 'div' name = 'opacity' class = 'deck_main'>
 					<div
 						v-for = '(i, v) in deck.main'
 						:data-swapy-slot = '`main_card:${v}:${i}`'
 						class = 'card'
 						:key = 'i'
 						:id = 'i.toString()'
-						@contextmenu = 'deck.remove($event, v, 0)'
 						@dblclick = 'deck.remove($event, v, 0)'
+						@contextmenu = 'deck.remove($event, v, 0)'
 					>
 							<div :data-swapy-item = '`main_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
 								<img :src = 'deck.get_pic(i)' ref = 'main_card'></img>
@@ -60,15 +60,15 @@
 				class = 'extra'
 				ref = 'extra'
 			>
-				<TransitionGroup tag = 'div' name = 'opacity'>
+				<TransitionGroup tag = 'div' name = 'opacity' class = 'deck_extra'>
 					<div
 						v-for = '(i, v) in deck.extra'
 						:data-swapy-slot = '`extra_card:${v}:${i}`'
 						class = 'card'
 						:key = 'i'
 						:id = 'i.toString()'
-						@contextmenu = 'deck.remove($event, v, 1)'
 						@dblclick = 'deck.remove($event, v, 1)'
+						@contextmenu = 'deck.remove($event, v, 1)'
 					>
 							<div :data-swapy-item = '`extra_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
 								<img :src = 'deck.get_pic(i)' ref = 'extra_card'></img>
@@ -80,15 +80,15 @@
 				class = 'side'
 				ref = 'side'
 			>
-				<TransitionGroup tag = 'div' name = 'opacity'>
+				<TransitionGroup tag = 'div' name = 'opacity' class = 'deck_side'>
 					<div
 						v-for = '(i, v) in deck.side'
 						:data-swapy-slot = '`side_card:${v}:${i}`'
 						class = 'card'
 						:key = 'i'
 						:id = 'i.toString()'
-						@contextmenu = 'deck.remove($event, v, 2)'
 						@dblclick = 'deck.remove($event, v, 2)'
+						@contextmenu = 'deck.remove($event, v, 2)'
 					>
 							<div :data-swapy-item = '`side_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
 								<img :src = 'deck.get_pic(i)' ref = 'side_card'></img>
@@ -256,7 +256,6 @@
 		},
 		push : (event: MouseEvent, card : Card, to_deck : number) : void => {
 			event.preventDefault();
-			if (mainGame.is_android()) return;
 			switch(to_deck) {
 				case 0:
 					if (card.is_ex()) {
@@ -422,6 +421,37 @@
 		}
 	}
 
+
+	interface SortableEvent {
+		dragged: HTMLElement;
+		draggedRect: DOMRect;
+		related: HTMLElement | null;
+		relatedRect: DOMRect | null;
+		to: HTMLElement;
+		from: HTMLElement;
+		item: HTMLElement;
+		clone: HTMLElement | null;
+		oldIndex: number;
+		newIndex: number;
+		pullMode?: string;
+		willInsertAfter?: boolean;
+	}
+
+	const sortable = {
+		move : (evt : SortableEvent) => {
+			if (evt.to.classList.contains('deck_side')) {
+				return true;
+			}
+			const card = mainGame.cards.get(Number(evt.dragged.id));
+			if (card && card.is_ex() && evt.to.classList.contains('deck_extra'))
+				return true;
+			else if (card && !card.is_ex() && evt.to.classList.contains('deck_main'))
+				return true;
+			return false;
+		},
+		array : [] as Array<HTMLElement>
+	};
+
 	const info : Ref<HTMLElement | null> = ref(null);
 	const card : Ref<HTMLElement | null> = ref(null);
 	const main : Ref<HTMLElement | null> = ref(null);
@@ -442,40 +472,11 @@
 		await search.on();
 	});
 
-	interface SortableEvent {
-		dragged: HTMLElement;
-		draggedRect: DOMRect;
-		related: HTMLElement | null;
-		relatedRect: DOMRect | null;
-		to: HTMLElement;
-		from: HTMLElement;
-		item: HTMLElement;
-		clone: HTMLElement | null;
-		oldIndex: number;
-		newIndex: number;
-		pullMode?: string;
-		willInsertAfter?: boolean;
-	}
-
-	const sortable = {
-		move : (evt : SortableEvent) => {
-			if (evt.to.classList.contains('side')) {
-				return true;
-			}
-			const card = mainGame.cards.get(Number(evt.dragged.id));
-			if (card && card.is_ex() && evt.to.classList.contains('extra'))
-				return true;
-			else if (card && !card.is_ex() && evt.to.classList.contains('main'))
-				return true;
-			return false;
-		},
-		array : [] as Array<HTMLElement>
-	};
-
 	onMounted(() : void => {
+		try {
 		if (mainGame.is_android()) {
 			for (const i of [main, extra, side]) {
-				Sortable.create(i.value, {
+				Sortable.create(i.value!.children[0], {
 					animation : 150,
 					draggable : '.card',
 					group : 'deck',
@@ -483,6 +484,9 @@
 				})
 			}
 		}
+	} catch (e) {
+		cardinfo.subtitle.level += e
+	}
 	})
 
 	watch(() => { return search.form.ot; }, (n) => {
