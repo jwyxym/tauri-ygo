@@ -282,7 +282,7 @@
 			}
 			if (!el.classList.contains('card')) return;
 			Dialog({
-				message : mainGame.get.text().deck.remove.replace('{:?}', mainGame.cards.get(parseInt(el.children[0].id))?.name ?? ''),
+				title : mainGame.get.text().deck.remove.replace('{:?}', mainGame.cards.get(parseInt(el.children[0].id))?.name ?? ''),
 				dialogClass : 'dialog',
 				cancelButtonTextColor : 'white',
 				confirmButtonTextColor : 'white',
@@ -298,7 +298,7 @@
 		},
 		exit : async () : Promise<void> => {
 			Dialog({
-				message : mainGame.get.text().deck.exit,
+				title : mainGame.get.text().deck.exit,
 				dialogClass : 'dialog',
 				cancelButtonTextColor : 'white',
 				confirmButtonTextColor : 'white',

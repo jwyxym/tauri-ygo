@@ -226,7 +226,7 @@
 			Dialog({
 				title : mainGame.get.text().deck.delete.title,
 				message : mainGame.get.text().deck.delete.message.replace('{:?}', list.decks[list.select].name ?? ''),
-				dialogClass : 'ground_glass',
+				dialogClass : 'dialog',
 				cancelButtonTextColor : 'white',
 				confirmButtonTextColor : 'white',
 				onConfirm : confirm
