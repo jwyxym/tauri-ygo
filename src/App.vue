@@ -95,19 +95,21 @@
 			cursor: pointer;
 		}
 	}
-	.dialog {
-		color: font.$text-color;
+	.dialog, .var-menu-option {
+		color: font.$text-color !important;
 		border: 1px solid white;
 	}
 	:root {
 		--card-background: transparent !important;
 		--dialog-background: transparent !important;
 		--popup-content-background-color: transparent !important;
+		--menu-select-menu-background-color: rgba(0, 0, 0, 0.6) !important;
 		--dialog-message-color: font.$text-color !important;
 		--dialog-title-color: font.$text-color !important;
 		--list-loading-color: font.$text-color !important;
 		--list-finished-color: font.$text-color !important;
 		--list-error-color: font.$text-color !important;
 		--checkbox-text-color: font.$text-color !important;
+		--menu-option-text-color: font.$text-color !important;
 	}
 </style>

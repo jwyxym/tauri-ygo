@@ -196,7 +196,7 @@ class Game {
 					const ydk : Deck | undefined = await fs.read.ydk(i.name);
 					const name = i.name.match(constant.reg.get_name) ?? [];
 					if (name.length >= 2 && ydk !== undefined) {
-						ydk.push_name(name[1])
+						ydk.push_name(name[1]);
 						decks.push(ydk);
 					}
 				}

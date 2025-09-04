@@ -170,10 +170,6 @@
 					v-model = 'search.info.scale'
 				/>
 			</var-form>
-			<br/>
-			<div>
-				<!-- <Button icon_name = 'exit' @click = 'search.off_setting'></Button> -->
-			</div>
 		</var-popup>
 	</div>
 </template>
@@ -205,7 +201,9 @@
 			const pic = mainGame.cards.get(card)?.pic;
 			return (pic ?? mainGame.textures.get(constant.str.files.textures.unknown)) ?? '';
 		},
-		name_rule : async (name : string) : Promise<string | boolean> => {
+		name_rule : async (name : string | undefined) : Promise<string | boolean> => {
+			if (name === undefined || name.length === 0)
+				return mainGame.get.text().deck.rule.name.length;
 			if (name.match(constant.reg.name))
 				return mainGame.get.text().deck.rule.name.unlawful;
 			if ((await mainGame.load.deck()).filter(i => i.name === name).length > 0 && (props.this_deck ? props.this_deck.name !== name : true))
@@ -227,7 +225,8 @@
 			return show_all ? get() : get().filter(i => i.style.display !== 'none');
 		},
 		save : async () : Promise<void> => {
-			if (typeof await deck.name_rule(deck.name) == 'boolean') {
+			const rule = await deck.name_rule(deck.name);
+			if (typeof rule == 'boolean') {
 				let main_deck : Array<number>;
 				let extra_deck : Array<number>;
 				let side_deck : Array<number>;
@@ -253,6 +252,8 @@
 				}
 				if (write && rename)
 					toast.info(mainGame.get.text().toast.deck.save);
+			} else {
+				toast.error(rule);
 			}
 		},
 		push : (event: MouseEvent, card : Card, to_deck : number) : void => {

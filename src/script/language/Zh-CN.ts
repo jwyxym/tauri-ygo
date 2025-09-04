@@ -10,8 +10,8 @@ const Zh_CN : textLike = {
 	],
 	deck : {
 		new : '新建卡组',
-		fromurl : '从url导入',
-		fromcode : '从卡组码导入',
+		from_url : '从url导入',
+		from_code : '从卡组码导入',
 		name : '卡组名称',
 		info : 'Tauri-YGO',
 		exit : '确认要退出吗？',
@@ -44,7 +44,8 @@ const Zh_CN : textLike = {
 		rule : {
 			name : {
 				exist : '卡组已存在',
-				unlawful : '文件名非法'
+				unlawful : '文件名非法',
+				length : '文件名不可为空'
 			},
 			atk : {
 				unlawful : '只允许包含数字和?'
@@ -61,7 +62,11 @@ const Zh_CN : textLike = {
 			delete : '删除成功'
 		},
 		error : {
-			search : '搜索词不合规'
+			search : '搜索词不合规',
+			ydk : {
+				from_url : '从url转换到卡组失败',
+				from_code : '从卡组码转换到卡组失败'
+			}
 		},
 		deck : {
 			save : '保存成功'

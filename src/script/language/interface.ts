@@ -2,10 +2,12 @@ interface textLike {
 	menu : Array<string>;
 	deck : {
 		new : string;
-		fromurl : string;
-		fromcode : string;
+		from_url : string;
+		from_code : string;
 		name : string;
 		info : string;
+		exit : string;
+		remove : string;
 		search : {
 			name : string;
 			link : string;
@@ -35,6 +37,7 @@ interface textLike {
 			name : {
 				exist : string;
 				unlawful : string;
+				length : string;
 			};
 			atk : {
 				unlawful : string;
@@ -51,6 +54,10 @@ interface textLike {
 		}
 		error : {
 			search : string;
+			ydk : {
+				from_url : string;
+				from_code : string;
+			}
 		}
 		deck : {
 			save : string;

@@ -5,12 +5,12 @@
 				<div class = 'list'>
 					<div class = 'button_list'>
 						<Button @click = 'select.menu' icon_name = 'exit'></Button>
-						<var-menu-select>
+						<var-menu-select @select = 'list.add'>
 							<Button icon_name = 'add'></Button>
 							<template #options>
 								<var-menu-option :label = 'mainGame.get.text().deck.new'/>
-								<var-menu-option :label = 'mainGame.get.text().deck.fromcode' />
-								<var-menu-option :label = 'mainGame.get.text().deck.fromurl' />
+								<var-menu-option :label = 'mainGame.get.text().deck.from_code' />
+								<var-menu-option :label = 'mainGame.get.text().deck.from_url' />
 							</template>
 						</var-menu-select>
 					</div>
@@ -68,14 +68,38 @@
 					>
 						<Button @click = 'list.copy' icon_name = 'share'></Button>
 						<Button @click = 'list.delete' icon_name = 'delete'></Button>
-						<Button @click = 'page.indeck' icon_name = 'deck'></Button>
+						<Button @click = 'page.indeck(list.decks[list.select])' icon_name = 'deck'></Button>
 					</div>
 				</transition>
 			</div>
 		</transition>
 		<transition name = 'opacity'>
-			<DeckPage v-if = 'page.deck' :this_deck = 'list.decks[list.select]' :offdeck = 'page.offdeck'></DeckPage>
+			<DeckPage v-if = 'page.deck' :this_deck = 'page.this_deck' :offdeck = 'page.offdeck'></DeckPage>
 		</transition>
+		<var-popup v-model:show = 'page.popup.code.show' position = 'center' :close-on-click-overlay = 'false'>
+			<var-form>
+				<Input
+					:placeholder = 'mainGame.get.text().deck.from_code'
+					v-model = 'page.popup.code.input'
+				/>
+				<div class = 'button_list'>
+					<Button @click = 'page.popup.code.confirm' icon_name = 'confirm'></Button>
+					<Button @click = 'page.popup.code.cancel' icon_name = 'cancel'></Button>
+				</div>
+			</var-form>
+		</var-popup>
+		<var-popup v-model:show = 'page.popup.url.show' position = 'center' :close-on-click-overlay = 'false'>
+			<var-form>
+				<Input
+					:placeholder = 'mainGame.get.text().deck.from_url'
+					v-model = 'page.popup.url.input'
+				/>
+				<div class = 'button_list'>
+					<Button @click = 'page.popup.url.confirm' icon_name = 'confirm'></Button>
+					<Button @click = 'page.popup.url.cancel' icon_name = 'cancel'></Button>
+				</div>
+			</var-form>
+		</var-popup>
 	</div>
 </template>
 <script setup lang='ts'>
@@ -91,22 +115,60 @@
 
 	import Button from '../varlet/button.vue';
 	import DeckPage from './deck.vue';
+	import Input from '../varlet/input.vue';
 
 	const page = reactive({
 		deck : false,
 		list : true,
-		indeck : () : void => {
+		this_deck : undefined as undefined | Deck,
+		indeck : (deck : Deck) : void => {
+			page.this_deck = deck;
 			page.list = false;
 			setTimeout(() => {
+				list.select = -1;
 				page.deck = true;
 			}, 400)
 		},
 		offdeck : async () : Promise<void> => {
 			page.deck = false;
+			page.this_deck = undefined;
 			await list.load();
 			setTimeout(() => {
 				page.list = true;
 			}, 400)
+		},
+		popup : {
+			code : {
+				show : false,
+				input : '',
+				confirm : () : void => {
+					page.indeck(Deck.fromYdkString(page.popup.code.input));
+					page.popup.code.exit();
+				},
+				cancel : () : void => {
+					page.popup.code.exit();
+				},
+				exit : () : void => {
+					page.popup.code.show = false;
+					page.popup.code.input = '';
+				}
+			},
+			url : {
+				show : false,
+				input : '',
+				confirm : () : void => {
+					const deck = Deck.fromYGOMobileDeckURL(page.popup.url.input)
+					page.indeck(deck);
+					page.popup.url.exit();
+				},
+				cancel : () : void => {
+					page.popup.url.exit();
+				},
+				exit : () : void => {
+					page.popup.url.show = false;
+					page.popup.url.input = '';
+				}
+			}
 		}
 	})
 
@@ -166,6 +228,24 @@
 				confirmButtonTextColor : 'white',
 				onConfirm : confirm
 			});
+		},
+		add : (value : string) => {
+			switch (value) {
+				case mainGame.get.text().deck.new:
+					page.indeck(new Deck({
+						main : [],
+						side : [],
+						extra : [],
+						name : ''
+					}));
+					break;
+				case mainGame.get.text().deck.from_code:
+					page.popup.code.show = true;
+					break;
+				case mainGame.get.text().deck.from_url:
+					page.popup.url.show = true;
+					break;
+			}
 		}
 	});
 
