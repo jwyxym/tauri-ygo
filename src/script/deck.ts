@@ -3,12 +3,17 @@ import fs from './fs';
 import mainGame from './game';
 
 class Deck extends YGOProDeck {
+	import = false;
 	constructor(init: Partial<YGOProDeckLike> = {}) {
 		super(init);
 	};
 
-	push_name (name : string) {
+	push_name = (name : string) : void => {
 		this.name = name;
+	}
+
+	is_imported = () : void => {
+		this.import = true;
 	}
 
 	toYdkString () {
@@ -57,7 +62,8 @@ class Deck extends YGOProDeck {
 			return new Deck({
 				main : deck.main,
 				side : deck.side,
-				extra : deck.extra
+				extra : deck.extra,
+				name : deck.name
 			})
 		} catch (e) {
 			fs.write.log(mainGame.get.text().toast.error.ydk.from_url)

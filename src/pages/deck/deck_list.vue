@@ -142,7 +142,9 @@
 				show : false,
 				input : '',
 				confirm : () : void => {
-					page.indeck(Deck.fromYdkString(page.popup.code.input));
+					const deck = Deck.fromYdkString(page.popup.code.input);
+					deck.is_imported();
+					page.indeck(deck);
 					page.popup.code.exit();
 				},
 				cancel : () : void => {
@@ -157,7 +159,8 @@
 				show : false,
 				input : '',
 				confirm : () : void => {
-					const deck = Deck.fromYGOMobileDeckURL(page.popup.url.input)
+					const deck = Deck.fromYGOMobileDeckURL(page.popup.url.input);
+					deck.is_imported();
 					page.indeck(deck);
 					page.popup.url.exit();
 				},

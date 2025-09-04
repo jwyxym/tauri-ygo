@@ -206,7 +206,7 @@
 				return mainGame.get.text().deck.rule.name.length;
 			if (name.match(constant.reg.name))
 				return mainGame.get.text().deck.rule.name.unlawful;
-			if ((await mainGame.load.deck()).filter(i => i.name === name).length > 0 && (props.this_deck ? props.this_deck.name !== name : true))
+			if ((await mainGame.load.deck()).filter(i => i.name === name).length > 0 && (props.this_deck && !props.this_deck.import ? props.this_deck.name !== name : true))
 				return mainGame.get.text().deck.rule.name.exist;
 			return true;
 		},
