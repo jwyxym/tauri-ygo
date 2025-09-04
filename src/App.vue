@@ -95,14 +95,19 @@
 			cursor: pointer;
 		}
 	}
+	.dialog {
+		color: font.$text-color;
+		border: 1px solid white;
+	}
 	:root {
+		--card-background: transparent !important;
+		--dialog-background: transparent !important;
+		--popup-content-background-color: transparent !important;
 		--dialog-message-color: font.$text-color !important;
 		--dialog-title-color: font.$text-color !important;
-		--card-background: transparent !important;
 		--list-loading-color: font.$text-color !important;
 		--list-finished-color: font.$text-color !important;
 		--list-error-color: font.$text-color !important;
-		--popup-content-background-color: transparent !important;
 		--checkbox-text-color: font.$text-color !important;
 	}
 </style>

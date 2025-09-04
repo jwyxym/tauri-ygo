@@ -14,6 +14,8 @@ const Zh_CN : textLike = {
 		fromcode : '从卡组码导入',
 		name : '卡组名称',
 		info : 'Tauri-YGO',
+		exit : '确认要退出吗？',
+		remove : '删除卡片 {:?}？',
 		search : {
 			name : '卡片搜索',
 			link : '连接标记',

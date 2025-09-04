@@ -32,7 +32,7 @@
 					v-model = 'deck.name'
 				/>
 				<div class = 'button_list'>
-					<Button @click = 'offdeck' icon_name = 'exit'></Button>
+					<Button @click = 'deck.exit' icon_name = 'exit'></Button>
 					<Button @click = 'deck.save' icon_name = 'save'></Button>
 				</div>
 			</div>
@@ -47,8 +47,8 @@
 						class = 'card'
 						:key = 'i'
 						:id = 'i.toString()'
-						@dblclick = 'deck.remove($event, v, 0)'
-						@contextmenu = 'deck.remove($event, v, 0)'
+						@dblclick = 'deck.remove'
+						@contextmenu = 'deck.remove'
 					>
 							<div :data-swapy-item = '`main_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
 								<img :src = 'deck.get_pic(i)' ref = 'main_card'></img>
@@ -67,8 +67,8 @@
 						class = 'card'
 						:key = 'i'
 						:id = 'i.toString()'
-						@dblclick = 'deck.remove($event, v, 1)'
-						@contextmenu = 'deck.remove($event, v, 1)'
+						@dblclick = 'deck.remove'
+						@contextmenu = 'deck.remove'
 					>
 							<div :data-swapy-item = '`extra_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
 								<img :src = 'deck.get_pic(i)' ref = 'extra_card'></img>
@@ -87,8 +87,8 @@
 						class = 'card'
 						:key = 'i'
 						:id = 'i.toString()'
-						@dblclick = 'deck.remove($event, v, 2)'
-						@contextmenu = 'deck.remove($event, v, 2)'
+						@dblclick = 'deck.remove'
+						@contextmenu = 'deck.remove'
 					>
 							<div :data-swapy-item = '`side_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
 								<img :src = 'deck.get_pic(i)' ref = 'side_card'></img>
@@ -172,7 +172,7 @@
 			</var-form>
 			<br/>
 			<div>
-				<Button icon_name = 'exit' @click = 'search.off_setting'></Button>
+				<!-- <Button icon_name = 'exit' @click = 'search.off_setting'></Button> -->
 			</div>
 		</var-popup>
 	</div>
@@ -181,6 +181,7 @@
 	import { ref, reactive, onMounted, Ref, watch, onBeforeMount } from "vue";
 	import { createSwapy, Swapy } from 'swapy';
 	import Sortable from 'sortablejs';
+	import { Dialog } from '@varlet/ui';
 
 	import mainGame from '../../script/game';
 	import constant from '../../script/constant';
@@ -239,13 +240,13 @@
 					extra_deck = deck.get_dom(1, false).map(i => parseInt(i.children[0].id));
 					side_deck = deck.get_dom(2, false).map(i => parseInt(i.children[0].id));
 				}
-				const write_Deck = new Deck({
+				const write_deck = new Deck({
 					main : main_deck,
 					extra : extra_deck,
 					side : side_deck,
 					name : deck.name
 				});
-				const write = await fs.write.ydk(props.this_deck.name, write_Deck);
+				const write = await fs.write.ydk(props.this_deck.name, write_deck);
 				let rename = true;
 				if (write && deck.name !== props.this_deck.name) {
 					rename = await fs.rename.ydk(props.this_deck.name, deck.name);
@@ -269,19 +270,39 @@
 					break;
 			}
 		},
-		remove : async (event: MouseEvent, v : number, from_deck : number) : Promise<void> => {
+		remove : async (event : MouseEvent) : Promise<void> => {
 			event.preventDefault();
-			const el = deck.get_dom(from_deck)[v];
-			const class_name = `${from_deck}:${v}:${el.children[0].id}`;
-			el.classList.add(class_name);
-			const card = {
-				element : el,
-				selector : el
+			let el = event.target as HTMLElement;
+			while (!el.classList.contains('card')) {
+				const parent = el.parentElement;
+				if (parent)
+					el = parent;
+				else break;
 			}
-			const complete = () : void => {
-				card.element.style.display = 'none';
-			}
-			gsap.leave(card, complete);
+			if (!el.classList.contains('card')) return;
+			Dialog({
+				message : mainGame.get.text().deck.remove.replace('{:?}', mainGame.cards.get(parseInt(el.children[0].id))?.name ?? ''),
+				dialogClass : 'dialog',
+				cancelButtonTextColor : 'white',
+				confirmButtonTextColor : 'white',
+				onConfirm : () => {
+					gsap.leave({
+						element : el,
+						selector : el
+					}, () : void => {
+						el.style.display = 'none';
+					});
+				}
+			});
+		},
+		exit : async () : Promise<void> => {
+			Dialog({
+				message : mainGame.get.text().deck.exit,
+				dialogClass : 'dialog',
+				cancelButtonTextColor : 'white',
+				confirmButtonTextColor : 'white',
+				onConfirm : props.offdeck
+			});
 		}
 	})
 

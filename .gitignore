@@ -25,3 +25,4 @@ dist-ssr
 *.bat
 /src-tauri/gen
 /src-tauri/2
+*.jks
