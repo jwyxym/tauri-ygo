@@ -125,7 +125,7 @@
 							:alt = 'card.id.toString()'
 							class = 'card search_card'
 							@contextmenu = 'deck.right_click($event, card)'
-							@click = 'deck.click($event, card)'
+							@dblclick = 'deck.dbl_click($event, card)'
 							@mousedown = 'cardinfo.select(card.id)'
 						/>
 					</div>
@@ -328,37 +328,35 @@
 		},
 		remove : async (el : HTMLElement, name : string) : Promise<void> => {
 			const title = mainGame.get.text().deck.remove.replace(constant.str.replace, name);
-			Dialog({
+			const leave = () => {
+				gsap.leave({
+					element : el,
+					selector : el
+				}, () : void => {
+					el.style.display = 'none';
+				});
+			};
+			mainGame.system.get(constant.str.system_conf.chk.deck.delete) ? Dialog({
 				title : title,
 				dialogClass : 'dialog',
 				cancelButtonTextColor : 'white',
 				confirmButtonTextColor : 'white',
-				onConfirm : () => {
-					gsap.leave({
-						element : el,
-						selector : el
-					}, () : void => {
-						el.style.display = 'none';
-					});
-				}
-			});
+				onConfirm : leave
+			}) : leave();
 		},
 		exit : async () : Promise<void> => {
-			Dialog({
+			mainGame.system.get(constant.str.system_conf.chk.deck.exit) ? Dialog({
 				title : mainGame.get.text().deck.exit,
 				dialogClass : 'dialog',
 				cancelButtonTextColor : 'white',
 				confirmButtonTextColor : 'white',
 				onConfirm : props.offdeck
-			});
+			}) : props.offdeck();
 		},
-		click : async (event : MouseEvent, card : Card) : Promise<void> => {
+		dbl_click : async (event : MouseEvent, card : Card | number) : Promise<void> => {
 			if (mainGame.is_android()) return;
-			deck.push(event, card, card.is_ex() ? 1 : 0);
-		},
-		dbl_click : async (event : MouseEvent, id : number) : Promise<void> => {
-			if (mainGame.is_android()) return;
-			const card = mainGame.cards.get(id)!;
+			if (typeof card === 'number')
+				card = mainGame.cards.get(card)!;
 			let el = event.target as HTMLElement;
 			while (!el.classList.contains('card')) {
 				const parent = el.parentElement;
@@ -367,9 +365,13 @@
 				else break;
 			}
 			if (!el.classList.contains('card')) return;
-			const class_list = el.parentElement!.classList;
-			const to_deck = class_list.contains('deck_main') || class_list.contains('deck_extra') ? 2 : card.is_ex() ? 1 : 0;
-			deck.move(el, card, to_deck);
+			if ((event.target as HTMLElement).parentElement!.classList.contains('searcher')) {
+				deck.push(event, card as Card, 2);
+			} else {
+				const class_list = el.parentElement!.classList;
+				const to_deck = class_list.contains('deck_main') || class_list.contains('deck_extra') ? 2 : card.is_ex() ? 1 : 0;
+				deck.move(el, card, to_deck);
+			}
 		},
 		right_click : async (event : MouseEvent, card : Card | number) : Promise<void> => {
 			if (mainGame.is_android()) return;
@@ -385,7 +387,7 @@
 			}
 			if (!el.classList.contains('card')) return;
 			if ((event.target as HTMLElement).parentElement!.classList.contains('searcher')) {
-				deck.push(event, card as Card, 2);
+				deck.push(event, card, card.is_ex() ? 1 : 0);
 			} else {
 				await deck.remove(el, card.name);
 			}

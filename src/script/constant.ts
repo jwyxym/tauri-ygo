@@ -1,6 +1,7 @@
 import * as fs from '@tauri-apps/plugin-fs';
 import * as path from '@tauri-apps/api/path';
 import { platform } from '@tauri-apps/plugin-os';
+import { exit } from '@tauri-apps/plugin-process';
 
 class System {
 	system : string
@@ -89,6 +90,14 @@ class Constant {
 			category : '!category',
 			race : '!race',
 			type : '!type'
+		},
+		system_conf : {
+			chk : {
+				deck : {
+					delete : 'chk_before_delete_card',
+					exit : 'chk_before_exit_deck'
+				}
+			}
 		},
 		ini : {
 			name : 'ServerName',

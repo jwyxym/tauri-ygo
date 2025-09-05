@@ -22,7 +22,7 @@ class Game {
 		[constant.str.info_conf.type, new Map]
 	]);
 	lflist : Map<string, Map<number, number>> = new Map;
-	system : Map<string, string> = new Map;
+	system : Map<string, boolean> = new Map;
 	servers : Map<string, string> = new Map;
 	cards : Map<number, Card> = new Map;
 	textures : Map<string, string> = new Map;
@@ -298,7 +298,7 @@ class Game {
 				return;
 			const key_value = line.split('=');
 			if (key_value.length == 2)
-				this.system.set(key_value[0].trim(), key_value[1].trim())
+				this.system.set(key_value[0].trim(), !!parseInt(key_value[1].trim()))
 		},
 		database : async (db : Array<Array<string | number>>) : Promise<void> => {
 			for (const i of db)
