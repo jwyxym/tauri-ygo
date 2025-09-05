@@ -34,6 +34,7 @@ interface textLike {
 			message : string;
 		};
 		rule : {
+			search : string;
 			name : {
 				exist : string;
 				unlawful : string;
@@ -45,6 +46,10 @@ interface textLike {
 			level : {
 				unlawful : string;
 			};
+			deck : {
+				deck_count : string;
+				card_count : string;
+			};
 		};
 	};
 	toast : {
@@ -53,7 +58,6 @@ interface textLike {
 			delete : string;
 		}
 		error : {
-			search : string;
 			ydk : {
 				from_url : string;
 				from_code : string;

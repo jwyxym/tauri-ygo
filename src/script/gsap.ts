@@ -72,8 +72,6 @@ class Gsap {
 	};
 
 	leave = (card : gsapElement, complete : Function = () => {}) : gsap.core.Timeline => {
-		const p = pos.get(card.element)
-		console.log(p)
 		const tl = this.timeline();
 		tl.to(card.element, {
 			x : '+=50vw',
@@ -86,7 +84,17 @@ class Gsap {
 			onComplete: () => { complete(); }
 		}, 0.2);
 		return tl;
-	}
+	};
+
+	opacity = (card : gsapElement, complete : Function = () => {}) : gsap.core.Timeline => {
+		const tl = this.timeline();
+		tl.to(card.element, {
+			opacity: 0,
+			duration : 0.4,
+			onComplete: () => { complete(); }
+		});
+		return tl;
+	};
 };
 
 export default new Gsap();

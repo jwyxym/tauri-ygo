@@ -47,11 +47,11 @@
 						class = 'card'
 						:key = 'i'
 						:id = 'i.toString()'
-						@dblclick = 'deck.remove'
-						@contextmenu = 'deck.remove'
+						@dblclick = 'deck.dbl_click($event, i)'
+						@contextmenu = 'deck.right_click($event, i)'
 					>
 							<div :data-swapy-item = '`main_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
-								<img :src = 'deck.get_pic(i)' ref = 'main_card'></img>
+								<img :src = 'deck.get_pic(i)' ref = 'main_card' :alt = 'i.toString()'></img>
 							</div>
 					</div>
 				</TransitionGroup>
@@ -67,11 +67,11 @@
 						class = 'card'
 						:key = 'i'
 						:id = 'i.toString()'
-						@dblclick = 'deck.remove'
-						@contextmenu = 'deck.remove'
+						@dblclick = 'deck.dbl_click($event, i)'
+						@contextmenu = 'deck.right_click($event, i)'
 					>
 							<div :data-swapy-item = '`extra_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
-								<img :src = 'deck.get_pic(i)' ref = 'extra_card'></img>
+								<img :src = 'deck.get_pic(i)' ref = 'extra_card' :alt = 'i.toString()'></img>
 							</div>
 					</div>
 				</TransitionGroup>
@@ -87,11 +87,11 @@
 						class = 'card'
 						:key = 'i'
 						:id = 'i.toString()'
-						@dblclick = 'deck.remove'
-						@contextmenu = 'deck.remove'
+						@dblclick = 'deck.dbl_click($event, i)'
+						@contextmenu = 'deck.right_click($event, i)'
 					>
 							<div :data-swapy-item = '`side_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
-								<img :src = 'deck.get_pic(i)' ref = 'side_card'></img>
+								<img :src = 'deck.get_pic(i)' ref = 'side_card' :alt = 'i.toString()'></img>
 							</div>
 					</div>
 				</TransitionGroup>
@@ -115,17 +115,18 @@
 				:immediate-check = 'false'
 			>
 				<div v-for = 'card in search.list' class = 'list'>
-					<div ref = 'searcher'>
+					<div
+						ref = 'searcher'
+						class = 'searcher'
+					>
 						<img
 							:src = 'card.pic'
 							:id = 'card.id.toString()'
+							:alt = 'card.id.toString()'
 							class = 'card'
-							@click = '($event) => {
-								cardinfo.select(card.id);
-								if (!mainGame.is_android())
-									deck.push($event, card, 0);
-							}'
-							@contextmenu = 'deck.push($event, card, 1)'
+							@contextmenu = 'deck.right_click($event, card)'
+							@dblclick = 'deck.dbl_click($event, card)'
+							@mousedown = 'cardinfo.select(card.id)'
 						/>
 					</div>
 					<div class = 'card_name'>
@@ -174,7 +175,7 @@
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { ref, reactive, onMounted, Ref, watch, onBeforeMount } from "vue";
+	import { ref, reactive, onMounted, Ref, watch, onBeforeMount, onUnmounted } from "vue";
 	import { createSwapy, Swapy } from 'swapy';
 	import Sortable from 'sortablejs';
 	import { Dialog } from '@varlet/ui';
@@ -198,7 +199,7 @@
 		side : [] as Array<number>,
 		name : '',
 		get_pic : (card : number) : string => {
-			const pic = mainGame.cards.get(card)?.pic;
+			const pic = mainGame.cards.get(card)!.pic;
 			return (pic ?? mainGame.textures.get(constant.str.files.textures.unknown)) ?? '';
 		},
 		name_rule : async (name : string | undefined) : Promise<string | boolean> => {
@@ -210,19 +211,43 @@
 				return mainGame.get.text().deck.rule.name.exist;
 			return true;
 		},
-		get_dom : (v : number, show_all : boolean = true) : Array<HTMLElement> => {
-			const get = () : Array<HTMLElement> => {
-				switch (v) {
-					case 0:
-						return Array.from(main.value!.children[0].children) as Array<HTMLElement>;
-					case 1:
-						return Array.from(extra.value!.children[0].children) as Array<HTMLElement>;
-					case 2:
-						return Array.from(side.value!.children[0].children) as Array<HTMLElement>;
+		get_dom : (v : number, show_all : boolean = false) : Array<HTMLElement> => {
+			const get = () : Array<HTMLElement | undefined> => {
+				if (mainGame.is_android()) {
+					const map = (i : Element) => {
+						let el = i as HTMLImageElement | undefined;
+						let id = el?.alt ?? undefined;
+						while (!id) {
+							el = el!.children[0] as HTMLImageElement | undefined;
+							id = el?.alt ?? undefined;
+							if (!el) break;
+						}
+						return el;
+					}
+					switch (v) {
+						case 0:
+							return Array.from(main.value!.children[0].children).map(map) as Array<HTMLElement | undefined>;
+						case 1:
+							return Array.from(extra.value!.children[0].children).map(map) as Array<HTMLElement | undefined>;
+						case 2:
+							return Array.from(side.value!.children[0].children).map(map) as Array<HTMLElement | undefined>;
+					}
+				} else {
+					switch (v) {
+						case 0:
+							return Array.from(main.value!.children[0].children) as Array<HTMLElement>;
+						case 1:
+							return Array.from(extra.value!.children[0].children) as Array<HTMLElement>;
+						case 2:
+							return Array.from(side.value!.children[0].children) as Array<HTMLElement>;
+					}
 				}
 				return [];
 			}
-			return show_all ? get() : get().filter(i => i.style.display !== 'none');
+			return show_all ? get().filter(i => i !== undefined) : get().filter(i => i !== undefined).filter(i => {
+				const p = i.parentElement?.parentElement ?? undefined;
+				return mainGame.is_android() && p !== undefined && p.classList.contains('card') ? p.style.display !== 'none' : i.style.display !== 'none';
+			});
 		},
 		save : async () : Promise<void> => {
 			const rule = await deck.name_rule(deck.name);
@@ -231,13 +256,13 @@
 				let extra_deck : Array<number>;
 				let side_deck : Array<number>;
 				if (mainGame.is_android()) {
-					main_deck = deck.get_dom(0, false).map(i => parseInt(i.id));
-					extra_deck = deck.get_dom(1, false).map(i => parseInt(i.id));
-					side_deck = deck.get_dom(2, false).map(i => parseInt(i.id));
+					main_deck = (deck.get_dom(0) as Array<HTMLImageElement>).map(i => parseInt(i.alt));
+					extra_deck = (deck.get_dom(1) as Array<HTMLImageElement>).map(i => parseInt(i.alt));
+					side_deck = (deck.get_dom(2) as Array<HTMLImageElement>).map(i => parseInt(i.alt));
 				} else {
-					main_deck = deck.get_dom(0, false).map(i => parseInt(i.children[0].id));
-					extra_deck = deck.get_dom(1, false).map(i => parseInt(i.children[0].id));
-					side_deck = deck.get_dom(2, false).map(i => parseInt(i.children[0].id));
+					main_deck = deck.get_dom(0).map(i => parseInt(i.children[0].id));
+					extra_deck = deck.get_dom(1).map(i => parseInt(i.children[0].id));
+					side_deck = deck.get_dom(2).map(i => parseInt(i.children[0].id));
 				}
 				const write_deck = new Deck({
 					main : main_deck,
@@ -258,31 +283,53 @@
 		},
 		push : (event: MouseEvent, card : Card, to_deck : number) : void => {
 			event.preventDefault();
-			switch(to_deck) {
-				case 0:
-					if (card.is_ex()) {
-						deck.extra.push(card.id);
-					} else {
-						deck.main.push(card.id);
-					}
-					break;
-				case 1:
-					deck.side.push(card.id);
-					break;
+			const main = deck.get_dom(0);
+			const extra = deck.get_dom(1);
+			const side = deck.get_dom(2);
+			const cards = [...main, ...extra, ...side];
+			const ct = search.info.lflist ? mainGame.lflist.get(search.info.lflist)?.get(card.id) ?? 3 : 3;
+			if (cards.filter(i => i.children[0].id === card.id.toString()).length + 1 > ct) {
+				toast.error(mainGame.get.text().deck.rule.deck.card_count.replace(constant.str.replace,ct.toString()));
+			} else {
+				switch(to_deck) {
+					case 0:
+						main.length + 1 > 60 ? toast.error(mainGame.get.text().deck.rule.deck.deck_count.replace(constant.str.replace, '60')) :
+							deck.main.push(card.id);
+						break;
+					case 1:
+						extra.length + 1 > 15 ? toast.error(mainGame.get.text().deck.rule.deck.deck_count.replace(constant.str.replace, '15')) : 
+							deck.extra.push(card.id);
+						break;
+					case 2:
+						side.length + 1 > 15 ? toast.error(mainGame.get.text().deck.rule.deck.deck_count.replace(constant.str.replace, '15')) : 
+							deck.side.push(card.id);
+						break;
+				}
 			}
 		},
-		remove : async (event : MouseEvent) : Promise<void> => {
-			event.preventDefault();
-			let el = event.target as HTMLElement;
-			while (!el.classList.contains('card')) {
-				const parent = el.parentElement;
-				if (parent)
-					el = parent;
-				else break;
+		move : (el: HTMLElement, card : Card, to_deck : number) : void => {
+			const to = deck.get_dom(to_deck);
+			if (to.length + 1 > [60, 15, 15][to_deck]) {
+				toast.error(mainGame.get.text().deck.rule.deck.deck_count.replace(constant.str.replace, [60, 15, 15][to_deck].toString()));
+			} else {
+				gsap.opacity({ element : el, selector : el}, () => { el.style.display = 'none'; });
+				switch(to_deck) {
+					case 0:
+						deck.main.push(card.id);
+						break;
+					case 1:
+						deck.extra.push(card.id);
+						break;
+					case 2:
+						deck.side.push(card.id);
+						break;
+					}
 			}
-			if (!el.classList.contains('card')) return;
+		},
+		remove : async (el : HTMLElement, name : string) : Promise<void> => {
+			const title = mainGame.get.text().deck.remove.replace(constant.str.replace, name);
 			Dialog({
-				title : mainGame.get.text().deck.remove.replace('{:?}', mainGame.cards.get(parseInt(el.children[0].id))?.name ?? ''),
+				title : title,
 				dialogClass : 'dialog',
 				cancelButtonTextColor : 'white',
 				confirmButtonTextColor : 'white',
@@ -304,7 +351,47 @@
 				confirmButtonTextColor : 'white',
 				onConfirm : props.offdeck
 			});
-		}
+		},
+		dbl_click : async (event : MouseEvent, card : Card | number) : Promise<void> => {
+			if (mainGame.is_android()) return;
+			if ((event.target as HTMLElement).parentElement!.classList.contains('searcher')) {
+				deck.push(event, card as Card, (card as Card).is_ex() ? 1 : 0);
+			} else {
+				if (typeof card === 'number')
+					card = mainGame.cards.get(card)!;
+				let el = event.target as HTMLElement;
+				while (!el.classList.contains('card')) {
+					const parent = el.parentElement;
+					if (parent)
+						el = parent;
+					else break;
+				}
+				if (!el.classList.contains('card')) return;
+				const class_list = el.parentElement!.classList;
+				const to_deck = class_list.contains('deck_main') || class_list.contains('deck_extra') ? 2 : card.is_ex() ? 1 : 0;
+				deck.move(el, card, to_deck);
+			}
+
+		},
+		right_click : async (event : MouseEvent, card : Card | number) : Promise<void> => {
+			if (mainGame.is_android()) return;
+			event.preventDefault();
+			if (typeof card === 'number')
+				card = mainGame.cards.get(card)!;
+			let el = event.target as HTMLElement;
+			while (!el.classList.contains('card')) {
+				const parent = el.parentElement;
+				if (parent)
+					el = parent;
+				else break;
+			}
+			if (!el.classList.contains('card')) return;
+			if ((event.target as HTMLElement).parentElement!.classList.contains('searcher')) {
+				deck.push(event, card as Card, 2);
+			} else {
+				await deck.remove(el, card.name);
+			}
+		},
 	})
 
 	const cardinfo = reactive({
@@ -318,7 +405,8 @@
 			level : '',
 			link : ''
 		},
-		select : (i : string | number) : void => {
+		select : (i : string | number, chk : boolean = true) : void => {
+			if (mainGame.is_android() && chk) return;
 			i = typeof i === 'string' ? parseInt(i) : i;
 			cardinfo.pic = deck.get_pic(i);
 			const card = mainGame.cards.get(i);
@@ -402,7 +490,7 @@
 				|| typeof search.rule.atk(search.info.def ?? '') !== 'boolean'
 			) {
 				search.in_setting();
-				toast.error(mainGame.get.text().toast.error.search)
+				toast.error(mainGame.get.text().deck.rule.search)
 				return;
 			}
 			search.list = [];
@@ -460,14 +548,21 @@
 	}
 
 	const sortable = {
-		move : (evt : SortableEvent) => {
-			if (evt.to.classList.contains('deck_side')) {
+		move : (evt : SortableEvent) : boolean => {
+			const main = deck.get_dom(0) as Array<HTMLImageElement>;
+			const extra = deck.get_dom(1) as Array<HTMLImageElement>;
+			const side = deck.get_dom(2) as Array<HTMLImageElement>;
+			const cards = [...main, ...extra, ...side];
+			const card = mainGame.cards.get(Number((evt.dragged as HTMLImageElement).alt));
+			const ct = search.info.lflist ? mainGame.lflist.get(search.info.lflist)?.get(card?.id ?? -1) ?? 3 : 3;
+			const id = card?.id.toString() ?? '';
+			if (evt.from.classList.contains('searcher') && cards.filter(i => i.alt === id).length + 1 > ct)
+				return false;
+			if (evt.to.classList.contains('deck_side') && side.length + 1 <= 15)
 				return true;
-			}
-			const card = mainGame.cards.get(Number(evt.dragged.id));
-			if (card && card.is_ex() && evt.to.classList.contains('deck_extra'))
+			if (card && card.is_ex() && evt.to.classList.contains('deck_extra') && extra.length + 1 <= 15)
 				return true;
-			else if (card && !card.is_ex() && evt.to.classList.contains('deck_main'))
+			if (card && !card.is_ex() && evt.to.classList.contains('deck_main') && main.length + 1 <= 60)
 				return true;
 			return false;
 		},
@@ -484,6 +579,25 @@
 	const extra_card : Ref<Array<HTMLElement> | null> = ref(null);
 	const side_card : Ref<Array<HTMLElement> | null> = ref(null);
 
+	const android = {
+		remove : async (e : MouseEvent) : Promise<void> => {
+			let el = e.target as HTMLImageElement | HTMLElement;
+			const card = mainGame.cards.get(parseInt((el as HTMLImageElement).alt))!;
+			while (!el.classList.contains('card')) {
+				const parent = el.parentElement;
+				if (parent)
+					el = parent;
+				else break;
+			}
+			if (!el.classList.contains('card')) return;
+			await deck.remove(el, card.name);
+		},
+		select : (e : MouseEvent) : void => {
+			let el = e.target as HTMLImageElement;
+			cardinfo.select(parseInt((el as HTMLImageElement).alt), false);
+		}
+	}
+
 	onBeforeMount(async () : Promise<void> => {
 		if (props.this_deck) {
 			deck.main = props.this_deck.main;
@@ -495,7 +609,6 @@
 	});
 
 	onMounted(() : void => {
-		try {
 		if (mainGame.is_android()) {
 			for (const i of [main, extra, side]) {
 				Sortable.create(i.value!.children[0], {
@@ -506,10 +619,20 @@
 				})
 			}
 		}
-	} catch (e) {
-		cardinfo.subtitle.level += e
-	}
+		if (mainGame.is_android()) {
+			document.addEventListener('dblclick', android.remove);
+			document.addEventListener('contextmenu', android.remove);
+			document.addEventListener('mousedown', android.select);
+		}
 	})
+
+	onUnmounted(() => {
+		if (mainGame.is_android()) {
+			document.removeEventListener('dblclick', android.remove);
+			document.removeEventListener('contextmenu', android.remove);
+			document.removeEventListener('mousedown', android.select);
+		}
+	});
 
 	watch(() => { return search.form.ot; }, (n) => {
 		search.info.ot = (n ?? []).reduce((a, b) => a + b, 0);

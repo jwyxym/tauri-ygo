@@ -225,7 +225,7 @@
 			}
 			Dialog({
 				title : mainGame.get.text().deck.delete.title,
-				message : mainGame.get.text().deck.delete.message.replace('{:?}', list.decks[list.select].name ?? ''),
+				message : mainGame.get.text().deck.delete.message.replace(constant.str.replace, list.decks[list.select].name ?? ''),
 				dialogClass : 'dialog',
 				cancelButtonTextColor : 'white',
 				confirmButtonTextColor : 'white',

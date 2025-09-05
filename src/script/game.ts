@@ -415,7 +415,10 @@ class Game {
 				if ((search.desc ?? '').length > 0) {
 					for (const i of desc) {
 						const id = Number(i);
-						if ((i !== '' && !card.name.includes(i) && !card.desc.includes(i)) && (!isNaN(id) && card.id !== id && card.alias !== id))
+						if (
+							(i !== '' && !card.name.includes(i) && !card.desc.includes(i))
+								&& (isNaN(id) ? true : card.id !== id && card.alias !== id)
+						)
 							return false;
 					}
 				}

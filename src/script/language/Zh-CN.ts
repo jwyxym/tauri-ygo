@@ -42,6 +42,7 @@ const Zh_CN : textLike = {
 			message : '[{:?}]将会永久消失！（真的很久！）'
 		},
 		rule : {
+			search : '搜索词不合规',
 			name : {
 				exist : '卡组已存在',
 				unlawful : '文件名非法',
@@ -52,8 +53,11 @@ const Zh_CN : textLike = {
 			},
 			level : {
 				unlawful : '只允许包含数字'
+			},
+			deck : {
+				deck_count : '卡组最大数量 {:?}',
+				card_count : '卡片最大数量 {:?}',
 			}
-			
 		}
 	},
 	toast : {
@@ -62,7 +66,6 @@ const Zh_CN : textLike = {
 			delete : '删除成功'
 		},
 		error : {
-			search : '搜索词不合规',
 			ydk : {
 				from_url : '从url转换到卡组失败',
 				from_code : '从卡组码转换到卡组失败'

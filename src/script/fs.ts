@@ -6,6 +6,7 @@ import axios from 'axios';
 import constant from './constant';
 import Deck from './deck';
 import toast from './toast';
+import mainGame from './game';
 
 class Fs {
 	dir : fs.ReadFileOptions;
@@ -109,7 +110,11 @@ class Fs {
 		},
 		ydk : async (file : string) : Promise<Deck | undefined> => {
 			try {
-				return Deck.fromYdkString(await fs.readTextFile(file, this.dir));
+				const deck = Deck.fromYdkString(await fs.readTextFile(file, this.dir));
+				deck.main = deck.main.filter(i => mainGame.cards.has(i));
+				deck.extra = deck.extra.filter(i => mainGame.cards.has(i));
+				deck.side = deck.side.filter(i => mainGame.cards.has(i));
+				return deck;
 			} catch (error) {
 				this.write.log(error);
 			}

@@ -53,6 +53,7 @@ class Constant {
 	str = {
 		blob : 'blob:http',
 		title : 'Tauri-YGO',
+		replace : '{:?}',
 		dirs : {
 			textures : 'textures',
 			expansions : 'expansions',
