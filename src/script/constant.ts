@@ -71,7 +71,8 @@ class Constant {
 				info : 'cardinfo.conf'
 			},
 			textures : {
-				unknown : 'unknown'
+				unknown : 'unknown',
+				pic : ['cardI', 'cardII']
 			},
 			database : 'cards.cdb'
 		},

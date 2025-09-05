@@ -9,7 +9,7 @@
 				:exit = '{ opacity: 0 }'
 				:style = "{ '--y' : `${position.height * 0.5}px`, '--x' : `${position.width * -0.3}px` }"
 				v-if = 'position.height > 0 && position.width > 0 && animation.show'
-				:src = 'url.I'
+				:src = 'mainGame.textures.get(constant.str.files.textures.pic[0])'
 			/>
 		</AnimatePresence>
 		<AnimatePresence>
@@ -21,20 +21,22 @@
 				:exit = '{ opacity: 0 }'
 				:style = "{ '--y' : `${position.height * 0.1}px`, '--x' : `${position.width * 0.1}px` }"
 				v-if = 'position.height > 0 && position.width > 0 && animation.show'
-				:src = 'url.II'
+				:src = 'mainGame.textures.get(constant.str.files.textures.pic[1])'
 			/>
 		</AnimatePresence>
 	</div>
 </template>
-<script setup lang="ts">
-	import { ref, onMounted, Ref, watch, Reactive, reactive } from "vue";
+<script setup lang = 'ts'>
+	import { ref, onMounted, Ref, watch, Reactive, reactive } from 'vue';
 	import * as path from '@tauri-apps/api/path';
 
-	import { motion, AnimatePresence } from "motion-v";
+	import { motion, AnimatePresence } from 'motion-v';
 
-	import fs from "../script/fs";
-	import pos, { posLike } from "../script/position";
-	import gsap from '../script/gsap'
+	import fs from '../script/fs';
+	import pos, { posLike } from '../script/position';
+	import gsap from '../script/gsap';
+	import mainGame from '../script/game';
+	import constant from '../script/constant';
 
 	const picI : Ref<HTMLElement | null> = ref(null);
 	const picII : Ref<HTMLElement | null> = ref(null);

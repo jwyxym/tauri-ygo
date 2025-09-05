@@ -123,9 +123,9 @@
 							:src = 'card.pic'
 							:id = 'card.id.toString()'
 							:alt = 'card.id.toString()'
-							class = 'card'
+							class = 'card search_card'
 							@contextmenu = 'deck.right_click($event, card)'
-							@dblclick = 'deck.dbl_click($event, card)'
+							@click = 'deck.click($event, card)'
 							@mousedown = 'cardinfo.select(card.id)'
 						/>
 					</div>
@@ -352,26 +352,24 @@
 				onConfirm : props.offdeck
 			});
 		},
-		dbl_click : async (event : MouseEvent, card : Card | number) : Promise<void> => {
+		click : async (event : MouseEvent, card : Card) : Promise<void> => {
 			if (mainGame.is_android()) return;
-			if ((event.target as HTMLElement).parentElement!.classList.contains('searcher')) {
-				deck.push(event, card as Card, (card as Card).is_ex() ? 1 : 0);
-			} else {
-				if (typeof card === 'number')
-					card = mainGame.cards.get(card)!;
-				let el = event.target as HTMLElement;
-				while (!el.classList.contains('card')) {
-					const parent = el.parentElement;
-					if (parent)
-						el = parent;
-					else break;
-				}
-				if (!el.classList.contains('card')) return;
-				const class_list = el.parentElement!.classList;
-				const to_deck = class_list.contains('deck_main') || class_list.contains('deck_extra') ? 2 : card.is_ex() ? 1 : 0;
-				deck.move(el, card, to_deck);
+			deck.push(event, card, card.is_ex() ? 1 : 0);
+		},
+		dbl_click : async (event : MouseEvent, id : number) : Promise<void> => {
+			if (mainGame.is_android()) return;
+			const card = mainGame.cards.get(id)!;
+			let el = event.target as HTMLElement;
+			while (!el.classList.contains('card')) {
+				const parent = el.parentElement;
+				if (parent)
+					el = parent;
+				else break;
 			}
-
+			if (!el.classList.contains('card')) return;
+			const class_list = el.parentElement!.classList;
+			const to_deck = class_list.contains('deck_main') || class_list.contains('deck_extra') ? 2 : card.is_ex() ? 1 : 0;
+			deck.move(el, card, to_deck);
 		},
 		right_click : async (event : MouseEvent, card : Card | number) : Promise<void> => {
 			if (mainGame.is_android()) return;
@@ -589,7 +587,7 @@
 					el = parent;
 				else break;
 			}
-			if (!el.classList.contains('card')) return;
+			if (!el.classList.contains('card') || el.parentElement!.classList.contains('searcher')) return;
 			await deck.remove(el, card.name);
 		},
 		select : (e : MouseEvent) : void => {
