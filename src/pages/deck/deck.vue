@@ -119,15 +119,18 @@
 						ref = 'searcher'
 						class = 'searcher'
 					>
-						<img
-							:src = 'card.pic'
-							:id = 'card.id.toString()'
-							:alt = 'card.id.toString()'
-							class = 'card search_card'
-							@contextmenu = 'deck.right_click($event, card)'
-							@dblclick = 'deck.dbl_click($event, card)'
-							@mousedown = 'cardinfo.select(card.id)'
-						/>
+						<div class = 'card search_card'>
+							<div>
+								<img
+									:src = 'card.pic'
+									:id = 'card.id.toString()'
+									:alt = 'card.id.toString()'
+									@contextmenu = 'deck.right_click($event, card)'
+									@dblclick = 'deck.dbl_click($event, card)'
+									@mousedown = 'cardinfo.select(card.id)'
+								/>
+							</div>
+						</div>
 					</div>
 					<div class = 'card_name'>
 						<div class = 'title'>
@@ -211,36 +214,27 @@
 				return mainGame.get.text().deck.rule.name.exist;
 			return true;
 		},
+		get_card : (el : HTMLElement) : HTMLElement | undefined => {
+			while (!el.classList.contains('card')) {
+				const parent = el.parentElement;
+				if (parent)
+					el = parent;
+				else break;
+			}
+			return el;
+		},
+		get_id : (el : HTMLElement) : number => {
+			return mainGame.is_android() ? parseInt((el!.children[0]!.children[0] as HTMLImageElement).alt) : parseInt(el.children[0].id);
+		},
 		get_dom : (v : number, show_all : boolean = false) : Array<HTMLElement> => {
 			const get = () : Array<HTMLElement | undefined> => {
-				if (mainGame.is_android()) {
-					const map = (i : Element) => {
-						let el = i as HTMLImageElement | undefined;
-						let id = el?.alt ?? undefined;
-						while (!id) {
-							el = el!.children[0] as HTMLImageElement | undefined;
-							id = el?.alt ?? undefined;
-							if (!el) break;
-						}
-						return el;
-					}
-					switch (v) {
-						case 0:
-							return Array.from(main.value!.children[0].children).map(map) as Array<HTMLElement | undefined>;
-						case 1:
-							return Array.from(extra.value!.children[0].children).map(map) as Array<HTMLElement | undefined>;
-						case 2:
-							return Array.from(side.value!.children[0].children).map(map) as Array<HTMLElement | undefined>;
-					}
-				} else {
-					switch (v) {
-						case 0:
-							return Array.from(main.value!.children[0].children) as Array<HTMLElement>;
-						case 1:
-							return Array.from(extra.value!.children[0].children) as Array<HTMLElement>;
-						case 2:
-							return Array.from(side.value!.children[0].children) as Array<HTMLElement>;
-					}
+				switch (v) {
+					case 0:
+						return Array.from(main.value!.children[0].children) as Array<HTMLElement>;
+					case 1:
+						return Array.from(extra.value!.children[0].children) as Array<HTMLElement>;
+					case 2:
+						return Array.from(side.value!.children[0].children) as Array<HTMLElement>;
 				}
 				return [];
 			}
@@ -255,15 +249,9 @@
 				let main_deck : Array<number>;
 				let extra_deck : Array<number>;
 				let side_deck : Array<number>;
-				if (mainGame.is_android()) {
-					main_deck = (deck.get_dom(0) as Array<HTMLImageElement>).map(i => parseInt(i.alt));
-					extra_deck = (deck.get_dom(1) as Array<HTMLImageElement>).map(i => parseInt(i.alt));
-					side_deck = (deck.get_dom(2) as Array<HTMLImageElement>).map(i => parseInt(i.alt));
-				} else {
-					main_deck = deck.get_dom(0).map(i => parseInt(i.children[0].id));
-					extra_deck = deck.get_dom(1).map(i => parseInt(i.children[0].id));
-					side_deck = deck.get_dom(2).map(i => parseInt(i.children[0].id));
-				}
+				main_deck = deck.get_dom(0).map(i => deck.get_id(i));
+				extra_deck = deck.get_dom(1).map(i => deck.get_id(i));
+				side_deck = deck.get_dom(2).map(i => deck.get_id(i));
 				const write_deck = new Deck({
 					main : main_deck,
 					extra : extra_deck,
@@ -357,14 +345,8 @@
 			if (mainGame.is_android()) return;
 			if (typeof card === 'number')
 				card = mainGame.cards.get(card)!;
-			let el = event.target as HTMLElement;
-			while (!el.classList.contains('card')) {
-				const parent = el.parentElement;
-				if (parent)
-					el = parent;
-				else break;
-			}
-			if (!el.classList.contains('card')) return;
+			const el = deck.get_card(event.target as HTMLElement);
+			if (!el) return;
 			if ((event.target as HTMLElement).parentElement!.classList.contains('searcher')) {
 				deck.push(event, card as Card, 2);
 			} else {
@@ -378,14 +360,8 @@
 			event.preventDefault();
 			if (typeof card === 'number')
 				card = mainGame.cards.get(card)!;
-			let el = event.target as HTMLElement;
-			while (!el.classList.contains('card')) {
-				const parent = el.parentElement;
-				if (parent)
-					el = parent;
-				else break;
-			}
-			if (!el.classList.contains('card')) return;
+			const el = deck.get_card(event.target as HTMLElement);
+			if (!el) return;
 			if ((event.target as HTMLElement).parentElement!.classList.contains('searcher')) {
 				deck.push(event, card, card.is_ex() ? 1 : 0);
 			} else {
@@ -548,25 +524,37 @@
 	}
 
 	const sortable = {
-		move : (evt : SortableEvent) : boolean => {
+		array : [] as Array<HTMLElement>,
+		cards : [] as Array<HTMLElement>,
+		choose : () : void => {
 			const main = deck.get_dom(0) as Array<HTMLImageElement>;
 			const extra = deck.get_dom(1) as Array<HTMLImageElement>;
 			const side = deck.get_dom(2) as Array<HTMLImageElement>;
-			const cards = [...main, ...extra, ...side];
-			const card = mainGame.cards.get(Number((evt.dragged as HTMLImageElement).alt));
-			const ct = search.info.lflist ? mainGame.lflist.get(search.info.lflist)?.get(card?.id ?? -1) ?? 3 : 3;
-			const id = card?.id.toString() ?? '';
-			if (evt.from.classList.contains('searcher') && cards.filter(i => i.alt === id).length + 1 > ct)
-				return false;
-			if (evt.to.classList.contains('deck_side') && side.length + 1 <= 15)
-				return true;
-			if (card && card.is_ex() && evt.to.classList.contains('deck_extra') && extra.length + 1 <= 15)
-				return true;
-			if (card && !card.is_ex() && evt.to.classList.contains('deck_main') && main.length + 1 <= 60)
-				return true;
-			return false;
+			sortable.cards = [...main, ...extra, ...side];
 		},
-		array : [] as Array<HTMLElement>
+		end : () : void => {
+			sortable.cards = [];
+		},
+		move : (evt : SortableEvent) : boolean => {
+			const el = deck.get_card(evt.dragged as HTMLElement);
+			if (el) {
+				const main = deck.get_dom(0) as Array<HTMLImageElement>;
+				const extra = deck.get_dom(1) as Array<HTMLImageElement>;
+				const side = deck.get_dom(2) as Array<HTMLImageElement>;
+				const card = mainGame.cards.get(deck.get_id(el));
+				const ct = search.info.lflist ? mainGame.lflist.get(search.info.lflist)?.get(card?.id ?? -1) ?? 3 : 3;
+				const id = card?.id.toString() ?? '';
+				if (evt.from.classList.contains('searcher') && sortable.cards.filter(i => deck.get_id(i).toString() === id).length + 1 > ct)
+					return false;
+				if (evt.to.classList.contains('deck_side') && side.length + 1 <= 15)
+					return true;
+				if (card && card.is_ex() && evt.to.classList.contains('deck_extra') && extra.length + 1 <= 15)
+					return true;
+				if (card && !card.is_ex() && evt.to.classList.contains('deck_main') && main.length + 1 <= 60)
+					return true;
+			}
+			return false;
+		}
 	};
 
 	const info : Ref<HTMLElement | null> = ref(null);
@@ -580,21 +568,16 @@
 	const side_card : Ref<Array<HTMLElement> | null> = ref(null);
 
 	const android = {
-		remove : async (e : MouseEvent) : Promise<void> => {
-			let el = e.target as HTMLImageElement | HTMLElement;
-			const card = mainGame.cards.get(parseInt((el as HTMLImageElement).alt))!;
-			while (!el.classList.contains('card')) {
-				const parent = el.parentElement;
-				if (parent)
-					el = parent;
-				else break;
-			}
-			if (!el.classList.contains('card') || el.parentElement!.classList.contains('searcher')) return;
+		remove : async (event : MouseEvent) : Promise<void> => {
+			const el = deck.get_card(event.target as HTMLElement);
+			if (!el || el.parentElement!.classList.contains('searcher')) return;
+			const card = mainGame.cards.get(deck.get_id(el))!;
 			await deck.remove(el, card.name);
 		},
-		select : (e : MouseEvent) : void => {
-			let el = e.target as HTMLImageElement;
-			cardinfo.select(parseInt((el as HTMLImageElement).alt), false);
+		select : (event : MouseEvent) : void => {
+			const el = deck.get_card(event.target as HTMLElement);
+			if (!el) return;
+			cardinfo.select(deck.get_id(el), false);
 		}
 	}
 
@@ -664,7 +647,9 @@
 							put : false
 						},
 						sort : false,
-						onMove : sortable.move
+						onMove : sortable.move,
+						onChoose : sortable.choose,
+						onEnd : sortable.end
 					});
 					sortable.array.push(i);
 				}
