@@ -1,7 +1,6 @@
 import * as fs from '@tauri-apps/plugin-fs';
 import * as path from '@tauri-apps/api/path';
 import { platform } from '@tauri-apps/plugin-os';
-import { exit } from '@tauri-apps/plugin-process';
 
 class System {
 	system : string

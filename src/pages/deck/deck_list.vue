@@ -15,23 +15,23 @@
 						</var-menu-select>
 					</div>
 					<var-list>
-						<transition
+						<TransitionGroup
 							name = 'opacity'
-							v-for = '(i, v) in list.decks'
+							tag = 'div'
 						>
-							<div
-								v-if = 'list.removing === undefined || list.removing?.deck !== i'
+							<var-button
+								v-for = '(i, v) in list.decks'
+								:key = 'i'
+								text outline container block
+								size = 'large'
+								type = 'primary'
+								text-color = 'white'
+								:loading = 'list.loading.includes(v)'
+								@click = 'list.selected(v)'
 							>
-								<var-button
-									text outline container block
-									size = 'large'
-									type = 'primary'
-									text-color = 'white'
-									:loading = 'list.loading.includes(v)'
-									@click = 'list.selected(v)'
-								>{{ i.name }}</var-button>
-							</div>
-						</transition>
+								{{ i.name }}
+							</var-button>
+						</TransitionGroup>
 					</var-list>
 				</div>
 				<div class = 'deck_show'>
@@ -103,7 +103,7 @@
 	</div>
 </template>
 <script setup lang='ts'>
-	import { ref, reactive, onMounted, onUnmounted, Ref, watch, onBeforeMount } from 'vue';
+	import { reactive, onBeforeMount, TransitionGroup } from 'vue';
 	import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 	import { Dialog } from '@varlet/ui'
 
@@ -213,14 +213,8 @@
 			const confirm = async () : Promise<void> => {
 				if (await fs.delete.ydk(list.decks[list.select].name!)) {
 					toast.info(mainGame.get.text().toast.deck_list.delete);
-					list.removing = { deck : list.decks[list.select], count : list.select};
+					list.decks.splice(list.select, 1);
 					list.select = -1;
-					setTimeout(() => {
-						list.decks.splice(list.removing!.count, 1);
-						setTimeout(() => {
-							list.removing = undefined;
-						}, 200)
-					}, 400);
 				}
 			}
 			Dialog({

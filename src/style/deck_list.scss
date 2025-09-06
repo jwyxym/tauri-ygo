@@ -25,13 +25,8 @@
 				&::-webkit-scrollbar {
 					display: none;
 				}
-				div{
-					&:hover {
-						cursor: pointer;
-					}
-					.var-button {
-						color: font.$text-color;
-					}
+				.var-button {
+					overflow: hidden;
 				}
 			}
 		}
@@ -74,7 +69,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
-		min-width: 320px;
 		width: 25vw;
 		height: 90%;
 		overflow-y: auto;

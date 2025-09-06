@@ -27,6 +27,8 @@ class Game {
 	cards : Map<number, Card> = new Map;
 	textures : Map<string, string> = new Map;
 	select = 'Zh_CN';
+	interval = -1;
+	interval_ct = 0;
 
 	private lflist_now : string = '';
 
@@ -81,15 +83,15 @@ class Game {
 					await this.read.database(database);
 			}
 			// 读取expnasions文件夹
-			const expnasionFiles : Array<DirEntry> = await fs.read.dir(constant.str.dirs.expansions) ?? [];
+			const expnasion_files : Array<DirEntry> = await fs.read.dir(constant.str.dirs.expansions) ?? [];
 			//读取cdb
-			for (const i of expnasionFiles.filter(i => i.name.match(constant.reg.database))) {
+			for (const i of expnasion_files.filter(i => i.name.match(constant.reg.database))) {
 				const database : Array<Array<string | number>> | undefined = await fs.read.database(i.name);
 				if (database !== undefined)
 					await this.read.database(database);
 			}
 			//读取conf
-			for (const i of expnasionFiles.filter(i => i.name.match(constant.reg.conf))) {
+			for (const i of expnasion_files.filter(i => i.name.match(constant.reg.conf))) {
 				if (i.name.endsWith(constant.str.files.conf.strings)) {
 					const text : string | undefined = await fs.read.text(i.name);
 					if (text === undefined) continue;
@@ -127,13 +129,13 @@ class Game {
 				}
 			}
 			//读取ini
-			for (const i of expnasionFiles.filter(i => i.name.match(constant.reg.ini))) {
+			for (const i of expnasion_files.filter(i => i.name.match(constant.reg.ini))) {
 				const string : string | undefined = await fs.read.text(i.name);
 				if (string !== undefined)
 					this.read.ini(string);
 			}
 			//读取ypk\zip
-			for (const i of expnasionFiles.filter(i => i.name.match(constant.reg.zip))) {
+			for (const i of expnasion_files.filter(i => i.name.match(constant.reg.zip))) {
 				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(i.name);
 				for (const [_, v] of ypk.get(constant.reg.database) ?? new Map()) {
 					const db = await fs.read.databaseInMemory(v as Uint8Array<ArrayBuffer>);
@@ -172,6 +174,7 @@ class Game {
 				for (const [_, v] of ypk.get(constant.reg.ini) ?? new Map()) {
 					this.read.ini(v);
 				}
+				this.load.interval();
 			}
 		} catch (error) {
 			fs.write.log(error);
@@ -208,30 +211,52 @@ class Game {
 				const card = this.cards.get(i);
 				return a.indexOf(i) === v && card != undefined && card.pic === ''
 			}
-			if (deck.filter(filter).length === 0) return;
-			const expnasionFiles : Array<DirEntry> = await fs.read.dir(constant.str.dirs.expansions) ?? [];
-			for (const i of expnasionFiles.filter(i => i.name.match(constant.reg.zip))) {
-				deck = deck.filter(filter);
+			deck = deck.filter(filter);
+			if (deck.length === 0) return;
+			const expnasion_files : Array<DirEntry> = await fs.read.dir(constant.str.dirs.expansions) ?? [];
+			for (const i of expnasion_files.filter(i => i.name.match(constant.reg.zip))) {
 				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(i.name, deck.map(num => num.toString()));
 				for (const code of deck) {
 					const blob = ypk.get(constant.reg.picture)!.get(code.toString());
 					if (blob != undefined)
 						this.cards.get(code)!.update_pic(URL.createObjectURL(blob as Blob));
 				}
+				deck = deck.filter(filter);
 			}
-			deck = deck.filter(filter);
 			const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(constant.str.files.pics, deck.map(num => num.toString()));
 			for (const code of deck) {
 				const blob = ypk.get(constant.reg.picture)!.get(code.toString());
 				if (blob != undefined)
 					this.cards.get(code)!.update_pic(URL.createObjectURL(blob as Blob));
 			}
-			// deck = deck.filter(filter);
-			// for (const code of deck) {
-			// 	await this.cards.get(code)!.find_pic();
-			// }
+			deck = deck.filter(filter);
+			for (const code of deck) {
+				await this.cards.get(code)!.find_pic();
+			}
 		},
+		interval : () : void => {
+			this.clear.interval();
+			this.interval = setInterval(async () => {
+				const deck = Array.from(this.cards.keys());
+				if (deck.length > this.interval_ct) {
+					await this.load.pic(deck.slice(this.interval_ct, this.interval_ct + 1000))
+					this.interval_ct += 1000;
+				}
+				else
+					this.clear.interval();
+			}, 5000);
+		}
 
+	}
+
+	clear = {
+		interval : () : void => {
+			if (this.interval != -1) {
+				clearInterval(this.interval);
+				this.interval = -1;
+				this.interval_ct = 0;
+			}
+		}
 	}
 
 	read = {
