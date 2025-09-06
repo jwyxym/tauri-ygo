@@ -156,6 +156,11 @@ class Card {
 	is_ex = () : boolean => {
 		return (this.type & 0x4802040) > 0;
 	}
+
+	is_token = () : boolean => {
+		return (this.type & 0x4000) === 0x4000;
+	}
+
 }
 
 export default Card;

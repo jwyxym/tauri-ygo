@@ -269,8 +269,8 @@
 				toast.error(rule);
 			}
 		},
-		push : (event: MouseEvent, card : Card, to_deck : number) : void => {
-			event.preventDefault();
+		push : (card : Card, to_deck : number) : void => {
+			if (card.is_token()) return;
 			const main = deck.get_dom(0);
 			const extra = deck.get_dom(1);
 			const side = deck.get_dom(2);
@@ -348,7 +348,7 @@
 			const el = deck.get_card(event.target as HTMLElement);
 			if (!el) return;
 			if (el.parentElement!.classList.contains('searcher')) {
-				deck.push(event, card as Card, 2);
+				deck.push(card as Card, 2);
 			} else {
 				const class_list = el.parentElement!.classList;
 				const to_deck = class_list.contains('deck_main') || class_list.contains('deck_extra') ? 2 : card.is_ex() ? 1 : 0;
@@ -363,7 +363,7 @@
 			const el = deck.get_card(event.target as HTMLElement);
 			if (!el) return;
 			if (el.parentElement!.classList.contains('searcher')) {
-				deck.push(event, card, card.is_ex() ? 1 : 0);
+				deck.push(card, card.is_ex() ? 1 : 0);
 			} else {
 				await deck.remove(el, card.name);
 			}
@@ -525,32 +525,36 @@
 
 	const sortable = {
 		array : [] as Array<HTMLElement>,
-		cards : [] as Array<HTMLElement>,
+		cards : {
+			main : [] as Array<HTMLElement>,
+			extra : [] as Array<HTMLElement>,
+			side : [] as Array<HTMLElement>,
+		},
 		choose : () : void => {
-			const main = deck.get_dom(0) as Array<HTMLImageElement>;
-			const extra = deck.get_dom(1) as Array<HTMLImageElement>;
-			const side = deck.get_dom(2) as Array<HTMLImageElement>;
-			sortable.cards = [...main, ...extra, ...side];
+			sortable.cards.main = deck.get_dom(0) as Array<HTMLImageElement>;
+			sortable.cards.extra = deck.get_dom(1) as Array<HTMLImageElement>;
+			sortable.cards.side = deck.get_dom(2) as Array<HTMLImageElement>;
 		},
 		end : () : void => {
-			sortable.cards = [];
+			sortable.cards.main = [];
+			sortable.cards.extra = [];
+			sortable.cards.side = [];
 		},
 		move : (evt : SortableEvent) : boolean => {
 			const el = deck.get_card(evt.dragged as HTMLElement);
 			if (el) {
-				const main = deck.get_dom(0) as Array<HTMLImageElement>;
-				const extra = deck.get_dom(1) as Array<HTMLImageElement>;
-				const side = deck.get_dom(2) as Array<HTMLImageElement>;
 				const card = mainGame.cards.get(deck.get_id(el));
 				const ct = search.info.lflist ? mainGame.lflist.get(search.info.lflist)?.get(card?.id ?? -1) ?? 3 : 3;
 				const id = card?.id.toString() ?? '';
-				if (evt.from.classList.contains('searcher') && sortable.cards.filter(i => deck.get_id(i).toString() === id).length + 1 > ct)
+				if(card && card.is_token())
 					return false;
-				if (evt.to.classList.contains('deck_side') && side.length + 1 <= 15)
+				if (evt.from.classList.contains('searcher') && [...sortable.cards.main, ...sortable.cards.extra, ...sortable.cards.side].filter(i => deck.get_id(i).toString() === id).length + 1 > ct)
+					return false;
+				if (evt.to.classList.contains('deck_side') && sortable.cards.side.length + 1 <= 15)
 					return true;
-				if (card && card.is_ex() && evt.to.classList.contains('deck_extra') && extra.length + 1 <= 15)
+				if (card && card.is_ex() && evt.to.classList.contains('deck_extra') && sortable.cards.extra.length + 1 <= 15)
 					return true;
-				if (card && !card.is_ex() && evt.to.classList.contains('deck_main') && main.length + 1 <= 60)
+				if (card && !card.is_ex() && evt.to.classList.contains('deck_main') && sortable.cards.main.length + 1 <= 60)
 					return true;
 			}
 			return false;
