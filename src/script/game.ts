@@ -174,7 +174,7 @@ class Game {
 				for (const [_, v] of ypk.get(constant.reg.ini) ?? new Map()) {
 					this.read.ini(v);
 				}
-				this.load.interval();
+				// this.load.interval();
 			}
 		} catch (error) {
 			fs.write.log(error);

@@ -476,15 +476,21 @@
 			await search.load_on();
 			search.button_loading = false;
 		},
-		load_on : async () : Promise<void> => {
-			if (search.loading || search.finished) return;
-			search.loading = true;
-			await search.load();
+		load_on : async (event : Event | undefined = undefined) : Promise<void> => {
+			if (event) {
+				const { scrollTop, scrollHeight, clientHeight } = event.target as HTMLElement;
+				if (scrollHeight / search.list.length < scrollHeight - scrollTop - clientHeight)
+					return;
+			}
+			if (!search.loading && !search.finished) {
+				search.loading = true;
+				await search.load();
+			}
 		},
 		load : async () : Promise<void> => {
 			const length = search.list.length;
 			if (search.list.length < search.result.length) {
-				const cards = search.result.slice(length, length + 100 > search.result.length ? search.result.length : length + 100);
+				const cards = search.result.slice(length, length + 1000 > search.result.length ? search.result.length : length + 1000);
 				await mainGame.load.pic(cards.map(i => i.id));
 				search.list.push(...cards);
 			}
