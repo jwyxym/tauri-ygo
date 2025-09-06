@@ -347,7 +347,7 @@
 				card = mainGame.cards.get(card)!;
 			const el = deck.get_card(event.target as HTMLElement);
 			if (!el) return;
-			if ((event.target as HTMLElement).parentElement!.classList.contains('searcher')) {
+			if (el.parentElement!.classList.contains('searcher')) {
 				deck.push(event, card as Card, 2);
 			} else {
 				const class_list = el.parentElement!.classList;
@@ -362,7 +362,7 @@
 				card = mainGame.cards.get(card)!;
 			const el = deck.get_card(event.target as HTMLElement);
 			if (!el) return;
-			if ((event.target as HTMLElement).parentElement!.classList.contains('searcher')) {
+			if (el.parentElement!.classList.contains('searcher')) {
 				deck.push(event, card, card.is_ex() ? 1 : 0);
 			} else {
 				await deck.remove(el, card.name);

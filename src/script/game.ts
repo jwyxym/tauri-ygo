@@ -211,18 +211,25 @@ class Game {
 			if (deck.filter(filter).length === 0) return;
 			const expnasionFiles : Array<DirEntry> = await fs.read.dir(constant.str.dirs.expansions) ?? [];
 			for (const i of expnasionFiles.filter(i => i.name.match(constant.reg.zip))) {
-				const pics = deck.filter(filter);
-				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(i.name, pics.map(num => num.toString()));
-				for (const code of pics) {
+				deck = deck.filter(filter);
+				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(i.name, deck.map(num => num.toString()));
+				for (const code of deck) {
 					const blob = ypk.get(constant.reg.picture)!.get(code.toString());
 					if (blob != undefined)
 						this.cards.get(code)!.update_pic(URL.createObjectURL(blob as Blob));
-				}	
+				}
 			}
-			const pics = deck.filter(filter);
-			for (const code of pics) {
-				await this.cards.get(code)!.find_pic();
+			deck = deck.filter(filter);
+			const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(constant.str.files.pics, deck.map(num => num.toString()));
+			for (const code of deck) {
+				const blob = ypk.get(constant.reg.picture)!.get(code.toString());
+				if (blob != undefined)
+					this.cards.get(code)!.update_pic(URL.createObjectURL(blob as Blob));
 			}
+			// deck = deck.filter(filter);
+			// for (const code of deck) {
+			// 	await this.cards.get(code)!.find_pic();
+			// }
 		},
 
 	}

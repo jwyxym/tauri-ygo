@@ -75,7 +75,8 @@ class Constant {
 				unknown : 'unknown',
 				pic : ['cardI', 'cardII']
 			},
-			database : 'cards.cdb'
+			database : 'cards.cdb',
+			pics : 'pics.zip'
 		},
 		string_conf : {
 			system : '!system',
