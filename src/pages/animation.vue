@@ -1,36 +1,28 @@
 <template>
 	<div class = 'body' ref = 'body'>
-		<AnimatePresence>
-			<motion.img
+		<transition name = 'opacity'>
+			<img
 				ref = 'picI'
 				id = 'picI'
-				:initial = '{ opacity: 0 }'
-				:animate = '{ opacity: 1 }'
-				:exit = '{ opacity: 0 }'
 				:style = "{ '--y' : `${position.height * 0.5}px`, '--x' : `${position.width * -0.3}px` }"
 				v-if = 'position.height > 0 && position.width > 0 && animation.show'
 				:src = 'mainGame.get.textures(constant.str.files.textures.pic[0])'
 			/>
-		</AnimatePresence>
-		<AnimatePresence>
-			<motion.img
+		</transition>
+		<transition name = 'opacity'>
+			<img
 				ref = 'picII'
 				id = 'picII'
-				:initial = '{ opacity: 0 }'
-				:animate = '{ opacity: 1 }'
-				:exit = '{ opacity: 0 }'
 				:style = "{ '--y' : `${position.height * 0.1}px`, '--x' : `${position.width * 0.1}px` }"
 				v-if = 'position.height > 0 && position.width > 0 && animation.show'
 				:src = 'mainGame.get.textures(constant.str.files.textures.pic[1])'
 			/>
-		</AnimatePresence>
+		</transition>
 	</div>
 </template>
 <script setup lang = 'ts'>
 	import { ref, onMounted, Ref, watch, Reactive, reactive } from 'vue';
 	import * as path from '@tauri-apps/api/path';
-
-	import { motion, AnimatePresence } from 'motion-v';
 
 	import fs from '../script/fs';
 	import pos, { posLike } from '../script/position';
@@ -66,7 +58,16 @@
 				await (new Promise(resolve => setTimeout(resolve, 200)));
 				tl.kill()
 			}
-			const tl = animation.count > 0 ? gsap.attack(100, { element : picI.value!, selector : '#picI', angle : 0 }, { element : picII.value!, selector : '#picII', angle : 180 }, kill) : gsap.attack(100, { element : picII.value!, selector : '#picII', angle : 180 }, { element : picI.value!, selector : '#picI', angle : 0 }, kill);
+			const tl = gsap.attack({
+				distance : 100,
+				attacker : animation.count > 0 ? picI.value! : picII.value!,
+				defender: animation.count > 0 ? picII.value! : picI.value!,
+				complete : kill,
+				angle : {
+					attacker : animation.count > 0 ? 0 : 180,
+					defender : 0
+				}
+			});
 		},
 		show : true,
 		count : 0

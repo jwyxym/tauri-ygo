@@ -12,10 +12,6 @@
 	justify-items: center;
 	align-items: center;
 	z-index: 10;
-	// margin: 0 0 0 5%;
-	span {
-		display: none;
-	}
 	.content {
 		height: 90%;
 		max-width: 20%;
@@ -24,17 +20,36 @@
 		.list {
 			height: 70%;
 			display: grid;
-			.item {
-				font-size: 7vh;
-				user-select: none;
+			gap: 10px;
+			.item_back {
+				width: 0;
+				font-family: 'menu';
+				font-style: italic;
+				background-color: font.$hover-color;
+				height: 100%;
+				transition: all 0.4s ease;
+				border: 2px solid rgb(white, 0);
+				.item {
+					font-size: 7vh;
+					user-select: none;
+					transition: all 0.4s ease;
+					&:hover {
+						transform: translate(10%);
+					}
+				}
 				&:hover {
 					cursor: pointer;
+					width: 140%;
+					border: 2px solid font.$boder-color;
 				}
 			}
 		}
 		.title {
 			height: 20%;
 			font-size: 10vh;
+		}
+		.title, .item_back {
+			display: none;
 		}
 	}
 }

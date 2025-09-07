@@ -12,24 +12,41 @@ class Gsap {
 		return gsap.timeline(vars);
 	};
 
-	attack = (distance : number,  attacker : gsapElement, defender: gsapElement, complete : Function = () => {}, attackedDistance : number = 300) : gsap.core.Timeline => {
+	attack = (obj : {
+		distance : number;
+		attacker : HTMLElement;
+		defender: HTMLElement;
+		complete ?: Function;
+		attacked_distance ?: number;
+		angle : {
+			attacker ?: number;
+			defender ?: number;
+		}
+	}) : gsap.core.Timeline => {
+		const attacker = obj.attacker;
+		const defender = obj.defender;
+		const distance = obj.distance;
+		const complete = obj.complete;
+		const attacker_angle = obj.angle.attacker;
+		const defender_angle = obj.angle.defender;
+		const attacked_distance = obj.attacked_distance ?? 300;
 		const tl = this.timeline();
-		if (!attacker.element || !defender.element) return tl;
-		const p1 = pos.get(attacker.element)
-		const p2 = pos.get(defender.element)
+		const p1 = pos.get(attacker)
+		const p2 = pos.get(defender)
 		const angle = pos.angle(p1, p2);
 		const radians = angle * Math.PI / 180;
-		if (attacker.angle !== undefined)
-			tl.to(attacker.selector, {
-				rotation : attacker.angle,
+		console.log(attacker)
+		if (attacker_angle !== undefined)
+			tl.to(attacker, {
+				rotation : attacker_angle,
 				duration : 0
 			}, 0);
-		if (defender.angle !== undefined)
-			tl.to(defender.selector, {
-				rotation : defender.angle,
+		if (defender_angle !== undefined)
+			tl.to(defender, {
+				rotation : defender_angle,
 				duration : 0
 			}, 0);
-		tl.to(attacker.selector, {
+		tl.to(attacker, {
 			rotation : angle,
 			duration : 0.5
 		}, 0.5);
@@ -37,33 +54,33 @@ class Gsap {
     	const distanceY = Math.abs(Math.sin(radians) * distance);
 		const X = Math.abs(pos.oppo(p1, p2));
     	const Y = Math.abs(pos.adjacent(p1, p2));
-		tl.to(attacker.selector, {
+		tl.to(attacker, {
 			x : `${pos.isLeft(p1, p2) ? '-' : '+'}=${distanceX}`,
 			y : `${pos.isHigh(p1, p2) ? '-' : '+'}=${distanceY}`,
 			duration : 0.5
 		}, 0.75);
-		tl.to(attacker.selector, {
+		tl.to(attacker, {
 			x : pos.isLeft(p1, p2) ? `+=${X + distanceX}` : `-=${X + distanceX}`,
 			y : pos.isHigh(p1, p2) ? `+=${Y + distanceX}` : `-=${Y + distanceY}`,
 			duration : 0.25,
 			ease : 'power2.inOut'
 		}, 1.25);
-		tl.to(attacker.selector, {
+		tl.to(attacker, {
 			rotation : `+=0`,
 			duration : 0.5
 		}, 1.5);
 		const attackedRadians = Math.PI / 2 - radians;
-		const attackedDistanceX = Math.abs(Math.cos(attackedRadians) * attackedDistance);
-    	const attackedDistanceY = Math.abs(Math.sin(attackedRadians) * attackedDistance);
-		tl.to(defender.selector, {
-			x : `${pos.isLeft(p2, p1) ? '-' : '+'}=${attackedDistanceX}`,
-			y : `${pos.isHigh(p2, p1) ? '-' : '+'}=${attackedDistanceY}`,
+		const attacked_distanceX = Math.abs(Math.cos(attackedRadians) * attacked_distance);
+    	const attacked_distanceY = Math.abs(Math.sin(attackedRadians) * attacked_distance);
+		tl.to(defender, {
+			x : `${pos.isLeft(p2, p1) ? '-' : '+'}=${attacked_distanceX}`,
+			y : `${pos.isHigh(p2, p1) ? '-' : '+'}=${attacked_distanceY}`,
 			duration : 0.4,
 			ease : 'power2.out',
-			onComplete: () => { complete(); }
+			onComplete: () => { if (complete !== undefined) complete(); }
 		}, 1.4);
-		let rotation : string = (defender.angle && Math.abs(defender.angle) == 90) ? angle > 270 || (angle > 90 && angle <= 180) ? '-' : '+' : angle > 270 || (angle > 90 && angle <= 180) ? '+' : '-';
-		tl.to(defender.selector, {
+		let rotation : string = (defender_angle && Math.abs(defender_angle) == 90) ? angle > 270 || (angle > 90 && angle <= 180) ? '-' : '+' : angle > 270 || (angle > 90 && angle <= 180) ? '+' : '-';
+		tl.to(defender, {
 			rotation : `${rotation}=${360 * 1}`,
 			duration : 0.5,
 		}, 1.4);
@@ -71,15 +88,14 @@ class Gsap {
 		return tl;
 	};
 
-	leave = (card : gsapElement, complete : Function = () => {}) : gsap.core.Timeline => {
+	leave = (el : HTMLElement, complete : Function = () => {}) : gsap.core.Timeline => {
 		const tl = this.timeline();
-		if (!card.element) return tl;
-		tl.to(card.selector, {
+		tl.to(el, {
 			x : '+=50vw',
 			y : '-=50vh',
 			duration : 0.5,
 		});
-		tl.to(card.element, {
+		tl.to(el, {
 			opacity: 0,
 			duration : 0.3,
 			onComplete: () => { complete(); }
@@ -87,10 +103,9 @@ class Gsap {
 		return tl;
 	};
 
-	opacity = (card : gsapElement, complete : Function = () => {}) : gsap.core.Timeline => {
+	opacity = (el : HTMLElement, complete : Function = () => {}) : gsap.core.Timeline => {
 		const tl = this.timeline();
-		if (!card.element) return tl;
-		tl.to(card.selector, {
+		tl.to(el, {
 			opacity: 0,
 			duration : 0.4,
 			onComplete: () => { complete(); }
@@ -98,23 +113,36 @@ class Gsap {
 		return tl;
 	};
 
-	move_left = (el : gsapElement, complete : Function = () => {}) : gsap.core.Timeline => {
+	move_left = (array : Array<HTMLElement>, complete : Function = () => {}) : gsap.core.Timeline => {
 		const tl = this.timeline();
-		tl.to(el.selector, {
-			x : '-=80vw',
-			duration : 1,
-			onComplete: () => { complete(); }
-		});
+		for (const [v, i] of array.entries()) {
+			tl.to(i, {
+				x : '-80vw',
+				duration : 0.5,
+				onComplete: () => {
+					if (v === array.length - 1) complete();
+				}
+			}, 0.2 * v);
+		}
 		return tl;
 	};
 
-	from_left = (el : gsapElement, complete : Function = () => {}) : gsap.core.Timeline => {
+	from_left = (array : Array<HTMLElement>, complete : Function = () => {}) : gsap.core.Timeline => {
 		const tl = this.timeline();
-		tl.from(el.selector, {
-			x : '-=80vw',
-			duration : 1,
-			onComplete: () => { complete(); }
-		});
+		for (const [v, i] of array.entries()) {
+			tl.to(i, {
+				x : '-=80vw',
+				duration : 0.2,
+				onComplete: () => { i.style.display = 'block'; }
+			}, 0);
+			tl.to(i, {
+				x : '+=80vw',
+				duration : 1,
+				onComplete: () => {
+					if (v === array.length - 1) complete();
+				}
+			}, 0.2 * (v + 1));
+		}
 		return tl;
 	};
 };

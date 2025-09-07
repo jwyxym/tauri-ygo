@@ -300,7 +300,7 @@
 			if (to.length + 1 > [60, 15, 15][to_deck]) {
 				toast.error(mainGame.get.text().deck.rule.deck.deck_count.replace(constant.str.replace, [60, 15, 15][to_deck].toString()));
 			} else {
-				gsap.opacity({ element : el, selector : el}, () => { el.style.display = 'none'; });
+				gsap.opacity(el, () => { el.style.display = 'none'; });
 				switch(to_deck) {
 					case 0:
 						deck.main.push(card.id);
@@ -317,10 +317,7 @@
 		remove : async (el : HTMLElement, name : string) : Promise<void> => {
 			const title = mainGame.get.text().deck.remove.replace(constant.str.replace, name);
 			const leave = () => {
-				gsap.leave({
-					element : el,
-					selector : el
-				}, () : void => {
+				gsap.leave(el, () : void => {
 					el.style.display = 'none';
 				});
 			};
