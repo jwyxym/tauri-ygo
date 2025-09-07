@@ -42,14 +42,14 @@
 				page.show.deck = false;
 				setTimeout(() => {
 					page.show.menu = true;
-				}, 400);
+				}, 500);
 			},
 			deck : () : void => {
 				page.show.menu = false;
 				setTimeout(() => {
 					page.show.deck = true;
-				}, 400);
-			},
+				}, 500);
+			}
 		}
 	});
 
@@ -76,8 +76,10 @@
 		.body {
 			height: 97vh;
 			width: 100vw;
+
 			display: flex;
-			justify-content: center;
+			gap: 10%;
+			justify-content: flex-start;
 		}
 		#back {
 			background: linear-gradient(#1c1a2e, #2f2434);

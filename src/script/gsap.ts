@@ -1,9 +1,8 @@
-import { Ref } from "vue";
 import { gsap } from 'gsap';
-import pos, { posLike } from './position';
+import pos from './position';
 
 interface gsapElement {
-	element : HTMLElement;
+	element ?: HTMLElement;
 	selector : string | HTMLElement;
 	angle ?: number;
 };
@@ -14,11 +13,12 @@ class Gsap {
 	};
 
 	attack = (distance : number,  attacker : gsapElement, defender: gsapElement, complete : Function = () => {}, attackedDistance : number = 300) : gsap.core.Timeline => {
+		const tl = this.timeline();
+		if (!attacker.element || !defender.element) return tl;
 		const p1 = pos.get(attacker.element)
 		const p2 = pos.get(defender.element)
 		const angle = pos.angle(p1, p2);
 		const radians = angle * Math.PI / 180;
-		const tl = this.timeline();
 		if (attacker.angle !== undefined)
 			tl.to(attacker.selector, {
 				rotation : attacker.angle,
@@ -73,7 +73,8 @@ class Gsap {
 
 	leave = (card : gsapElement, complete : Function = () => {}) : gsap.core.Timeline => {
 		const tl = this.timeline();
-		tl.to(card.element, {
+		if (!card.element) return tl;
+		tl.to(card.selector, {
 			x : '+=50vw',
 			y : '-=50vh',
 			duration : 0.5,
@@ -88,9 +89,30 @@ class Gsap {
 
 	opacity = (card : gsapElement, complete : Function = () => {}) : gsap.core.Timeline => {
 		const tl = this.timeline();
-		tl.to(card.element, {
+		if (!card.element) return tl;
+		tl.to(card.selector, {
 			opacity: 0,
 			duration : 0.4,
+			onComplete: () => { complete(); }
+		});
+		return tl;
+	};
+
+	move_left = (el : gsapElement, complete : Function = () => {}) : gsap.core.Timeline => {
+		const tl = this.timeline();
+		tl.to(el.selector, {
+			x : '-=80vw',
+			duration : 1,
+			onComplete: () => { complete(); }
+		});
+		return tl;
+	};
+
+	from_left = (el : gsapElement, complete : Function = () => {}) : gsap.core.Timeline => {
+		const tl = this.timeline();
+		tl.from(el.selector, {
+			x : '-=80vw',
+			duration : 1,
 			onComplete: () => { complete(); }
 		});
 		return tl;

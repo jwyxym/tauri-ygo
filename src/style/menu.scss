@@ -5,12 +5,17 @@
 	color: font.$text-color;
 	font-family: 'title';
 	height: 100%;
+	width: 50%;
 	white-space: nowrap;
 	display: flex;
+	justify-content: left;
 	justify-items: center;
 	align-items: center;
 	z-index: 10;
-	margin: 0 0 0 5%;
+	// margin: 0 0 0 5%;
+	span {
+		display: none;
+	}
 	.content {
 		height: 90%;
 		max-width: 20%;
