@@ -35,7 +35,6 @@ class Gsap {
 		const p2 = pos.get(defender)
 		const angle = pos.angle(p1, p2);
 		const radians = angle * Math.PI / 180;
-		console.log(attacker)
 		if (attacker_angle !== undefined)
 			tl.to(attacker, {
 				rotation : attacker_angle,

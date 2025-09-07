@@ -1,5 +1,6 @@
 import { exit } from '@tauri-apps/plugin-process';
 import { DirEntry } from '@tauri-apps/plugin-fs';
+import { join } from '@tauri-apps/api/path';
 
 import fs from './fs';
 import constant from './constant';
@@ -76,7 +77,7 @@ class Game {
 		system : (key : string) : Array<string> | boolean | undefined => {
 			if (this.system.has(key)) {
 				const value = this.system.get(key);
-				if (!isNaN(Number(value)))
+				if (isNaN(Number(value)))
 					return value!.split('&&');
 				else
 					return !!Number(value);
@@ -171,9 +172,12 @@ class Game {
 		expansion : async () : Promise<void> => {
 			// 读取expnasions文件夹
 			const load_expansion : Array<string> = this.get.system(constant.str.system_conf.string.expansion) as Array<string> ?? [];
-			const expnasion_files : Array<DirEntry> = (await fs.read.dir(constant.str.dirs.expansions))?.filter(i => i.isFile) ?? [];
+			const expnasion_files : Array<DirEntry> = (await fs.read.dir(constant.str.dirs.expansions, false))?.filter(i => i.isFile) ?? [];
 			const load = load_expansion.filter(i => expnasion_files.findIndex(j => j.name === i) > -1);
-			this.system.set(constant.str.system_conf.string.expansion, load.join('&&'))
+			this.system.set(constant.str.system_conf.string.expansion, load.join('&&'));
+			for (let i = 0; i < load.length; i++) {
+				load[i] = await join(constant.str.dirs.expansions, load[i]);
+			}
 			//读取cdb
 			for (const i of load.filter(i => i.match(constant.reg.database))) {
 				const database : Array<Array<string | number>> | undefined = await fs.read.database(i);
@@ -338,12 +342,11 @@ class Game {
 			}
 		},
 		system_conf : (line : string) : void => {
-			if (line.startsWith('#'))
+			if (line.startsWith('#') || line.length === 0)
 				return;
 			const key_value = line.split('=', 2);
 			if (key_value.length == 2) {
-				const v = key_value[1].trim();
-				this.system.set(key_value[0].trim(), v);
+				this.system.set(key_value[0].trim(), key_value[1].trim());
 			}
 		},
 		database : async (db : Array<Array<string | number>>) : Promise<void> => {
