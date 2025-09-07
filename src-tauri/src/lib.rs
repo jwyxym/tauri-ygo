@@ -67,6 +67,10 @@ fn read_zip(path: String, file_type: Vec<String>) -> Result<Vec<(String, FileCon
                 }
             }
         }
+
+        if file_type.len() == entries.len() {
+            break;
+        }
     }
     Ok(entries)
 }
