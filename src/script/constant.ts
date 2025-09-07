@@ -8,15 +8,15 @@ class System {
 		this.system = platform();
 	};
 
-	baseDir = () : number => {
+	base_dir = () : number => {
 		return this.system == 'android' ? fs.BaseDirectory.Public : fs.BaseDirectory.Resource;
 	};
 
-	basePath = async () : Promise<string> => {
+	base_path = async () : Promise<string> => {
 		return this.system == 'android' ? await path.publicDir() : await path.resourceDir();
 	};
 
-	lineFeed = () : string => {
+	line_feed = () : string => {
 		const map = new Map<string, string>([
 			['linux', '\n'],
 			['macos', '\n'],
@@ -62,12 +62,12 @@ class Constant {
 			cache : 'cache'
 		},
 		files : {
+			system : 'system.conf',
 			conf : {
+				info : 'cardinfo.conf',
 				strings : 'strings.conf',
 				lflist : 'lflist.conf',
-				system : 'system.conf',
 				servers : 'servers.conf',
-				info : 'cardinfo.conf'
 			},
 			textures : {
 				unknown : 'unknown',
@@ -93,12 +93,12 @@ class Constant {
 		system_conf : {
 			chk : {
 				deck : {
-					delete : 'chk_before_delete_card',
-					exit : 'chk_before_exit_deck'
+					delete : 'delete',
+					exit : 'exit'
 				}
 			},
 			string : {
-				expansion : 'load_expansion'
+				expansion : 'load'
 			}
 		},
 		ini : {

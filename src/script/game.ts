@@ -48,6 +48,94 @@ class Game {
 						this.textures.set(name[1], url);
 				}
 			}
+			//读取system.conf文件夹
+			const text : string | undefined = await fs.read.text(constant.str.files.system);
+			if (text !== undefined) {
+				const lines : Array<string> = text.split(/\r?\n/);
+				for (const i of lines) {
+					const line : string = i.trim();
+					this.read.system_conf(line);
+				}
+			}
+			await fs.write.system();
+			await this.load.card();
+			await this.load.expansion();
+		} catch (error) {
+			fs.write.log(error);
+		}
+	};
+
+	get = {
+		text : () : textLike => {
+			switch (this.select) {
+				case constant.str.language.Zh_CN:
+					return Zh_CN;
+			}
+			return Zh_CN;
+		},
+		system : (key : string) : Array<string> | boolean | undefined => {
+			if (this.system.has(key)) {
+				const value = this.system.get(key);
+				if (!isNaN(Number(value)))
+					return value!.split('&&');
+				else
+					return !!Number(value);
+			}
+			return undefined;
+		},
+		textures : (key : string) : string | undefined => {
+			return this.textures.get(key);
+		},
+		card : (key : string | number) : Card | undefined => {
+			key = typeof key == 'string' ? parseInt(key) : key;
+			return this.cards.get(key);
+		},
+	}
+
+	load = {
+		deck : async () : Promise<Array<Deck>> => {
+			let decks : Array<Deck> = [];
+			for (const i of await fs.read.dir(constant.str.dirs.deck) ?? []) {
+				if (i.name.match(constant.reg.deck)) {
+					const ydk : Deck | undefined = await fs.read.ydk(i.name);
+					const name = i.name.match(constant.reg.get_name) ?? [];
+					if (name.length >= 2 && ydk !== undefined) {
+						ydk.push_name(name[1]);
+						decks.push(ydk);
+					}
+				}
+			}
+			return decks;
+		},
+		pic : async (deck : Array<number>) : Promise<void> => {
+			const filter = (i : number, v : number, a : Array<number>) => {
+				const card = this.cards.get(i);
+				return a.indexOf(i) === v && card != undefined && card.pic === ''
+			}
+			deck = deck.filter(filter);
+			if (deck.length === 0) return;
+			const expnasion_files : Array<DirEntry> = await fs.read.dir(constant.str.dirs.expansions) ?? [];
+			for (const i of expnasion_files.filter(i => i.name.match(constant.reg.zip))) {
+				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(i.name, deck.map(num => num.toString()));
+				for (const code of deck) {
+					const blob = ypk.get(constant.reg.picture)!.get(code.toString());
+					if (blob != undefined)
+						this.cards.get(code)!.update_pic(URL.createObjectURL(blob as Blob));
+				}
+				deck = deck.filter(filter);
+			}
+			const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(constant.str.files.pics, deck.map(num => num.toString()));
+			for (const code of deck) {
+				const blob = ypk.get(constant.reg.picture)!.get(code.toString());
+				if (blob != undefined)
+					this.cards.get(code)!.update_pic(URL.createObjectURL(blob as Blob));
+			}
+			deck = deck.filter(filter);
+			for (const code of deck) {
+				await this.cards.get(code)!.find_pic();
+			}
+		},
+		card : async () : Promise<void> => {
 			//读取目录下的所有conf
 			for (const [_, conf] of Object.entries(constant.str.files.conf)) {
 				const text : string | undefined = await fs.read.text(conf);
@@ -67,9 +155,6 @@ class Game {
 							if (v === (lines.length - 1))
 								this.lflist_now = '';
 							break;
-						case constant.str.files.conf.system:
-							this.read.system_conf(line);
-							break;
 						case constant.str.files.conf.info:
 							this.read.info_conf(line);
 							break;
@@ -82,6 +167,8 @@ class Game {
 				if (database !== undefined)
 					await this.read.database(database);
 			}
+		},
+		expansion : async () : Promise<void> => {
 			// 读取expnasions文件夹
 			const load_expansion : Array<string> = this.get.system(constant.str.system_conf.string.expansion) as Array<string> ?? [];
 			const expnasion_files : Array<DirEntry> = (await fs.read.dir(constant.str.dirs.expansions))?.filter(i => i.isFile) ?? [];
@@ -178,81 +265,7 @@ class Game {
 					this.read.ini(v);
 				}
 			}
-		} catch (error) {
-			fs.write.log(error);
 		}
-	};
-
-	get = {
-		text : () : textLike => {
-			switch (this.select) {
-				case constant.str.language.Zh_CN:
-					return Zh_CN;
-			}
-			return Zh_CN;
-		},
-		system : (key : string) : Array<string> | boolean | undefined => {
-			if (this.system.has(key)) {
-				const value = this.system.get(key);
-				if (!isNaN(Number(value)))
-					return value!.split('&&');
-				else
-					return !!Number(value);
-			}
-			return undefined;
-		},
-		textures : (key : string) : string | undefined => {
-			return this.textures.get(key);
-		},
-		card : (key : string | number) : Card | undefined => {
-			key = typeof key == 'string' ? parseInt(key) : key;
-			return this.cards.get(key);
-		},
-	}
-
-	load = {
-		deck : async () : Promise<Array<Deck>> => {
-			let decks : Array<Deck> = [];
-			for (const i of await fs.read.dir(constant.str.dirs.deck) ?? []) {
-				if (i.name.match(constant.reg.deck)) {
-					const ydk : Deck | undefined = await fs.read.ydk(i.name);
-					const name = i.name.match(constant.reg.get_name) ?? [];
-					if (name.length >= 2 && ydk !== undefined) {
-						ydk.push_name(name[1]);
-						decks.push(ydk);
-					}
-				}
-			}
-			return decks;
-		},
-		pic : async (deck : Array<number>) : Promise<void> => {
-			const filter = (i : number, v : number, a : Array<number>) => {
-				const card = this.cards.get(i);
-				return a.indexOf(i) === v && card != undefined && card.pic === ''
-			}
-			deck = deck.filter(filter);
-			if (deck.length === 0) return;
-			const expnasion_files : Array<DirEntry> = await fs.read.dir(constant.str.dirs.expansions) ?? [];
-			for (const i of expnasion_files.filter(i => i.name.match(constant.reg.zip))) {
-				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(i.name, deck.map(num => num.toString()));
-				for (const code of deck) {
-					const blob = ypk.get(constant.reg.picture)!.get(code.toString());
-					if (blob != undefined)
-						this.cards.get(code)!.update_pic(URL.createObjectURL(blob as Blob));
-				}
-				deck = deck.filter(filter);
-			}
-			const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(constant.str.files.pics, deck.map(num => num.toString()));
-			for (const code of deck) {
-				const blob = ypk.get(constant.reg.picture)!.get(code.toString());
-				if (blob != undefined)
-					this.cards.get(code)!.update_pic(URL.createObjectURL(blob as Blob));
-			}
-			deck = deck.filter(filter);
-			for (const code of deck) {
-				await this.cards.get(code)!.find_pic();
-			}
-		},
 	}
 
 	clear = {
@@ -328,8 +341,10 @@ class Game {
 			if (line.startsWith('#'))
 				return;
 			const key_value = line.split('=', 2);
-			if (key_value[1].length > 0)
-				this.system.set(key_value[0].trim(), key_value[1].trim())
+			if (key_value.length == 2) {
+				const v = key_value[1].trim();
+				this.system.set(key_value[0].trim(), v);
+			}
 		},
 		database : async (db : Array<Array<string | number>>) : Promise<void> => {
 			for (const i of db)

@@ -14,9 +14,9 @@ class Fs {
 	rename_dir : fs.RenameOptions;
 
 	constructor () {
-		const base_dir = constant.system.baseDir() 
+		const base_dir = constant.system.base_dir() 
 		this.dir = { baseDir: base_dir };
-		this.path = constant.system.basePath();
+		this.path = constant.system.base_path();
 		this.rename_dir = {
 			oldPathBaseDir : base_dir,
 			newPathBaseDir : base_dir
@@ -35,7 +35,7 @@ class Fs {
 	read = {
 		database : async (file : string) : Promise<Array<Array<string | number>> | undefined> => {
 			try {
-				const p = await path.join(await constant.system.basePath(), file);
+				const p = await path.join(await constant.system.base_path(), file);
 				const entries = await invoke<Array<[Array<number>, Array<string>]>>('read_db', {
 					path : p,
 				});
@@ -66,7 +66,7 @@ class Fs {
 				[constant.reg.ini, new Map]
 			]);
 			try {
-				const p = await path.join(await constant.system.basePath(), file);
+				const p = await path.join(await constant.system.base_path(), file);
 				const entries = await invoke<Array<[string, { content : string | Uint8Array}]>>('read_zip', {
 					path : p, fileType: file_type
 				});
@@ -155,7 +155,7 @@ class Fs {
 				}
 				console.error(text)
 				toast.error(get_reason(text));
-				const log = `[${new Date().toLocaleString()}] ${text}${constant.system.lineFeed()}`
+				const log = `[${new Date().toLocaleString()}] ${text}${constant.system.line_feed()}`
 				if (await fs.exists(constant.log.error, this.dir)) {
 					const file = await fs.open(constant.log.error, { append: true, baseDir : this.dir.baseDir });
 					await file.write(new TextEncoder().encode(log));
@@ -170,6 +170,19 @@ class Fs {
 				toast.error(error.toString());
 				return false;
 			}
+		},
+		system : async () : Promise<boolean> => {
+			try {
+				let system = '';
+				for (const [k, i] of mainGame.system) {
+					system += `${k} = ${i}${constant.system.line_feed()}`
+				}
+				await fs.writeTextFile(constant.str.files.system, system, this.dir);
+				return true;
+			} catch (error) {
+				this.write.log(error);
+			}
+			return false;
 		},
 		ydk : async (file : string, ydk : Deck) : Promise<boolean> => {
 			try {
