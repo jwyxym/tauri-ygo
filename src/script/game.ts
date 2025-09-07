@@ -22,7 +22,7 @@ class Game {
 		[constant.str.info_conf.type, new Map]
 	]);
 	lflist : Map<string, Map<number, number>> = new Map;
-	system : Map<string, boolean> = new Map;
+	system : Map<string, string> = new Map;
 	servers : Map<string, string> = new Map;
 	cards : Map<number, Card> = new Map;
 	textures : Map<string, string> = new Map;
@@ -83,33 +83,36 @@ class Game {
 					await this.read.database(database);
 			}
 			// 读取expnasions文件夹
-			const expnasion_files : Array<DirEntry> = await fs.read.dir(constant.str.dirs.expansions) ?? [];
+			const load_expansion : Array<string> = this.get.system(constant.str.system_conf.string.expansion) as Array<string> ?? [];
+			const expnasion_files : Array<DirEntry> = (await fs.read.dir(constant.str.dirs.expansions))?.filter(i => i.isFile) ?? [];
+			const load = load_expansion.filter(i => expnasion_files.findIndex(j => j.name === i) > -1);
+			this.system.set(constant.str.system_conf.string.expansion, load.join('&&'))
 			//读取cdb
-			for (const i of expnasion_files.filter(i => i.name.match(constant.reg.database))) {
-				const database : Array<Array<string | number>> | undefined = await fs.read.database(i.name);
+			for (const i of load.filter(i => i.match(constant.reg.database))) {
+				const database : Array<Array<string | number>> | undefined = await fs.read.database(i);
 				if (database !== undefined)
 					await this.read.database(database);
 			}
 			//读取conf
-			for (const i of expnasion_files.filter(i => i.name.match(constant.reg.conf))) {
-				if (i.name.endsWith(constant.str.files.conf.strings)) {
-					const text : string | undefined = await fs.read.text(i.name);
+			for (const i of load.filter(i => i.match(constant.reg.conf))) {
+				if (i.endsWith(constant.str.files.conf.strings)) {
+					const text : string | undefined = await fs.read.text(i);
 					if (text === undefined) continue;
 					const lines : Array<string> = text.split(/\r?\n/);
 					for (const [_, i] of lines.entries()) {
 						const line : string = i.trim();
 						this.read.string_conf(line);
 					}
-				} else if (i.name.endsWith(constant.str.files.conf.servers)) {
-					const text : string | undefined = await fs.read.text(i.name);
+				} else if (i.endsWith(constant.str.files.conf.servers)) {
+					const text : string | undefined = await fs.read.text(i);
 					if (text === undefined) continue;
 					const lines : Array<string> = text.split(/\r?\n/);
 					for (const [_, i] of lines.entries()) {
 						const line : string = i.trim();
 						this.read.servers_conf(line);
 					}
-				} else if (i.name.endsWith(constant.str.files.conf.lflist)) {
-					const text : string | undefined = await fs.read.text(i.name);
+				} else if (i.endsWith(constant.str.files.conf.lflist)) {
+					const text : string | undefined = await fs.read.text(i);
 					if (text === undefined) continue;
 					const lines : Array<string> = text.split(/\r?\n/);
 					for (const [v, i] of lines.entries()) {
@@ -118,8 +121,8 @@ class Game {
 						if (v === (lines.length - 1))
 							this.lflist_now = '';
 					}
-				} else if (i.name.endsWith(constant.str.files.conf.info)) {
-					const text : string | undefined = await fs.read.text(i.name);
+				} else if (i.endsWith(constant.str.files.conf.info)) {
+					const text : string | undefined = await fs.read.text(i);
 					if (text === undefined) continue;
 					const lines : Array<string> = text.split(/\r?\n/);
 					for (const [_, i] of lines.entries()) {
@@ -129,14 +132,14 @@ class Game {
 				}
 			}
 			//读取ini
-			for (const i of expnasion_files.filter(i => i.name.match(constant.reg.ini))) {
-				const string : string | undefined = await fs.read.text(i.name);
+			for (const i of load.filter(i => i.match(constant.reg.ini))) {
+				const string : string | undefined = await fs.read.text(i);
 				if (string !== undefined)
 					this.read.ini(string);
 			}
 			//读取ypk\zip
-			for (const i of expnasion_files.filter(i => i.name.match(constant.reg.zip))) {
-				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(i.name);
+			for (const i of load.filter(i => i.match(constant.reg.zip))) {
+				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(i);
 				for (const [_, v] of ypk.get(constant.reg.database) ?? new Map()) {
 					const db = await fs.read.databaseInMemory(v as Uint8Array<ArrayBuffer>);
 					if (db !== undefined)
@@ -174,7 +177,6 @@ class Game {
 				for (const [_, v] of ypk.get(constant.reg.ini) ?? new Map()) {
 					this.read.ini(v);
 				}
-				// this.load.interval();
 			}
 		} catch (error) {
 			fs.write.log(error);
@@ -188,7 +190,24 @@ class Game {
 					return Zh_CN;
 			}
 			return Zh_CN;
-		}
+		},
+		system : (key : string) : Array<string> | boolean | undefined => {
+			if (this.system.has(key)) {
+				const value = this.system.get(key);
+				if (!isNaN(Number(value)))
+					return value!.split('&&');
+				else
+					return !!Number(value);
+			}
+			return undefined;
+		},
+		textures : (key : string) : string | undefined => {
+			return this.textures.get(key);
+		},
+		card : (key : string | number) : Card | undefined => {
+			key = typeof key == 'string' ? parseInt(key) : key;
+			return this.cards.get(key);
+		},
 	}
 
 	load = {
@@ -234,29 +253,9 @@ class Game {
 				await this.cards.get(code)!.find_pic();
 			}
 		},
-		interval : () : void => {
-			this.clear.interval();
-			this.interval = setInterval(async () => {
-				const deck = Array.from(this.cards.keys());
-				if (deck.length > this.interval_ct) {
-					await this.load.pic(deck.slice(this.interval_ct, this.interval_ct + 1000))
-					this.interval_ct += 1000;
-				}
-				else
-					this.clear.interval();
-			}, 5000);
-		}
-
 	}
 
 	clear = {
-		interval : () : void => {
-			if (this.interval != -1) {
-				clearInterval(this.interval);
-				this.interval = -1;
-				this.interval_ct = 0;
-			}
-		}
 	}
 
 	read = {
@@ -328,9 +327,9 @@ class Game {
 		system_conf : (line : string) : void => {
 			if (line.startsWith('#'))
 				return;
-			const key_value = line.split('=');
-			if (key_value.length == 2)
-				this.system.set(key_value[0].trim(), !!parseInt(key_value[1].trim()))
+			const key_value = line.split('=', 2);
+			if (key_value[1].length > 0)
+				this.system.set(key_value[0].trim(), key_value[1].trim())
 		},
 		database : async (db : Array<Array<string | number>>) : Promise<void> => {
 			for (const i of db)

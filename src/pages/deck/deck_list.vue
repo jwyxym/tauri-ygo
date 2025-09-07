@@ -200,7 +200,7 @@
 		},
 		get_pic : (card : number) : string => {
 			const pic = list.card.get(card)?.pic;
-			return (pic ?? mainGame.textures.get(constant.str.files.textures.unknown)) ?? '';
+			return (pic ?? mainGame.get.textures(constant.str.files.textures.unknown)) ?? '';
 		},
 		copy : async () : Promise<void> => {
 			if (list.select <= -1) return;

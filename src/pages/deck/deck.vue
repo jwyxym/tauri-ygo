@@ -201,9 +201,9 @@
 		extra : [] as Array<number>,
 		side : [] as Array<number>,
 		name : '',
-		get_pic : (card : number) : string => {
-			const pic = mainGame.cards.get(card)!.pic;
-			return (pic ?? mainGame.textures.get(constant.str.files.textures.unknown)) ?? '';
+		get_pic : (card : string | number) : string => {
+			const pic = mainGame.get.card(card)!.pic;
+			return (pic ?? mainGame.get.textures(constant.str.files.textures.unknown)) ?? '';
 		},
 		name_rule : async (name : string | undefined) : Promise<string | boolean> => {
 			if (name === undefined || name.length === 0)
@@ -223,8 +223,8 @@
 			}
 			return el;
 		},
-		get_id : (el : HTMLElement) : number => {
-			return mainGame.is_android() ? parseInt((el!.children[0]!.children[0] as HTMLImageElement).alt) : parseInt(el.children[0].id);
+		get_id : (el : HTMLElement) : string => {
+			return mainGame.is_android() ? (el!.children[0]!.children[0] as HTMLImageElement).alt : el.children[0].id;
 		},
 		get_dom : (v : number, show_all : boolean = false) : Array<HTMLElement> => {
 			const get = () : Array<HTMLElement | undefined> => {
@@ -249,9 +249,9 @@
 				let main_deck : Array<number>;
 				let extra_deck : Array<number>;
 				let side_deck : Array<number>;
-				main_deck = deck.get_dom(0).map(i => deck.get_id(i));
-				extra_deck = deck.get_dom(1).map(i => deck.get_id(i));
-				side_deck = deck.get_dom(2).map(i => deck.get_id(i));
+				main_deck = deck.get_dom(0).map(i => parseInt(deck.get_id(i)));
+				extra_deck = deck.get_dom(1).map(i => parseInt(deck.get_id(i)));
+				side_deck = deck.get_dom(2).map(i => parseInt(deck.get_id(i)));
 				const write_deck = new Deck({
 					main : main_deck,
 					extra : extra_deck,
@@ -324,7 +324,7 @@
 					el.style.display = 'none';
 				});
 			};
-			mainGame.system.get(constant.str.system_conf.chk.deck.delete) ? Dialog({
+			mainGame.get.system(constant.str.system_conf.chk.deck.delete) ? Dialog({
 				title : title,
 				dialogClass : 'dialog',
 				cancelButtonTextColor : 'white',
@@ -333,7 +333,7 @@
 			}) : leave();
 		},
 		exit : async () : Promise<void> => {
-			mainGame.system.get(constant.str.system_conf.chk.deck.exit) ? Dialog({
+			mainGame.get.system(constant.str.system_conf.chk.deck.exit) ? Dialog({
 				title : mainGame.get.text().deck.exit,
 				dialogClass : 'dialog',
 				cancelButtonTextColor : 'white',
@@ -344,7 +344,7 @@
 		dbl_click : async (event : MouseEvent, card : Card | number) : Promise<void> => {
 			if (mainGame.is_android()) return;
 			if (typeof card === 'number')
-				card = mainGame.cards.get(card)!;
+				card = mainGame.get.card(card)!;
 			const el = deck.get_card(event.target as HTMLElement);
 			if (!el) return;
 			if (el.parentElement!.classList.contains('searcher')) {
@@ -359,7 +359,7 @@
 			if (mainGame.is_android()) return;
 			event.preventDefault();
 			if (typeof card === 'number')
-				card = mainGame.cards.get(card)!;
+				card = mainGame.get.card(card)!;
 			const el = deck.get_card(event.target as HTMLElement);
 			if (!el) return;
 			if (el.parentElement!.classList.contains('searcher')) {
@@ -371,7 +371,7 @@
 	})
 
 	const cardinfo = reactive({
-		pic : mainGame.textures.get(constant.str.files.textures.unknown),
+		pic : mainGame.get.textures(constant.str.files.textures.unknown),
 		name : mainGame.get.text().deck.info,
 		id : '',
 		description : '',
@@ -383,9 +383,8 @@
 		},
 		select : (i : string | number, chk : boolean = true) : void => {
 			if (mainGame.is_android() && chk) return;
-			i = typeof i === 'string' ? parseInt(i) : i;
 			cardinfo.pic = deck.get_pic(i);
-			const card = mainGame.cards.get(i);
+			const card = mainGame.get.card(i);
 			cardinfo.name = card?.name ?? '';
 			cardinfo.id = card?.id.toString() ?? '';
 			cardinfo.description = card?.desc ?? '';
@@ -549,12 +548,12 @@
 		move : (evt : SortableEvent) : boolean => {
 			const el = deck.get_card(evt.dragged as HTMLElement);
 			if (el) {
-				const card = mainGame.cards.get(deck.get_id(el));
+				const card = mainGame.get.card(deck.get_id(el));
 				const ct = search.info.lflist ? mainGame.lflist.get(search.info.lflist)?.get(card?.id ?? -1) ?? 3 : 3;
 				const id = card?.id.toString() ?? '';
 				if(card && card.is_token())
 					return false;
-				if (evt.from.classList.contains('searcher') && [...sortable.cards.main, ...sortable.cards.extra, ...sortable.cards.side].filter(i => deck.get_id(i).toString() === id).length + 1 > ct)
+				if (evt.from.classList.contains('searcher') && [...sortable.cards.main, ...sortable.cards.extra, ...sortable.cards.side].filter(i => deck.get_id(i) === id).length + 1 > ct)
 					return false;
 				if (evt.to.classList.contains('deck_side') && sortable.cards.side.length + 1 <= 15)
 					return true;
@@ -581,7 +580,7 @@
 		remove : async (event : MouseEvent) : Promise<void> => {
 			const el = deck.get_card(event.target as HTMLElement);
 			if (!el || el.parentElement!.classList.contains('searcher')) return;
-			const card = mainGame.cards.get(deck.get_id(el))!;
+			const card = mainGame.get.card(deck.get_id(el))!;
 			await deck.remove(el, card.name);
 		},
 		select : (event : MouseEvent) : void => {

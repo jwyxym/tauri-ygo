@@ -79,21 +79,21 @@ class Card {
 		this.pic = url;
 	}
 
-	//这段因读取时间过长暂被弃用
 	find_pic = async () : Promise<void> => {
-		const paths : Array<string> = [
-			await path.join(constant.str.dirs.expansions, constant.str.dirs.pics, `${this.id}.jpg`)
-		]
-		for (const file of paths) {
-			if (await fs.exists(file)) {
-				const i = await fs.read.picture(file);
-				if (i !== undefined) {
-					this.update_pic(i);
-					return;
-				}
-			}
-		}
-		let url : string | undefined = mainGame.textures.get(constant.str.files.textures.unknown);
+		// 读取单独文件所需时间过长而被弃用
+		// const paths : Array<string> = [
+		// 	await path.join(constant.str.dirs.expansions, constant.str.dirs.pics, `${this.id}.jpg`)
+		// ]
+		// for (const file of paths) {
+		// 	if (await fs.exists(file)) {
+		// 		const i = await fs.read.picture(file);
+		// 		if (i !== undefined) {
+		// 			this.update_pic(i);
+		// 			return;
+		// 		}
+		// 	}
+		// }
+		let url : string | undefined = mainGame.get.textures(constant.str.files.textures.unknown);
 		if (url !== undefined)
 			this.update_pic(url);
 	}

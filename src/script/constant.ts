@@ -58,7 +58,6 @@ class Constant {
 			textures : 'textures',
 			expansions : 'expansions',
 			script : 'script',
-			pics : 'pics',
 			deck : 'deck',
 			cache : 'cache'
 		},
@@ -97,6 +96,9 @@ class Constant {
 					delete : 'chk_before_delete_card',
 					exit : 'chk_before_exit_deck'
 				}
+			},
+			string : {
+				expansion : 'load_expansion'
 			}
 		},
 		ini : {

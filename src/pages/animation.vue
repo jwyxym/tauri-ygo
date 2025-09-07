@@ -9,7 +9,7 @@
 				:exit = '{ opacity: 0 }'
 				:style = "{ '--y' : `${position.height * 0.5}px`, '--x' : `${position.width * -0.3}px` }"
 				v-if = 'position.height > 0 && position.width > 0 && animation.show'
-				:src = 'mainGame.textures.get(constant.str.files.textures.pic[0])'
+				:src = 'mainGame.get.textures(constant.str.files.textures.pic[0])'
 			/>
 		</AnimatePresence>
 		<AnimatePresence>
@@ -21,7 +21,7 @@
 				:exit = '{ opacity: 0 }'
 				:style = "{ '--y' : `${position.height * 0.1}px`, '--x' : `${position.width * 0.1}px` }"
 				v-if = 'position.height > 0 && position.width > 0 && animation.show'
-				:src = 'mainGame.textures.get(constant.str.files.textures.pic[1])'
+				:src = 'mainGame.get.textures(constant.str.files.textures.pic[1])'
 			/>
 		</AnimatePresence>
 	</div>
