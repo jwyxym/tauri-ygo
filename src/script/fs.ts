@@ -120,6 +120,14 @@ class Fs {
 			}
 			return undefined;
 		},
+		file : async (file : string) : Promise<Uint8Array<ArrayBuffer> | undefined> => {
+			try {
+				return await fs.readFile(file, this.dir);
+			} catch (error) {
+				this.write.log(error);
+			}
+			return undefined;
+		},
 		dir : async (dir : string, full_path : boolean = true, extension : boolean = true) : Promise<Array<fs.DirEntry> | undefined> => {
 			try {
 				let result : Array<fs.DirEntry> = await fs.readDir(dir, this.dir);
