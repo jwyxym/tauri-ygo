@@ -3,15 +3,14 @@
 	border-radius: 16px;
 	display: flex;
 	justify-content: center;
-	gap: 0;
 	position: relative;
 	.cardinfo {
 		width: calc((100% - 52.5vw - 32px) / 2);
 		.description {
 			color: font.$text-color;
 			overflow-y: auto;
-			height: calc(100% - 15.3vw - 32px);
-			width: calc(100% - 10px);
+			height: calc(100% - 15.3vw);
+			width: 100%;
 			font-size: 3vh;
 			white-space: pre-line;
 			display: flex;
@@ -32,24 +31,32 @@
 			}
 		}
 	}
-	.deck {
+	.deck_show {
 		width: 52.5vw;
-		.main {
-			height: 20.4vw;
-			max-height: calc(74.97px * 4);
-		}
-		.side, .extra {
-			height: 5.1vw;
-			max-height: 74.97px;
-		}
 		.head {
 			display: flex;
-			align-items: start;
+			align-items: center;
 			gap: 10px;
 			.button_list {
 				display: flex;
 				align-items: center;
 				gap: 10px;
+			}
+		}
+		.deck {
+			width: 100%;
+			height: 95%;
+			overflow-y: auto;
+			&::-webkit-scrollbar {
+				display: none;
+			}
+			.main {
+				width: 100%;
+				min-height: 20.4vw;
+			}
+			.side, .extra {
+				width: 100%;
+				min-height: 5.1vw;
 			}
 		}
 	}

@@ -9,6 +9,9 @@ const Zh_CN : textLike = {
 		'退出游戏'
 	],
 	deck : {
+		main : '主卡组',
+		extra : '额外卡组',
+		side : '副卡组',
 		new : '新建卡组',
 		from_url : '从url导入',
 		from_code : '从卡组码导入',
@@ -59,6 +62,10 @@ const Zh_CN : textLike = {
 				card_count : '卡片最大数量 {:?}',
 			}
 		}
+	},
+	setting : {
+		ex_cards : '拓展卡包',
+		system_setting : '系统设置'
 	},
 	toast : {
 		deck_list : {

@@ -1,8 +1,9 @@
 .card {
-    width: 3.5vw;
-    height: 5.1vw;
-    max-width: 51.45px;
-    max-height: 74.97px;
+    min-width: 3.5vw;
+    min-height: 5.1vw;
+    width: calc(100% / 15);
+    aspect-ratio: 1 / 1.45;
+    height: 74.97px;
     display: inline-block;
     img {
         width: 100%;

@@ -1,0 +1,14 @@
+.setting_body {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	.var-tabs {
+		width: 100%;
+		display: flex;
+		align-items: center;
+      	justify-content: center;
+	}
+	.button_list {
+		position: absolute;
+	}
+}

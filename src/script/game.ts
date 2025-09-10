@@ -8,6 +8,7 @@ import Deck from './deck';
 import Card, { Search } from './card';
 import textLike from './language/interface';
 import Zh_CN from './language/Zh-CN';
+import toast from './toast';
 
 class Game {
 	strings : Map<string, Map<number, string>> = new Map([
@@ -52,7 +53,7 @@ class Game {
 			//读取system.conf文件夹
 			const text : string | undefined = await fs.read.text(constant.str.files.system);
 			if (text !== undefined) {
-				const lines : Array<string> = text.split(/\r?\n/);
+				const lines : Array<string> = text.split(constant.reg.line_feed);
 				for (const i of lines) {
 					const line : string = i.trim();
 					this.read.system_conf(line);
@@ -76,9 +77,9 @@ class Game {
 		},
 		system : (key : string) : Array<string> | boolean | undefined => {
 			if (this.system.has(key)) {
-				const value = this.system.get(key);
-				if (isNaN(Number(value)))
-					return value!.split('&&');
+				const value = this.system.get(key)!;
+				if (value === '' || isNaN(Number(value)))
+					return value.split('&&');
 				else
 					return !!Number(value);
 			}
@@ -91,6 +92,16 @@ class Game {
 			key = typeof key == 'string' ? parseInt(key) : key;
 			return this.cards.get(key);
 		},
+		ypk : async () : Promise<Array<string>> => {
+			const load_expansion : Array<string> = this.get.system(constant.str.system_conf.string.expansion) as Array<string> ?? [];
+			const expansion_files : Array<DirEntry> = (await fs.read.dir(constant.str.dirs.expansions, false))?.filter(i => i.isFile) ?? [];
+			const load : Array<string> = load_expansion.filter(i => { return expansion_files.findIndex(j => j.name === i) > -1; });
+			this.system.set(constant.str.system_conf.string.expansion, load.join('&&'));
+			for (let i = 0; i < load.length; i++) {
+				load[i] = await join(constant.str.dirs.expansions, load[i]);
+			}
+			return load;
+		}
 	}
 
 	load = {
@@ -115,9 +126,9 @@ class Game {
 			}
 			deck = deck.filter(filter);
 			if (deck.length === 0) return;
-			const expnasion_files : Array<DirEntry> = await fs.read.dir(constant.str.dirs.expansions) ?? [];
-			for (const i of expnasion_files.filter(i => i.name.match(constant.reg.zip))) {
-				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(i.name, deck.map(num => num.toString()));
+			const load = await this.get.ypk();
+			for (const i of load.filter(i => i.match(constant.reg.zip))) {
+				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(i, deck.map(num => num.toString()));
 				for (const code of deck) {
 					const blob = ypk.get(constant.reg.picture)!.get(code.toString());
 					if (blob != undefined)
@@ -141,7 +152,7 @@ class Game {
 			for (const [_, conf] of Object.entries(constant.str.files.conf)) {
 				const text : string | undefined = await fs.read.text(conf);
 				if (text === undefined) continue;
-				const lines : Array<string> = text.split(/\r?\n/);
+				const lines : Array<string> = text.split(constant.reg.line_feed);
 				for (const [v, i] of lines.entries()) {
 					const line : string = i.trim();
 					switch (conf) {
@@ -166,30 +177,24 @@ class Game {
 			if (await fs.exists(constant.str.files.database)) {
 				const database : Array<Array<string | number>> | undefined = await fs.read.database(constant.str.files.database);
 				if (database !== undefined)
-					await this.read.database(database);
+					this.read.database(database);
 			}
 		},
 		expansion : async () : Promise<void> => {
 			// 读取expnasions文件夹
-			const load_expansion : Array<string> = this.get.system(constant.str.system_conf.string.expansion) as Array<string> ?? [];
-			const expnasion_files : Array<DirEntry> = (await fs.read.dir(constant.str.dirs.expansions, false))?.filter(i => i.isFile) ?? [];
-			const load = load_expansion.filter(i => expnasion_files.findIndex(j => j.name === i) > -1);
-			this.system.set(constant.str.system_conf.string.expansion, load.join('&&'));
-			for (let i = 0; i < load.length; i++) {
-				load[i] = await join(constant.str.dirs.expansions, load[i]);
-			}
+			const load = await this.get.ypk();
 			//读取cdb
 			for (const i of load.filter(i => i.match(constant.reg.database))) {
 				const database : Array<Array<string | number>> | undefined = await fs.read.database(i);
 				if (database !== undefined)
-					await this.read.database(database);
+					this.read.database(database);
 			}
 			//读取conf
 			for (const i of load.filter(i => i.match(constant.reg.conf))) {
 				if (i.endsWith(constant.str.files.conf.strings)) {
 					const text : string | undefined = await fs.read.text(i);
 					if (text === undefined) continue;
-					const lines : Array<string> = text.split(/\r?\n/);
+					const lines : Array<string> = text.split(constant.reg.line_feed);
 					for (const [_, i] of lines.entries()) {
 						const line : string = i.trim();
 						this.read.string_conf(line);
@@ -197,7 +202,7 @@ class Game {
 				} else if (i.endsWith(constant.str.files.conf.servers)) {
 					const text : string | undefined = await fs.read.text(i);
 					if (text === undefined) continue;
-					const lines : Array<string> = text.split(/\r?\n/);
+					const lines : Array<string> = text.split(constant.reg.line_feed);
 					for (const [_, i] of lines.entries()) {
 						const line : string = i.trim();
 						this.read.servers_conf(line);
@@ -205,7 +210,7 @@ class Game {
 				} else if (i.endsWith(constant.str.files.conf.lflist)) {
 					const text : string | undefined = await fs.read.text(i);
 					if (text === undefined) continue;
-					const lines : Array<string> = text.split(/\r?\n/);
+					const lines : Array<string> = text.split(constant.reg.line_feed);
 					for (const [v, i] of lines.entries()) {
 						const line : string = i.trim();
 						this.read.lflist_conf(line);
@@ -215,7 +220,7 @@ class Game {
 				} else if (i.endsWith(constant.str.files.conf.info)) {
 					const text : string | undefined = await fs.read.text(i);
 					if (text === undefined) continue;
-					const lines : Array<string> = text.split(/\r?\n/);
+					const lines : Array<string> = text.split(constant.reg.line_feed);
 					for (const [_, i] of lines.entries()) {
 						const line : string = i.trim();
 						this.read.info_conf(line);
@@ -238,19 +243,19 @@ class Game {
 				}
 				for (const [i, v] of ypk.get(constant.reg.conf) ?? new Map()) {
 					if (i.endsWith(constant.str.files.conf.strings)) {
-						const lines : Array<string> = v.split(/\r?\n/);
+						const lines : Array<string> = v.split(constant.reg.line_feed);
 						for (const [_, i] of lines.entries()) {
 							const line : string = i.trim();
 							this.read.string_conf(line);
 						}
 					} else if (i.endsWith(constant.str.files.conf.servers)) {
-						const lines : Array<string> = v.split(/\r?\n/);
+						const lines : Array<string> = v.split(constant.reg.line_feed);
 						for (const [_, i] of lines.entries()) {
 							const line : string = i.trim();
 							this.read.servers_conf(line);
 						}
 					} else if (i.endsWith(constant.str.files.conf.lflist)) {
-						const lines : Array<string> = v.split(/\r?\n/);
+						const lines : Array<string> = v.split(constant.reg.line_feed);
 						for (const [v, i] of lines.entries()) {
 							const line : string = i.trim();
 							this.read.lflist_conf(line);
@@ -258,7 +263,7 @@ class Game {
 								this.lflist_now = '';
 						}
 					} else if (i.endsWith(constant.str.files.conf.servers)) {
-						const lines : Array<string> = v.split(/\r?\n/);
+						const lines : Array<string> = v.split(constant.reg.line_feed);
 						for (const [_, i] of lines.entries()) {
 							const line : string = i.trim();
 							this.read.info_conf(line);
@@ -349,12 +354,12 @@ class Game {
 				this.system.set(key_value[0].trim(), key_value[1].trim());
 			}
 		},
-		database : async (db : Array<Array<string | number>>) : Promise<void> => {
+		database : (db : Array<Array<string | number>>) : void => {
 			for (const i of db)
 				this.cards.set(i[0] as number, new Card(i));
 		},
 		ini : (string : string) : void => {
-			const lines = string.split(/\r?\n/);
+			const lines = string.split(constant.reg.line_feed);
 			let name : string = '';
 			let host : string = '';
 			let port : string = '';

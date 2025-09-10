@@ -1,5 +1,6 @@
 import YGOProDeck, { YGOProDeckLike } from 'ygopro-deck-encode';
 import fs from './fs';
+import constant from './constant';
 import mainGame from './game';
 
 class Deck extends YGOProDeck {
@@ -30,7 +31,7 @@ class Deck extends YGOProDeck {
 
 
 	static fromYdkString (str: string) : Deck {
-		const lines = str.split(/\r?\n/);
+		const lines = str.split(constant.reg.line_feed);
 		const deck = new Deck();
 		try {
 			let current = deck.main;

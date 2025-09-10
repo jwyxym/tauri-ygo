@@ -1,6 +1,9 @@
 interface textLike {
 	menu : Array<string>;
 	deck : {
+		main : string;
+		extra : string;
+		side : string;
 		new : string;
 		from_url : string;
 		from_code : string;
@@ -51,6 +54,10 @@ interface textLike {
 				card_count : string;
 			};
 		};
+	};
+	setting : {
+		ex_cards : string;
+		system_setting : string;
 	};
 	toast : {
 		deck_list : {

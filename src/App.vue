@@ -9,6 +9,12 @@
 				></Deck>
 			</transition>
 			<transition name = 'opacity'>
+				<Setting
+					v-if = 'page.show.setting'
+					:select = 'page.select'
+				></Setting>
+			</transition>
+			<transition name = 'opacity'>
 				<Menu
 					v-if = 'page.show.menu'
 					:select = 'page.select'
@@ -28,6 +34,7 @@
 	import Menu from './pages/menu.vue';
 	import Animation from './pages/animation.vue';
 	import Deck from './pages/deck/deck_list.vue';
+	import Setting from './pages/setting.vue';
 
 	import mainGame from './script/game';
 
@@ -35,11 +42,13 @@
 		show : {
 			dialog : false,
 			menu : false,
-			deck : false
+			deck : false,
+			setting : false,
 		},
 		select : {
 			menu : () : void => {
 				page.show.deck = false;
+				page.show.setting = false;
 				setTimeout(() => {
 					page.show.menu = true;
 				}, 500);
@@ -48,6 +57,12 @@
 				page.show.menu = false;
 				setTimeout(() => {
 					page.show.deck = true;
+				}, 500);
+			},
+			setting : () : void => {
+				page.show.menu = false;
+				setTimeout(() => {
+					page.show.setting = true;
 				}, 500);
 			}
 		}
@@ -101,10 +116,14 @@
 		color: font.$text-color !important;
 		border: 1px solid white;
 	}
+	.var-divider {
+		color: font.$text-color !important;
+	}
 	:root {
 		--card-background: transparent !important;
 		--dialog-background: transparent !important;
 		--popup-content-background-color: transparent !important;
+		--tabs-background: transparent !important;
 		--menu-select-menu-background-color: rgba(0, 0, 0, 0.6) !important;
 		--dialog-message-color: font.$text-color !important;
 		--dialog-title-color: font.$text-color !important;
@@ -113,5 +132,6 @@
 		--list-error-color: font.$text-color !important;
 		--checkbox-text-color: font.$text-color !important;
 		--menu-option-text-color: font.$text-color !important;
+		--divider-color: white !important;
 	}
 </style>

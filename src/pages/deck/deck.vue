@@ -21,7 +21,7 @@
 			</div>
 		</div>
 		<div
-			class = 'deck'
+			class = 'deck_show'
 			:elevation = '4'
 		>
 			<div class = 'head'>
@@ -36,65 +36,70 @@
 					<Button @click = 'deck.save' icon_name = 'save'></Button>
 				</div>
 			</div>
-			<div
-				class = 'main'
-				ref = 'main'
-			>
-				<TransitionGroup tag = 'div' name = 'opacity' class = 'deck_main'>
-					<div
-						v-for = '(i, v) in deck.main'
-						:data-swapy-slot = '`main_card:${v}:${i}`'
-						class = 'card'
-						:key = 'i'
-						:id = 'i.toString()'
-						@dblclick = 'deck.dbl_click($event, i)'
-						@contextmenu = 'deck.right_click($event, i)'
-					>
-							<div :data-swapy-item = '`main_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
-								<img :src = 'deck.get_pic(i)' ref = 'main_card' :alt = 'i.toString()'></img>
-							</div>
-					</div>
-				</TransitionGroup>
-			</div>
-			<div
-				class = 'extra'
-				ref = 'extra'
-			>
-				<TransitionGroup tag = 'div' name = 'opacity' class = 'deck_extra'>
-					<div
-						v-for = '(i, v) in deck.extra'
-						:data-swapy-slot = '`extra_card:${v}:${i}`'
-						class = 'card'
-						:key = 'i'
-						:id = 'i.toString()'
-						@dblclick = 'deck.dbl_click($event, i)'
-						@contextmenu = 'deck.right_click($event, i)'
-					>
-							<div :data-swapy-item = '`extra_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
-								<img :src = 'deck.get_pic(i)' ref = 'extra_card' :alt = 'i.toString()'></img>
-							</div>
-					</div>
-				</TransitionGroup>
-			</div>
-			<div
-				class = 'side'
-				ref = 'side'
-			>
-				<TransitionGroup tag = 'div' name = 'opacity' class = 'deck_side'>
-					<div
-						v-for = '(i, v) in deck.side'
-						:data-swapy-slot = '`side_card:${v}:${i}`'
-						class = 'card'
-						:key = 'i'
-						:id = 'i.toString()'
-						@dblclick = 'deck.dbl_click($event, i)'
-						@contextmenu = 'deck.right_click($event, i)'
-					>
-							<div :data-swapy-item = '`side_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
-								<img :src = 'deck.get_pic(i)' ref = 'side_card' :alt = 'i.toString()'></img>
-							</div>
-					</div>
-				</TransitionGroup>
+			<div class = 'deck'>
+				<var-divider :description = '`${mainGame.get.text().deck.main} : ${deck.ct.main}`'/>
+				<div
+					class = 'main'
+					ref = 'main'
+				>
+					<TransitionGroup tag = 'div' name = 'opacity' class = 'deck_main'>
+						<div
+							v-for = '(i, v) in deck.main'
+							:data-swapy-slot = '`main_card:${v}:${i}`'
+							class = 'card'
+							:key = 'i'
+							:id = 'i.toString()'
+							@dblclick = 'deck.dbl_click($event, i)'
+							@contextmenu = 'deck.right_click($event, i)'
+						>
+								<div :data-swapy-item = '`main_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
+									<img :src = 'deck.get_pic(i)' ref = 'main_card' :alt = 'i.toString()'></img>
+								</div>
+						</div>
+					</TransitionGroup>
+				</div>
+				<var-divider :description = '`${mainGame.get.text().deck.extra} : ${deck.ct.extra}`'/>
+				<div
+					class = 'extra'
+					ref = 'extra'
+				>
+					<TransitionGroup tag = 'div' name = 'opacity' class = 'deck_extra'>
+						<div
+							v-for = '(i, v) in deck.extra'
+							:data-swapy-slot = '`extra_card:${v}:${i}`'
+							class = 'card'
+							:key = 'i'
+							:id = 'i.toString()'
+							@dblclick = 'deck.dbl_click($event, i)'
+							@contextmenu = 'deck.right_click($event, i)'
+						>
+								<div :data-swapy-item = '`extra_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
+									<img :src = 'deck.get_pic(i)' ref = 'extra_card' :alt = 'i.toString()'></img>
+								</div>
+						</div>
+					</TransitionGroup>
+				</div>
+				<var-divider :description = '`${mainGame.get.text().deck.side} : ${deck.ct.side}`'/>
+				<div
+					class = 'side'
+					ref = 'side'
+				>
+					<TransitionGroup tag = 'div' name = 'opacity' class = 'deck_side'>
+						<div
+							v-for = '(i, v) in deck.side'
+							:data-swapy-slot = '`side_card:${v}:${i}`'
+							class = 'card'
+							:key = 'i'
+							:id = 'i.toString()'
+							@dblclick = 'deck.dbl_click($event, i)'
+							@contextmenu = 'deck.right_click($event, i)'
+						>
+								<div :data-swapy-item = '`side_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
+									<img :src = 'deck.get_pic(i)' ref = 'side_card' :alt = 'i.toString()'></img>
+								</div>
+						</div>
+					</TransitionGroup>
+				</div>
 			</div>
 		</div>
 		<div class = 'search'>
@@ -178,7 +183,7 @@
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { ref, reactive, onMounted, Ref, watch, onBeforeMount, onUnmounted } from "vue";
+	import { ref, reactive, onMounted, Ref, watch, onBeforeMount, onUnmounted, computed } from "vue";
 	import { createSwapy, Swapy } from 'swapy';
 	import Sortable from 'sortablejs';
 	import { Dialog } from '@varlet/ui';
@@ -201,6 +206,19 @@
 		extra : [] as Array<number>,
 		side : [] as Array<number>,
 		name : '',
+		ct : {
+			main : 0,
+			extra : 0,
+			side : 0,
+			remove : (el : HTMLElement) : void => {
+				if (el.parentElement?.classList.contains('deck_main'))
+					deck.ct.main --;
+				else if (el.parentElement?.classList.contains('deck_extra'))
+					deck.ct.extra --;
+				else if (el.parentElement?.classList.contains('deck_side'))
+					deck.ct.side --;
+			}
+		},
 		get_pic : (card : string | number) : string => {
 			const pic = mainGame.get.card(card)!.pic;
 			return (pic ?? mainGame.get.textures(constant.str.files.textures.unknown)) ?? '';
@@ -230,11 +248,11 @@
 			const get = () : Array<HTMLElement | undefined> => {
 				switch (v) {
 					case 0:
-						return Array.from(main.value!.children[0].children) as Array<HTMLElement>;
+						return Array.from(main.value?.children[0].children ?? []) as Array<HTMLElement>;
 					case 1:
-						return Array.from(extra.value!.children[0].children) as Array<HTMLElement>;
+						return Array.from(extra.value?.children[0].children ?? []) as Array<HTMLElement>;
 					case 2:
-						return Array.from(side.value!.children[0].children) as Array<HTMLElement>;
+						return Array.from(side.value?.children[0].children ?? []) as Array<HTMLElement>;
 				}
 				return [];
 			}
@@ -283,14 +301,17 @@
 					case 0:
 						main.length + 1 > 60 ? toast.error(mainGame.get.text().deck.rule.deck.deck_count.replace(constant.str.replace, '60')) :
 							deck.main.push(card.id);
+						deck.ct.main ++;
 						break;
 					case 1:
 						extra.length + 1 > 15 ? toast.error(mainGame.get.text().deck.rule.deck.deck_count.replace(constant.str.replace, '15')) : 
 							deck.extra.push(card.id);
+						deck.ct.extra ++;
 						break;
 					case 2:
 						side.length + 1 > 15 ? toast.error(mainGame.get.text().deck.rule.deck.deck_count.replace(constant.str.replace, '15')) : 
 							deck.side.push(card.id);
+						deck.ct.side ++;
 						break;
 				}
 			}
@@ -300,16 +321,19 @@
 			if (to.length + 1 > [60, 15, 15][to_deck]) {
 				toast.error(mainGame.get.text().deck.rule.deck.deck_count.replace(constant.str.replace, [60, 15, 15][to_deck].toString()));
 			} else {
-				gsap.opacity(el, () => { el.style.display = 'none'; });
+				gsap.opacity(el, () => { el.style.display = 'none'; deck.ct.remove(el); });
 				switch(to_deck) {
 					case 0:
 						deck.main.push(card.id);
+						deck.ct.main ++;
 						break;
 					case 1:
 						deck.extra.push(card.id);
+						deck.ct.extra ++;
 						break;
 					case 2:
 						deck.side.push(card.id);
+						deck.ct.side ++;
 						break;
 					}
 			}
@@ -320,6 +344,7 @@
 				gsap.leave(el, () : void => {
 					el.style.display = 'none';
 				});
+				deck.ct.remove(el);
 			};
 			mainGame.get.system(constant.str.system_conf.chk.deck.delete) ? Dialog({
 				title : title,
@@ -486,7 +511,7 @@
 		load : async () : Promise<void> => {
 			const length = search.list.length;
 			if (search.list.length < search.result.length) {
-				const cards = search.result.slice(length, length + 1000 > search.result.length ? search.result.length : length + 1000);
+				const cards = search.result.slice(length, length + 250 > search.result.length ? search.result.length : length + 250);
 				await mainGame.load.pic(cards.map(i => i.id));
 				search.list.push(...cards);
 			}
@@ -541,6 +566,9 @@
 			sortable.cards.main = [];
 			sortable.cards.extra = [];
 			sortable.cards.side = [];
+			deck.ct.main = deck.get_dom(0).length;
+			deck.ct.extra = deck.get_dom(1).length;
+			deck.ct.side = deck.get_dom(2).length;
 		},
 		move : (evt : SortableEvent) : boolean => {
 			const el = deck.get_card(evt.dragged as HTMLElement);
@@ -598,17 +626,20 @@
 	});
 
 	onMounted(() : void => {
+		deck.ct.main = deck.get_dom(0).length;
+		deck.ct.extra = deck.get_dom(1).length;
+		deck.ct.side = deck.get_dom(2).length;
 		if (mainGame.is_android()) {
 			for (const i of [main, extra, side]) {
 				Sortable.create(i.value!.children[0], {
 					animation : 150,
 					draggable : '.card',
 					group : 'deck',
-					onMove : sortable.move
+					onMove : sortable.move,
+					onChoose : sortable.choose,
+					onEnd : sortable.end
 				})
 			}
-		}
-		if (mainGame.is_android()) {
 			document.addEventListener('dblclick', android.remove);
 			document.addEventListener('contextmenu', android.remove);
 			document.addEventListener('mousedown', android.select);

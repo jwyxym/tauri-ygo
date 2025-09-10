@@ -136,7 +136,7 @@ class Gsap {
 			}, 0);
 			tl.to(i, {
 				x : '+=80vw',
-				duration : 1,
+				duration : 0.5,
 				onComplete: () => {
 					if (v === array.length - 1) complete();
 				}

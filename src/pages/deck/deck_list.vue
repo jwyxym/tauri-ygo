@@ -143,6 +143,9 @@
 				input : '',
 				confirm : () : void => {
 					const deck = Deck.fromYdkString(page.popup.code.input);
+					deck.main = deck.main.filter(i => mainGame.cards.has(i));
+					deck.extra = deck.extra.filter(i => mainGame.cards.has(i));
+					deck.side = deck.side.filter(i => mainGame.cards.has(i));
 					deck.is_imported();
 					page.indeck(deck);
 					page.popup.code.exit();
@@ -160,6 +163,9 @@
 				input : '',
 				confirm : () : void => {
 					const deck = Deck.fromYGOMobileDeckURL(page.popup.url.input);
+					deck.main = deck.main.filter(i => mainGame.cards.has(i));
+					deck.extra = deck.extra.filter(i => mainGame.cards.has(i));
+					deck.side = deck.side.filter(i => mainGame.cards.has(i));
 					deck.is_imported();
 					page.indeck(deck);
 					page.popup.url.exit();

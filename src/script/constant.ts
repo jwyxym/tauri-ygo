@@ -48,6 +48,7 @@ class Constant {
 		name : /[\\/:*?"<>|]/,
 		atk : /^[0-9?\s]*$/,
 		level : /^[0-9 ]*$/,
+		line_feed : /\r?\n/
 	};
 
 	str = {
@@ -60,6 +61,9 @@ class Constant {
 			script : 'script',
 			deck : 'deck',
 			cache : 'cache'
+		},
+		exdirs : {
+			pics : 'pics'
 		},
 		files : {
 			system : 'system.conf',

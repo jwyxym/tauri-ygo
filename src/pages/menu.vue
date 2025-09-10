@@ -27,11 +27,14 @@
 	const title : Ref<HTMLElement | null> = ref(null);
 	const item : Ref<Array<HTMLElement> | null> = ref(null);
 
-	const select = (v : number) : void => {
+	const select = async (v : number) : Promise<void> => {
 		const leave = async () : Promise<void> => {
 			switch (v) {
 				case 2:
 					await props.select.deck();
+					break;
+				case 3:
+					await props.select.setting();
 					break;
 				case 4:
 					await mainGame.exit();
