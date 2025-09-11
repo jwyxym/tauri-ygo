@@ -183,7 +183,7 @@
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { ref, reactive, onMounted, Ref, watch, onBeforeMount, onUnmounted, computed } from "vue";
+	import { ref, reactive, onMounted, Ref, watch, onBeforeMount, onUnmounted } from "vue";
 	import { createSwapy, Swapy } from 'swapy';
 	import Sortable from 'sortablejs';
 	import { Dialog } from '@varlet/ui';
@@ -220,8 +220,8 @@
 			}
 		},
 		get_pic : (card : string | number) : string => {
-			const pic = mainGame.get.card(card)!.pic;
-			return (pic ?? mainGame.get.textures(constant.str.files.textures.unknown)) ?? '';
+			const pic = mainGame.get.card(card).pic;
+			return pic;
 		},
 		name_rule : async (name : string | undefined) : Promise<string | boolean> => {
 			if (name === undefined || name.length === 0)
@@ -293,7 +293,7 @@
 			const extra = deck.get_dom(1);
 			const side = deck.get_dom(2);
 			const cards = [...main, ...extra, ...side];
-			const ct = search.info.lflist ? mainGame.lflist.get(search.info.lflist)?.get(card.id) ?? 3 : 3;
+			const ct = search.info.lflist ? mainGame.get.lflist(search.info.lflist, card.id) : 3;
 			if (cards.filter(i => i.children[0].id === card.id.toString()).length + 1 > ct) {
 				toast.error(mainGame.get.text().deck.rule.deck.card_count.replace(constant.str.replace,ct.toString()));
 			} else {
@@ -366,7 +366,7 @@
 		dbl_click : async (event : MouseEvent, card : Card | number) : Promise<void> => {
 			if (mainGame.is_android()) return;
 			if (typeof card === 'number')
-				card = mainGame.get.card(card)!;
+				card = mainGame.get.card(card);
 			const el = deck.get_card(event.target as HTMLElement);
 			if (!el) return;
 			if (el.parentElement!.classList.contains('searcher')) {
@@ -381,7 +381,7 @@
 			if (mainGame.is_android()) return;
 			event.preventDefault();
 			if (typeof card === 'number')
-				card = mainGame.get.card(card)!;
+				card = mainGame.get.card(card);
 			const el = deck.get_card(event.target as HTMLElement);
 			if (!el) return;
 			if (el.parentElement!.classList.contains('searcher')) {
@@ -407,24 +407,13 @@
 			if (mainGame.is_android() && chk) return;
 			cardinfo.pic = deck.get_pic(i);
 			const card = mainGame.get.card(i);
-			cardinfo.name = card?.name ?? '';
-			cardinfo.id = card?.id.toString() ?? '';
-			cardinfo.description = card?.desc ?? '';
-			const info : CardInfo = card?.get_info() ?? {
-				ot : '',
-				level : '',
-				atk : '',
-				def : '',
-				link : '',
-				type : '',
-				race : '',
-				attribute : '',
-				category : '',
-				setcode : ''
-			};
+			cardinfo.name = card.name;
+			cardinfo.id = card.id.toString();
+			cardinfo.description = card.desc;
+			const info : CardInfo = card.get_info()
 			cardinfo.subtitle.ot = info.ot.length > 0 ? `【${info.ot}】` : '';
 			cardinfo.subtitle.type = `【${info.type}】${info.attribute} ${info.attribute !== '' ? '|' : ''} ${info.race}`;
-			cardinfo.subtitle.level = card?.is_monster() ?? false ? `【${info.level}】${info.atk}/${info.def}` : '';
+			cardinfo.subtitle.level = card.is_monster() ? `【${info.level}】${info.atk}/${info.def}` : '';
 			cardinfo.subtitle.link = info.link.length > 0 ? `【${info.link}】` : '';
 		}
 	});
@@ -574,17 +563,17 @@
 			const el = deck.get_card(evt.dragged as HTMLElement);
 			if (el) {
 				const card = mainGame.get.card(deck.get_id(el));
-				const ct = search.info.lflist ? mainGame.lflist.get(search.info.lflist)?.get(card?.id ?? -1) ?? 3 : 3;
-				const id = card?.id.toString() ?? '';
-				if(card && card.is_token())
+				const ct = search.info.lflist ? mainGame.get.lflist(search.info.lflist, card.id) : 3;
+				const id = card.id.toString() ?? '';
+				if(card.is_token())
 					return false;
 				if (evt.from.classList.contains('searcher') && [...sortable.cards.main, ...sortable.cards.extra, ...sortable.cards.side].filter(i => deck.get_id(i) === id).length + 1 > ct)
 					return false;
 				if (evt.to.classList.contains('deck_side') && sortable.cards.side.length + 1 <= 15)
 					return true;
-				if (card && card.is_ex() && evt.to.classList.contains('deck_extra') && sortable.cards.extra.length + 1 <= 15)
+				if (card.is_ex() && evt.to.classList.contains('deck_extra') && sortable.cards.extra.length + 1 <= 15)
 					return true;
-				if (card && !card.is_ex() && evt.to.classList.contains('deck_main') && sortable.cards.main.length + 1 <= 60)
+				if (!card.is_ex() && evt.to.classList.contains('deck_main') && sortable.cards.main.length + 1 <= 60)
 					return true;
 			}
 			return false;

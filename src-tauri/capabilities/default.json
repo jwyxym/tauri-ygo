@@ -120,6 +120,17 @@
 				}
 			]
 		},
+		{
+			"identifier": "fs:allow-copy-file",
+			"allow": [
+				{
+					"path": "$PUBLIC/**"
+				},
+				{
+					"path": "$RESOURCE/**"
+				}
+			]
+		},
 		"process:default",
 		"clipboard-manager:allow-read-text",
 		"clipboard-manager:allow-write-text",

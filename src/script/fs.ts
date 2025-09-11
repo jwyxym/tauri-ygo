@@ -11,7 +11,9 @@ import mainGame from './game';
 class Fs {
 	dir : fs.ReadFileOptions;
 	path : Promise<string>;
+	base_dir : number;
 	rename_dir : fs.RenameOptions;
+	copy_dir : fs.CopyFileOptions;
 
 	constructor () {
 		const base_dir = constant.system.base_dir() 
@@ -21,11 +23,64 @@ class Fs {
 			oldPathBaseDir : base_dir,
 			newPathBaseDir : base_dir
 		}
+		this.copy_dir = {
+			fromPathBaseDir: base_dir,
+			toPathBaseDir: base_dir
+		}
+		this.base_dir = base_dir
 	};
 
 	exists = async (file : string) : Promise<boolean> => {
 		try {
 			return fs.exists(file, this.dir);
+		} catch (error) {
+			this.write.log(error);
+		}
+		return false;
+	};
+
+	init = async (chk : boolean = true) : Promise<boolean> => {
+		try {
+			const files : Array<fs.DirEntry> = await this.read.dir(constant.str.dirs.assets, false, true, {
+    			baseDir : constant.system.resource_dir()
+			});
+			for (const i of files.filter(i => i.isFile)) {
+				const from = await path.join(constant.str.dirs.assets, i.name);
+				if (await this.exists(await path.join(await this.path, i.name)) && chk)
+					continue;
+				await this.copy(from, i.name, {
+					fromPathBaseDir: constant.system.resource_dir(),
+					toPathBaseDir: this.base_dir
+				});
+			}
+			for (const i of files.filter(i => i.isDirectory)) {
+				const f = await this.read.dir(await path.join(constant.str.dirs.assets, i.name), false, true, {
+					baseDir : constant.system.resource_dir()
+				});
+				if (!await this.exists(i.name))
+					await this.write.dir(i.name);
+				for (const j of f.filter(i => i.isFile)) {
+					const to = await path.join(i.name, j.name);
+					if (await this.exists(await path.join(await this.path, to)) && chk)
+						continue;
+					const from = await path.join(constant.str.dirs.assets, to);
+					await this.copy(from, to, {
+						fromPathBaseDir: constant.system.resource_dir(),
+						toPathBaseDir: this.base_dir
+					});
+				}
+			}
+			return true;
+		} catch (error) {
+			this.write.log(error);
+		}
+		return false;
+	};
+
+	copy = async (from : string, to : string, dir : fs.CopyFileOptions = this.copy_dir) : Promise<boolean> => {
+		try {
+			await fs.copyFile(from, to, dir)
+			return true;
 		} catch (error) {
 			this.write.log(error);
 		}
@@ -128,9 +183,9 @@ class Fs {
 			}
 			return undefined;
 		},
-		dir : async (dir : string, full_path : boolean = true, extension : boolean = true) : Promise<Array<fs.DirEntry> | undefined> => {
+		dir : async (dir : string, full_path : boolean = true, extension : boolean = true, this_dir : fs.ReadFileOptions = this.dir) : Promise<Array<fs.DirEntry>> => {
 			try {
-				let result : Array<fs.DirEntry> = await fs.readDir(dir, this.dir);
+				let result : Array<fs.DirEntry> = await fs.readDir(dir, this_dir);
 				if (full_path)
 					for (const i of result) {
 						i.name = await path.join(dir, i.name)
@@ -144,7 +199,7 @@ class Fs {
 			} catch (error) {
 				this.write.log(error);
 			}
-			return undefined;
+			return [];
 		}
 
 	};

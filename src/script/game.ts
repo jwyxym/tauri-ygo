@@ -31,6 +31,7 @@ class Game {
 	select = 'Zh_CN';
 	interval = -1;
 	interval_ct = 0;
+	unknown : Card = new Card([...new Array(11).fill(0), new Array(19).fill('')])
 
 	private lflist_now : string = '';
 
@@ -41,8 +42,12 @@ class Game {
 				if (!await fs.exists(i))
 					await fs.write.dir(i);
 			}
+
+			//初始化资源
+			await fs.init();
+
 			//读取./textures文件夹
-			for (const i of await fs.read.dir(constant.str.dirs.textures) ?? []) {
+			for (const i of await fs.read.dir(constant.str.dirs.textures)) {
 				if (i.name.match(constant.reg.picture)) {
 					const url : string | undefined = await fs.read.picture(i.name);
 					const name = i.name.match(constant.reg.get_name) ?? [];
@@ -59,6 +64,7 @@ class Game {
 					this.read.system_conf(line);
 				}
 			}
+			this.unknown.update_pic(this.textures.get(constant.str.files.textures.unknown) ?? '');
 			await fs.write.system();
 			await this.load.card();
 			await this.load.expansion();
@@ -88,26 +94,34 @@ class Game {
 		textures : (key : string) : string | undefined => {
 			return this.textures.get(key);
 		},
-		card : (key : string | number) : Card | undefined => {
+		card : (key : string | number) : Card => {
 			key = typeof key == 'string' ? parseInt(key) : key;
-			return this.cards.get(key);
+			return this.cards.get(key) ?? this.unknown;
 		},
 		ypk : async () : Promise<Array<string>> => {
 			const load_expansion : Array<string> = this.get.system(constant.str.system_conf.string.expansion) as Array<string> ?? [];
-			const expansion_files : Array<DirEntry> = (await fs.read.dir(constant.str.dirs.expansions, false))?.filter(i => i.isFile) ?? [];
+			const expansion_files : Array<DirEntry> = (await fs.read.dir(constant.str.dirs.expansions, false))?.filter(i => i.isFile);
 			const load : Array<string> = load_expansion.filter(i => { return expansion_files.findIndex(j => j.name === i) > -1; });
 			this.system.set(constant.str.system_conf.string.expansion, load.join('&&'));
 			for (let i = 0; i < load.length; i++) {
 				load[i] = await join(constant.str.dirs.expansions, load[i]);
 			}
 			return load;
+		},
+		lflist : (key : string, card : string | number) : number => {
+			const lflist = this.lflist.get(key);
+			if (lflist) {
+				card = typeof card == 'string' ? parseInt(card) : card;
+				return lflist.get(card) ?? 3;
+			}
+			return 3;
 		}
 	}
 
 	load = {
 		deck : async () : Promise<Array<Deck>> => {
 			let decks : Array<Deck> = [];
-			for (const i of await fs.read.dir(constant.str.dirs.deck) ?? []) {
+			for (const i of await fs.read.dir(constant.str.dirs.deck)) {
 				if (i.name.match(constant.reg.deck)) {
 					const ydk : Deck | undefined = await fs.read.ydk(i.name);
 					const name = i.name.match(constant.reg.get_name) ?? [];

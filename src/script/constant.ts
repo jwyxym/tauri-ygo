@@ -12,6 +12,10 @@ class System {
 		return this.system == 'android' ? fs.BaseDirectory.Public : fs.BaseDirectory.Resource;
 	};
 
+	resource_dir = () : number => {
+		return fs.BaseDirectory.Resource;
+	};
+
 	base_path = async () : Promise<string> => {
 		return this.system == 'android' ? await path.publicDir() : await path.resourceDir();
 	};
@@ -60,7 +64,8 @@ class Constant {
 			expansions : 'expansions',
 			script : 'script',
 			deck : 'deck',
-			cache : 'cache'
+			cache : 'cache',
+			assets : 'assets'
 		},
 		exdirs : {
 			pics : 'pics'

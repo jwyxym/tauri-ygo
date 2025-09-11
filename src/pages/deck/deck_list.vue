@@ -182,7 +182,6 @@
 	})
 
 	const list = reactive({
-		card : mainGame.cards,
 		select : -1,
 		decks : [] as Array<Deck>,
 		loading : [] as Array<number>,
@@ -205,8 +204,8 @@
 				list.select = -1;
 		},
 		get_pic : (card : number) : string => {
-			const pic = list.card.get(card)?.pic;
-			return (pic ?? mainGame.get.textures(constant.str.files.textures.unknown)) ?? '';
+			const pic = mainGame.get.card(card).pic;
+			return pic;
 		},
 		copy : async () : Promise<void> => {
 			if (list.select <= -1) return;

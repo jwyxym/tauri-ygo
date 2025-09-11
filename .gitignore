@@ -23,7 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 *.bat
+/src-tauri/assets
 /src-tauri/gen
 /src-tauri/2
 *.jks
-/assets
