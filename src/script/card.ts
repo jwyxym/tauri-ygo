@@ -35,24 +35,30 @@ interface Search {
 }
 
 class Card {
-	ot : number;
-	id : number;
-	alias : number;
-	level : number;
-	scale : number;
-	atk : number;
-	def : number;
-	type : number;
-	race : number;
-	attribute : number;
-	category : number;
-	setcode : Array<number>;
-	name : string;
-	desc : string;
-	hint : Array<string>;
+	ot : number = 0;
+	id : number = 0;
+	alias : number = 0;
+	level : number = 0;
+	scale : number = 0;
+	atk : number = 0;
+	def : number = 0;
+	type : number = 0;
+	race : number = 0;
+	attribute : number = 0;
+	category : number = 0;
+	setcode : Array<number> = [0, 0, 0, 0];
+	name : string = '';
+	desc : string = '';
+	hint : Array<string> = new Array(16).fill('');
 	pic : string;
   
-	constructor(row : Array<string | number>) {
+	constructor (row : Array<string | number> = []) {
+		if (row.length === 30)
+			this.update_info(row);
+		this.pic = '';
+	};
+
+	update_info = (row : Array<string | number>) : void => {
 		this.id = row[0] as number;
 		this.ot = row[1] as number;
 		this.alias = row[2] as number;
@@ -69,15 +75,12 @@ class Card {
 		this.name = row[11] as string;
 		this.desc = row[12] as string;
 		this.hint = row.slice(13, 29) as Array<string>;
-		this.pic = '';
-	}
+	};
 
 	update_pic = (url : string) : void => {
-		if (this.pic.startsWith(constant.str.blob)) {
-			URL.revokeObjectURL(this.pic)
-		}
+		this.clear();
 		this.pic = url;
-	}
+	};
 
 	find_pic = async () : Promise<void> => {
 		const paths : Array<string> = [
@@ -95,7 +98,7 @@ class Card {
 		let url : string | undefined = mainGame.get.textures(constant.str.files.textures.unknown);
 		if (url !== undefined)
 			this.update_pic(url);
-	}
+	};
 
 	get_info = () : CardInfo => {
 		const to_srting = (i : Array<string>) : string => {
@@ -133,31 +136,36 @@ class Card {
 			category : to_srting(category),
 			setcode : to_srting(setcode),
 		}
-	}
+	};
+
+	clear = () : void => {
+		if (this.pic.startsWith(constant.str.blob))
+			URL.revokeObjectURL(this.pic);
+	};
 
 	is_link = () : boolean => {
 		return (this.type & 0x4000000) === 0x4000000;
-	}
+	};
 
 	is_pendulum = () : boolean => {
 		return (this.type & 0x1000000) === 0x1000000;
-	}
+	};
 
 	is_xyz = () : boolean => {
 		return (this.type & 0x800000) === 0x800000;
-	}
+	};
 
 	is_monster = () : boolean => {
 		return (this.type & 0x1) === 0x1;
-	}
+	};
 
 	is_ex = () : boolean => {
 		return (this.type & 0x4802040) > 0;
-	}
+	};
 
 	is_token = () : boolean => {
 		return (this.type & 0x4000) === 0x4000;
-	}
+	};
 
 }
 

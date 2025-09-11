@@ -31,7 +31,7 @@ class Game {
 	select = 'Zh_CN';
 	interval = -1;
 	interval_ct = 0;
-	unknown : Card = new Card([...new Array(11).fill(0), new Array(19).fill('')])
+	unknown : Card = new Card()
 
 	private lflist_now : string = '';
 
@@ -119,6 +119,46 @@ class Game {
 	}
 
 	load = {
+		ypk : async (path : string) : Promise<void> => {
+			const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(path);
+			for (const [_, v] of ypk.get(constant.reg.database) ?? new Map()) {
+				const db = await fs.read.database_in_memory(v as Uint8Array<ArrayBuffer>);
+				if (db !== undefined)
+					this.read.database(db);
+			}
+			for (const [i, v] of ypk.get(constant.reg.conf) ?? new Map()) {
+				if (i.endsWith(constant.str.files.conf.strings)) {
+					const lines : Array<string> = v.split(constant.reg.line_feed);
+					for (const [_, i] of lines.entries()) {
+						const line : string = i.trim();
+						this.read.string_conf(line);
+					}
+				} else if (i.endsWith(constant.str.files.conf.servers)) {
+					const lines : Array<string> = v.split(constant.reg.line_feed);
+					for (const [_, i] of lines.entries()) {
+						const line : string = i.trim();
+						this.read.servers_conf(line);
+					}
+				} else if (i.endsWith(constant.str.files.conf.lflist)) {
+					const lines : Array<string> = v.split(constant.reg.line_feed);
+					for (const [v, i] of lines.entries()) {
+						const line : string = i.trim();
+						this.read.lflist_conf(line);
+						if (v === (lines.length - 1))
+							this.lflist_now = '';
+					}
+				} else if (i.endsWith(constant.str.files.conf.servers)) {
+					const lines : Array<string> = v.split(constant.reg.line_feed);
+					for (const [_, i] of lines.entries()) {
+						const line : string = i.trim();
+						this.read.info_conf(line);
+					}
+				}
+			}
+			for (const [_, v] of ypk.get(constant.reg.ini) ?? new Map()) {
+				this.read.ini(v);
+			}
+		},
 		deck : async () : Promise<Array<Deck>> => {
 			let decks : Array<Deck> = [];
 			for (const i of await fs.read.dir(constant.str.dirs.deck)) {
@@ -249,44 +289,7 @@ class Game {
 			}
 			//读取ypk\zip
 			for (const i of load.filter(i => i.match(constant.reg.zip))) {
-				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(i);
-				for (const [_, v] of ypk.get(constant.reg.database) ?? new Map()) {
-					const db = await fs.read.databaseInMemory(v as Uint8Array<ArrayBuffer>);
-					if (db !== undefined)
-						this.read.database(db);
-				}
-				for (const [i, v] of ypk.get(constant.reg.conf) ?? new Map()) {
-					if (i.endsWith(constant.str.files.conf.strings)) {
-						const lines : Array<string> = v.split(constant.reg.line_feed);
-						for (const [_, i] of lines.entries()) {
-							const line : string = i.trim();
-							this.read.string_conf(line);
-						}
-					} else if (i.endsWith(constant.str.files.conf.servers)) {
-						const lines : Array<string> = v.split(constant.reg.line_feed);
-						for (const [_, i] of lines.entries()) {
-							const line : string = i.trim();
-							this.read.servers_conf(line);
-						}
-					} else if (i.endsWith(constant.str.files.conf.lflist)) {
-						const lines : Array<string> = v.split(constant.reg.line_feed);
-						for (const [v, i] of lines.entries()) {
-							const line : string = i.trim();
-							this.read.lflist_conf(line);
-							if (v === (lines.length - 1))
-								this.lflist_now = '';
-						}
-					} else if (i.endsWith(constant.str.files.conf.servers)) {
-						const lines : Array<string> = v.split(constant.reg.line_feed);
-						for (const [_, i] of lines.entries()) {
-							const line : string = i.trim();
-							this.read.info_conf(line);
-						}
-					}
-				}
-				for (const [_, v] of ypk.get(constant.reg.ini) ?? new Map()) {
-					this.read.ini(v);
-				}
+				this.load.ypk(i);
 			}
 		}
 	}
@@ -369,8 +372,12 @@ class Game {
 			}
 		},
 		database : (db : Array<Array<string | number>>) : void => {
-			for (const i of db)
-				this.cards.set(i[0] as number, new Card(i));
+			for (const i of db) {
+				const code : number = i[0] as number;
+				if (this.cards.has(code))
+					this.cards.get(code)!.clear()
+				this.cards.set(code, new Card(i));
+			}
 		},
 		ini : (string : string) : void => {
 			const lines = string.split(constant.reg.line_feed);

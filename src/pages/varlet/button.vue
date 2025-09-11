@@ -21,6 +21,7 @@
 	import Exit from'../svg/exit.vue';
 	import Cancel from'../svg/cancel.vue';
 	import Confirm from'../svg/confirm.vue';
+	import Download from'../svg/download.vue';
 	const props = defineProps(['icon_name']);
 	const svgs : Map<string, Component> = new Map ([
 		['deck', Deck],
@@ -34,6 +35,7 @@
 		['exit', Exit],
 		['cancel', Cancel],
 		['confirm', Confirm],
+		['download', Download],
 	]);
 	const svg : null | Component = svgs.get(props.icon_name) ?? null;
 </script>

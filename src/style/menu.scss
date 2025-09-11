@@ -25,22 +25,18 @@
 				width: 0;
 				font-family: 'menu';
 				font-style: italic;
-				background-color: font.$hover-color;
 				height: 100%;
 				transition: all 0.4s ease;
-				border: 2px solid rgb(white, 0);
+				border: 2px solid rgb(font.$boder-color, 0);
 				.item {
 					font-size: 7vh;
 					user-select: none;
-					transition: all 0.4s ease;
-					&:hover {
-						transform: translate(10%);
-					}
 				}
 				&:hover {
 					cursor: pointer;
 					width: 140%;
 					border: 2px solid font.$boder-color;
+					background-color: font.$hover-color;
 				}
 			}
 		}

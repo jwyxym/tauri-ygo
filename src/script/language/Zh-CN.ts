@@ -65,7 +65,11 @@ const Zh_CN : textLike = {
 	},
 	setting : {
 		ex_cards : '拓展卡包',
-		system_setting : '系统设置'
+		system_setting : '系统设置',
+		download : {
+			url : '下载自定义卡包',
+			super_pre : '下载先行卡'
+		}
 	},
 	toast : {
 		deck_list : {
@@ -76,10 +80,17 @@ const Zh_CN : textLike = {
 			ydk : {
 				from_url : '从url转换到卡组失败',
 				from_code : '从卡组码转换到卡组失败'
+			},
+			setting : {
+				download : 'url不可为空'
 			}
 		},
 		deck : {
 			save : '保存成功'
+		},
+		download : {
+			start : '开始下载',
+			complete : '下载完成'
 		}
 	}
 }

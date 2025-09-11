@@ -1,14 +1,43 @@
 .setting_body {
-	position: relative;
 	display: flex;
 	flex-direction: column;
 	.var-tabs {
 		width: 100%;
 		display: flex;
 		align-items: center;
-      	justify-content: center;
+		justify-content: center;
 	}
-	.button_list {
-		position: absolute;
+	.ex_cards {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		.download_ex {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+	}
+}
+
+.var-popup {
+	.var-form {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		width: 25vw;
+		height: 90%;
+		overflow-y: auto;
+		.var-select, .var-input {
+			width: 100%;
+		}
+		&::-webkit-scrollbar {
+			display: none;
+		}
+		.button_list {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			justify-items: center;
+			align-items: center;
+		}
 	}
 }

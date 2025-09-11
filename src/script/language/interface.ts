@@ -58,21 +58,32 @@ interface textLike {
 	setting : {
 		ex_cards : string;
 		system_setting : string;
+		download : {
+			url : string;
+			super_pre : string;
+		};
 	};
 	toast : {
 		deck_list : {
 			copy : string;
 			delete : string;
-		}
+		};
 		error : {
 			ydk : {
 				from_url : string;
 				from_code : string;
-			}
-		}
+			};
+			setting : {
+				download : string;
+			};
+		};
 		deck : {
 			save : string;
-		}
+		};
+		download : {
+			start : string;
+			complete : string;
+		};
 	};
 }
 

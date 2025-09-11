@@ -100,7 +100,7 @@ class Fs {
 			}
 			return undefined;
 		},
-		databaseInMemory : async (file : Uint8Array<ArrayBuffer>) : Promise<Array<Array<string | number>> | undefined> => {
+		database_in_memory : async (file : Uint8Array<ArrayBuffer>) : Promise<Array<Array<string | number>> | undefined> => {
 			try {
 				const p = await path.join(constant.str.dirs.cache, constant.str.files.database)
 				if (await(this.write.file(p, file))) {
@@ -276,16 +276,46 @@ class Fs {
 			}
 			return false;
 		},
-		fromUrl : async (file : string, url : string) : Promise<boolean> => {
+		from_url : async (url : string,  file : string) : Promise<string> => {
 			try {
-				const response = await axios.get(url, {
-					responseType: 'blob'
+				const split = url.split('/');
+				if (file.length === 0 && split.length > 0) {
+					file = split[split.length - 1];
+				}
+				if (file.length === 0)
+					file = `${Math.random().toString().slice(2)}.ypk`;
+				await invoke<Array<[Array<number>, Array<string>]>>('download', {
+					url : url,
+					path : await path.join(await this.path, constant.str.dirs.expansions),
+					name : file
 				});
-				return await this.write.file(file, new Uint8Array(await response.data.arrayBuffer()));
+				return file;
 			} catch (error) {
 				this.write.log(error.message ?? error);
 			}
-			return false;
+			return '';
+		},
+		ypk : async (url : string, file : string = '') : Promise<Array<string>> => {
+			try {
+				const split = url.split('/');
+				if (file.length === 0 && split.length > 0) {
+					file = split[split.length - 1];
+				}
+				if (file.length === 0)
+					file = Math.random().toString().slice(2).toString();
+				if (!file.endsWith(constant.str.url.ypk))
+					file += constant.str.url.ypk;
+				await invoke<Array<[Array<number>, Array<string>]>>('download', {
+					url : url,
+					path : await path.join(await this.path, constant.str.dirs.expansions),
+					name : file
+				});
+				const p = await path.join(constant.str.dirs.expansions, file);
+				return [p, file];
+			} catch (error) {
+				this.write.log(error.message ?? error);
+			}
+			return [];
 		},
 	};
 	delete = {

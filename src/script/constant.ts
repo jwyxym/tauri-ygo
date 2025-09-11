@@ -117,6 +117,10 @@ class Constant {
 		},
 		language : {
 			Zh_CN : 'Zh_CN'
+		},
+		url : {
+			super_pre : 'https://cdn02.moecube.com:444/ygopro-super-pre/archive/ygopro-super-pre.ypk',
+			ypk : '.ypk'
 		}
 	}
 
