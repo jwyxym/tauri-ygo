@@ -132,6 +132,10 @@
 		--list-error-color: font.$text-color !important;
 		--checkbox-text-color: font.$text-color !important;
 		--menu-option-text-color: font.$text-color !important;
+		--cell-color: white !important;
 		--divider-color: white !important;
+		--checkbox-unchecked-color: white !important;
+		--cell-border-color: white !important;
+		--cell-font-size: 16px !important;
 	}
 </style>

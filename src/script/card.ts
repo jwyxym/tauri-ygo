@@ -35,30 +35,25 @@ interface Search {
 }
 
 class Card {
-	ot : number = 0;
-	id : number = 0;
-	alias : number = 0;
-	level : number = 0;
-	scale : number = 0;
-	atk : number = 0;
-	def : number = 0;
-	type : number = 0;
-	race : number = 0;
-	attribute : number = 0;
-	category : number = 0;
-	setcode : Array<number> = [0, 0, 0, 0];
-	name : string = '';
-	desc : string = '';
-	hint : Array<string> = new Array(16).fill('');
+	ot : number;
+	id : number;
+	alias : number;
+	level : number;
+	scale : number;
+	atk : number;
+	def : number;
+	type : number;
+	race : number;
+	attribute : number;
+	category : number;
+	setcode : Array<number>;
+	name : string;
+	desc : string;
+	hint : Array<string>;
 	pic : string;
   
-	constructor (row : Array<string | number> = []) {
-		if (row.length === 30)
-			this.update_info(row);
+	constructor (row : Array<string | number>) {
 		this.pic = '';
-	};
-
-	update_info = (row : Array<string | number>) : void => {
 		this.id = row[0] as number;
 		this.ot = row[1] as number;
 		this.alias = row[2] as number;

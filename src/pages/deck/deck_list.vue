@@ -82,10 +82,7 @@
 					:placeholder = 'mainGame.get.text().deck.from_code'
 					v-model = 'page.popup.code.input'
 				/>
-				<div class = 'button_list'>
-					<Button @click = 'page.popup.code.confirm' icon_name = 'confirm'></Button>
-					<Button @click = 'page.popup.code.cancel' icon_name = 'cancel'></Button>
-				</div>
+				<Button_List :confirm = 'page.popup.code.confirm' :cancel = 'page.popup.code.cancel'></Button_List>
 			</var-form>
 		</var-popup>
 		<var-popup v-model:show = 'page.popup.url.show' position = 'center' :close-on-click-overlay = 'false'>
@@ -94,10 +91,7 @@
 					:placeholder = 'mainGame.get.text().deck.from_url'
 					v-model = 'page.popup.url.input'
 				/>
-				<div class = 'button_list'>
-					<Button @click = 'page.popup.url.confirm' icon_name = 'confirm'></Button>
-					<Button @click = 'page.popup.url.cancel' icon_name = 'cancel'></Button>
-				</div>
+				<Button_List :confirm = 'page.popup.url.confirm' :cancel = 'page.popup.url.cancel'></Button_List>
 			</var-form>
 		</var-popup>
 	</div>
@@ -105,7 +99,6 @@
 <script setup lang='ts'>
 	import { reactive, onBeforeMount, TransitionGroup } from 'vue';
 	import { writeText } from '@tauri-apps/plugin-clipboard-manager'
-	import { Dialog } from '@varlet/ui'
 
 	import mainGame from '../../script/game';
 	import Deck from '../../script/deck';
@@ -116,6 +109,8 @@
 	import Button from '../varlet/button.vue';
 	import DeckPage from './deck.vue';
 	import Input from '../varlet/input.vue';
+	import Button_List from '../varlet/button_list.vue';
+	import Dialog from '../varlet/dialog';
 
 	const page = reactive({
 		deck : false,
@@ -225,9 +220,6 @@
 			Dialog({
 				title : mainGame.get.text().deck.delete.title,
 				message : mainGame.get.text().deck.delete.message.replace(constant.str.replace, list.decks[list.select].name ?? ''),
-				dialogClass : 'dialog',
-				cancelButtonTextColor : 'white',
-				confirmButtonTextColor : 'white',
 				onConfirm : confirm
 			});
 		},

@@ -1,7 +1,6 @@
 import { invoke, convertFileSrc } from '@tauri-apps/api/core';
 import * as fs from '@tauri-apps/plugin-fs';
 import * as path from '@tauri-apps/api/path';
-import axios from 'axios';
 
 import constant from './constant';
 import Deck from './deck';
@@ -46,7 +45,7 @@ class Fs {
 			});
 			for (const i of files.filter(i => i.isFile)) {
 				const from = await path.join(constant.str.dirs.assets, i.name);
-				if (await this.exists(await path.join(await this.path, i.name)) && chk)
+				if (await this.exists(i.name) && chk)
 					continue;
 				await this.copy(from, i.name, {
 					fromPathBaseDir: constant.system.resource_dir(),
@@ -61,7 +60,7 @@ class Fs {
 					await this.write.dir(i.name);
 				for (const j of f.filter(i => i.isFile)) {
 					const to = await path.join(i.name, j.name);
-					if (await this.exists(await path.join(await this.path, to)) && chk)
+					if (await this.exists(to) && chk)
 						continue;
 					const from = await path.join(constant.str.dirs.assets, to);
 					await this.copy(from, to, {
@@ -102,7 +101,7 @@ class Fs {
 		},
 		database_in_memory : async (file : Uint8Array<ArrayBuffer>) : Promise<Array<Array<string | number>> | undefined> => {
 			try {
-				const p = await path.join(constant.str.dirs.cache, constant.str.files.database)
+				const p = await path.join(constant.str.dirs.cache, `${Math.random().toString().slice(2)}${constant.str.extends.cdb}`)
 				if (await(this.write.file(p, file))) {
 					const result : Array<Array<string | number>> | undefined = await this.read.database(p);
 					await(this.delete.file(p));
@@ -283,7 +282,7 @@ class Fs {
 					file = split[split.length - 1];
 				}
 				if (file.length === 0)
-					file = `${Math.random().toString().slice(2)}.ypk`;
+					file = `${Math.random().toString().slice(2)}${constant.str.extends.ypk}`;
 				await invoke<Array<[Array<number>, Array<string>]>>('download', {
 					url : url,
 					path : await path.join(await this.path, constant.str.dirs.expansions),
@@ -303,8 +302,8 @@ class Fs {
 				}
 				if (file.length === 0)
 					file = Math.random().toString().slice(2).toString();
-				if (!file.endsWith(constant.str.url.ypk))
-					file += constant.str.url.ypk;
+				if (!file.endsWith(constant.str.extends.ypk))
+					file += constant.str.extends.ypk;
 				await invoke<Array<[Array<number>, Array<string>]>>('download', {
 					url : url,
 					path : await path.join(await this.path, constant.str.dirs.expansions),

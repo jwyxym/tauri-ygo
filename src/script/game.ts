@@ -31,7 +31,7 @@ class Game {
 	select = 'Zh_CN';
 	interval = -1;
 	interval_ct = 0;
-	unknown : Card = new Card()
+	unknown : Card = new Card([...new Array(11).fill(0), new Array(19).fill('')]);
 
 	private lflist_now : string = '';
 
@@ -73,6 +73,16 @@ class Game {
 		}
 	};
 
+	reload = async () : Promise<void> => {
+		try {
+			this.clear();
+			await this.load.card();
+			await this.load.expansion();
+		} catch (error) {
+			fs.write.log(error);
+		}
+	};
+
 	get = {
 		text : () : textLike => {
 			switch (this.select) {
@@ -85,7 +95,7 @@ class Game {
 			if (this.system.has(key)) {
 				const value = this.system.get(key)!;
 				if (value === '' || isNaN(Number(value)))
-					return value.split('&&');
+					return value.split('&&').filter(i => i !== '');
 				else
 					return !!Number(value);
 			}
@@ -98,7 +108,10 @@ class Game {
 			key = typeof key == 'string' ? parseInt(key) : key;
 			return this.cards.get(key) ?? this.unknown;
 		},
-		ypk : async () : Promise<Array<string>> => {
+		ypk : async () : Promise<{
+			loading : Array<string>;
+			files : Array<DirEntry>;
+		}> => {
 			const load_expansion : Array<string> = this.get.system(constant.str.system_conf.string.expansion) as Array<string> ?? [];
 			const expansion_files : Array<DirEntry> = (await fs.read.dir(constant.str.dirs.expansions, false))?.filter(i => i.isFile);
 			const load : Array<string> = load_expansion.filter(i => { return expansion_files.findIndex(j => j.name === i) > -1; });
@@ -106,7 +119,10 @@ class Game {
 			for (let i = 0; i < load.length; i++) {
 				load[i] = await join(constant.str.dirs.expansions, load[i]);
 			}
-			return load;
+			return {
+				loading : load,
+				files : expansion_files
+			};
 		},
 		lflist : (key : string, card : string | number) : number => {
 			const lflist = this.lflist.get(key);
@@ -180,7 +196,7 @@ class Game {
 			}
 			deck = deck.filter(filter);
 			if (deck.length === 0) return;
-			const load = await this.get.ypk();
+			const load = (await this.get.ypk()).loading;
 			for (const i of load.filter(i => i.match(constant.reg.zip))) {
 				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(i, deck.map(num => num.toString()));
 				for (const code of deck) {
@@ -236,7 +252,7 @@ class Game {
 		},
 		expansion : async () : Promise<void> => {
 			// 读取expnasions文件夹
-			const load = await this.get.ypk();
+			const load = (await this.get.ypk()).loading;
 			//读取cdb
 			for (const i of load.filter(i => i.match(constant.reg.database))) {
 				const database : Array<Array<string | number>> | undefined = await fs.read.database(i);
@@ -294,7 +310,25 @@ class Game {
 		}
 	}
 
-	clear = {
+	clear = () : void => {
+		this.cards.forEach(i => {
+			i.clear();
+		});
+		this.cards = new Map();
+		this.lflist = new Map();
+		this.servers = new Map();
+		this.strings = new Map([
+			[constant.str.string_conf.system, new Map],
+			[constant.str.string_conf.victory, new Map],
+			[constant.str.string_conf.counter, new Map],
+			[constant.str.string_conf.setcode, new Map],
+			[constant.str.info_conf.ot, new Map],
+			[constant.str.info_conf.attribute, new Map],
+			[constant.str.info_conf.category, new Map],
+			[constant.str.info_conf.link, new Map],
+			[constant.str.info_conf.race, new Map],
+			[constant.str.info_conf.type, new Map]
+		]);
 	}
 
 	read = {
@@ -532,6 +566,39 @@ class Game {
 			return result;
 		}
 	}
+
+	push = {
+		system : (key : string, n : string | boolean) : void => {
+			const to_string = (str : string) : string => {
+				const value = this.system.get(key) ?? '';
+				return `${value}${value.length > 0 ? '&&' : ''}${str}`
+			}
+			const get = this.get.system(key);
+			if (get === undefined) {
+				this.system.set(key, typeof n === 'boolean' ? (n ? '1' : '0') : to_string(n));
+			}
+			else if (typeof get === 'boolean' && typeof n === 'boolean')
+				this.system.set(key, n ? '1' : '0');
+			else if (typeof get === 'object' && typeof n === 'string' && !get.includes(n)) {
+				this.system.set(key, to_string(n));
+			}
+		}
+	};
+
+	remove = {
+		system : (key : string, n : string) : void => {
+			const get = this.get.system(key);
+			if (typeof get === 'object') {
+				const ct = get.indexOf(n)
+				if (ct > -1) {
+					const to_string = () : string => {
+						return get.filter(i => i !== n ).join('&&');
+					}
+					this.system.set(key, to_string());
+				}
+			}
+		}
+	};
 
 	chk = async () : Promise<boolean> => {
 		for (const [_, i] of Object.entries(constant.str.files.conf)) {

@@ -104,7 +104,8 @@ class Constant {
 				deck : {
 					delete : 'delete',
 					exit : 'exit'
-				}
+				},
+				button : 'button'
 			},
 			string : {
 				expansion : 'load'
@@ -120,7 +121,10 @@ class Constant {
 		},
 		url : {
 			super_pre : 'https://cdn02.moecube.com:444/ygopro-super-pre/archive/ygopro-super-pre.ypk',
-			ypk : '.ypk'
+		},
+		extends : {
+			ypk : '.ypk',
+			cdb : '.cdb'
 		}
 	}
 

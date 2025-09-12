@@ -1,5 +1,9 @@
 interface textLike {
 	menu : Array<string>;
+	dialog : {
+		confirm : string;
+		cancel : string;
+	};
 	deck : {
 		main : string;
 		extra : string;
@@ -58,9 +62,11 @@ interface textLike {
 	setting : {
 		ex_cards : string;
 		system_setting : string;
+		reload : string;
 		download : {
 			url : string;
 			super_pre : string;
+			ex : string;
 		};
 	};
 	toast : {

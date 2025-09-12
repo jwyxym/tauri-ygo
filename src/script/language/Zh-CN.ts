@@ -8,6 +8,10 @@ const Zh_CN : textLike = {
 		'系统设置',
 		'退出游戏'
 	],
+	dialog : {
+		confirm : '确认',
+		cancel : '取消'
+	},
 	deck : {
 		main : '主卡组',
 		extra : '额外卡组',
@@ -66,9 +70,11 @@ const Zh_CN : textLike = {
 	setting : {
 		ex_cards : '拓展卡包',
 		system_setting : '系统设置',
+		reload : '重新加载卡片资源',
 		download : {
 			url : '下载自定义卡包',
-			super_pre : '下载先行卡'
+			super_pre : '下载先行卡',
+			ex : '下载卡片补丁',
 		}
 	},
 	toast : {

@@ -5,7 +5,8 @@
 		text-color = 'white'
 		size = 'small'
 	>
-		<component :is = "svg" />
+		{{ content }}
+		<component v-if = 'icon_name' :is = 'svg'/>
 	</var-button>
 </template>
 <script setup lang = 'ts'>
@@ -22,7 +23,8 @@
 	import Cancel from'../svg/cancel.vue';
 	import Confirm from'../svg/confirm.vue';
 	import Download from'../svg/download.vue';
-	const props = defineProps(['icon_name']);
+	import Refresh from'../svg/refresh.vue';
+	const props = defineProps(['icon_name', 'content']);
 	const svgs : Map<string, Component> = new Map ([
 		['deck', Deck],
 		['save', Save],
@@ -36,6 +38,7 @@
 		['cancel', Cancel],
 		['confirm', Confirm],
 		['download', Download],
+		['refresh', Refresh],
 	]);
 	const svg : null | Component = svgs.get(props.icon_name) ?? null;
 </script>

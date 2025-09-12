@@ -186,7 +186,6 @@
 	import { ref, reactive, onMounted, Ref, watch, onBeforeMount, onUnmounted } from "vue";
 	import { createSwapy, Swapy } from 'swapy';
 	import Sortable from 'sortablejs';
-	import { Dialog } from '@varlet/ui';
 
 	import mainGame from '../../script/game';
 	import constant from '../../script/constant';
@@ -198,6 +197,9 @@
 	import toast from '../../script/toast';
 	import fs from '../../script/fs';
 	import gsap from '../../script/gsap';
+
+	import Dialog from '../varlet/dialog';
+
 
 	const props = defineProps(['this_deck', 'offdeck']);
 
@@ -346,22 +348,16 @@
 				});
 				deck.ct.remove(el);
 			};
-			mainGame.get.system(constant.str.system_conf.chk.deck.delete) ? Dialog({
+			Dialog({
 				title : title,
-				dialogClass : 'dialog',
-				cancelButtonTextColor : 'white',
-				confirmButtonTextColor : 'white',
 				onConfirm : leave
-			}) : leave();
+			}, mainGame.get.system(constant.str.system_conf.chk.deck.delete));
 		},
 		exit : async () : Promise<void> => {
-			mainGame.get.system(constant.str.system_conf.chk.deck.exit) ? Dialog({
+			Dialog({
 				title : mainGame.get.text().deck.exit,
-				dialogClass : 'dialog',
-				cancelButtonTextColor : 'white',
-				confirmButtonTextColor : 'white',
 				onConfirm : props.offdeck
-			}) : props.offdeck();
+			}, mainGame.get.system(constant.str.system_conf.chk.deck.exit));
 		},
 		dbl_click : async (event : MouseEvent, card : Card | number) : Promise<void> => {
 			if (mainGame.is_android()) return;

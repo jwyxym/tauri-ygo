@@ -1,20 +1,37 @@
 .setting_body {
 	display: flex;
 	flex-direction: column;
-	.var-tabs {
-		width: 100%;
+	gap: 10px;
+	.button_list {
 		display: flex;
-		align-items: center;
-		justify-content: center;
+		gap: 10px;
 	}
-	.ex_cards {
+	.content {
 		width: 100%;
+		height: 100%;
 		display: flex;
-		align-items: center;
-		.download_ex {
+		.expansion_list {
+			width: 40%;
+			height: 100%;
 			display: flex;
-			align-items: center;
+			flex-direction: column;
 			gap: 10px;
+			.head {
+				display: flex;
+				align-content: center;
+				align-items: center;
+				gap: 10px;
+			}
+			.var-list {
+				width: 100%;
+				height: 100%;
+				&::-webkit-scrollbar {
+					display: none;
+				}
+				.var-loading{
+					height: 44px;
+				}
+			}
 		}
 	}
 }
@@ -32,12 +49,6 @@
 		}
 		&::-webkit-scrollbar {
 			display: none;
-		}
-		.button_list {
-			display: grid;
-			grid-template-columns: repeat(2, 1fr);
-			justify-items: center;
-			align-items: center;
 		}
 	}
 }
