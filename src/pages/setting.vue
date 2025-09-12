@@ -31,6 +31,7 @@
 								v-for = '(i, v) in setting.expansion'
 								:loading = 'expansion.loading'
 								:key = 'i'
+								color = 'white'
 							>
 								<var-cell
 									:title = 'i'

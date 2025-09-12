@@ -71,17 +71,6 @@
 	onBeforeMount(async () => {
 		await mainGame.init();
 		page.show.menu = true;
-		// page.show.dialog = !await mainGame.chk();
-		// page.show.menu = !page.show.dialog;
-		// if (page.show.dialog)
-		// 	Dialog({
-		// 		message : ,
-		// 		dialogClass : 'ground_glass',
-		// 		cancelButtonTextColor : 'white',
-		// 		confirmButtonTextColor : 'white',
-		// 		onConfirm : page.select.download,
-		// 		onCancel : mainGame.exit
-		// 	});
 	});
 
 </script>
