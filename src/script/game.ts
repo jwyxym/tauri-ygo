@@ -91,13 +91,16 @@ class Game {
 			}
 			return Zh_CN;
 		},
-		system : (key : string) : Array<string> | boolean | undefined => {
+		system : (key : string) : Array<string> | number | boolean | undefined => {
 			if (this.system.has(key)) {
 				const value = this.system.get(key)!;
-				if (value === '' || isNaN(Number(value)))
+				const number = Number(value)
+				if (key === constant.str.system_conf.string.expansion)
 					return value.split('&&').filter(i => i !== '');
+				else if (Object.entries(constant.str.system_conf.sound).findIndex(i => i[1] === key))
+					return isNaN(number) ? 0 : number;
 				else
-					return !!Number(value);
+					return !!number;
 			}
 			return undefined;
 		},

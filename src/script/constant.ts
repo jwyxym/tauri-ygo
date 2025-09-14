@@ -64,11 +64,11 @@ class Constant {
 			expansions : 'expansions',
 			script : 'script',
 			deck : 'deck',
-			cache : 'cache',
-			assets : 'assets'
+			cache : 'cache'
 		},
 		exdirs : {
-			pics : 'pics'
+			pics : 'pics',
+			assets : 'assets'
 		},
 		files : {
 			system : 'system.conf',
@@ -101,14 +101,16 @@ class Constant {
 		},
 		system_conf : {
 			chk : {
-				deck : {
-					delete : 'delete',
-					exit : 'exit'
-				},
+				deck_delete : 'delete',
+				deck_exit : 'exit',
 				button : 'button'
 			},
 			string : {
 				expansion : 'load'
+			},
+			sound : {
+				back : 'back_sound',
+				button : 'button_sound'
 			}
 		},
 		ini : {

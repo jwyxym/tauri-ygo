@@ -1,5 +1,5 @@
 <template>
-	<div class = 'deck_body hover_ground'>
+	<div class = 'deck_body over_ground'>
 		<div class = 'cardinfo' ref = 'info'>
 			<var-card
 				:elevation = '0'
@@ -351,13 +351,13 @@
 			Dialog({
 				title : title,
 				onConfirm : leave
-			}, mainGame.get.system(constant.str.system_conf.chk.deck.delete));
+			}, mainGame.get.system(constant.str.system_conf.chk.deck_delete));
 		},
 		exit : async () : Promise<void> => {
 			Dialog({
 				title : mainGame.get.text().deck.exit,
 				onConfirm : props.offdeck
-			}, mainGame.get.system(constant.str.system_conf.chk.deck.exit));
+			}, mainGame.get.system(constant.str.system_conf.chk.deck_exit));
 		},
 		dbl_click : async (event : MouseEvent, card : Card | number) : Promise<void> => {
 			if (mainGame.is_android()) return;
@@ -696,10 +696,4 @@
 </script>
 <style scoped lang = 'scss'>
 	@use '../../style/deck.scss';
-	@use '../../style/ground_glass.scss';
-	@use '../../style/card.scss';
-	@use '../../style/transition.scss';
-	.var-card {
-		background-color: transparent;
-	}
 </style>

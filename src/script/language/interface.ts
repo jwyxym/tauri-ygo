@@ -60,6 +60,7 @@ interface textLike {
 		};
 	};
 	setting : {
+		setting_items : Map<string, string>,
 		ex_cards : string;
 		system_setting : string;
 		reload : string;

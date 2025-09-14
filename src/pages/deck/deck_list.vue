@@ -1,7 +1,7 @@
 <template>
 	<div class = 'body'>
 		<transition name = 'opacity'>
-			<div class = 'deck_list hover_ground' v-if = 'page.list'>
+			<div class = 'deck_list over_ground' v-if = 'page.list'>
 				<div class = 'list'>
 					<div class = 'button_list'>
 						<Button @click = 'select.menu' icon_name = 'exit'></Button>
@@ -248,8 +248,5 @@
 	onBeforeMount(list.load)
 </script>
 <style scoped lang = 'scss'>
-	@use '../../style/ground_glass.scss';
 	@use '../../style/deck_list.scss';
-    @use '../../style/transition.scss';
-	@use '../../style/card.scss';
 </style>

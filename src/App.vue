@@ -92,10 +92,11 @@
 
 </style>
 <style lang = 'scss'>
+	@use './style/font.scss';
 	@use './style/toast.scss';
-    @use './style/ground_glass.scss';
+    @use './style/ground.scss';
     @use './style/transition.scss';
-    @use './style/font.scss';
+    @use './style/card.scss';
 	.var-icon {
 		&:hover {
 			cursor: pointer;
@@ -107,6 +108,9 @@
 	}
 	.var-divider {
 		color: font.$text-color !important;
+	}
+	.var-card {
+		background-color: transparent;
 	}
 	:root {
 		--card-background: transparent !important;

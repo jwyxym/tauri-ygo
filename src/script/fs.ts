@@ -40,11 +40,11 @@ class Fs {
 
 	init = async (chk : boolean = true) : Promise<boolean> => {
 		try {
-			const files : Array<fs.DirEntry> = await this.read.dir(constant.str.dirs.assets, false, true, {
+			const files : Array<fs.DirEntry> = await this.read.dir(constant.str.exdirs.assets, false, true, {
     			baseDir : constant.system.resource_dir()
 			});
 			for (const i of files.filter(i => i.isFile)) {
-				const from = await path.join(constant.str.dirs.assets, i.name);
+				const from = await path.join(constant.str.exdirs.assets, i.name);
 				if (await this.exists(i.name) && chk)
 					continue;
 				await this.copy(from, i.name, {
@@ -53,7 +53,7 @@ class Fs {
 				});
 			}
 			for (const i of files.filter(i => i.isDirectory)) {
-				const f = await this.read.dir(await path.join(constant.str.dirs.assets, i.name), false, true, {
+				const f = await this.read.dir(await path.join(constant.str.exdirs.assets, i.name), false, true, {
 					baseDir : constant.system.resource_dir()
 				});
 				if (!await this.exists(i.name))
@@ -62,7 +62,7 @@ class Fs {
 					const to = await path.join(i.name, j.name);
 					if (await this.exists(to) && chk)
 						continue;
-					const from = await path.join(constant.str.dirs.assets, to);
+					const from = await path.join(constant.str.exdirs.assets, to);
 					await this.copy(from, to, {
 						fromPathBaseDir: constant.system.resource_dir(),
 						toPathBaseDir: this.base_dir

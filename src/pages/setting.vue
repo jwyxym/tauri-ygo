@@ -1,5 +1,5 @@
 <template>
-	<div class = 'setting_body hover_ground'>
+	<div class = 'setting_body over_ground'>
 		<div class = 'button_list'>
 			<Button @click = 'select.menu' icon_name = 'exit'></Button>
 		</div>
@@ -7,7 +7,7 @@
 			<div class = 'expansion_list'>
 				<div class = 'head'>
 					<var-menu-select @select = 'download.popup.on'>
-						<Button size = 'large' icon_name = 'download' :loading = 'download.downloading' :content = 'mainGame.get.text().setting.download.ex'></Button>
+						<Button size = 'large' icon_name = 'download' :loading = 'setting.loading' :content = 'mainGame.get.text().setting.download.ex'></Button>
 						<template #options>
 							<var-menu-option :label = 'mainGame.get.text().setting.download.url'/>
 							<var-menu-option :label = 'mainGame.get.text().setting.download.super_pre' />
@@ -18,22 +18,22 @@
 						size = 'large'
 						icon_name = 'refresh'
 						:content = 'mainGame.get.text().setting.reload'
-						:loading = 'download.downloading || expansion.loading'
+						:loading = 'setting.loading'
 					></Button>
 				</div>
-				<var-checkbox-group v-model = 'setting.load'>
-					<var-list>
-						<TransitionGroup
-							name = 'opacity'
-							tag = 'div'
-						>
-							<var-loading
-								v-for = '(i, v) in setting.expansion'
-								:loading = 'expansion.loading'
-								:key = 'i'
-								color = 'white'
+				<var-loading
+					:loading = 'setting.loading'
+					color = 'white'
+				>
+					<var-checkbox-group v-model = 'setting.load'>
+						<var-list>
+							<TransitionGroup
+								name = 'opacity'
+								tag = 'div'
 							>
 								<var-cell
+									v-for = '(i, v) in setting.expansion'
+									:key = 'i'
 									:title = 'i'
 									:border = 'true'
 								>
@@ -44,11 +44,49 @@
 										></var-checkbox>
 									</template>
 								</var-cell>
-							</var-loading>
-						</TransitionGroup>
+							</TransitionGroup>
+						</var-list>
+					</var-checkbox-group>
+				</var-loading>
+			</div>
+			<var-loading
+				:loading = 'setting.loading'
+				color = 'white'
+				class = 'items'
+			>
+				<var-checkbox-group v-model = 'setting.items'>
+					<var-list>
+						<var-cell
+							v-for = 'i in Object.entries(constant.str.system_conf.chk).map(i => i[1])'
+							:key = 'i'
+							:title = 'mainGame.get.text().setting.setting_items.get(i)'
+							:border = 'true'
+						>
+							<template #extra>
+								<var-checkbox
+									:checked-value = 'i'
+									@change = 'items.change($event, i)'
+								></var-checkbox>
+							</template>
+						</var-cell>
 					</var-list>
 				</var-checkbox-group>
-			</div>
+				<var-list>
+					<var-cell
+						v-for = '(i, v) in Object.entries(constant.str.system_conf.sound).map(i => i[1])'
+						:key = 'i'
+						:border = 'true'
+					>
+						<template #default>
+							{{ mainGame.get.text().setting.setting_items.get(i) }}
+							<var-slider
+								v-model = 'setting.sound[v]'
+								label-visible = 'always'
+							/>
+						</template>
+					</var-cell>
+				</var-list>
+			</var-loading>
 		</div>
 		<var-popup v-model:show = 'download.popup.url' position = 'center' :close-on-click-overlay = 'false'>
 			<var-form>
@@ -56,7 +94,7 @@
 					:placeholder = 'mainGame.get.text().setting.download.url'
 					v-model = 'download.url'
 				/>
-				<Button_List :loading = 'download.downloading' :confirm = 'download.custom.confirm' :cancel = 'download.custom.cancel'></Button_List>
+				<Button_List :loading = 'setting.loading' :confirm = 'download.custom.confirm' :cancel = 'download.custom.cancel'></Button_List>
 			</var-form>
 		</var-popup>
 	</div>
@@ -76,7 +114,6 @@
 
 	const download = reactive({
 		url : '',
-		downloading : false,
 		popup : {
 			url : false,
 			on : async (value : string) : Promise<void> => {
@@ -95,8 +132,7 @@
 				toast.error(mainGame.get.text().toast.error.setting.download);
 				return;
 			}
-			expansion.loading = true;
-			download.downloading = true;
+			setting.loading = true;
 			toast.info(mainGame.get.text().toast.download.start);
 			const path = await fs.write.ypk(url);
 			if (path.length == 2) {
@@ -109,8 +145,7 @@
 				await fs.write.system();
 				toast.info(mainGame.get.text().toast.download.complete);
 			}
-			download.downloading = false;
-			expansion.loading = false;
+			setting.loading = false;
 		},
 		custom : {
 			confirm : async () : Promise<void> => {
@@ -129,13 +164,16 @@
 
 	const setting = reactive({
 		load : [] as Array<string>,
-		expansion : [] as Array<string>
+		expansion : [] as Array<string>,
+		items_true : [] as Array<string>,
+		items : [] as Array<string>,
+		sound : [] as Array<number>,
+		loading : false
 	})
 
-	const expansion = reactive({
-		loading : false,
+	const expansion = {
 		change : async (value : string | boolean, v : number) : Promise<void> => {
-			expansion.loading = true;
+			setting.loading = true;
 			const load = await mainGame.get.ypk();
 			setting.expansion = load.files.map(i => i.name);
 			if (typeof value === 'string') {
@@ -147,14 +185,23 @@
 				await fs.write.system();
 				await mainGame.reload();
 			}
-			expansion.loading = false;
+			setting.loading = false;
 		},
 		reload : async () : Promise<void> => {
-			expansion.loading = true;
+			setting.loading = true;
 			await mainGame.reload();
-			expansion.loading = false;
+			setting.loading = false;
 		}
-	})
+	};
+
+	const items = {
+		change : async (value : string | boolean, i : string) : Promise<void> => {
+			setting.loading = true;
+			mainGame.push.system(i, typeof value === 'string');
+			await fs.write.system();
+			setting.loading = false;
+		}
+	}
 
 	defineProps(['select']);
 
@@ -162,10 +209,17 @@
 		const load = await mainGame.get.ypk();
 		setting.expansion = load.files.map(i => i.name);
 		setting.load = (mainGame.get.system(constant.str.system_conf.string.expansion) as Array<string> | undefined) ?? [];
+		const items = Object.entries(constant.str.system_conf.chk);
+		setting.items = items.map(i => i[1]);
+		setting.items_true = setting.items.filter(i => mainGame.get.system(i));
+		setting.sound = Object.entries(constant.str.system_conf.sound).map(i => mainGame.get.system(i[1]) as number * 100);
 	});
+
+	// watch(() => { return setting.sound; }, (n, o) => {
+	// 	console.log(n, o)
+	// })
 
 </script>
 <style scoped lang = 'scss'>
 	@use '../style/setting.scss';
-	@use '../style/ground_glass.scss';
 </style>

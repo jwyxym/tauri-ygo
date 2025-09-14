@@ -2,7 +2,7 @@ import { Dialog, DialogOptions } from '@varlet/ui'
 import mainGame from '../../script/game';
 import constant from '../../script/constant';
 
-const dialog = (option : DialogOptions, need_confirm : boolean | Array<string> = true) : void => {
+const dialog = (option : DialogOptions, need_confirm : boolean | number | Array<string> = true) : void => {
 	const chk = mainGame.get.system(constant.str.system_conf.chk.button);
 	if (option.onConfirm === undefined) option.onConfirm = () => {};
 	need_confirm ? Dialog({

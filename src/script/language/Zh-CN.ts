@@ -68,6 +68,13 @@ const Zh_CN : textLike = {
 		}
 	},
 	setting : {
+		setting_items : new Map([
+			['delete', '删除卡组时询问'],
+			['exit', '退出卡组时询问'],
+			['button', '确认按钮至于左侧'],
+			['back_sound', '背景音量'],
+			['button_sound', '按钮音量'],
+		]),
 		ex_cards : '拓展卡包',
 		system_setting : '系统设置',
 		reload : '重新加载卡片资源',

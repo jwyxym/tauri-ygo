@@ -9,10 +9,7 @@ use std::{
 	path::PathBuf
 };
 use zip::ZipArchive;
-use reqwest::{
-	Client,
-	Response
-};
+use ureq;
 
 #[derive(Serialize)]
 #[serde(tag = "type", content = "content")]
@@ -121,16 +118,19 @@ fn read_db(path: String) -> Result<Vec<(Vec<i64>, Vec<String>)>, String> {
 
 #[tauri::command]
 async fn download(url: String, path: String, name: String) -> Result<(), String> {
-	let client: Client = Client::new();
-	let response: Response = client.get(&url).send().await.map_err(|e| e.to_string())?;
-	if !response.status().is_success() {
-		return Err(format!("HTTP 请求失败，状态码: {}", response.status()));
-	}
-	let bytes = response.bytes().await.map_err(|e| e.to_string())?;
-	let file_path: PathBuf = Path::new(&path).join(name);
-	let mut file: File = File::create(&file_path).map_err(|e| e.to_string())?;
+    let response = ureq::get(&url).call().map_err(|e| e.to_string())?;
+    if response.status().is_success() {
+		let file_path: PathBuf = Path::new(&path).join(name);
+        let mut file: File = File::create(&file_path).map_err(|e| e.to_string())?;
+		let mut body = response.into_body();
+		let mut reader = body.as_reader();
+		let mut bytes = Vec::new();
+		reader.read_to_end(&mut bytes).map_err(|e| e.to_string())?;
         file.write_all(&bytes).map_err(|e| e.to_string())?;
-	Ok(())
+    	Ok(())
+    } else {
+        Err(format!("HTTP 请求失败，状态码: {}", response.status()))
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
