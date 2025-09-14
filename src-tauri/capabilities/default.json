@@ -18,9 +18,6 @@
 				},
 				{
 					"path": "$RESOURCE/**"
-				},
-				{
-					"path": "$APPDATA/**"
 				}
 			]
 		},
@@ -32,9 +29,6 @@
 				},
 				{
 					"path": "$RESOURCE/**"
-				},
-				{
-					"path": "$APPDATA/**"
 				}
 			]
 		},
@@ -46,9 +40,6 @@
 				},
 				{
 					"path": "$RESOURCE/**"
-				},
-				{
-					"path": "$APPDATA/**"
 				}
 			]
 		},
@@ -60,9 +51,6 @@
 				},
 				{
 					"path": "$RESOURCE/**"
-				},
-				{
-					"path": "$APPDATA/**"
 				}
 			]
 		},
@@ -74,9 +62,6 @@
 				},
 				{
 					"path": "$RESOURCE/**"
-				},
-				{
-					"path": "$APPDATA/**"
 				}
 			]
 		},
@@ -88,9 +73,6 @@
 				},
 				{
 					"path": "$RESOURCE/**"
-				},
-				{
-					"path": "$APPDATA/**"
 				}
 			]
 		},
@@ -102,9 +84,6 @@
 				},
 				{
 					"path": "$RESOURCE/**"
-				},
-				{
-					"path": "$APPDATA/**"
 				}
 			]
 		},
@@ -116,9 +95,6 @@
 				},
 				{
 					"path": "$RESOURCE/**"
-				},
-				{
-					"path": "$APPDATA/**"
 				}
 			]
 		},
@@ -130,9 +106,6 @@
 				},
 				{
 					"path": "$RESOURCE/**"
-				},
-				{
-					"path": "$APPDATA/**"
 				}
 			]
 		},
@@ -144,9 +117,6 @@
 				},
 				{
 					"path": "$RESOURCE/**"
-				},
-				{
-					"path": "$APPDATA/**"
 				}
 			]
 		},
@@ -158,9 +128,6 @@
 				},
 				{
 					"path": "$RESOURCE/**"
-				},
-				{
-					"path": "$APPDATA/**"
 				}
 			]
 		},
