@@ -51,6 +51,11 @@
 						>
 								<div :data-swapy-item = '`main_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
 									<img :src = 'deck.get_pic(i)' ref = 'main_card' :alt = 'i.toString()'></img>
+									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
+										<template #value>
+											{{ deck.get_ct(i) }}
+										</template>
+									</var-badge>
 								</div>
 						</div>
 					</TransitionGroup>
@@ -72,6 +77,11 @@
 						>
 								<div :data-swapy-item = '`extra_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
 									<img :src = 'deck.get_pic(i)' ref = 'extra_card' :alt = 'i.toString()'></img>
+									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
+										<template #value>
+											{{ deck.get_ct(i) }}
+										</template>
+									</var-badge>
 								</div>
 						</div>
 					</TransitionGroup>
@@ -93,6 +103,11 @@
 						>
 								<div :data-swapy-item = '`side_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
 									<img :src = 'deck.get_pic(i)' ref = 'side_card' :alt = 'i.toString()'></img>
+									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
+										<template #value>
+											{{ deck.get_ct(i) }}
+										</template>
+									</var-badge>
 								</div>
 						</div>
 					</TransitionGroup>
@@ -131,6 +146,11 @@
 									@dblclick = 'deck.dbl_click($event, card)'
 									@mousedown = 'cardinfo.select(card.id)'
 								/>
+								<var-badge type = 'primary' v-show = 'deck.get_ct(card.id) < 3'>
+									<template #value>
+										{{ deck.get_ct(card.id) }}
+									</template>
+								</var-badge>
 							</div>
 						</div>
 					</div>
@@ -217,6 +237,9 @@
 				else if (el.parentElement?.classList.contains('deck_side'))
 					deck.ct.side --;
 			}
+		},
+		get_ct : (id : number) : number => {
+			return search.rule.forbidden() ? 3 : mainGame.get.lflist(search.info.lflist!, id);
 		},
 		get_pic : (card : string | number) : string => {
 			const pic = mainGame.get.card(card).pic;

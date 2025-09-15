@@ -101,6 +101,15 @@
 			}
 		}
 	}
+	.card {
+		div {
+			position: relative;
+			.var-badge {
+				position: absolute;
+				right: 0;
+			}
+		}
+	}
 }
 .var-popup {
 	.var-form {
