@@ -1,5 +1,5 @@
 <template>
-	<div class = 'main'>
+	<div class = 'main' @contextmenu.prevent>
 		<starry-sky :stars-count = '1500' :distance = '800' id = 'back'/>
 		<div class = 'body'>
 			<transition name = 'opacity'>

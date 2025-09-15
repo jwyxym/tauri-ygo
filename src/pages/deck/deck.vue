@@ -375,7 +375,6 @@
 		},
 		right_click : async (event : MouseEvent, card : Card | number) : Promise<void> => {
 			if (mainGame.is_android()) return;
-			event.preventDefault();
 			if (typeof card === 'number')
 				card = mainGame.get.card(card);
 			const el = deck.get_card(event.target as HTMLElement);
