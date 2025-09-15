@@ -4,17 +4,22 @@ import constant from './constant';
 import mainGame from './game';
 
 class Deck extends YGOProDeck {
-	import = false;
-	constructor(init: Partial<YGOProDeckLike> = {}) {
+	new : boolean;
+	constructor(init: Partial<YGOProDeckLike> = {}, is_new : boolean = false) {
 		super(init);
+		this.new = is_new;
 	};
 
 	push_name = (name : string) : void => {
 		this.name = name;
 	}
 
-	is_imported = () : void => {
-		this.import = true;
+	is_new = () : void => {
+		this.new = true;
+	}
+
+	is_not_new = () : void => {
+		this.new = false;
 	}
 
 	toYdkString () {

@@ -201,7 +201,7 @@
 	import Dialog from '../varlet/dialog';
 
 
-	const props = defineProps(['this_deck', 'offdeck']);
+	const props = defineProps(['this_deck', 'offdeck', 'update']);
 
 	const deck = reactive({
 		main : [] as Array<number>,
@@ -230,7 +230,8 @@
 				return mainGame.get.text().deck.rule.name.length;
 			if (name.match(constant.reg.name))
 				return mainGame.get.text().deck.rule.name.unlawful;
-			if ((await mainGame.load.deck()).filter(i => i.name === name).length > 0 && (props.this_deck && !props.this_deck.import ? props.this_deck.name !== name : true))
+			console.log(props.this_deck.new)
+			if ((await mainGame.load.deck()).filter(i => i.name === name).length > (props.this_deck.new || (props.this_deck.name.length > 0 && props.this_deck.name !== name) ? 0 : 1))
 				return mainGame.get.text().deck.rule.name.exist;
 			return true;
 		},
@@ -239,7 +240,7 @@
 				const parent = el.parentElement;
 				if (parent)
 					el = parent;
-				else break;
+				else return undefined;
 			}
 			return el;
 		},
@@ -278,13 +279,15 @@
 					side : side_deck,
 					name : deck.name
 				});
-				const write = await fs.write.ydk(props.this_deck.name, write_deck);
+				const write = await fs.write.ydk(props.this_deck.name.length > 0 ? props.this_deck.name : deck.name, write_deck);
 				let rename = true;
-				if (write && deck.name !== props.this_deck.name) {
+				if (write && deck.name !== props.this_deck.name && props.this_deck.name.length > 0) {
 					rename = await fs.rename.ydk(props.this_deck.name, deck.name);
 				}
 				if (write && rename)
 					toast.info(mainGame.get.text().toast.deck.save);
+				if (props.this_deck.new)
+					props.update(deck.name);
 			} else {
 				toast.error(rule);
 			}

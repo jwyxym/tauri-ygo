@@ -122,6 +122,11 @@
 	.var-card {
 		background-color: transparent;
 	}
+	.var-button {
+		span {
+			font-size: min(4vh, var(--font-size-md)) !important;
+		}
+	}
 	:root {
 		--card-background: transparent !important;
 		--dialog-background: transparent !important;
@@ -139,6 +144,11 @@
 		--divider-color: white !important;
 		--checkbox-unchecked-color: white !important;
 		--cell-border-color: white !important;
-		--cell-font-size: 16px !important;
+		--button-mini-padding: 4px 4px !important;
+		--button-small-padding: 4px 4px !important;
+		--button-normal-padding: 4px 4px !important;
+		--button-large-padding: 4px 4px !important;
+		--cell-min-height: 5vh !important;
+		--cell-padding: 1vh 20px !important;
 	}
 </style>

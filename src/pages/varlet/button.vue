@@ -5,7 +5,7 @@
 		text-color = 'white'
 		size = 'small'
 	>
-		{{ content }}
+		<span>{{ content }}</span>
 		<component v-if = 'icon_name' :is = 'svg'/>
 	</var-button>
 </template>

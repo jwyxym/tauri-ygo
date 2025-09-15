@@ -14,12 +14,18 @@
 		gap: 10%;
 		.expansion_list {
 			width: 40%;
-			height: 100%;
+			height: 90%;
 			display: flex;
 			flex-direction: column;
 			gap: 10px;
+			overflow-y: auto;
+			&::-webkit-scrollbar {
+				display: none;
+			}
 			.head {
+				width: 100%;
 				display: flex;
+				flex-wrap: wrap;
 				align-content: center;
 				align-items: center;
 				gap: 10px;
@@ -27,7 +33,11 @@
 		}
 		.items {
 			width: 40%;
-			height: 100%;
+			height: 90%;
+			overflow-y: auto;
+			&::-webkit-scrollbar {
+				display: none;
+			}
 		}
 	}
 	.var-list {

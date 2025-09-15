@@ -22,14 +22,13 @@
 							<var-button
 								v-for = '(i, v) in list.decks'
 								:key = 'i'
-								text outline container block
-								size = 'large'
+								text outline block
 								type = 'primary'
 								text-color = 'white'
 								:loading = 'list.loading.includes(v)'
 								@click = 'list.selected(v)'
 							>
-								{{ i.name }}
+								<span>{{ i.name }}</span>
 							</var-button>
 						</TransitionGroup>
 					</var-list>
@@ -74,7 +73,7 @@
 			</div>
 		</transition>
 		<transition name = 'opacity'>
-			<DeckPage v-if = 'page.deck' :this_deck = 'page.this_deck' :offdeck = 'page.offdeck'></DeckPage>
+			<DeckPage v-if = 'page.deck' :this_deck = 'page.this_deck' :offdeck = 'page.offdeck' :update = 'page.update'></DeckPage>
 		</transition>
 		<var-popup v-model:show = 'page.popup.code.show' position = 'center' :close-on-click-overlay = 'false'>
 			<var-form>
@@ -132,6 +131,11 @@
 				page.list = true;
 			}, 400)
 		},
+		update : (name : string) : void => {
+			if (!page.this_deck) return;
+			page.this_deck.is_not_new();
+			page.this_deck.name = name;
+		},
 		popup : {
 			code : {
 				show : false,
@@ -141,7 +145,7 @@
 					deck.main = deck.main.filter(i => mainGame.cards.has(i));
 					deck.extra = deck.extra.filter(i => mainGame.cards.has(i));
 					deck.side = deck.side.filter(i => mainGame.cards.has(i));
-					deck.is_imported();
+					deck.is_new();
 					page.indeck(deck);
 					page.popup.code.exit();
 				},
@@ -161,7 +165,7 @@
 					deck.main = deck.main.filter(i => mainGame.cards.has(i));
 					deck.extra = deck.extra.filter(i => mainGame.cards.has(i));
 					deck.side = deck.side.filter(i => mainGame.cards.has(i));
-					deck.is_imported();
+					deck.is_new();
 					page.indeck(deck);
 					page.popup.url.exit();
 				},
@@ -226,12 +230,14 @@
 		add : (value : string) => {
 			switch (value) {
 				case mainGame.get.text().deck.new:
-					page.indeck(new Deck({
+					const deck = new Deck({
 						main : [],
 						side : [],
 						extra : [],
 						name : ''
-					}));
+					});
+					deck.is_new();
+					page.indeck(deck);
 					break;
 				case mainGame.get.text().deck.from_code:
 					page.popup.code.show = true;

@@ -5,13 +5,12 @@
 	justify-content: center;
 	position: relative;
 	.cardinfo {
-		width: calc((100% - 52.5vw - 32px) / 2);
+		width: 20%;
 		.description {
 			color: font.$text-color;
 			overflow-y: auto;
 			height: calc(100% - 15.3vw);
 			width: 100%;
-			font-size: 3vh;
 			white-space: pre-line;
 			display: flex;
 			flex-direction: column;
@@ -19,11 +18,11 @@
 			&::-webkit-scrollbar {
 				display: none;
 			}
-			font-size: 2.5vh;
+			font-size: max(2.5vh, var(--font-size-sm));
 			.title {
 				display: grid;
 				.name {
-					font-size: 5vh;
+					font-size: max(5vh, var(--font-size-md));
 				}
 			}
 			.content {
@@ -32,7 +31,8 @@
 		}
 	}
 	.deck_show {
-		width: 52.5vw;
+		width: 60%;
+		max-height: 50vw;
 		.head {
 			display: flex;
 			align-items: center;
@@ -52,16 +52,16 @@
 			}
 			.main {
 				width: 100%;
-				min-height: 20.4vw;
+				aspect-ratio: 5 / 2;
 			}
 			.side, .extra {
 				width: 100%;
-				min-height: 5.1vw;
+				aspect-ratio: 15 / 1;
 			}
 		}
 	}
 	.search {
-		width: calc((100% - 52.5vw - 32px) / 2);
+		width: 20%;
 		height: 100%;
 		.button_list {
 			display: flex;
@@ -76,6 +76,7 @@
 				display: none;
 			}
 			.list {
+				width: 100%;
 				display: flex;
 				gap: 10px;
 				.card_name {
@@ -85,11 +86,17 @@
 					overflow: hidden;
 					white-space: nowrap;
 					.title {
-						font-size: 3vh;
+						font-size: max(3vh, var(--font-size-md));
 					}
 					.description {
 						color: font.$subtext-color;
-						font-size: 2vh;
+						font-size: max(2vh, var(--font-size-sm));
+					}
+				}
+				.searcher {
+					width: 30%;
+					.card {
+						width: 100%;
 					}
 				}
 			}

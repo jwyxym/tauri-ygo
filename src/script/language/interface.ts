@@ -64,6 +64,7 @@ interface textLike {
 		ex_cards : string;
 		system_setting : string;
 		reload : string;
+		resert : string;
 		download : {
 			url : string;
 			super_pre : string;

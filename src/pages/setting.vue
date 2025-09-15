@@ -7,7 +7,7 @@
 			<div class = 'expansion_list'>
 				<div class = 'head'>
 					<var-menu-select @select = 'download.popup.on'>
-						<Button size = 'large' icon_name = 'download' :loading = 'setting.loading' :content = 'mainGame.get.text().setting.download.ex'></Button>
+						<Button size = 'large' :loading = 'setting.loading' :content = 'mainGame.get.text().setting.download.ex'></Button>
 						<template #options>
 							<var-menu-option :label = 'mainGame.get.text().setting.download.url'/>
 							<var-menu-option :label = 'mainGame.get.text().setting.download.super_pre' />
@@ -16,8 +16,13 @@
 					<Button
 						@click = 'expansion.reload'
 						size = 'large'
-						icon_name = 'refresh'
 						:content = 'mainGame.get.text().setting.reload'
+						:loading = 'setting.loading'
+					></Button>
+					<Button
+						@click = 'expansion.reload'
+						size = 'large'
+						:content = 'mainGame.get.text().setting.resert'
 						:loading = 'setting.loading'
 					></Button>
 				</div>

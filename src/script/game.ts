@@ -576,6 +576,8 @@ class Game {
 					if ((search.def ?? '').length > 0 || (card.def & link) !== link)
 						return false;
 				} else {
+					if (link > 0)
+						return false;
 					if ((search.def ?? '').length > 0 && (card.def < 0 ? !def.includes('?') : !def.includes(card.def.toString())))
 						return false;
 				}

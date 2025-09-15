@@ -39,6 +39,8 @@
 			.deck {
 				display: grid;
 				justify-items: center;
+				height: 100%;
+				width: 100%;
 				.deck_name {
 					span {
 						color: font.$text-color;
@@ -46,9 +48,6 @@
 						font-size: 10vh;
 						white-space: nowrap;
 					}
-				}
-				.cards {
-					width: 100%;
 				}
 			}
 		}
