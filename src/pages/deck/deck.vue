@@ -20,10 +20,7 @@
 				<span class = 'content'>{{ cardinfo.description }}</span>
 			</div>
 		</div>
-		<div
-			class = 'deck_show'
-			:elevation = '4'
-		>
+		<div class = 'deck_show'>
 			<div class = 'head'>
 				<Input
 					:placeholder = 'mainGame.get.text().deck.name'
@@ -292,7 +289,7 @@
 				toast.error(rule);
 			}
 		},
-		push : (card : Card, to_deck : number) : void => {
+		push : (card : Card, to_deck : number = 3) : void => {
 			if (card.is_token()) return;
 			const main = deck.get_dom(0);
 			const extra = deck.get_dom(1);
@@ -302,6 +299,13 @@
 			if (cards.filter(i => i.children[0].id === card.id.toString()).length + 1 > ct) {
 				toast.error(mainGame.get.text().deck.rule.deck.card_count.replace(constant.str.replace,ct.toString()));
 			} else {
+				if (to_deck > 2) {
+					to_deck = card.is_ex() ? (extra.length + 1 > 15 ? 2 : 1) : (main.length + 1 > 60 ? 2 : 0);
+					if (to_deck == 2 && side.length + 1 > 15) {
+						toast.error(mainGame.get.text().deck.rule.deck.deck_count.replace(constant.str.replace, ''))
+						return;
+					}
+				}
 				switch(to_deck) {
 					case 0:
 						main.length + 1 > 60 ? toast.error(mainGame.get.text().deck.rule.deck.deck_count.replace(constant.str.replace, '60')) :
@@ -589,11 +593,11 @@
 	const side_card : Ref<Array<HTMLElement> | null> = ref(null);
 
 	const android = {
-		remove : async (event : MouseEvent) : Promise<void> => {
+		dbl_click : async (event : MouseEvent) : Promise<void> => {
 			const el = deck.get_card(event.target as HTMLElement);
-			if (!el || el.parentElement!.classList.contains('searcher')) return;
+			if (!el) return;
 			const card = mainGame.get.card(deck.get_id(el))!;
-			await deck.remove(el, card.name);
+			el.parentElement!.classList.contains('searcher') ? deck.push(card) : await deck.remove(el, card.name);
 		},
 		select : (event : MouseEvent) : void => {
 			const el = deck.get_card(event.target as HTMLElement);
@@ -627,16 +631,14 @@
 					onEnd : sortable.end
 				})
 			}
-			document.addEventListener('dblclick', android.remove);
-			document.addEventListener('contextmenu', android.remove);
+			document.addEventListener('dblclick', android.dbl_click);
 			document.addEventListener('mousedown', android.select);
 		}
 	})
 
 	onUnmounted(() => {
 		if (mainGame.is_android()) {
-			document.removeEventListener('dblclick', android.remove);
-			document.removeEventListener('contextmenu', android.remove);
+			document.removeEventListener('dblclick', android.dbl_click);
 			document.removeEventListener('mousedown', android.select);
 		}
 	});

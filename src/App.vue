@@ -132,7 +132,8 @@
 		--dialog-background: transparent !important;
 		--popup-content-background-color: transparent !important;
 		--tabs-background: transparent !important;
-		--menu-select-menu-background-color: rgba(0, 0, 0, 0.6) !important;
+		--select-scroller-background: rgba(0, 0, 0, 0.8) !important;
+		--menu-select-menu-background-color: rgba(0, 0, 0, 0.8) !important;
 		--dialog-message-color: font.$text-color !important;
 		--dialog-title-color: font.$text-color !important;
 		--list-loading-color: font.$text-color !important;
@@ -140,6 +141,7 @@
 		--list-error-color: font.$text-color !important;
 		--checkbox-text-color: font.$text-color !important;
 		--menu-option-text-color: font.$text-color !important;
+		--option-text-color: white !important;
 		--cell-color: white !important;
 		--divider-color: white !important;
 		--checkbox-unchecked-color: white !important;

@@ -62,8 +62,8 @@ const Zh_CN : textLike = {
 				unlawful : '只允许包含数字'
 			},
 			deck : {
-				deck_count : '卡组最大数量 {:?}',
-				card_count : '卡片最大数量 {:?}',
+				deck_count : '卡组已达最大数量 {:?}',
+				card_count : '卡片已达最大数量 {:?}',
 			}
 		}
 	},

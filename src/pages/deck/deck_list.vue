@@ -121,7 +121,7 @@
 			setTimeout(() => {
 				list.select = -1;
 				page.deck = true;
-			}, 400)
+			}, 500)
 		},
 		offdeck : async () : Promise<void> => {
 			page.deck = false;
@@ -129,7 +129,7 @@
 			await list.load();
 			setTimeout(() => {
 				page.list = true;
-			}, 400)
+			}, 500)
 		},
 		update : (name : string) : void => {
 			if (!page.this_deck) return;
@@ -198,7 +198,7 @@
 				setTimeout(() => {
 					list.select = v;
 					list.loading.splice(list.loading.indexOf(v), 1);
-				}, 400);
+				}, 500);
 			} else
 				list.select = -1;
 		},

@@ -91,7 +91,7 @@
 						</template>
 					</var-cell>
 				</var-list>
-				<var-checkbox-group v-model = 'setting.items'>
+				<var-checkbox-group v-model = 'setting.items_true'>
 					<var-list>
 						<var-cell
 							v-for = 'i in Object.entries(constant.str.system_conf.chk).map(i => i[1])'
