@@ -26,20 +26,23 @@
 				></Animation>
 			</transition>
 		</div>
+		<Voice v-if = 'page.show.voice'></Voice>
 	</div>
 </template>
-<script setup lang="ts">
-	import { reactive, onBeforeMount } from "vue";
+<script setup lang = 'ts'>
+	import { reactive, onBeforeMount, onMounted, watch } from "vue";
 
 	import Menu from './pages/menu.vue';
 	import Animation from './pages/animation.vue';
 	import Deck from './pages/deck/deck_list.vue';
 	import Setting from './pages/setting.vue';
+	import Voice from './pages/voice.vue';
 
 	import mainGame from './script/game';
 
 	let page = reactive({
 		show : {
+			voice : false,
 			dialog : false,
 			menu : false,
 			deck : false,
@@ -71,6 +74,10 @@
 	onBeforeMount(async () => {
 		await mainGame.init();
 		page.show.menu = true;
+		page.show.voice = true;
+	});
+
+	onMounted(async () => {
 	});
 
 </script>

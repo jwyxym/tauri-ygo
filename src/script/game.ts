@@ -2,13 +2,15 @@ import { exit } from '@tauri-apps/plugin-process';
 import { DirEntry } from '@tauri-apps/plugin-fs';
 import { join } from '@tauri-apps/api/path';
 
+import toast from './toast';
+
 import fs from './fs';
 import constant from './constant';
 import Deck from './deck';
 import Card, { Search } from './card';
 import textLike from './language/interface';
 import Zh_CN from './language/Zh-CN';
-import toast from './toast';
+import voice from './voice';
 
 class Game {
 	strings : Map<string, Map<number, string>> = new Map([
@@ -28,6 +30,11 @@ class Game {
 	servers : Map<string, string> = new Map;
 	cards : Map<number, Card> = new Map;
 	textures : Map<string, string> = new Map;
+	bgm : Map<string, Map<string, string>> = new Map([
+		[constant.str.system_conf.sound.back, new Map],
+		[constant.str.system_conf.sound.button, new Map]
+	]);
+	audio : Array<HTMLAudioElement> = [];
 	select = 'Zh_CN';
 	interval = -1;
 	interval_ct = 0;
@@ -55,6 +62,7 @@ class Game {
 						this.textures.set(name[1], url);
 				}
 			}
+
 			//读取system.conf文件夹
 			const text : string | undefined = await fs.read.text(constant.str.files.system);
 			if (text !== undefined) {
@@ -64,6 +72,17 @@ class Game {
 					this.read.system_conf(line);
 				}
 			}
+
+			//读取./sound文件夹
+			for (const i of await fs.read.dir(constant.str.dirs.sound)) {
+				if (i.name.match(constant.reg.bgm)) {
+					const url : string | undefined = await fs.read.bgm(i.name);
+					const name = i.name.match(constant.reg.get_name) ?? [];
+					if (name.length >= 2 && url !== undefined)
+						this.bgm.get(constant.str.system_conf.sound.back)!.set(name[1], url);
+				}
+			}
+
 			this.unknown.update_pic(this.textures.get(constant.str.files.textures.unknown) ?? '');
 			await fs.write.system();
 			await this.load.card();
@@ -92,17 +111,15 @@ class Game {
 			return Zh_CN;
 		},
 		system : (key : string) : Array<string> | number | boolean | undefined => {
-			if (this.system.has(key)) {
-				const value = this.system.get(key)!;
-				const number = Number(value)
-				if (key === constant.str.system_conf.string.expansion)
-					return value.split('&&').filter(i => i !== '');
-				else if (Object.entries(constant.str.system_conf.sound).findIndex(i => i[1] === key))
-					return isNaN(number) ? 0 : number;
-				else
-					return !!number;
+			const value = this.system.get(key);
+			const number = Number(value)
+			if (key === constant.str.system_conf.string.expansion) {
+				return (value ?? '').split('&&').filter(i => i !== '');
+			} else if (Object.entries(constant.str.system_conf.sound).findIndex(i => i[1] === key) > -1) {
+				return isNaN(number) ? 0 : number;
+			} else {
+				return !!number;
 			}
-			return undefined;
 		},
 		textures : (key : string) : string | undefined => {
 			return this.textures.get(key);
@@ -116,7 +133,7 @@ class Game {
 			files : Array<DirEntry>;
 		}> => {
 			const load_expansion : Array<string> = this.get.system(constant.str.system_conf.string.expansion) as Array<string> ?? [];
-			const expansion_files : Array<DirEntry> = (await fs.read.dir(constant.str.dirs.expansions, false))?.filter(i => i.isFile);
+			const expansion_files : Array<DirEntry> = (await fs.read.dir(constant.str.dirs.expansions, false))?.filter(i => i.isFile && i.name.match(constant.reg.zip));
 			const load : Array<string> = load_expansion.filter(i => { return expansion_files.findIndex(j => j.name === i) > -1; });
 			this.system.set(constant.str.system_conf.string.expansion, load.join('&&'));
 			for (let i = 0; i < load.length; i++) {
@@ -134,6 +151,9 @@ class Game {
 				return lflist.get(card) ?? 3;
 			}
 			return 3;
+		},
+		music : (key : string) : HTMLAudioElement | undefined => {
+			return this.audio.find(i => i.id === key);
 		}
 	}
 
@@ -571,20 +591,22 @@ class Game {
 	}
 
 	push = {
-		system : (key : string, n : string | boolean) : void => {
+		system : (key : string, n : string | number | boolean) : void => {
 			const to_string = (str : string) : string => {
 				const value = this.system.get(key) ?? '';
 				return `${value}${value.length > 0 ? '&&' : ''}${str}`
 			}
-			const get = this.get.system(key);
-			if (get === undefined) {
-				this.system.set(key, typeof n === 'boolean' ? (n ? '1' : '0') : to_string(n));
-			}
-			else if (typeof get === 'boolean' && typeof n === 'boolean')
+			if (key === constant.str.system_conf.string.expansion) {
+				this.system.set(key, to_string(n as string));
+			} else if (Object.entries(constant.str.system_conf.sound).findIndex(i => i[1] === key) > -1) {
+				this.system.set(key, n.toString());
+				voice.update(key);
+			} else {
 				this.system.set(key, n ? '1' : '0');
-			else if (typeof get === 'object' && typeof n === 'string' && !get.includes(n)) {
-				this.system.set(key, to_string(n));
 			}
+		},
+		music : (audio : Array<HTMLAudioElement>) : void => {
+			this.audio = audio;
 		}
 	};
 

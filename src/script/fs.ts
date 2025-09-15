@@ -38,37 +38,14 @@ class Fs {
 		return false;
 	};
 
-	init = async (chk : boolean = true) : Promise<boolean> => {
+	init = async (chk : boolean = false, chk_path : boolean = false) : Promise<boolean> => {
 		try {
-			const files : Array<fs.DirEntry> = await this.read.dir(constant.str.exdirs.assets, false, true, {
-    			baseDir : constant.system.resource_dir()
+			if (!await this.exists(constant.str.files.assets) || chk)
+				await this.write.from_url(constant.str.url.assets, constant.str.files.assets);
+			const p = await this.path;
+			await invoke<void>('unzip', {
+				path : p, file : await path.join(p, constant.str.files.assets), chk : chk_path
 			});
-			for (const i of files.filter(i => i.isFile)) {
-				const from = await path.join(constant.str.exdirs.assets, i.name);
-				if (await this.exists(i.name) && chk)
-					continue;
-				await this.copy(from, i.name, {
-					fromPathBaseDir: constant.system.resource_dir(),
-					toPathBaseDir: this.base_dir
-				});
-			}
-			for (const i of files.filter(i => i.isDirectory)) {
-				const f = await this.read.dir(await path.join(constant.str.exdirs.assets, i.name), false, true, {
-					baseDir : constant.system.resource_dir()
-				});
-				if (!await this.exists(i.name))
-					await this.write.dir(i.name);
-				for (const j of f.filter(i => i.isFile)) {
-					const to = await path.join(i.name, j.name);
-					if (await this.exists(to) && chk)
-						continue;
-					const from = await path.join(constant.str.exdirs.assets, to);
-					await this.copy(from, to, {
-						fromPathBaseDir: constant.system.resource_dir(),
-						toPathBaseDir: this.base_dir
-					});
-				}
-			}
 			return true;
 		} catch (error) {
 			this.write.log(error);
@@ -126,7 +103,7 @@ class Fs {
 				});
 				for (const [name, content] of entries) {
 					if (name.match(constant.reg.picture)) {
-						const blob = new Blob([new Uint8Array(content.content as Uint8Array)], { type: name.endsWith('png') ? 'image/png' : 'image/jpeg' })
+						const blob = new Blob([new Uint8Array(content.content as Uint8Array)], { type : name.endsWith('png') ? 'image/png' : 'image/jpeg' })
 						let filename = name.replace(/\\/g, '/').split('/').filter(part => part.trim() !== '').pop() || '';
 						if (!filename.startsWith('.')) {
 							const dotIndex = filename.lastIndexOf('.');
@@ -145,6 +122,23 @@ class Fs {
 				this.write.log(error);
 			}
 			return map;
+		},
+		bgm : async (file : string) : Promise<string | undefined> => {
+			try {
+				const read_to_blob = async () => {
+					const bgm = await this.read.file(file);
+					if (bgm)
+						return URL.createObjectURL(
+							new Blob([new Uint8Array(bgm)], { type : 'audio/wav' })
+						)
+					return undefined;
+				}
+				return await read_to_blob();
+				// return mainGame.is_android() ? await read_to_blob() : convertFileSrc(await path.join(await this.path, file));
+			} catch (error) {
+				this.write.log(error);
+			}
+			return undefined;
 		},
 		picture : async (file : string) : Promise<string | undefined> => {
 			try {
@@ -255,6 +249,15 @@ class Fs {
 			}
 			return false;
 		},
+		text : async (file : string, text : string) : Promise<boolean> => {
+			try {
+				await fs.writeTextFile(file, text, this.dir);
+				return true;
+			} catch (error) {
+				this.write.log(error);
+			}
+			return false;
+		},
 		file : async (file : string, data : Uint8Array<ArrayBufferLike>) : Promise<boolean> => {
 			try {
 				const f = await fs.create(file, this.dir);
@@ -285,7 +288,7 @@ class Fs {
 					file = `${Math.random().toString().slice(2)}${constant.str.extends.ypk}`;
 				await invoke<Array<[Array<number>, Array<string>]>>('download', {
 					url : url,
-					path : await path.join(await this.path, constant.str.dirs.expansions),
+					path : await this.path,
 					name : file
 				});
 				return file;

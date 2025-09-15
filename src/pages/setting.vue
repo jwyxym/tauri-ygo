@@ -54,6 +54,38 @@
 				color = 'white'
 				class = 'items'
 			>
+				<var-list>
+					<var-cell
+						v-for = '(i, v) in Object.entries(constant.str.system_conf.sound).map(i => i[1])'
+						:key = 'i'
+						:border = 'true'
+					>
+						<template #default>
+							<div>
+								{{ `${mainGame.get.text().setting.setting_items.get(i)} : ${setting.sound[v] ? setting.sound[v].toFixed(2) : 0}` }}
+								<var-slider
+									v-if = 'mainGame.is_android()'
+									v-model = 'setting.sound[v]'
+									label-visible = 'never'
+									:step = '0.01'
+									:max = '1'
+									:min = '0'
+									@end = 'items.sound_change($event as number, i)'
+								/>
+								<slider
+									v-if = '!mainGame.is_android()'
+									v-model = 'setting.sound[v]'
+									color = '#397bfe'
+									track-color = 'white'
+									:step = '0.01'
+									:max = '1'
+									:min = '0'
+									@drag-end = 'items.sound_change($event as number, i)'
+								/>
+							</div>
+						</template>
+					</var-cell>
+				</var-list>
 				<var-checkbox-group v-model = 'setting.items'>
 					<var-list>
 						<var-cell
@@ -71,21 +103,6 @@
 						</var-cell>
 					</var-list>
 				</var-checkbox-group>
-				<var-list>
-					<var-cell
-						v-for = '(i, v) in Object.entries(constant.str.system_conf.sound).map(i => i[1])'
-						:key = 'i'
-						:border = 'true'
-					>
-						<template #default>
-							{{ mainGame.get.text().setting.setting_items.get(i) }}
-							<var-slider
-								v-model = 'setting.sound[v]'
-								label-visible = 'always'
-							/>
-						</template>
-					</var-cell>
-				</var-list>
 			</var-loading>
 		</div>
 		<var-popup v-model:show = 'download.popup.url' position = 'center' :close-on-click-overlay = 'false'>
@@ -100,8 +117,9 @@
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { reactive, onBeforeMount, watch } from 'vue';
+	import { reactive, onBeforeMount } from 'vue';
 	import { join } from '@tauri-apps/api/path';
+	import slider from "vue3-slider"
 	
 	import mainGame from '../script/game';
 	import fs from '../script/fs';
@@ -196,10 +214,12 @@
 
 	const items = {
 		change : async (value : string | boolean, i : string) : Promise<void> => {
-			setting.loading = true;
 			mainGame.push.system(i, typeof value === 'string');
 			await fs.write.system();
-			setting.loading = false;
+		},
+		sound_change : async (value : number, i : string) : Promise<void> => {
+			mainGame.push.system(i, value.toString());
+			await fs.write.system();
 		}
 	}
 
@@ -212,12 +232,8 @@
 		const items = Object.entries(constant.str.system_conf.chk);
 		setting.items = items.map(i => i[1]);
 		setting.items_true = setting.items.filter(i => mainGame.get.system(i));
-		setting.sound = Object.entries(constant.str.system_conf.sound).map(i => mainGame.get.system(i[1]) as number * 100);
+		setting.sound = Object.entries(constant.str.system_conf.sound).map(i => mainGame.get.system(i[1]) as number);
 	});
-
-	// watch(() => { return setting.sound; }, (n, o) => {
-	// 	console.log(n, o)
-	// })
 
 </script>
 <style scoped lang = 'scss'>

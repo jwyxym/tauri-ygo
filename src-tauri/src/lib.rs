@@ -2,11 +2,9 @@ use regex::Regex;
 use rusqlite::{Connection, Result};
 use serde::Serialize;
 use std::{
-	fs::File,
-	io::Read,
-	io::Write,
-	path::Path,
-	path::PathBuf
+	fs::{create_dir_all, File, exists},
+	io::{copy, Read, Write},
+	path::{Path, PathBuf}
 };
 use zip::ZipArchive;
 use ureq;
@@ -16,6 +14,30 @@ use ureq;
 enum FileContent {
 	Binary(Vec<u8>),
 	Text(String),
+}
+
+#[tauri::command]
+fn unzip(path: String, file: String, chk: bool) -> Result<(), String> {
+	let file = File::open(file).map_err(|e| e.to_string())?;
+	let mut archive = ZipArchive::new(file).map_err(|e| e.to_string())?;
+
+	for i in 0..archive.len() {
+		let mut file = archive.by_index(i).map_err(|e| e.to_string())?;
+		let file_name = file.name().to_string();
+		let out_path = Path::new(&path).join(Path::new(&file_name));
+
+		if file.is_dir() {
+			create_dir_all(&out_path).map_err(|e| e.to_string())?;
+		} else if !exists(&out_path).map_err(|e| e.to_string())? || chk {
+			if let Some(parent) = out_path.parent() {
+				create_dir_all(parent).map_err(|e| e.to_string())?;
+			}
+			let mut outfile = File::create(&out_path).map_err(|e| e.to_string())?;
+			copy(&mut file, &mut outfile).map_err(|e| e.to_string())?;
+		}
+	}
+
+	Ok(())
 }
 
 #[tauri::command]
@@ -118,19 +140,19 @@ fn read_db(path: String) -> Result<Vec<(Vec<i64>, Vec<String>)>, String> {
 
 #[tauri::command]
 async fn download(url: String, path: String, name: String) -> Result<(), String> {
-    let response = ureq::get(&url).call().map_err(|e| e.to_string())?;
-    if response.status().is_success() {
+	let response = ureq::get(&url).call().map_err(|e| e.to_string())?;
+	if response.status().is_success() {
 		let file_path: PathBuf = Path::new(&path).join(name);
-        let mut file: File = File::create(&file_path).map_err(|e| e.to_string())?;
+		let mut file: File = File::create(&file_path).map_err(|e| e.to_string())?;
 		let mut body = response.into_body();
 		let mut reader = body.as_reader();
 		let mut bytes = Vec::new();
 		reader.read_to_end(&mut bytes).map_err(|e| e.to_string())?;
-        file.write_all(&bytes).map_err(|e| e.to_string())?;
-    	Ok(())
-    } else {
-        Err(format!("HTTP 请求失败，状态码: {}", response.status()))
-    }
+		file.write_all(&bytes).map_err(|e| e.to_string())?;
+		Ok(())
+	} else {
+		Err(format!("HTTP 请求失败，状态码: {}", response.status()))
+	}
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -142,7 +164,7 @@ pub fn run() {
 		.plugin(tauri_plugin_os::init())
 		.plugin(tauri_plugin_fs::init())
 		.plugin(tauri_plugin_opener::init())
-		.invoke_handler(tauri::generate_handler![read_zip, read_db, download])
+		.invoke_handler(tauri::generate_handler![unzip, read_zip, read_db, download])
 		.run(tauri::generate_context!())
 		.expect("error while running tauri application");
 }

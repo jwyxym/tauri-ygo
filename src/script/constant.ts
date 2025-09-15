@@ -12,10 +12,6 @@ class System {
 		return this.system == 'android' ? fs.BaseDirectory.Public : fs.BaseDirectory.Resource;
 	};
 
-	resource_dir = () : number => {
-		return fs.BaseDirectory.Resource;
-	};
-
 	base_path = async () : Promise<string> => {
 		return this.system == 'android' ? await path.publicDir() : await path.resourceDir();
 	};
@@ -44,6 +40,7 @@ class Constant {
 		get_name : /[\\/]([^.]*)\./,
 		database : /\.(cdb)$/i,
 		picture : /\.(jpg|png|jpeg)$/i,
+		bgm : /\.(mp4|wav)$/i,
 		conf : /\.(conf)$/i,
 		ini : /\.(ini)$/i,
 		zip : /\.(ypk|zip)$/i,
@@ -64,11 +61,11 @@ class Constant {
 			expansions : 'expansions',
 			script : 'script',
 			deck : 'deck',
-			cache : 'cache'
+			cache : 'cache',
+			sound : 'sound'
 		},
 		exdirs : {
 			pics : 'pics',
-			assets : 'assets'
 		},
 		files : {
 			system : 'system.conf',
@@ -83,7 +80,8 @@ class Constant {
 				pic : ['cardI', 'cardII']
 			},
 			database : 'cards.cdb',
-			pics : 'pics.zip'
+			pics : 'pics.zip',
+			assets : 'assets.zip'
 		},
 		string_conf : {
 			system : '!system',
@@ -123,10 +121,28 @@ class Constant {
 		},
 		url : {
 			super_pre : 'https://cdn02.moecube.com:444/ygopro-super-pre/archive/ygopro-super-pre.ypk',
+			assets : 'https://jwyxym.top:50028/tauri/assets'
 		},
 		extends : {
 			ypk : '.ypk',
 			cdb : '.cdb'
+		},
+		bgm : {
+			back : 'Night View',
+			battle : 'City of Night'
+		},
+		file_list : async () : Promise<Array<string>> => {
+			return [
+				this.str.files.conf.info,
+				this.str.files.conf.lflist,
+				this.str.files.conf.strings,
+				this.str.files.conf.servers,
+				this.str.files.pics,
+				this.str.files.database,
+				await path.join(this.str.dirs.textures, this.str.files.textures.unknown),
+				await path.join(this.str.dirs.textures, this.str.files.textures.pic[0]),
+				await path.join(this.str.dirs.textures, this.str.files.textures.pic[1])
+			]
 		}
 	}
 

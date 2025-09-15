@@ -1,3 +1,4 @@
+@use './font.scss';
 .setting_body {
 	display: flex;
 	flex-direction: column;
@@ -35,8 +36,14 @@
 		&::-webkit-scrollbar {
 			display: none;
 		}
-		.var-loading{
+		.var-loading {
 			height: 44px;
+		}
+		.var-cell {
+			width: 100%;
+			.var-slider {
+				width: 100%;
+			}
 		}
 	}
 }
