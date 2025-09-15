@@ -28,7 +28,6 @@
 
 	const audio : Ref<Array<HTMLAudioElement>> = ref([]);
 	onMounted(() => {
-		// audio.value[0].play();
 		mainGame.push.music(audio.value);
 		voice.back.play();
 	});

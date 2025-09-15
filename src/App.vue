@@ -1,5 +1,5 @@
 <template>
-	<div class = 'main' @contextmenu.prevent>
+	<div class = 'main' @contextmenu = 'page.contextmenu'>
 		<starry-sky :stars-count = '1500' :distance = '800' id = 'back'/>
 		<div class = 'body'>
 			<transition name = 'opacity'>
@@ -68,6 +68,9 @@
 					page.show.setting = true;
 				}, 500);
 			}
+		},
+		contextmenu : (event : MouseEvent) : void => {
+			if (!import.meta.env.DEV) event.preventDefault();
 		}
 	});
 
