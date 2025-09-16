@@ -64,7 +64,7 @@ jobs:
     - name: Android build
       shell: cmd
       run: |
-        tauri android init
+        npm run tauri android init
         npm run copy
         npm run tauri android build
 
