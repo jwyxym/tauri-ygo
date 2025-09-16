@@ -210,13 +210,13 @@
 			if (list.select <= -1) return;
 			const text = list.decks[list.select].toYGOMobileDeckURL();
 			await writeText(text);
-			toast.info(mainGame.get.text().toast.deck_list.copy)
+			toast.info(mainGame.get.text().toast.copy)
 		},
 		delete : async () : Promise<void> => {
 			if (list.select <= -1) return;
 			const confirm = async () : Promise<void> => {
 				if (await fs.delete.ydk(list.decks[list.select].name!)) {
-					toast.info(mainGame.get.text().toast.deck_list.delete);
+					toast.info(mainGame.get.text().toast.delete);
 					list.decks.splice(list.select, 1);
 					list.select = -1;
 				}

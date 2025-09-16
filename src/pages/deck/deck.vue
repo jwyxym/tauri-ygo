@@ -39,7 +39,7 @@
 					class = 'main'
 					ref = 'main'
 				>
-					<TransitionGroup tag = 'div' name = 'opacity' class = 'deck_main'>
+					<TransitionGroup tag = 'div' name = 'scale' class = 'deck_main'>
 						<div
 							v-for = '(i, v) in deck.main'
 							:data-swapy-slot = '`main_card:${v}:${i}`'
@@ -65,7 +65,7 @@
 					class = 'extra'
 					ref = 'extra'
 				>
-					<TransitionGroup tag = 'div' name = 'opacity' class = 'deck_extra'>
+					<TransitionGroup tag = 'div' name = 'scale' class = 'deck_extra'>
 						<div
 							v-for = '(i, v) in deck.extra'
 							:data-swapy-slot = '`extra_card:${v}:${i}`'
@@ -91,7 +91,7 @@
 					class = 'side'
 					ref = 'side'
 				>
-					<TransitionGroup tag = 'div' name = 'opacity' class = 'deck_side'>
+					<TransitionGroup tag = 'div' name = 'scale' class = 'deck_side'>
 						<div
 							v-for = '(i, v) in deck.side'
 							:data-swapy-slot = '`side_card:${v}:${i}`'
@@ -247,12 +247,11 @@
 		},
 		name_rule : async (name : string | undefined) : Promise<string | boolean> => {
 			if (name === undefined || name.length === 0)
-				return mainGame.get.text().deck.rule.name.length;
+				return mainGame.get.text().rule.name.length;
 			if (name.match(constant.reg.name))
-				return mainGame.get.text().deck.rule.name.unlawful;
-			console.log(props.this_deck.new)
+				return mainGame.get.text().rule.name.unlawful;
 			if ((await mainGame.load.deck()).filter(i => i.name === name).length > (props.this_deck.new || (props.this_deck.name.length > 0 && props.this_deck.name !== name) ? 0 : 1))
-				return mainGame.get.text().deck.rule.name.exist;
+				return mainGame.get.text().rule.name.exist;
 			return true;
 		},
 		get_card : (el : HTMLElement) : HTMLElement | undefined => {
@@ -305,7 +304,7 @@
 					rename = await fs.rename.ydk(props.this_deck.name, deck.name);
 				}
 				if (write && rename)
-					toast.info(mainGame.get.text().toast.deck.save);
+					toast.info(mainGame.get.text().toast.save);
 				if (props.this_deck.new)
 					props.update(deck.name);
 			} else {
@@ -320,28 +319,28 @@
 			const cards = [...main, ...extra, ...side];
 			const ct = search.info.lflist ? mainGame.get.lflist(search.info.lflist, card.id) : 3;
 			if (cards.filter(i => i.children[0].id === card.id.toString()).length + 1 > ct) {
-				toast.error(mainGame.get.text().deck.rule.deck.card_count.replace(constant.str.replace,ct.toString()));
+				toast.error(mainGame.get.text().rule.deck.card_count.replace(constant.str.replace,ct.toString()));
 			} else {
 				if (to_deck > 2) {
 					to_deck = card.is_ex() ? (extra.length + 1 > 15 ? 2 : 1) : (main.length + 1 > 60 ? 2 : 0);
 					if (to_deck == 2 && side.length + 1 > 15) {
-						toast.error(mainGame.get.text().deck.rule.deck.deck_count.replace(constant.str.replace, ''))
+						toast.error(mainGame.get.text().rule.deck.deck_count.replace(constant.str.replace, ''))
 						return;
 					}
 				}
 				switch(to_deck) {
 					case 0:
-						main.length + 1 > 60 ? toast.error(mainGame.get.text().deck.rule.deck.deck_count.replace(constant.str.replace, '60')) :
+						main.length + 1 > 60 ? toast.error(mainGame.get.text().rule.deck.deck_count.replace(constant.str.replace, '60')) :
 							deck.main.push(card.id);
 						deck.ct.main ++;
 						break;
 					case 1:
-						extra.length + 1 > 15 ? toast.error(mainGame.get.text().deck.rule.deck.deck_count.replace(constant.str.replace, '15')) : 
+						extra.length + 1 > 15 ? toast.error(mainGame.get.text().rule.deck.deck_count.replace(constant.str.replace, '15')) : 
 							deck.extra.push(card.id);
 						deck.ct.extra ++;
 						break;
 					case 2:
-						side.length + 1 > 15 ? toast.error(mainGame.get.text().deck.rule.deck.deck_count.replace(constant.str.replace, '15')) : 
+						side.length + 1 > 15 ? toast.error(mainGame.get.text().rule.deck.deck_count.replace(constant.str.replace, '15')) : 
 							deck.side.push(card.id);
 						deck.ct.side ++;
 						break;
@@ -351,9 +350,9 @@
 		move : (el: HTMLElement, card : Card, to_deck : number) : void => {
 			const to = deck.get_dom(to_deck);
 			if (to.length + 1 > [60, 15, 15][to_deck]) {
-				toast.error(mainGame.get.text().deck.rule.deck.deck_count.replace(constant.str.replace, [60, 15, 15][to_deck].toString()));
+				toast.error(mainGame.get.text().rule.deck.deck_count.replace(constant.str.replace, [60, 15, 15][to_deck].toString()));
 			} else {
-				gsap.opacity(el, () => { el.style.display = 'none'; deck.ct.remove(el); });
+				gsap.scale(el, () => { el.style.display = 'none'; deck.ct.remove(el); });
 				switch(to_deck) {
 					case 0:
 						deck.main.push(card.id);
@@ -459,12 +458,12 @@
 		rule : {
 			atk : (atk : string) : string | boolean => {
 				if (!atk.match(constant.reg.atk))
-					return mainGame.get.text().deck.rule.atk.unlawful;
+					return mainGame.get.text().rule.atk.unlawful;
 				return true;
 			},
 			level : (lv : string) : string | boolean => {
 				if (!lv.match(constant.reg.level))
-					return mainGame.get.text().deck.rule.level.unlawful;
+					return mainGame.get.text().rule.level.unlawful;
 				return true;
 			},
 			forbidden : () : boolean => {
@@ -501,7 +500,7 @@
 				|| typeof search.rule.atk(search.info.def ?? '') !== 'boolean'
 			) {
 				search.in_setting();
-				toast.error(mainGame.get.text().deck.rule.search)
+				toast.error(mainGame.get.text().rule.search)
 				return;
 			}
 			search.list = [];

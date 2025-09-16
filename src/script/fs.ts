@@ -38,13 +38,13 @@ class Fs {
 		return false;
 	};
 
-	init = async (chk : boolean = false, chk_path : boolean = false) : Promise<boolean> => {
+	init = async (chk : boolean = false) : Promise<boolean> => {
 		try {
-			if (!await this.exists(constant.str.files.assets) || chk)
+			if (!await this.exists(constant.str.files.assets))
 				await this.write.from_url(constant.str.url.assets, constant.str.files.assets);
 			const p = await this.path;
 			await invoke<void>('unzip', {
-				path : p, file : await path.join(p, constant.str.files.assets), chk : chk_path
+				path : p, file : await path.join(p, constant.str.files.assets), chk : chk
 			});
 			return true;
 		} catch (error) {
@@ -332,8 +332,15 @@ class Fs {
 		},
 		ydk : async (file : string) : Promise<boolean> => {
 			try {
-				await this.delete.file(await path.join(constant.str.dirs.deck, `${file}.ydk`));
-				return true;
+				return this.delete.file(await path.join(constant.str.dirs.deck, `${file}${file.endsWith('.ydk') ? '' : '.ydk'}`));
+			} catch (error) {
+				this.write.log(error);
+			}
+			return false;
+		},
+		ypk : async (file : string) : Promise<boolean> => {
+			try {
+				return await this.delete.file(await path.join(constant.str.dirs.expansions, `${file}${file.endsWith('.ypk') ? '' : '.ypk'}`));
 			} catch (error) {
 				this.write.log(error);
 			}

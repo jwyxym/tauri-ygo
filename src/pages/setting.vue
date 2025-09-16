@@ -20,7 +20,7 @@
 						:loading = 'setting.loading'
 					></Button>
 					<Button
-						@click = 'expansion.reload'
+						@click = 'expansion.resert'
 						size = 'large'
 						:content = 'mainGame.get.text().setting.resert'
 						:loading = 'setting.loading'
@@ -41,6 +41,7 @@
 									:key = 'i'
 									:title = 'i'
 									:border = 'true'
+									@dblclick = 'expansion.delete(v)'
 								>
 									<template #extra>
 										<var-checkbox
@@ -67,25 +68,23 @@
 					>
 						<template #default>
 							<div>
-								{{ `${mainGame.get.text().setting.setting_items.get(i)} : ${setting.sound[v] ? setting.sound[v].toFixed(2) : 0}` }}
+								{{ `${mainGame.get.text().setting.setting_items.get(i)} : ${setting.sound[i] ? setting.sound[i].toFixed(2) : 0}` }}
 								<var-slider
 									v-if = 'mainGame.is_android()'
-									v-model = 'setting.sound[v]'
+									v-model = 'setting.sound[i]'
 									label-visible = 'never'
 									:step = '0.01'
 									:max = '1'
 									:min = '0'
-									@end = 'items.sound_change($event as number, i)'
 								/>
 								<slider
 									v-if = '!mainGame.is_android()'
-									v-model = 'setting.sound[v]'
+									v-model = 'setting.sound[i]'
 									color = '#397bfe'
 									track-color = 'white'
 									:step = '0.01'
 									:max = '1'
 									:min = '0'
-									@drag-end = 'items.sound_change($event as number, i)'
 								/>
 							</div>
 						</template>
@@ -116,13 +115,18 @@
 					:placeholder = 'mainGame.get.text().setting.download.url'
 					v-model = 'download.url'
 				/>
+				<Input
+					:placeholder = 'mainGame.get.text().setting.download.name'
+					:rules = 'download.name_rule'
+					v-model = 'download.name'
+				/>
 				<Button_List :loading = 'setting.loading' :confirm = 'download.custom.confirm' :cancel = 'download.custom.cancel'></Button_List>
 			</var-form>
 		</var-popup>
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { reactive, onBeforeMount } from 'vue';
+	import { reactive, onBeforeMount, watch } from 'vue';
 	import { join } from '@tauri-apps/api/path';
 	import slider from "vue3-slider"
 	
@@ -134,9 +138,16 @@
 	import Button_List from './varlet/button_list.vue';
 	import Button from './varlet/button.vue';
 	import Input from './varlet/input.vue';
+	import Dialog from './varlet/dialog';
 
 	const download = reactive({
 		url : '',
+		name : '',
+		name_rule : (name : string | undefined) : string | boolean => {
+			if (name !== undefined && name.length > 0 && name.match(constant.reg.name))
+				return mainGame.get.text().rule.name.unlawful;
+			return true;
+		},
 		popup : {
 			url : false,
 			on : async (value : string) : Promise<void> => {
@@ -150,14 +161,14 @@
 				}
 			}
 		},
-		on : async (url : string) : Promise<void> => {
+		on : async (url : string, name : string = '') : Promise<void> => {
 			if (!url) {
 				toast.error(mainGame.get.text().toast.error.setting.download);
 				return;
 			}
 			setting.loading = true;
 			toast.info(mainGame.get.text().toast.download.start);
-			const path = await fs.write.ypk(url);
+			const path = await fs.write.ypk(url, name);
 			if (path.length == 2) {
 				mainGame.push.system(constant.str.system_conf.string.expansion, path[1]);
 				const load = await mainGame.get.ypk();
@@ -172,7 +183,7 @@
 		},
 		custom : {
 			confirm : async () : Promise<void> => {
-				await download.on(download.url);
+				await download.on(download.url, download.name ?? '');
 				download.custom.exit();
 			},
 			cancel : () : void => {
@@ -181,6 +192,7 @@
 			exit : () : void => {
 				download.popup.url = false;
 				download.url = '';
+				download.name = '';
 			}
 		}
 	});
@@ -190,11 +202,23 @@
 		expansion : [] as Array<string>,
 		items_true : [] as Array<string>,
 		items : [] as Array<string>,
-		sound : [] as Array<number>,
+		sound : {} as { [key: string]: number },
 		loading : false
 	})
 
 	const expansion = {
+		delete : (v : number) : void => {
+			Dialog({
+				title : mainGame.get.text().setting.delete,
+				onConfirm : async () : Promise<void> => {
+					if (await fs.delete.ypk(setting.expansion[v])) {
+						const load = await mainGame.get.ypk();
+						setting.expansion = load.files.map(i => i.name);
+						toast.info(mainGame.get.text().toast.delete)
+					}
+				}
+			}, mainGame.get.system(constant.str.system_conf.chk.ypk_delete));
+		},
 		change : async (value : string | boolean, v : number) : Promise<void> => {
 			setting.loading = true;
 			const load = await mainGame.get.ypk();
@@ -214,6 +238,12 @@
 			setting.loading = true;
 			await mainGame.reload();
 			setting.loading = false;
+		},
+		resert : async () : Promise<void> => {
+			setting.loading = true;
+			await fs.init(true);
+			await mainGame.reload();
+			setting.loading = false;
 		}
 	};
 
@@ -231,14 +261,21 @@
 	defineProps(['select']);
 
 	onBeforeMount(async () : Promise<void> => {
+		console.log(window.location.href)
 		const load = await mainGame.get.ypk();
 		setting.expansion = load.files.map(i => i.name);
 		setting.load = (mainGame.get.system(constant.str.system_conf.string.expansion) as Array<string> | undefined) ?? [];
 		const items = Object.entries(constant.str.system_conf.chk);
 		setting.items = items.map(i => i[1]);
 		setting.items_true = setting.items.filter(i => mainGame.get.system(i));
-		setting.sound = Object.entries(constant.str.system_conf.sound).map(i => mainGame.get.system(i[1]) as number);
+		Object.entries(constant.str.system_conf.sound).forEach(i => setting.sound[i[1]] = mainGame.get.system(i[1]) as number);
 	});
+
+	watch(() => { return setting.sound; }, async (n) => {
+		for (const [i, v] of Object.entries(n)) {
+			await items.sound_change(v, i);
+		}
+	}, { deep : true });
 
 </script>
 <style scoped lang = 'scss'>

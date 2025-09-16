@@ -106,7 +106,17 @@ class Gsap {
 		const tl = this.timeline();
 		tl.to(el, {
 			opacity: 0,
-			duration : 0.4,
+			duration : 0.5,
+			onComplete: () => { complete(); }
+		});
+		return tl;
+	};
+
+	scale = (el : HTMLElement, complete : Function = () => {}) : gsap.core.Timeline => {
+		const tl = this.timeline();
+		tl.to(el, {
+			scale: 0,
+			duration: 0.5,
 			onComplete: () => { complete(); }
 		});
 		return tl;

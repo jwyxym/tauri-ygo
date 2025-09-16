@@ -47,34 +47,36 @@ const Zh_CN : textLike = {
 		delete : {
 			title : '确定要删除卡组吗',
 			message : '[{:?}]将会永久消失！（真的很久！）'
+		}
+	},
+	rule : {
+		search : '搜索词不合规',
+		name : {
+			exist : '卡组已存在',
+			unlawful : '文件名非法',
+			length : '文件名不可为空'
 		},
-		rule : {
-			search : '搜索词不合规',
-			name : {
-				exist : '卡组已存在',
-				unlawful : '文件名非法',
-				length : '文件名不可为空'
-			},
-			atk : {
-				unlawful : '只允许包含数字和?'
-			},
-			level : {
-				unlawful : '只允许包含数字'
-			},
-			deck : {
-				deck_count : '卡组已达最大数量 {:?}',
-				card_count : '卡片已达最大数量 {:?}',
-			}
+		atk : {
+			unlawful : '只允许包含数字和?'
+		},
+		level : {
+			unlawful : '只允许包含数字'
+		},
+		deck : {
+			deck_count : '卡组已达最大数量 {:?}',
+			card_count : '卡片已达最大数量 {:?}',
 		}
 	},
 	setting : {
 		setting_items : new Map([
+			['delete_ypk', '删除补丁时询问'],
 			['delete', '删除卡片时询问'],
 			['exit', '退出卡组时询问'],
 			['button', '确认按钮至于左侧'],
 			['back_sound', '背景音量'],
 			['button_sound', '按钮音量'],
 		]),
+		delete : '确认要删除吗？',
 		ex_cards : '拓展卡包',
 		system_setting : '系统设置',
 		reload : '重新加载卡片',
@@ -83,13 +85,13 @@ const Zh_CN : textLike = {
 			url : '下载自定义卡包',
 			super_pre : '下载先行卡',
 			ex : '下载卡片补丁',
+			name : '补丁文件名称（选填）'
 		}
 	},
 	toast : {
-		deck_list : {
-			copy : '已复制到粘贴板',
-			delete : '删除成功'
-		},
+		save : '保存成功',
+		delete : '删除成功',
+		copy : '已复制到粘贴板',
 		error : {
 			ydk : {
 				from_url : '从url转换到卡组失败',
@@ -98,9 +100,6 @@ const Zh_CN : textLike = {
 			setting : {
 				download : 'url不可为空'
 			}
-		},
-		deck : {
-			save : '保存成功'
 		},
 		download : {
 			start : '开始下载',

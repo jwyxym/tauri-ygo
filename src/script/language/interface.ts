@@ -40,27 +40,28 @@ interface textLike {
 			title : string;
 			message : string;
 		};
-		rule : {
-			search : string;
-			name : {
-				exist : string;
-				unlawful : string;
-				length : string;
-			};
-			atk : {
-				unlawful : string;
-			};
-			level : {
-				unlawful : string;
-			};
-			deck : {
-				deck_count : string;
-				card_count : string;
-			};
+	};
+	rule : {
+		search : string;
+		name : {
+			exist : string;
+			unlawful : string;
+			length : string;
+		};
+		atk : {
+			unlawful : string;
+		};
+		level : {
+			unlawful : string;
+		};
+		deck : {
+			deck_count : string;
+			card_count : string;
 		};
 	};
 	setting : {
 		setting_items : Map<string, string>,
+		delete : string;
 		ex_cards : string;
 		system_setting : string;
 		reload : string;
@@ -69,13 +70,13 @@ interface textLike {
 			url : string;
 			super_pre : string;
 			ex : string;
+			name : string;
 		};
 	};
 	toast : {
-		deck_list : {
-			copy : string;
-			delete : string;
-		};
+		save : string;
+		delete : string;
+		copy : string;
 		error : {
 			ydk : {
 				from_url : string;
@@ -84,9 +85,6 @@ interface textLike {
 			setting : {
 				download : string;
 			};
-		};
-		deck : {
-			save : string;
 		};
 		download : {
 			start : string;

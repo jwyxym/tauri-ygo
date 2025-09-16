@@ -99,6 +99,7 @@ class Constant {
 		},
 		system_conf : {
 			chk : {
+				ypk_delete : 'delete_ypk',
 				deck_delete : 'delete',
 				deck_exit : 'exit',
 				button : 'button'
