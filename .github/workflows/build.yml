@@ -68,12 +68,18 @@ jobs:
         npm run copy
         npm run tauri android build
 
-    - name: Upload Lflist Conf
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload
+      uses: actions/upload-artifact@v4
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: .\src-tauri\gen\android\app\build\outputs\apk\universal\release\app-universal-release-unsigned.apk
-        asset_name: app-universal-release-unsigned.apk
-        asset_content_type: application/octet-stream
+        name: tauri-ygo.apk
+        path: .\src-tauri\gen\android\app\build\outputs\apk\universal\release\app-universal-release-unsigned.apk
+
+    # - name: Upload
+    #   uses: actions/upload-release-asset@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+    #     asset_path: .\src-tauri\gen\android\app\build\outputs\apk\universal\release\app-universal-release-unsigned.apk
+    #     asset_name: app-universal-release-unsigned.apk
+    #     asset_content_type: application/octet-stream
