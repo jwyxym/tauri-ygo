@@ -64,19 +64,9 @@ jobs:
     - name: Android build
       shell: cmd
       run: |
-        npm run tauri android init
+        tauri android init
         npm run copy
         npm run tauri android build
-        dir .\src-tauri\gen\android\app\build\outputs\apk\universal\release\
-        dir .\src-tauri\gen\android\app\build\outputs\apk\universal\
-        dir .\src-tauri\gen\android\app\build\outputs\apk\
-        dir .\src-tauri\gen\android\app\build\outputs\
-        dir .\src-tauri\gen\android\app\build\
-        dir .\src-tauri\gen\android\app\
-        dir .\src-tauri\gen\android\
-        dir .\src-tauri\gen\
-        dir .\src-tauri\
-        dir .\
 
     - name: Upload
       uses: actions/upload-artifact@v4
