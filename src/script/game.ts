@@ -2,8 +2,6 @@ import { exit } from '@tauri-apps/plugin-process';
 import { DirEntry } from '@tauri-apps/plugin-fs';
 import { join } from '@tauri-apps/api/path';
 
-import toast from './toast';
-
 import fs from './fs';
 import constant from './constant';
 import Deck from './deck';
@@ -622,18 +620,6 @@ class Game {
 	};
 
 	chk = async () : Promise<boolean> => {
-		// for (const [_, i] of [...Object.entries(constant.str.files.conf), constant.str.files.pics, constant.str.files.database]) {
-		// 	if (!await fs.exists(i))
-		// 		return false;
-		// }
-		// for (const [_, i] of Object.entries(constant.str.files.textures).flat()) {
-		// 	if (!await fs.exists(await join(constant.str.dirs.textures, i)))
-		// 		return false;
-		// }
-		// for (const [_, i] of Object.entries(constant.str.files.sound)) {
-		// 	if (!await fs.exists(await join(constant.str.dirs.sound, i)))
-		// 		return false;
-		// }
 		return await fs.exists(constant.str.files.assets);
     };
 

@@ -40,8 +40,11 @@ class Fs {
 
 	init = async (chk : boolean = false) : Promise<boolean> => {
 		try {
-			if (!await this.exists(constant.str.files.assets))
+			if (!await this.exists(constant.str.files.assets)) {
+				toast.info(mainGame.get.text().toast.download.start);
 				await this.write.from_url(constant.str.url.assets, constant.str.files.assets);
+				toast.info(mainGame.get.text().toast.download.complete);
+			}
 			const p = await this.path;
 			await invoke<void>('unzip', {
 				path : p, file : await path.join(p, constant.str.files.assets), chk : chk
@@ -77,17 +80,19 @@ class Fs {
 			return undefined;
 		},
 		database_in_memory : async (file : Uint8Array<ArrayBuffer>) : Promise<Array<Array<string | number>> | undefined> => {
+			let p = '';
+			let result : Array<Array<string | number>> | undefined = undefined;
 			try {
-				const p = await path.join(constant.str.dirs.cache, `${Math.random().toString().slice(2)}${constant.str.extends.cdb}`)
-				if (await(this.write.file(p, file))) {
-					const result : Array<Array<string | number>> | undefined = await this.read.database(p);
-					await(this.delete.file(p));
-					return result;
-				}
+				p = await path.join(constant.str.dirs.cache, `${Math.random().toString().slice(2)}${constant.str.extends.cdb}`)
+				if (await(this.write.file(p, file)))
+					result = await this.read.database(p);
 			} catch (error) {
 				this.write.log(error);
+			} finally {
+				if (p.length > 0)
+					await(this.delete.file(p));
 			}
-			return undefined;
+			return result;
 		},
 		zip : async (file : string, file_type : Array<string> = []) : Promise<Map<RegExp, Map<string, Blob | Uint8Array | string>>> => {
 			let map = new Map([
