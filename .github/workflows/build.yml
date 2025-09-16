@@ -36,13 +36,29 @@ jobs:
         unzip jdk-21_windows-x64_bin.zip
         set JAVA_HOME=%cd%\jdk-21.0.8
     
+    - name: Install Android sdk
+      run: |
+        mkdir android-sdk
+        cd android-sdk
+        mkdir platform-tools
+        wget https://dl.google.com/android/repository/commandlinetools-win-13114758_latest.zip
+        unzip commandlinetools-win-13114758_latest.zip
+        set ANDROID_HOME=%cd%
+        set ANDROID_SDK_ROOT=%cd%
+        set PATH=%PATH%;%ANDROID_SDK_ROOT%\cmdline-tools\bin;%ANDROID_SDK_ROOT%\platform-tools
+        sdkmanager.bat "platform-tools" "build-tools;34.0.0" "platforms;android-34"
+
     - name: Install Android ndk r27
       run: |
         wget https://googledownloads.cn/android/repository/android-ndk-r27d-windows.zip
         unzip android-ndk-r27d-windows.zip
         set NDK_HOME=%cd%\android-ndk-r27d
 
-    - name: Android Init
+    - name: NPM Init
+      run: |
+        npm install
+    
+    - name: Android build
       run: |
         npm run tauri android init
         npm run copy
