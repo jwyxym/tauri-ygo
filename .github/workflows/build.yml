@@ -1,11 +1,11 @@
-name: Make Windows
+name: build tauri-ygo
 
 on:
   push:
     branches: [ main ]
     
 jobs:
-  test:
+  build:
     runs-on: windows-latest
     
     steps:
@@ -31,12 +31,14 @@ jobs:
         choco install wget unzip -y
 
     - name: Install Java21
+      shell: cmd
       run: |
         wget https://download.oracle.com/java/21/latest/jdk-21_windows-x64_bin.zip
         unzip jdk-21_windows-x64_bin.zip
         set JAVA_HOME=%cd%\jdk-21.0.8
     
     - name: Install Android sdk
+      shell: cmd
       run: |
         mkdir android-sdk
         cd android-sdk
@@ -45,20 +47,22 @@ jobs:
         unzip commandlinetools-win-13114758_latest.zip
         set ANDROID_HOME=%cd%
         set ANDROID_SDK_ROOT=%cd%
-        set PATH=%PATH%;%ANDROID_SDK_ROOT%\cmdline-tools\bin;%ANDROID_SDK_ROOT%\platform-tools
-        sdkmanager.bat "platform-tools" "build-tools;34.0.0" "platforms;android-34"
+        .\cmdline-tools\bin\sdkmanager.bat "platform-tools" "build-tools;34.0.0" "platforms;android-34"
 
     - name: Install Android ndk r27
+      shell: cmd
       run: |
         wget https://googledownloads.cn/android/repository/android-ndk-r27d-windows.zip
         unzip android-ndk-r27d-windows.zip
         set NDK_HOME=%cd%\android-ndk-r27d
 
     - name: NPM Init
+      shell: cmd
       run: |
         npm install
     
     - name: Android build
+      shell: cmd
       run: |
         npm run tauri android init
         npm run copy
