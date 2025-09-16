@@ -1,21 +1,23 @@
-import { Dialog, DialogOptions } from '@varlet/ui'
+import { Dialog, DialogOptions, DialogActions } from '@varlet/ui'
 import mainGame from '../../script/game';
 import constant from '../../script/constant';
 
-const dialog = (option : DialogOptions, need_confirm : boolean | number | Array<string> = true) : void => {
+const dialog = async (option : DialogOptions, need_confirm : boolean | number | Array<string> = true) : Promise<void> => {
 	const chk = mainGame.get.system(constant.str.system_conf.chk.button);
-	if (option.onConfirm === undefined) option.onConfirm = () => {};
-	need_confirm ? Dialog({
-		title : option.title,
-		message : option.message,
-		dialogClass : 'dialog',
-		cancelButtonTextColor : 'white',
-		confirmButtonTextColor : 'white',
-		cancelButtonText : chk ? mainGame.get.text().dialog.cancel : mainGame.get.text().dialog.confirm,
-		confirmButtonText : chk ? mainGame.get.text().dialog.confirm : mainGame.get.text().dialog.cancel,
-		onConfirm : chk ? option.onConfirm : option.onCancel,
-		onCancel : chk ? option.onCancel : option.onConfirm
-	}) : option.onConfirm();
+	option.dialogClass = 'dialog';
+	option.cancelButtonTextColor = 'white';
+	option.confirmButtonTextColor = 'white';
+	option.cancelButtonText = chk ? mainGame.get.text().dialog.cancel : mainGame.get.text().dialog.confirm;
+	option.confirmButtonText = chk ? mainGame.get.text().dialog.confirm : mainGame.get.text().dialog.cancel;
+	const confirm = option.onConfirm;
+	const cancel = option.onCancel;
+	option.onConfirm = chk ? confirm : cancel;
+	option.onCancel = chk ? cancel : confirm;
+	const quit = async () : Promise<void> => {
+		if (option.onConfirm !== undefined)
+			await option.onConfirm();
+	};
+	need_confirm ? await Dialog(option) : await quit();
 }
 
 export default dialog;

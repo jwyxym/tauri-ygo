@@ -109,7 +109,7 @@
 				</var-checkbox-group>
 			</var-loading>
 		</div>
-		<var-popup v-model:show = 'download.popup.url' position = 'center' :close-on-click-overlay = 'false'>
+		<var-popup :close-on-key-escape = 'false' v-model:show = 'download.popup.url' position = 'center' :close-on-click-overlay = 'false'>
 			<var-form>
 				<Input
 					:placeholder = 'mainGame.get.text().setting.download.url'
@@ -241,8 +241,8 @@
 		},
 		resert : async () : Promise<void> => {
 			setting.loading = true;
-			await fs.init(true);
-			await mainGame.reload();
+			if (await fs.init(true))
+				await mainGame.reload();
 			setting.loading = false;
 		}
 	};
@@ -261,7 +261,6 @@
 	defineProps(['select']);
 
 	onBeforeMount(async () : Promise<void> => {
-		console.log(window.location.href)
 		const load = await mainGame.get.ypk();
 		setting.expansion = load.files.map(i => i.name);
 		setting.load = (mainGame.get.system(constant.str.system_conf.string.expansion) as Array<string> | undefined) ?? [];

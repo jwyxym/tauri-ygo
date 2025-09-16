@@ -79,6 +79,10 @@ class Constant {
 				unknown : 'unknown',
 				pic : ['cardI', 'cardII']
 			},
+			sound : {
+				back : 'Night View',
+				battle : 'City of Night'
+			},
 			database : 'cards.cdb',
 			pics : 'pics.zip',
 			assets : 'assets.zip'
@@ -127,10 +131,6 @@ class Constant {
 		extends : {
 			ypk : '.ypk',
 			cdb : '.cdb'
-		},
-		bgm : {
-			back : 'Night View',
-			battle : 'City of Night'
 		},
 		file_list : async () : Promise<Array<string>> => {
 			return [

@@ -1,5 +1,9 @@
 interface textLike {
 	menu : Array<string>;
+	start : {
+		title : string;
+		message : string;
+	};
 	dialog : {
 		confirm : string;
 		cancel : string;

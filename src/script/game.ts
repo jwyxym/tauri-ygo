@@ -34,7 +34,6 @@ class Game {
 		[constant.str.system_conf.sound.back, new Map],
 		[constant.str.system_conf.sound.button, new Map]
 	]);
-	audio : Array<HTMLAudioElement> = [];
 	select = 'Zh_CN';
 	interval = -1;
 	interval_ct = 0;
@@ -42,7 +41,7 @@ class Game {
 
 	private lflist_now : string = '';
 
-    init = async () : Promise<void> => {
+    init = async (chk : boolean = true) : Promise<void> => {
 		try {
 			//新建所需要的文件夹
 			for (const [_, i] of Object.entries(constant.str.dirs)) {
@@ -51,7 +50,8 @@ class Game {
 			}
 
 			//初始化资源
-			await fs.init();
+			if (chk)
+				await fs.init();
 
 			//读取./textures文件夹
 			for (const i of await fs.read.dir(constant.str.dirs.textures)) {
@@ -151,9 +151,6 @@ class Game {
 				return lflist.get(card) ?? 3;
 			}
 			return 3;
-		},
-		music : (key : string) : HTMLAudioElement | undefined => {
-			return this.audio.find(i => i.id === key);
 		}
 	}
 
@@ -606,9 +603,6 @@ class Game {
 			} else {
 				this.system.set(key, n ? '1' : '0');
 			}
-		},
-		music : (audio : Array<HTMLAudioElement>) : void => {
-			this.audio = audio;
 		}
 	};
 
@@ -628,11 +622,19 @@ class Game {
 	};
 
 	chk = async () : Promise<boolean> => {
-		for (const [_, i] of Object.entries(constant.str.files.conf)) {
-			if (!await fs.exists(i))
-				return false;
-		}
-		return true;
+		// for (const [_, i] of [...Object.entries(constant.str.files.conf), constant.str.files.pics, constant.str.files.database]) {
+		// 	if (!await fs.exists(i))
+		// 		return false;
+		// }
+		// for (const [_, i] of Object.entries(constant.str.files.textures).flat()) {
+		// 	if (!await fs.exists(await join(constant.str.dirs.textures, i)))
+		// 		return false;
+		// }
+		// for (const [_, i] of Object.entries(constant.str.files.sound)) {
+		// 	if (!await fs.exists(await join(constant.str.dirs.sound, i)))
+		// 		return false;
+		// }
+		return await fs.exists(constant.str.files.assets);
     };
 
 	exit = async () : Promise<void> => {

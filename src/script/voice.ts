@@ -2,38 +2,54 @@ import mainGame from './game';
 import constant from './constant';
 
 class Voice {
+	audio : Array<HTMLAudioElement> = [];
+
 	update = (key : string) : void => {
-		mainGame.audio.forEach(i => {
+		this.audio.forEach(i => {
 			if (i.classList.contains(key))
 				i.volume = mainGame.get.system(key) as number;
 		});
 	};
+
 	back = {
 		play : () : void => {
 			this.update(constant.str.system_conf.sound.back);
-			mainGame.get.music(constant.str.bgm.back)?.play();
+			this.get.music(constant.str.files.sound.back)?.play();
 		},
 		stop : () : void => {
-			const audio = mainGame.get.music(constant.str.bgm.back);
+			const audio = this.get.music(constant.str.files.sound.back);
 			if (audio) {
 				audio.pause();
 				audio.currentTime = 0;
 			}
 		},
 	};
+
 	battle = {
 		play : () : void => {
 			this.update(constant.str.system_conf.sound.back);
-			mainGame.get.music(constant.str.bgm.battle)?.play();
+			this.get.music(constant.str.files.sound.battle)?.play();
 		},
 		stop : () : void => {
-			const audio = mainGame.get.music(constant.str.bgm.battle);
+			const audio = this.get.music(constant.str.files.sound.battle);
 			if (audio) {
 				audio.pause();
 				audio.currentTime = 0;
 			}
 		},
 	};
+
+	get = {
+		music : (key : string) : HTMLAudioElement | undefined => {
+			return this.audio.find(i => i.id === key);
+		}
+	};
+
+	push = {
+		music : (audio : Array<HTMLAudioElement>) : void => {
+			this.audio = audio;
+		}
+	}
 }
 
 export default new Voice();
