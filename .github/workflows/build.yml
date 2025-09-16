@@ -35,7 +35,6 @@ jobs:
       run: |
         wget https://download.oracle.com/java/21/latest/jdk-21_windows-x64_bin.zip
         unzip jdk-21_windows-x64_bin.zip
-        set JAVA_HOME=%cd%\jdk-21.0.8
     
     - name: Install Android sdk
       shell: cmd
@@ -45,8 +44,6 @@ jobs:
         mkdir platform-tools
         wget https://dl.google.com/android/repository/commandlinetools-win-13114758_latest.zip
         unzip commandlinetools-win-13114758_latest.zip
-        set ANDROID_HOME=%cd%
-        set ANDROID_SDK_ROOT=%cd%
         .\cmdline-tools\bin\sdkmanager.bat "platform-tools" "build-tools;34.0.0" "platforms;android-34"
 
     - name: Install Android ndk r27
@@ -54,8 +51,6 @@ jobs:
       run: |
         wget https://googledownloads.cn/android/repository/android-ndk-r27d-windows.zip
         unzip android-ndk-r27d-windows.zip
-        set NDK_HOME=%cd%\android-ndk-r27d
-        echo %NDK_HOME%
 
     - name: NPM Init
       shell: cmd
@@ -65,6 +60,9 @@ jobs:
     - name: Android build
       shell: cmd
       run: |
+        set JAVA_HOME=%cd%\jdk-21.0.8
+        set ANDROID_HOME=%cd%\android-sdk
+        set NDK_HOME=%cd%\android-ndk-r27d
         npm run tauri android init
         npm run copy
         npm run tauri android build
