@@ -1,0 +1,59 @@
+name: Make Windows
+
+on:
+  push:
+    branches: [ main ]
+    
+jobs:
+  test:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+    
+    - name: Setup Node.js v22.18.0
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22.18.0'
+
+    - name: Install Rust (toolchain 1.88.0)
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: 1.88.0
+        
+    - name: Install wget and unzip
+      shell: powershell
+      run: |
+        Set-ExecutionPolicy Bypass -Scope Process -Force
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+        choco install wget unzip -y
+
+    - name: Install Java21
+      run: |
+        wget https://download.oracle.com/java/21/latest/jdk-21_windows-x64_bin.zip
+        unzip jdk-21_windows-x64_bin.zip
+        set JAVA_HOME=%cd%\jdk-21.0.8
+    
+    - name: Install Android ndk r27
+      run: |
+        wget https://googledownloads.cn/android/repository/android-ndk-r27d-windows.zip
+        unzip android-ndk-r27d-windows.zip
+        set NDK_HOME=%cd%\android-ndk-r27d
+
+    - name: Android Init
+      run: |
+        npm run tauri android init
+        npm run copy
+        npm run tauri android build
+
+    - name: Upload Lflist Conf
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: .\src-tauri\gen\android\app\build\outputs\apk\universal\release\app-universal-release-unsigned.apk
+        asset_name: app-universal-release-unsigned.apk
+        asset_content_type: application/octet-stream
