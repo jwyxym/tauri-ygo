@@ -55,6 +55,7 @@ jobs:
         wget https://googledownloads.cn/android/repository/android-ndk-r27d-windows.zip
         unzip android-ndk-r27d-windows.zip
         set NDK_HOME=%cd%\android-ndk-r27d
+        echo %NDK_HOME%
 
     - name: NPM Init
       shell: cmd
