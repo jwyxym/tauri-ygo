@@ -276,18 +276,12 @@ class Fs {
 		},
 		from_url : async (url : string,  file : string) : Promise<string> => {
 			try {
-				const split = url.split('/');
-				if (file.length === 0 && split.length > 0) {
-					file = split[split.length - 1];
-				}
-				if (file.length === 0)
-					file = `${Math.random().toString().slice(2)}${constant.str.extends.ypk}`;
-				await invoke<Array<[Array<number>, Array<string>]>>('download', {
+				const download = await invoke<string>('download', {
 					url : url,
 					path : await this.path,
 					name : file
 				});
-				return file;
+				return download;
 			} catch (error) {
 				this.write.log(error.message ?? error);
 			}
@@ -295,21 +289,15 @@ class Fs {
 		},
 		ypk : async (url : string, file : string = '') : Promise<Array<string>> => {
 			try {
-				const split = url.split('/');
-				if (file.length === 0 && split.length > 0) {
-					file = split[split.length - 1];
-				}
-				if (file.length === 0)
-					file = Math.random().toString().slice(2).toString();
-				if (!file.endsWith(constant.str.extends.ypk))
+				if (file.length > 0 && !file.endsWith(constant.str.extends.ypk))
 					file += constant.str.extends.ypk;
-				await invoke<Array<[Array<number>, Array<string>]>>('download', {
+				const download = await invoke<string>('download', {
 					url : url,
 					path : await path.join(await this.path, constant.str.dirs.expansions),
 					name : file
 				});
-				const p = await path.join(constant.str.dirs.expansions, file);
-				return [p, file];
+				const p = await path.join(constant.str.dirs.expansions, download);
+				return [p, download];
 			} catch (error) {
 				this.write.log(error.message ?? error);
 			}

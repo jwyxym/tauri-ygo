@@ -10,7 +10,7 @@ interface CTOS_JoinGame {
 class Tcp {
 	cid : string;
 	constructor () {
-		this.cid = Math.random().toString();
+		this.cid = "jwyxym";
 	}
 	connect = async () => {
 		console.log(this.package.host('jwyxym.top:50005').length)

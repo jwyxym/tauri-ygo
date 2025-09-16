@@ -2,12 +2,11 @@ use regex::Regex;
 use rusqlite::{Connection, Result};
 use serde::Serialize;
 use std::{
-	fs::{create_dir_all, File, exists},
-	io::{copy, Read, Write},
-	path::{Path, PathBuf}
+	fs::{create_dir_all, exists, File}, io::{copy, Read, Write}, path::{Path, PathBuf}
 };
 use zip::ZipArchive;
-use ureq;
+use content_disposition::parse_content_disposition;
+use rand::Rng;
 
 #[derive(Serialize)]
 #[serde(tag = "type", content = "content")]
@@ -42,22 +41,22 @@ fn unzip(path: String, file: String, chk: bool) -> Result<(), String> {
 
 #[tauri::command]
 fn read_zip(path: String, file_type: Vec<String>) -> Result<Vec<(String, FileContent)>, String> {
-	let file: File = File::open(&path).map_err(|e| format!("无法打开文件 '{}': {}", path, e))?;
+	let file: File = File::open(&path).map_err(|e| e.to_string())?;
 	let mut archive: ZipArchive<File> = ZipArchive::new(file)
-		.map_err(|e: zip::result::ZipError| format!("无效的 ZIP 文件 '{}': {}", path, e))?;
+		.map_err(|e| e.to_string())?;
 
 	let mut entries: Vec<(String, FileContent)> = Vec::new();
 
 	let pic_regex: Regex = Regex::new(r"^pics/(\d+)\.(jpg|png|jpeg)$")
-		.map_err(|e: regex::Error| format!("正则表达式编译失败: {}", e))?;
+		.map_err(|e| e.to_string())?;
 	let db_regex: Regex =
-		Regex::new(r"^[^/]+\.(cdb)$").map_err(|e| format!("正则表达式编译失败: {}", e))?;
+		Regex::new(r"^[^/]+\.(cdb)$").map_err(|e| e.to_string())?;
 	let conf_regex: Regex =
-		Regex::new(r"^[^/]+\.(conf|ini)$").map_err(|e| format!("正则表达式编译失败: {}", e))?;
+		Regex::new(r"^[^/]+\.(conf|ini)$").map_err(|e| e.to_string())?;
 	for i in 0..archive.len() {
 		let mut file: zip::read::ZipFile<'_> = archive
 			.by_index(i)
-			.map_err(|e: zip::result::ZipError| format!("无法读取 ZIP 内文件索引 {}: {}", i, e))?;
+			.map_err(|e| e.to_string())?;
 		let name: String = file.name().to_string();
 
 		if file.is_dir() {
@@ -69,14 +68,12 @@ fn read_zip(path: String, file_type: Vec<String>) -> Result<Vec<(String, FileCon
 				if db_regex.is_match(&name) {
 					let mut content: Vec<u8> = Vec::new();
 					file.read_to_end(&mut content)
-						.map_err(|e| format!("无法读取二进制文件 '{}': {}", name, e))?;
+						.map_err(|e| e.to_string())?;
 					entries.push((name, FileContent::Binary(content)));
 				} else if conf_regex.is_match(&name) {
 					let mut content: String = String::new();
 					file.read_to_string(&mut content)
-						.map_err(|e| {
-							format!("无法读取文本文件 '{}': {}", name, e)
-						})?;
+						.map_err(|e| e.to_string())?;
 					entries.push((name, FileContent::Text(content)));
 				}
 			}
@@ -89,7 +86,7 @@ fn read_zip(path: String, file_type: Vec<String>) -> Result<Vec<(String, FileCon
 						{
 							let mut content: Vec<u8> = Vec::new();
 							file.read_to_end(&mut content)
-								.map_err(|e| format!("无法读取二进制文件 '{}': {}", name, e))?;
+								.map_err(|e| e.to_string())?;
 							entries.push((name, FileContent::Binary(content)));
 						}
 					}
@@ -107,11 +104,11 @@ fn read_zip(path: String, file_type: Vec<String>) -> Result<Vec<(String, FileCon
 #[tauri::command]
 fn read_db(path: String) -> Result<Vec<(Vec<i64>, Vec<String>)>, String> {
 	let conn: Connection = Connection::open(&path)
-		.map_err(|e: rusqlite::Error| format!("无法读取数据库 '{}': {}", &path, e))?;
+		.map_err(|e| e.to_string())?;
 
 	let mut stmt: rusqlite::Statement<'_> = conn
 		.prepare("SELECT * FROM datas, texts WHERE datas.id = texts.id")
-		.map_err(|e: rusqlite::Error| format!("准备查询失败: {}", e))?;
+		.map_err(|e| e.to_string())?;
 
 	let rows_iter = stmt
 		.query_map([], |row| {
@@ -125,13 +122,13 @@ fn read_db(path: String) -> Result<Vec<(Vec<i64>, Vec<String>)>, String> {
 
 			Ok((int_values, string_values))
 		})
-		.map_err(|e| format!("查询数据库失败: {}", e))?;
+		.map_err(|e| e.to_string())?;
 
 	let mut result: Vec<(Vec<i64>, Vec<String>)> = Vec::new();
 
 	for row_result in rows_iter {
 		let row_data: (Vec<i64>, Vec<String>) =
-			row_result.map_err(|e| format!("读取行失败: {}", e))?;
+			row_result.map_err(|e| e.to_string())?;
 		result.push(row_data);
 	}
 
@@ -139,19 +136,39 @@ fn read_db(path: String) -> Result<Vec<(Vec<i64>, Vec<String>)>, String> {
 }
 
 #[tauri::command]
-async fn download(url: String, path: String, name: String) -> Result<(), String> {
-	let response = ureq::get(&url).call().map_err(|e| e.to_string())?;
+async fn download(url: String, path: String, name: String) -> Result<String, String> {
+	let response: ureq::http::Response<ureq::Body> = ureq::get(&url).call().map_err(|e| e.to_string())?;
+	let mut file_name: String = name;
 	if response.status().is_success() {
-		let file_path: PathBuf = Path::new(&path).join(name);
-		let mut file: File = File::create(&file_path).map_err(|e| e.to_string())?;
+		if file_name.len() == 0 {
+			if let Some(content_disp) = response.headers().get("Content-Disposition") {
+				if let Ok(cd_str) = content_disp.to_str() {
+					if let Some(f) = parse_content_disposition(cd_str).filename() {
+						if let Some(typ) = f.1 {
+							file_name = format!("{}.{}", f.0, typ).to_string();
+						}
+					}
+				}
+			}
+		}
+		if file_name.len() == 0 {
+			let mut rng = rand::rng();
+			let random_number = rng.random_range(10_000_000..=100_000_000);
+			file_name = random_number.to_string();
+		}
+		if !file_name.ends_with(".ypk") {
+			file_name += ".ypk";
+		}
+		let file_path: PathBuf = Path::new(&path).join(&file_name);
 		let mut body = response.into_body();
 		let mut reader = body.as_reader();
 		let mut bytes = Vec::new();
 		reader.read_to_end(&mut bytes).map_err(|e| e.to_string())?;
+		let mut file: File = File::create(&file_path).map_err(|e| e.to_string())?;
 		file.write_all(&bytes).map_err(|e| e.to_string())?;
-		Ok(())
+		Ok(file_name)
 	} else {
-		Err(format!("HTTP 请求失败，状态码: {}", response.status()))
+		Err(format!("{}", response.status()))
 	}
 }
 
