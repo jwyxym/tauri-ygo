@@ -42,8 +42,8 @@ class Fs {
 		try {
 			if (!await this.exists(constant.str.files.assets)) {
 				toast.info(mainGame.get.text().toast.download.start);
-				await this.write.from_url(constant.str.url.assets, constant.str.files.assets);
-				toast.info(mainGame.get.text().toast.download.complete);
+				if ((await this.write.from_url(constant.str.url.assets, constant.str.files.assets)).length > 0)
+					toast.info(mainGame.get.text().toast.download.complete);
 			}
 			const p = await this.path;
 			await invoke<void>('unzip', {
@@ -205,17 +205,8 @@ class Fs {
 	write = {
 		log : async (text : string)  : Promise<boolean> => {
 			try {
-				const get_reason = (error : string) : string => {
-					const start = error.indexOf('error: ') + 'error: '.length;
-					const end = error.indexOf(' (', start);
-					
-					if (start >= 0 && end > start) {
-						return error.substring(start, end);
-					}
-					return error;
-				}
 				console.error(text)
-				toast.error(get_reason(text));
+				toast.error(text);
 				const log = `[${new Date().toLocaleString()}] ${text}${constant.system.line_feed()}`
 				if (await fs.exists(constant.log.error, this.dir)) {
 					const file = await fs.open(constant.log.error, { append: true, baseDir : this.dir.baseDir });

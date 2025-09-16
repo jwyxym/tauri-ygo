@@ -86,12 +86,12 @@
 		}
 		const download = async () : Promise<void> => {
 			LoadingBar.start();
-			if (await fs.init())
+			if (await fs.init()) {
 				LoadingBar.finish();
-			else
+				await on(false);
+			} else
 				LoadingBar.error();
 
-			await on(false);
 		}
 		await mainGame.chk() ? await on() : await Dialog({
 			title : mainGame.get.text().start.title,
