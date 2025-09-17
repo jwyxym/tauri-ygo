@@ -44,6 +44,7 @@ class Fs {
 				toast.info(mainGame.get.text().toast.download.start);
 				if ((await this.write.from_url(constant.str.url.assets, constant.str.files.assets)).length > 0)
 					toast.info(mainGame.get.text().toast.download.complete);
+				else return false;
 			}
 			const p = await this.path;
 			await invoke<void>('unzip', {

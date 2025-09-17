@@ -44,7 +44,7 @@
 
 	import Dialog from "./pages/varlet/dialog";
 
-	let page = reactive({
+	const page = reactive({
 		show : {
 			voice : false,
 			dialog : false,
@@ -83,23 +83,28 @@
 			await mainGame.init(chk);
 			page.show.menu = true;
 			page.show.voice = true;
-		}
+		};
+		const dialog = async () : Promise<void> => {
+			await Dialog({
+				title : mainGame.get.text().start.title,
+				message : mainGame.get.text().start.message,
+				onConfirm : download,
+				onCancel : mainGame.exit,
+				closeOnClickOverlay : false
+			}, true)
+		};
 		const download = async () : Promise<void> => {
 			LoadingBar.start();
 			if (await fs.init()) {
 				LoadingBar.finish();
 				await on(false);
-			} else
+			} else {
 				LoadingBar.error();
+				await dialog();
+			}
 
-		}
-		await mainGame.chk() ? await on() : await Dialog({
-			title : mainGame.get.text().start.title,
-			message : mainGame.get.text().start.message,
-			onConfirm : download,
-			onCancel : mainGame.exit,
-			closeOnClickOverlay : false
-		}, true);
+		};
+		await mainGame.chk() ? await on() : await dialog();
 	});
 
 	onMounted(async () => {
