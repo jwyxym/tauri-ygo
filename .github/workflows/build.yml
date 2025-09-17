@@ -69,21 +69,67 @@ jobs:
     - name: Android copy
       run: |
         npm run copy
-        
+
     - name: Android build
       shell: cmd
       env:
         JAVA_HOME: ${{ github.workspace }}\jdk-21.0.8
         ANDROID_HOME: ${{ github.workspace }}\android-sdk
         NDK_HOME: ${{ github.workspace }}\android-ndk-r27d
+        ANDROID_SDK_ROOT: ${{ github.workspace }}\android-sdk
       run: |
         npm run tauri android build
+
+    - name: Windows build
+      shell: cmd
+      run: |
+        npm run tauri build
+    
+    - name: copy
+      shell: cmd
+      run: |
+        mkdir windows_build
+        set "found_msi="
+        set "found_exe="
+
+        for %%f in (.\src-tauri\target\release\bundle\msi\*.msi) do (
+            if not defined found_msi (
+                copy "%%f" "windows_build\setup.msi"
+                set "found_msi=1"
+            )
+        )
+
+        for %%f in (.\src-tauri\target\release\bundle\nsis\*.exe) do (
+            if not defined found_exe (
+                copy "%%f" "windows_build\setup.exe"
+                set "found_exe=1"
+            )
+        )
+
 
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
         name: tauri-ygo.apk
         path: .\src-tauri\gen\android\app\build\outputs\apk\universal\release\app-universal-release-unsigned.apk
+
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: tauri-ygo-setup.exe
+        path: .\windows_build\setup.exe
+
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: tauri-ygo-setup.msi
+        path: .\windows_build\setup.msi
+
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: tauri-ygo.exe
+        path: .\src-tauri\target\release\tauri-ygo.exe
 
     # - name: Upload
     #   uses: actions/upload-release-asset@v1
