@@ -87,6 +87,7 @@ jobs:
     - name: Sign apk
       shell: cmd
       run: |
+        dir "%ANDROID_HOME%\build-tools"
         "%ANDROID_HOME%\build-tools\34.0.0\apksigner.bat" sign --ks ./tauri-ygo.jks --ks-key-alias ${{ secrets.KEY_ALIAS }} --key-pass pass:${{ secrets.KEYSTORE_PASSWORD }} --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} --out .\windows_build\tauri-ygo.apk .\src-tauri\gen\android\app\build\outputs\apk\universal\release\app-universal-release-unsigned.apk
 
     - name: Windows build

@@ -27,3 +27,4 @@ dist-ssr
 /src-tauri/gen
 /src-tauri/2
 *.jks
+*.b64
