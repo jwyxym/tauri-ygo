@@ -40,9 +40,6 @@
 	import Voice from './pages/voice/voice.vue';
 
 	import mainGame from './script/game';
-	import fs from './script/fs';
-
-	import Dialog from "./pages/varlet/dialog";
 
 	const page = reactive({
 		show : {

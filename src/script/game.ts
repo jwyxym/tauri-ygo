@@ -56,7 +56,6 @@ class Game {
 			for (const i of await fs.read.dir(constant.str.dirs.textures, false)) {
 				if (i.name.match(constant.reg.picture)) {
 					const url : string | undefined = await fs.read.picture(await join(constant.str.dirs.textures, i.name));
-					console.log(i.name);
 					if (url)
 						this.textures.set(i.name, url);
 				}
