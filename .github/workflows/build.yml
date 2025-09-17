@@ -14,16 +14,21 @@ jobs:
       with:
         submodules: 'recursive'
     
-    - name: Setup Node.js v22.18.0
+    - name: Install Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '22.18.0'
 
-    - name: Install Rust (toolchain 1.88.0)
+    - name: Install Rust
       uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.88.0
         
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+
     - name: Install wget and unzip
       shell: powershell
       run: |
@@ -70,6 +75,12 @@ jobs:
     - name: Android copy
       run: |
         npm run copy
+
+    - name: Write Rust File
+      shell: cmd
+      run: |
+        python .ci\to_b64.py
+        copy .ci\assets.rs src-tauri\src\assets.rs /Y
 
     - name: Android build
       shell: cmd
