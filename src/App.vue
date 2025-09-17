@@ -102,7 +102,6 @@
 				LoadingBar.error();
 				await dialog();
 			}
-
 		};
 		await mainGame.chk() ? await on() : await dialog();
 	});

@@ -280,7 +280,8 @@ class Fs {
 				const download = await invoke<string>('download', {
 					url : url,
 					path : await this.path,
-					name : file
+					name : file,
+					exName : ''
 				});
 				return download;
 			} catch (error) {
@@ -295,7 +296,8 @@ class Fs {
 				const download = await invoke<string>('download', {
 					url : url,
 					path : await path.join(await this.path, constant.str.dirs.expansions),
-					name : file
+					name : file,
+					exName : constant.str.extends.ypk
 				});
 				const p = await path.join(constant.str.dirs.expansions, download);
 				return [p, download];

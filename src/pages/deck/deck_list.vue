@@ -39,7 +39,7 @@
 							v-if = 'list.select > -1'
 							class = 'deck'
 						>
-							<div class = 'deck_name'>
+							<div class = 'deck_name font-title'>
 								<span>{{ list.decks[list.select].name }}</span>
 							</div>
 							<div class = 'cards'>

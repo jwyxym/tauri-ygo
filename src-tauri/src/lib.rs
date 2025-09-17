@@ -136,7 +136,7 @@ fn read_db(path: String) -> Result<Vec<(Vec<i64>, Vec<String>)>, String> {
 }
 
 #[tauri::command]
-async fn download(url: String, path: String, name: String) -> Result<String, String> {
+async fn download(url: String, path: String, name: String, ex_name: String) -> Result<String, String> {
 	let response: ureq::http::Response<ureq::Body> = ureq::get(&url).call().map_err(|e| e.to_string())?;
 	let mut file_name: String = name;
 	if response.status().is_success() {
@@ -156,8 +156,8 @@ async fn download(url: String, path: String, name: String) -> Result<String, Str
 			let random_number = rng.random_range(10_000_000..=100_000_000);
 			file_name = random_number.to_string();
 		}
-		if !file_name.ends_with(".ypk") {
-			file_name += ".ypk";
+		if ex_name.len() == 0 && !file_name.ends_with(&ex_name) {
+			file_name += &ex_name;
 		}
 		let file_path: PathBuf = Path::new(&path).join(&file_name);
 		let mut body = response.into_body();

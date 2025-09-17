@@ -3,7 +3,6 @@
 .menu {
 	transform: translateX(10%);
 	color: font.$text-color;
-	font-family: 'title';
 	height: 100%;
 	width: 50%;
 	white-space: nowrap;
@@ -12,6 +11,7 @@
 	justify-items: center;
 	align-items: center;
 	z-index: 10;
+	user-select: none;
 	.content {
 		height: 90%;
 		max-width: 20%;
@@ -23,14 +23,12 @@
 			gap: 10px;
 			.item_back {
 				width: 0;
-				font-family: 'menu';
 				font-style: italic;
 				height: 100%;
 				transition: all 0.4s ease;
 				border: 2px solid rgb(font.$boder-color, 0);
 				.item {
 					font-size: 7vh;
-					user-select: none;
 				}
 				&:hover {
 					cursor: pointer;

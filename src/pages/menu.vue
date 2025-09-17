@@ -1,11 +1,11 @@
 <template>
 	<div class = 'menu'>
 		<div class = 'content'>
-			<span class = 'title' ref = 'title'>{{ constant.str.title }}</span>
+			<span class = 'title font-title' ref = 'title'>{{ constant.str.title }}</span>
 			<div class = 'list'>
 				<div v-for = '(i, v) in mainGame.get.text().menu' class = 'item_back' ref = 'item'>
 					<span
-						class = 'item'
+						class = 'item font-menu'
 						@click = 'select(v)'
 					>
 						{{ i }}
