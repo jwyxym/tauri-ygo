@@ -18,9 +18,9 @@
 <script setup lang = 'ts'>
 	import { ref, Ref, onMounted } from "vue";
 
-	import constant from '../script/constant';
-	import mainGame from '../script/game';
-	import gsap from '../script/gsap';
+	import constant from '../../script/constant';
+	import mainGame from '../../script/game';
+	import gsap from '../../script/gsap';
 
 	const props = defineProps(['select']);
 
@@ -52,5 +52,5 @@
 
 </script>
 <style scoped lang = 'scss'>
-	@use '../style/menu.scss';
+	@use './menu.scss';
 </style>

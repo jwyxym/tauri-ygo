@@ -24,11 +24,11 @@
 	import { ref, onMounted, Ref, watch, Reactive, reactive } from 'vue';
 	import * as path from '@tauri-apps/api/path';
 
-	import fs from '../script/fs';
-	import pos, { posLike } from '../script/position';
-	import gsap from '../script/gsap';
-	import mainGame from '../script/game';
-	import constant from '../script/constant';
+	import fs from '../../script/fs';
+	import pos, { posLike } from '../../script/position';
+	import gsap from '../../script/gsap';
+	import mainGame from '../../script/game';
+	import constant from '../../script/constant';
 
 	const picI : Ref<HTMLElement | null> = ref(null);
 	const picII : Ref<HTMLElement | null> = ref(null);
@@ -96,5 +96,5 @@
 
 </script>
 <style scoped lang = 'scss'>
-	@use '../style/animation.scss';
+	@use './mune_animation.scss';
 </style>

@@ -33,9 +33,10 @@
 	import { reactive, onBeforeMount, onMounted, watch } from "vue";
 	import { LoadingBar } from '@varlet/ui';
 
-	import Menu from './pages/menu.vue';
-	import Animation from './pages/animation.vue';
+	import Menu from './pages/menu/menu.vue';
 	import Deck from './pages/deck/deck_list.vue';
+	import Animation from './pages/animation/mune_animation.vue';
+
 	import Setting from './pages/setting.vue';
 	import Voice from './pages/voice.vue';
 
