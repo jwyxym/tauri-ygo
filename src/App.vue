@@ -31,7 +31,6 @@
 </template>
 <script setup lang = 'ts'>
 	import { reactive, onBeforeMount, onMounted, watch } from "vue";
-	import { LoadingBar } from '@varlet/ui';
 
 	import Menu from './pages/menu.vue';
 	import Animation from './pages/animation.vue';
@@ -79,31 +78,9 @@
 	});
 
 	onBeforeMount(async () : Promise<void> => {
-		const on = async (chk : boolean = true) : Promise<void> => {
-			await mainGame.init(chk);
-			page.show.menu = true;
-			page.show.voice = true;
-		};
-		const dialog = async () : Promise<void> => {
-			await Dialog({
-				title : mainGame.get.text().start.title,
-				message : mainGame.get.text().start.message,
-				onConfirm : download,
-				onCancel : mainGame.exit,
-				closeOnClickOverlay : false
-			}, true)
-		};
-		const download = async () : Promise<void> => {
-			LoadingBar.start();
-			if (await fs.init()) {
-				LoadingBar.finish();
-				await on(false);
-			} else {
-				LoadingBar.error();
-				await dialog();
-			}
-		};
-		await mainGame.chk() ? await on() : await dialog();
+		await mainGame.init();
+		page.show.menu = true;
+		page.show.voice = true;
 	});
 
 	onMounted(async () => {

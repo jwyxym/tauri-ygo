@@ -8,10 +8,6 @@ const Zh_CN : textLike = {
 		'系统设置',
 		'退出游戏'
 	],
-	start : {
-		title : '是否下载游戏数据？',
-		message : '此过程需要流量（约300MB）'
-	},
 	dialog : {
 		confirm : '确认',
 		cancel : '取消'

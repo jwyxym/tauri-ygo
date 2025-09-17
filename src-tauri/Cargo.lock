@@ -4384,6 +4384,7 @@ dependencies = [
 name = "tauri-ygo"
 version = "0.1.0"
 dependencies = [
+ "base64 0.22.1",
  "content_disposition",
  "rand 0.9.2",
  "regex",
