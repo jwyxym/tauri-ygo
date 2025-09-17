@@ -81,7 +81,9 @@ jobs:
     - name: Decode Keystore File
       shell: pwsh
       run: |
-        $bytes = [System.Convert]::FromBase64String("${{ secrets.KEYSTORE_FILE }}")
+        $base64String = "${{ secrets.KEYSTORE_FILE }}"
+        $cleanBase64 = $base64String -replace "`r`n|`n|\s", ""
+        $bytes = [System.Convert]::FromBase64String($cleanBase64)
         [System.IO.File]::WriteAllBytes("tauri-ygo.jks", $bytes)
 
     - name: Sign apk
