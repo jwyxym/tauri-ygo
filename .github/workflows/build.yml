@@ -57,13 +57,21 @@ jobs:
       run: |
         npm install
     
-    - name: Android build
+    - name: Android Init
       shell: cmd
       run: |
         set JAVA_HOME=%cd%\jdk-21.0.8
         set ANDROID_HOME=%cd%\android-sdk
         set NDK_HOME=%cd%\android-ndk-r27d
         npm run tauri android init
+
+
+    - name: Android build
+      shell: cmd
+      run: |
+        set JAVA_HOME=%cd%\jdk-21.0.8
+        set ANDROID_HOME=%cd%\android-sdk
+        set NDK_HOME=%cd%\android-ndk-r27d
         npm run copy
         npm run tauri android build
 
