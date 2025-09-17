@@ -11,19 +11,19 @@
 </template>
 <script setup lang = 'ts'>
 	import { type Component } from 'vue';
-	import Deck from'../svg/deck.vue';
-	import Save from'../svg/save.vue';
-	import Delete from'../svg/delete.vue';
-	import Share from'../svg/share.vue';
-	import Home from'../svg/home.vue';
-	import Add from'../svg/add.vue';
-	import Search from'../svg/search.vue';
-	import Setting from'../svg/setting.vue';
-	import Exit from'../svg/exit.vue';
-	import Cancel from'../svg/cancel.vue';
-	import Confirm from'../svg/confirm.vue';
-	import Download from'../svg/download.vue';
-	import Refresh from'../svg/refresh.vue';
+	import Deck from'./svg/deck.vue';
+	import Save from'./svg/save.vue';
+	import Delete from'./svg/delete.vue';
+	import Share from'./svg/share.vue';
+	import Home from'./svg/home.vue';
+	import Add from'./svg/add.vue';
+	import Search from'./svg/search.vue';
+	import Setting from'./svg/setting.vue';
+	import Exit from'./svg/exit.vue';
+	import Cancel from'./svg/cancel.vue';
+	import Confirm from'./svg/confirm.vue';
+	import Download from'./svg/download.vue';
+	import Refresh from'./svg/refresh.vue';
 	const props = defineProps(['icon_name', 'content']);
 	const svgs : Map<string, Component> = new Map ([
 		['deck', Deck],
