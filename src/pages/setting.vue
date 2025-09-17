@@ -278,5 +278,79 @@
 
 </script>
 <style scoped lang = 'scss'>
-	@use '../style/setting.scss';
+	@use '../style/font.scss';
+	.setting_body {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		.button_list {
+			display: flex;
+			gap: 10px;
+		}
+		.content {
+			width: 100%;
+			height: 100%;
+			display: flex;
+			gap: 10%;
+			.expansion_list {
+				width: 40%;
+				height: 100%;
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+				.head {
+					width: 100%;
+					display: flex;
+					flex-wrap: wrap;
+					align-content: center;
+					align-items: center;
+					gap: 10px;
+				}
+				.var-loading {
+					height: 100%;
+					overflow-y: auto;
+					&::-webkit-scrollbar {
+						display: none;
+					}
+				}
+			}
+			.items {
+				width: 40%;
+				height: 100%;
+				overflow-y: auto;
+				&::-webkit-scrollbar {
+					display: none;
+				}
+			}
+			.var-list {
+				width: 100%;
+				height: 100%;
+				user-select: none;
+				.var-cell {
+					width: 100%;
+					.var-slider {
+						width: 100%;
+					}
+				}
+			}
+		}
+
+	}
+
+	.var-popup {
+		.var-form {
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+			width: 25vw;
+			height: 90%;
+			overflow-y: auto;
+			.var-select, .var-input {
+				width: 100%;
+			}
+			&::-webkit-scrollbar {
+				display: none;
+			}
+		}
+	}
 </style>

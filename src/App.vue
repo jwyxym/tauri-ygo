@@ -140,11 +140,11 @@
 		}
 	}
 	.dialog, .var-menu-option {
-		color: font.$text-color !important;
+		color: white !important;
 		border: 1px solid white;
 	}
 	.var-divider {
-		color: font.$text-color !important;
+		color: white !important;
 	}
 	.var-card {
 		background-color: transparent;
@@ -161,13 +161,13 @@
 		--tabs-background: transparent !important;
 		--select-scroller-background: rgba(0, 0, 0, 0.8) !important;
 		--menu-select-menu-background-color: rgba(0, 0, 0, 0.8) !important;
-		--dialog-message-color: font.$text-color !important;
-		--dialog-title-color: font.$text-color !important;
-		--list-loading-color: font.$text-color !important;
-		--list-finished-color: font.$text-color !important;
-		--list-error-color: font.$text-color !important;
-		--checkbox-text-color: font.$text-color !important;
-		--menu-option-text-color: font.$text-color !important;
+		--dialog-message-color: white !important;
+		--dialog-title-color: white !important;
+		--list-loading-color: white !important;
+		--list-finished-color: white !important;
+		--list-error-color: white !important;
+		--checkbox-text-color: white !important;
+		--menu-option-text-color: white !important;
 		--option-text-color: white !important;
 		--cell-color: white !important;
 		--divider-color: white !important;

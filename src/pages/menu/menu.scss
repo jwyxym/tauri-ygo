@@ -1,8 +1,6 @@
-@use '../../style/font.scss';
-
 .menu {
 	transform: translateX(10%);
-	color: font.$text-color;
+	color: white;
 	height: 100%;
 	width: 50%;
 	white-space: nowrap;
@@ -26,15 +24,15 @@
 				font-style: italic;
 				height: 100%;
 				transition: all 0.4s ease;
-				border: 2px solid rgb(font.$boder-color, 0);
+				border: 2px solid rgb(#ACC927, 0);
 				.item {
 					font-size: 7vh;
 				}
 				&:hover {
 					cursor: pointer;
 					width: 140%;
-					border: 2px solid font.$boder-color;
-					background-color: font.$hover-color;
+					border: 2px solid #ACC927;
+					background-color: rgba(black, 0.2);
 				}
 			}
 		}
