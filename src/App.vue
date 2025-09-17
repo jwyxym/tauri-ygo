@@ -38,7 +38,7 @@
 	import Animation from './pages/animation/mune_animation.vue';
 
 	import Setting from './pages/setting.vue';
-	import Voice from './pages/voice.vue';
+	import Voice from './pages/voice/voice.vue';
 
 	import mainGame from './script/game';
 	import fs from './script/fs';

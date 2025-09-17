@@ -1,5 +1,5 @@
-import mainGame from './game';
-import constant from './constant';
+import mainGame from '../../script/game';
+import constant from '../../script/constant';
 
 class Voice {
 	audio : Array<HTMLAudioElement> = [];

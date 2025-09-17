@@ -7,8 +7,8 @@ import constant from './constant';
 import Card, { Search } from './card';
 import textLike from './language/interface';
 import Zh_CN from './language/Zh-CN';
-import voice from './voice';
 
+import voice from '../pages/voice/voice';
 import Deck from '../pages/deck/deck';
 
 class Game {

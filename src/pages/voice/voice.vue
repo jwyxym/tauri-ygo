@@ -22,9 +22,10 @@
 </template>
 <script setup lang = 'ts'>
 	import { onMounted, ref, Ref } from 'vue';
-	import mainGame from '../script/game';
-	import constant from '../script/constant';
-	import voice from '../script/voice';
+	import mainGame from '../../script/game';
+	import constant from '../../script/constant';
+	
+	import voice from './voice';
 
 	const audio : Ref<Array<HTMLAudioElement>> = ref([]);
 	onMounted(() => {
