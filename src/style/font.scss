@@ -6,6 +6,14 @@ $text-size: 6vh;
 $boder-color: #ACC927;
 $subtext-color: rgb(162, 162, 162);
 
+.font-title {
+	font-family: 'title';
+}
+
+.font-menu {
+	font-family: 'menu';
+}
+
 @font-face {
 	font-family: 'title';
 	src: url('../font/title.ttf');
