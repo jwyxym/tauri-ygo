@@ -53,12 +53,12 @@ class Game {
 				await fs.init();
 
 			//读取./textures文件夹
-			for (const i of await fs.read.dir(constant.str.dirs.textures)) {
+			for (const i of await fs.read.dir(constant.str.dirs.textures, false)) {
 				if (i.name.match(constant.reg.picture)) {
-					const url : string | undefined = await fs.read.picture(i.name);
-					const name = i.name.match(constant.reg.get_name) ?? [];
-					if (name.length >= 2 && url !== undefined)
-						this.textures.set(name[1], url);
+					const url : string | undefined = await fs.read.picture(await join(constant.str.dirs.textures, i.name));
+					console.log(i.name);
+					if (url)
+						this.textures.set(i.name, url);
 				}
 			}
 
@@ -73,12 +73,11 @@ class Game {
 			}
 
 			//读取./sound文件夹
-			for (const i of await fs.read.dir(constant.str.dirs.sound)) {
+			for (const i of await fs.read.dir(constant.str.dirs.sound, false)) {
 				if (i.name.match(constant.reg.bgm)) {
-					const url : string | undefined = await fs.read.bgm(i.name);
-					const name = i.name.match(constant.reg.get_name) ?? [];
-					if (name.length >= 2 && url !== undefined)
-						this.bgm.get(constant.str.system_conf.sound.back)!.set(name[1], url);
+					const url : string | undefined = await fs.read.bgm(await join(constant.str.dirs.sound, i.name));
+					if (url)
+						this.bgm.get(constant.str.system_conf.sound.back)!.set(i.name, url);
 				}
 			}
 

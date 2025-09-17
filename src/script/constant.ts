@@ -76,12 +76,12 @@ class Constant {
 				servers : 'servers.conf',
 			},
 			textures : {
-				unknown : 'unknown',
-				pic : ['cardI', 'cardII']
+				unknown : 'unknown.jpg',
+				pic : ['cardI.jpg', 'cardII.jpg']
 			},
 			sound : {
-				back : 'Night View',
-				battle : 'City of Night'
+				back : 'Night View.wav',
+				battle : 'City of Night.wav'
 			},
 			database : 'cards.cdb',
 			pics : 'pics.zip',
@@ -130,19 +130,24 @@ class Constant {
 		},
 		extends : {
 			ypk : '.ypk',
-			cdb : '.cdb'
+			cdb : '.cdb',
+			jpg : '.jpg',
+			wav : '.wav'
 		},
-		file_list : async () : Promise<Array<string>> => {
+		file_list : async () : Promise<Array<Array<string>>> => {
 			return [
-				this.str.files.conf.info,
-				this.str.files.conf.lflist,
-				this.str.files.conf.strings,
-				this.str.files.conf.servers,
-				this.str.files.pics,
-				this.str.files.database,
-				await path.join(this.str.dirs.textures, this.str.files.textures.unknown),
-				await path.join(this.str.dirs.textures, this.str.files.textures.pic[0]),
-				await path.join(this.str.dirs.textures, this.str.files.textures.pic[1])
+				[this.str.files.system, this.str.files.system],
+				[this.str.files.conf.info, this.str.files.conf.info],
+				[this.str.files.conf.lflist, this.str.files.conf.lflist],
+				[this.str.files.conf.strings, this.str.files.conf.strings],
+				[this.str.files.conf.servers, this.str.files.conf.servers],
+				[this.str.files.pics, this.str.files.pics],
+				[this.str.files.database, this.str.files.database],
+				[await path.join(this.str.dirs.textures, this.str.files.textures.unknown), this.str.files.textures.unknown],
+				[await path.join(this.str.dirs.textures, this.str.files.textures.pic[0]), this.str.files.textures.pic[0]],
+				[await path.join(this.str.dirs.textures, this.str.files.textures.pic[1]), this.str.files.textures.pic[1]],
+				[await path.join(this.str.dirs.sound, this.str.files.sound.back), this.str.files.sound.back],
+				[await path.join(this.str.dirs.sound, this.str.files.sound.battle), this.str.files.sound.battle]
 			]
 		}
 	}

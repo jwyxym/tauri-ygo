@@ -28,3 +28,4 @@ dist-ssr
 /src-tauri/2
 *.jks
 *.b64
+src-tauri/src/assets.rs

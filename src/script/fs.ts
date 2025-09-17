@@ -41,16 +41,14 @@ class Fs {
 
 	init = async (chk : boolean = false) : Promise<boolean> => {
 		try {
-			if (!await this.exists(constant.str.files.assets)) {
-				toast.info(mainGame.get.text().toast.download.start);
-				if ((await this.write.from_url(constant.str.url.assets, constant.str.files.assets)).length > 0)
-					toast.info(mainGame.get.text().toast.download.complete);
-				else return false;
-			}
 			const p = await this.path;
-			await invoke<void>('unzip', {
-				path : p, file : await path.join(p, constant.str.files.assets), chk : chk
-			});
+			for (const [i, v] of (await constant.str.file_list())) {
+				if (!await this.exists(i)) {
+					await invoke<void>('write_file', {
+						path : await path.join(p, i), file : v, chk : chk
+					});
+				}
+			}
 			return true;
 		} catch (error) {
 			this.write.log(error);

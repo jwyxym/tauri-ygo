@@ -7,12 +7,63 @@ use std::{
 use zip::ZipArchive;
 use content_disposition::parse_content_disposition;
 use rand::Rng;
+use base64::{engine::general_purpose, Engine as _};
+
+mod assets;
 
 #[derive(Serialize)]
 #[serde(tag = "type", content = "content")]
 enum FileContent {
 	Binary(Vec<u8>),
 	Text(String),
+}
+
+#[tauri::command]
+fn write_file(path: String, file: String, chk: bool) -> Result<(), String> {
+	let mut binary_data: Vec<u8> = vec![];
+	match file.as_str() {
+		"cardinfo.conf" => {
+			binary_data = general_purpose::STANDARD.decode(&assets::CARDINFO_CONF).map_err(|e| e.to_string())?;
+		}
+		"strings.conf" => {
+			binary_data = general_purpose::STANDARD.decode(&assets::STRINGS_CONF).map_err(|e| e.to_string())?;
+		}
+		"lflist.conf" => {
+			binary_data = general_purpose::STANDARD.decode(&assets::LFLIST_CONF).map_err(|e| e.to_string())?;
+		}
+		"cardI.jpg" => {
+			binary_data = general_purpose::STANDARD.decode(&assets::CARDI_JPG).map_err(|e| e.to_string())?;
+		}
+		"cardII.jpg" => {
+			binary_data = general_purpose::STANDARD.decode(&assets::CARDII_JPG).map_err(|e| e.to_string())?;
+		}
+		"unknown.jpg" => {
+			binary_data = general_purpose::STANDARD.decode(&assets::UNKNOWN_JPG).map_err(|e| e.to_string())?;
+		}
+		"City of Night.wav" => {
+			binary_data = general_purpose::STANDARD.decode(&assets::CITY_OF_NIGHT_WAV).map_err(|e| e.to_string())?;
+		}
+		"Night View.wav" => {
+			binary_data = general_purpose::STANDARD.decode(&assets::NIGHT_VIEW_WAV).map_err(|e| e.to_string())?;
+		}
+		"pics.zip" => {
+			binary_data = general_purpose::STANDARD.decode(&assets::PICS_ZIP).map_err(|e| e.to_string())?;
+		}
+		"cards.cdb" => {
+			binary_data = general_purpose::STANDARD.decode(&assets::CARDS_CDB).map_err(|e| e.to_string())?;
+		}
+		_=> {
+			if !exists(&path).map_err(|e| e.to_string())? || chk {
+				File::create(path).map_err(|e| e.to_string())?;
+			}
+			return Ok(());
+		}
+	}
+	if binary_data.len() > 0 && (!exists(&path).map_err(|e| e.to_string())? || chk) {
+		let mut file: File = File::create(path).map_err(|e| e.to_string())?;
+		file.write_all(&binary_data).map_err(|e| e.to_string())?;
+	}
+    Ok(())
 }
 
 #[tauri::command]
@@ -181,7 +232,7 @@ pub fn run() {
 		.plugin(tauri_plugin_os::init())
 		.plugin(tauri_plugin_fs::init())
 		.plugin(tauri_plugin_opener::init())
-		.invoke_handler(tauri::generate_handler![unzip, read_zip, read_db, download])
+		.invoke_handler(tauri::generate_handler![write_file, unzip, read_zip, read_db, download])
 		.run(tauri::generate_context!())
 		.expect("error while running tauri application");
 }
