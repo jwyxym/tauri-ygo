@@ -721,5 +721,5 @@
 
 </script>
 <style scoped lang = 'scss'>
-	@use '../../style/deck.scss';
+	@use './deck.scss';
 </style>

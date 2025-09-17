@@ -254,5 +254,5 @@
 	onBeforeMount(list.load)
 </script>
 <style scoped lang = 'scss'>
-	@use '../../style/deck_list.scss';
+	@use './deck_list.scss';
 </style>
