@@ -100,7 +100,6 @@
 	import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 
 	import mainGame from '../../script/game';
-	import Deck from '../../script/deck';
 	import constant from '../../script/constant';
 	import toast from '../../script/toast';
 	import fs from '../../script/fs';
@@ -111,6 +110,8 @@
 	import Button_List from '../varlet/button_list.vue';
 	import Dialog from '../varlet/dialog';
 
+	import Deck from './deck';
+	
 	const page = reactive({
 		deck : false,
 		list : true,

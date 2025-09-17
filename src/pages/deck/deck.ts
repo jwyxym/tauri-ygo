@@ -1,7 +1,7 @@
 import YGOProDeck, { YGOProDeckLike } from 'ygopro-deck-encode';
-import fs from './fs';
-import constant from './constant';
-import mainGame from './game';
+import fs from '../../script/fs';
+import constant from '../../script/constant';
+import mainGame from '../../script/game';
 
 class Deck extends YGOProDeck {
 	new : boolean;

@@ -3,9 +3,10 @@ import * as fs from '@tauri-apps/plugin-fs';
 import * as path from '@tauri-apps/api/path';
 
 import constant from './constant';
-import Deck from './deck';
 import toast from './toast';
 import mainGame from './game';
+
+import Deck from '../pages/deck/deck';
 
 class Fs {
 	dir : fs.ReadFileOptions;

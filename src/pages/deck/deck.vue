@@ -210,13 +210,13 @@
 	import Select from '../varlet/select.vue';
 	import Input from '../varlet/input.vue';
 	import Card, { CardInfo, Search } from '../../script/card';
-	import Deck from '../../script/deck';
 	import toast from '../../script/toast';
 	import fs from '../../script/fs';
 	import gsap from '../../script/gsap';
 
 	import Dialog from '../varlet/dialog';
 
+	import Deck from './deck';
 
 	const props = defineProps(['this_deck', 'offdeck', 'update']);
 

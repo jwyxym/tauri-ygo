@@ -4,11 +4,12 @@ import { join } from '@tauri-apps/api/path';
 
 import fs from './fs';
 import constant from './constant';
-import Deck from './deck';
 import Card, { Search } from './card';
 import textLike from './language/interface';
 import Zh_CN from './language/Zh-CN';
 import voice from './voice';
+
+import Deck from '../pages/deck/deck';
 
 class Game {
 	strings : Map<string, Map<number, string>> = new Map([
