@@ -74,9 +74,7 @@ jobs:
       shell: cmd
       env:
         JAVA_HOME: ${{ github.workspace }}\jdk-21.0.8
-        ANDROID_HOME: ${{ github.workspace }}\android-sdk
         NDK_HOME: ${{ github.workspace }}\android-ndk-r27d
-        ANDROID_SDK_ROOT: ${{ github.workspace }}\android-sdk
       run: |
         npm run tauri android build
 
