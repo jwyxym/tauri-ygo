@@ -59,20 +59,24 @@ jobs:
     
     - name: Android Init
       shell: cmd
+      env:
+        JAVA_HOME: ${{ github.workspace }}\jdk-21.0.8
+        ANDROID_HOME: ${{ github.workspace }}\android-sdk
+        NDK_HOME: ${{ github.workspace }}\android-ndk-r27d
       run: |
-        set JAVA_HOME=%cd%\jdk-21.0.8
-        set ANDROID_HOME=%cd%\android-sdk
-        set NDK_HOME=%cd%\android-ndk-r27d
         npm run tauri android init
 
-
+    - name: Android copy
+      run: |
+        npm run copy
+        
     - name: Android build
       shell: cmd
+      env:
+        JAVA_HOME: ${{ github.workspace }}\jdk-21.0.8
+        ANDROID_HOME: ${{ github.workspace }}\android-sdk
+        NDK_HOME: ${{ github.workspace }}\android-ndk-r27d
       run: |
-        set JAVA_HOME=%cd%\jdk-21.0.8
-        set ANDROID_HOME=%cd%\android-sdk
-        set NDK_HOME=%cd%\android-ndk-r27d
-        npm run copy
         npm run tauri android build
 
     - name: Upload
