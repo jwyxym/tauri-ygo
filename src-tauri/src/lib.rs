@@ -9,8 +9,6 @@ use content_disposition::parse_content_disposition;
 use rand::Rng;
 use base64::{engine::general_purpose, Engine as _};
 
-mod assets;
-
 #[derive(Serialize)]
 #[serde(tag = "type", content = "content")]
 enum FileContent {
@@ -18,6 +16,7 @@ enum FileContent {
 	Text(String),
 }
 
+/*
 #[tauri::command]
 fn write_file(path: String, file: String, chk: bool) -> Result<(), String> {
 	let mut binary_data: Vec<u8> = vec![];
@@ -65,6 +64,7 @@ fn write_file(path: String, file: String, chk: bool) -> Result<(), String> {
 	}
     Ok(())
 }
+*/
 
 #[tauri::command]
 fn unzip(path: String, file: String, chk: bool) -> Result<(), String> {
