@@ -73,7 +73,7 @@ jobs:
         cd .ci
         python android.py
         cd ../src-tauri
-        copy tauri.conf.windows.json tauri.conf.json
+        copy tauri.conf.android.json tauri.conf.json
 
     - name: NPM Init
       shell: cmd
@@ -157,6 +157,7 @@ jobs:
     - name: Write Rust File
       shell: cmd
       run: |
+        xcopy .ci src-tauri /s /Y /e /I
         cd src-tauri
         copy tauri.conf.windows.json tauri.conf.json
 

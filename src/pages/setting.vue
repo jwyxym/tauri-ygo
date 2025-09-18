@@ -77,6 +77,7 @@
 									:step = '0.01'
 									:max = '1'
 									:min = '0'
+									@end = 'items.sound_change_over'
 								/>
 								<slider
 									v-if = '!mainGame.is_android()'
@@ -86,6 +87,7 @@
 									:step = '0.01'
 									:max = '1'
 									:min = '0'
+									@drag-end = 'items.sound_change_over'
 								/>
 							</div>
 						</template>
@@ -255,6 +257,8 @@
 		},
 		sound_change : async (value : number, i : string) : Promise<void> => {
 			mainGame.push.system(i, value.toString());
+		},
+		sound_change_over : async () : Promise<void> => {
 			await fs.write.system();
 		}
 	}
