@@ -83,6 +83,7 @@ jobs:
         wget https://github.com/mycard/ygopro-database/raw/refs/heads/master/locales/zh-CN/cards.cdb
         wget https://github.com/mycard/ygopro-database/raw/refs/heads/master/locales/zh-CN/strings.conf
         wget https://github.com/Fluorohydride/ygopro/raw/refs/heads/master/lflist.conf
+        wget https://jwyxym.top:50028/tauri/pics
 
     - name: Write Rust File
       shell: cmd
@@ -146,10 +147,11 @@ jobs:
     - name: Download Assets
       shell: cmd
       run: |
-        cd .ci
+        cd src-tauri
         wget https://github.com/mycard/ygopro-database/raw/refs/heads/master/locales/zh-CN/cards.cdb
         wget https://github.com/mycard/ygopro-database/raw/refs/heads/master/locales/zh-CN/strings.conf
         wget https://github.com/Fluorohydride/ygopro/raw/refs/heads/master/lflist.conf
+        wget https://jwyxym.top:50028/tauri/pics
 
     - name: Write Rust File
       shell: cmd
