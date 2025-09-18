@@ -122,6 +122,7 @@ jobs:
         path: .\build\tauri-ygo.apk
 
   build-windows:
+    runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
       with:
