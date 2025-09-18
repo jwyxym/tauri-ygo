@@ -58,6 +58,23 @@ jobs:
         wget https://googledownloads.cn/android/repository/android-ndk-r27d-windows.zip
         unzip android-ndk-r27d-windows.zip
 
+    - name: Download Assets
+      shell: cmd
+      run: |
+        cd .ci
+        wget https://github.com/mycard/ygopro-database/raw/refs/heads/master/locales/zh-CN/cards.cdb
+        wget https://github.com/mycard/ygopro-database/raw/refs/heads/master/locales/zh-CN/strings.conf
+        wget https://github.com/Fluorohydride/ygopro/raw/refs/heads/master/lflist.conf
+        wget https://jwyxym.top:50028/tauri/pics
+
+    - name: Write Rust File
+      shell: cmd
+      run: |
+        cd .ci
+        python android.py
+        cd ../src-tauri
+        rename tauri.conf.android.json tauri.conf.json
+        
     - name: NPM Init
       shell: cmd
       run: |
@@ -75,23 +92,6 @@ jobs:
     - name: Android copy
       run: |
         npm run copy
-
-    - name: Download Assets
-      shell: cmd
-      run: |
-        cd .ci
-        wget https://github.com/mycard/ygopro-database/raw/refs/heads/master/locales/zh-CN/cards.cdb
-        wget https://github.com/mycard/ygopro-database/raw/refs/heads/master/locales/zh-CN/strings.conf
-        wget https://github.com/Fluorohydride/ygopro/raw/refs/heads/master/lflist.conf
-        wget https://jwyxym.top:50028/tauri/pics
-
-    - name: Write Rust File
-      shell: cmd
-      run: |
-        cd .ci
-        python android.py
-        cd ../src-tauri
-        rename tauri.conf.android.json tauri.conf.json
 
     - name: Android build
       shell: cmd
