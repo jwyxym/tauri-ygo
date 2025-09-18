@@ -30,3 +30,8 @@ dist-ssr
 *.b64
 src-tauri/src/assets.rs
 .ci/assets.rs
+.ci/pics.zip
+.ci/cards.cdb
+.ci/lflist.conf
+.ci/strings.conf
+src-tauri/tauri.conf.json

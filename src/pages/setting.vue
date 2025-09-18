@@ -20,6 +20,7 @@
 						:loading = 'setting.loading'
 					></Button>
 					<Button
+						v-if = 'mainGame.is_android()'
 						@click = 'expansion.resert'
 						size = 'large'
 						:content = 'mainGame.get.text().setting.resert'

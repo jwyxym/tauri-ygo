@@ -40,6 +40,7 @@ class Fs {
 	};
 
 	init = async (chk : boolean = false) : Promise<boolean> => {
+		if (!mainGame.is_android()) return false;
 		try {
 			const p = await this.path;
 			for (const [i, v] of (await constant.str.file_list())) {

@@ -40,7 +40,7 @@ class Game {
 
 	private lflist_now : string = '';
 
-    init = async (chk : boolean = true) : Promise<void> => {
+    init = async () : Promise<void> => {
 		try {
 			//新建所需要的文件夹
 			for (const [_, i] of Object.entries(constant.str.dirs)) {
@@ -49,8 +49,7 @@ class Game {
 			}
 
 			//初始化资源
-			if (chk)
-				await fs.init();
+			await fs.init();
 
 			//读取./textures文件夹
 			for (const i of await fs.read.dir(constant.str.dirs.textures, false)) {
