@@ -73,8 +73,8 @@ jobs:
         cd .ci
         python android.py
         cd ../src-tauri
-        rename tauri.conf.android.json tauri.conf.json
-        
+        copy tauri.conf.windows.json tauri.conf.json
+
     - name: NPM Init
       shell: cmd
       run: |
@@ -158,7 +158,7 @@ jobs:
       shell: cmd
       run: |
         cd src-tauri
-        rename tauri.conf.windows.json tauri.conf.json
+        copy tauri.conf.windows.json tauri.conf.json
 
     - name: NPM Init
       shell: cmd
