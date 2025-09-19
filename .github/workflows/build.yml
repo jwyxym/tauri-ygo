@@ -252,7 +252,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/tauri-ygo.apk
+          asset_path: ./build/tauri-ygo.apk/tauri-ygo.apk
           asset_name: tauri-ygo.apk
           asset_content_type: application/octet-stream
 
@@ -262,7 +262,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/tauri-ygo-setup.msi
+          asset_path: ./build/tauri-ygo-setup.msi/tauri-ygo-setup.msi
           asset_name: tauri-ygo-setup.msi
           asset_content_type: application/octet-stream
 
@@ -272,7 +272,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/tauri-ygo-setup.exe
+          asset_path: ./build/tauri-ygo-setup.exe/tauri-ygo-setup.exe
           asset_name: tauri-ygo-setup.exe
           asset_content_type: application/octet-stream
 
@@ -282,6 +282,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/tauri-ygo.exe
+          asset_path: ./build/tauri-ygo.exe/tauri-ygo.exe
           asset_name: tauri-ygo.exe
           asset_content_type: application/octet-stream
