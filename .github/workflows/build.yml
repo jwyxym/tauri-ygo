@@ -181,21 +181,18 @@ jobs:
       run: |
         set "found_msi="
         set "found_exe="
-        dir .\src-tauri\target\release\bundle\msi\
-        dir .\src-tauri\target\release\bundle\nsis\
-        dir .\src-tauri\target\release\bundle\
-        dir .\src-tauri\target\release\
+        mkdir build
 
-        for %%f in (.\src-tauri\target\release\bundle\msi\*.msi) do (
+        for %%f in (.\src-tauri\target\release\bundle\msi\*) do (
             if not defined found_msi (
-                copy "%%f" "build\tauri-ygo-setup.msi"
+                copy "%%f" ".\build\tauri-ygo-setup.msi"
                 set "found_msi=1"
             )
         )
 
-        for %%f in (.\src-tauri\target\release\bundle\nsis\*.exe) do (
+        for %%f in (.\src-tauri\target\release\bundle\nsis\*) do (
             if not defined found_exe (
-                copy "%%f" "build\tauri-ygo-setup.exe"
+                copy "%%f" ".\build\tauri-ygo-setup.exe"
                 set "found_exe=1"
             )
         )
