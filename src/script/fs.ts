@@ -95,6 +95,20 @@ class Fs {
 			}
 			return result;
 		},
+		pics : async (file_type : Array<string> = []) : Promise<Map<string, Blob>> => {
+			const p = await this.path;
+			const entries = await invoke<Array<[string, { content : Uint8Array}]>>('read_pics', {
+				dirs : [
+					await path.join(p, constant.str.exdirs.pics),
+					await path.join(p, constant.str.dirs.expansions, constant.str.exdirs.pics),
+				], fileType: file_type
+			});
+			const result = new Map();
+			for (const [name, content] of entries) {
+				result.set(name, new Blob([new Uint8Array(content.content)], { type : 'image/jpeg' }));
+			}
+			return result;
+		},
 		zip : async (file : string, file_type : Array<string> = []) : Promise<Map<RegExp, Map<string, Blob | Uint8Array | string>>> => {
 			let map = new Map([
 				[constant.reg.database, new Map],

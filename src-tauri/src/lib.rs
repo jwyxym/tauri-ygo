@@ -7,7 +7,7 @@ use std::{
 use zip::ZipArchive;
 use content_disposition::parse_content_disposition;
 use rand::Rng;
-use base64::{engine::general_purpose, Engine as _};
+/*use base64::{engine::general_purpose, Engine as _};*/
 
 #[derive(Serialize)]
 #[serde(tag = "type", content = "content")]
@@ -88,6 +88,31 @@ fn unzip(path: String, file: String, chk: bool) -> Result<(), String> {
 	}
 
 	Ok(())
+}
+
+#[tauri::command]
+fn read_pics(dirs: Vec<String>, file_type: Vec<String>) -> Result<Vec<(String, FileContent)>, String> {
+	let mut entries: Vec<(String, FileContent)> = Vec::new();
+	for path in dirs {
+		for name in &file_type {
+			let full_name: String = format!("{}.jpg", name);
+			let file_path: PathBuf = Path::new(&path).join(full_name);
+	println!("{}", file_path.to_string_lossy());
+			if !exists(&file_path).map_err(|e| e.to_string())? {
+				continue;
+			}
+			match File::open(&file_path) {
+				Ok(mut file) => {
+					let mut content: Vec<u8> = Vec::new();
+					file.read_to_end(&mut content)
+						.map_err(|e| e.to_string())?;
+					entries.push((name.to_string(), FileContent::Binary(content)));
+				}
+				Err(_) => ()
+			}
+		}
+	}
+	Ok(entries)
 }
 
 #[tauri::command]
@@ -232,7 +257,7 @@ pub fn run() {
 		.plugin(tauri_plugin_os::init())
 		.plugin(tauri_plugin_fs::init())
 		.plugin(tauri_plugin_opener::init())
-		.invoke_handler(tauri::generate_handler![/*write_file, */unzip, read_zip, read_db, download])
+		.invoke_handler(tauri::generate_handler![/*write_file, */unzip, read_zip, read_pics, read_db, download])
 		.run(tauri::generate_context!())
 		.expect("error while running tauri application");
 }

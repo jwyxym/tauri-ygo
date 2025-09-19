@@ -62,7 +62,7 @@ class Constant {
 			script : 'script',
 			deck : 'deck',
 			cache : 'cache',
-			sound : 'sound'
+			sound : 'sound',
 		},
 		exdirs : {
 			pics : 'pics',

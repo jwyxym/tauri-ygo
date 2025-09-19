@@ -222,16 +222,25 @@ class Game {
 				}
 				deck = deck.filter(filter);
 			}
-			const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(constant.str.files.pics, deck.map(num => num.toString()));
-			for (const code of deck) {
-				const blob = ypk.get(constant.reg.picture)!.get(code.toString());
-				if (blob != undefined)
-					this.cards.get(code)!.update_pic(URL.createObjectURL(blob as Blob));
-			}
-			deck = deck.filter(filter);
-			for (const code of deck) {
-				await this.cards.get(code)!.find_pic();
-			}
+			const read_pics = async () : Promise<void> => {
+				deck = deck.filter(filter);
+				const pics : Map<string, Blob> = await fs.read.pics(deck.map(num => num.toString()));
+				for (const code of deck) {
+					const blob = pics.get(code.toString());
+					if (blob != undefined)
+						this.cards.get(code)!.update_pic(URL.createObjectURL(blob));
+				}
+			};
+			const read_zip = async () : Promise<void> => {
+				deck = deck.filter(filter);
+				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(constant.str.files.pics, deck.map(num => num.toString()));
+				for (const code of deck) {
+					const blob = ypk.get(constant.reg.picture)!.get(code.toString());
+					if (blob != undefined)
+						this.cards.get(code)!.update_pic(URL.createObjectURL(blob as Blob));
+				}
+			};
+			this.is_android() ? await read_zip() : await read_pics();
 		},
 		card : async () : Promise<void> => {
 			//读取目录下的所有conf
