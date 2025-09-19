@@ -13,21 +13,6 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
-    
-    - name: Install Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '22.18.0'
-
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@master
-      with:
-        toolchain: 1.88.0
-        
-    - name: Install Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.13'
 
     - name: Install wget and unzip
       shell: powershell
@@ -49,15 +34,33 @@ jobs:
         cd android-sdk
         mkdir platform-tools
         wget https://dl.google.com/android/repository/commandlinetools-win-13114758_latest.zip
-        unzip commandlinetools-win-13114758_latest.zip
         set ANDROID_SDK_ROOT=%cd%
-        .\cmdline-tools\bin\sdkmanager.bat "platform-tools" "build-tools;34.0.0" "platforms;android-34"
+        mkdir cmdline-tools
+        unzip commandlinetools-win-13114758_latest.zip -d cmdline-tools
+        cd cmdline-tools
+        ren cmdline-tools latest
+        .\latest\bin\sdkmanager.bat "platform-tools" "build-tools;34.0.0" "platforms;android-34"
 
     - name: Install Android ndk r27
       shell: cmd
       run: |
         wget https://googledownloads.cn/android/repository/android-ndk-r27d-windows.zip
         unzip android-ndk-r27d-windows.zip
+
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22.18.0'
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: 1.88.0
+        
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
 
     - name: Download Assets
       shell: cmd
