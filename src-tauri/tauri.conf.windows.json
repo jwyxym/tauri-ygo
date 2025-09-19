@@ -42,10 +42,10 @@
 		"resources": [
 			"sound/**/*",
 			"textures/**/*",
+			"pics/**/*",
 			"cardinfo.conf",
 			"strings.conf",
 			"lflist.conf",
-			"pics.zip",
 			"cards.cdb"
 		]
 	}
