@@ -134,6 +134,8 @@
 		"process:default",
 		"clipboard-manager:allow-read-text",
 		"clipboard-manager:allow-write-text",
-		"clipboard-manager:default"
+		"clipboard-manager:default",
+		"tcp:allow-connect",
+		"tcp:default"
 	]
 }

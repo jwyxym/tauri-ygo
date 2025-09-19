@@ -38,10 +38,11 @@ src-tauri/tauri.conf.json
 src-tauri/cards.cdb
 src-tauri/cardinfo.conf
 src-tauri/lflist.conf
-*.zip
-/src-tauri/pics
+src-tauri/pics
 src-tauri/servers.conf
-/src-tauri/sound
+src-tauri/sound
 src-tauri/strings.conf
 src-tauri/system.conf
-/src-tauri/textures
+src-tauri/textures
+.ci/*.conf
+*.zip

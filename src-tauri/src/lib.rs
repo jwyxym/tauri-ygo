@@ -9,6 +9,8 @@ use content_disposition::parse_content_disposition;
 use rand::Rng;
 /*ifdef android
 use base64::{engine::general_purpose, Engine as _};
+
+mod assets;
 endif android*/
 
 #[derive(Serialize)]
