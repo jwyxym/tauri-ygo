@@ -37,31 +37,27 @@ jobs:
         choco install wget unzip -y
 
     - name: Install Java21
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '21'
+      shell: cmd
+      run: |
+        wget https://download.oracle.com/java/21/latest/jdk-21_windows-x64_bin.zip
+        unzip jdk-21_windows-x64_bin.zip
     
-    - name: Set up Android SDK
-      uses: google-github-actions/setup-android@v3
-
-    - name: Accept Android licenses
-      run: yes | sdkmanager --licenses
+    - name: Install Android sdk
       shell: cmd
-
-    - name: Install NDK r27
       run: |
-        sdkmanager "ndk;27.0.11718014"
+        mkdir android-sdk
+        cd android-sdk
+        mkdir platform-tools
+        wget https://dl.google.com/android/repository/commandlinetools-win-13114758_latest.zip
+        unzip commandlinetools-win-13114758_latest.zip
+        set ANDROID_SDK_ROOT=%cd%
+        .\cmdline-tools\bin\sdkmanager.bat "platform-tools" "build-tools;34.0.0" "platforms;android-34"
 
-    - name: Set ANDROID_HOME and NDK_HOME
-      run: |
-        echo ANDROID_SDK_ROOT is: %ANDROID_SDK_ROOT%
-        echo Setting ANDROID_HOME=%ANDROID_SDK_ROOT%
-        echo Setting NDK_HOME=%ANDROID_SDK_ROOT%\ndk\27.0.11718014
-
-        echo ANDROID_HOME=%ANDROID_SDK_ROOT%>> %GITHUB_ENV%
-        echo NDK_HOME=%ANDROID_SDK_ROOT%\ndk\27.0.11718014>> %GITHUB_ENV%
+    - name: Install Android ndk r27
       shell: cmd
+      run: |
+        wget https://googledownloads.cn/android/repository/android-ndk-r27d-windows.zip
+        unzip android-ndk-r27d-windows.zip
 
     - name: Download Assets
       shell: cmd
