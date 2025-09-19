@@ -181,6 +181,10 @@ jobs:
       run: |
         set "found_msi="
         set "found_exe="
+        dir .\src-tauri\target\release\bundle\msi\
+        dir .\src-tauri\target\release\bundle\nsis\
+        dir .\src-tauri\target\release\bundle\
+        dir .\src-tauri\target\release\
 
         for %%f in (.\src-tauri\target\release\bundle\msi\*.msi) do (
             if not defined found_msi (
