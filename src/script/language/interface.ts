@@ -1,4 +1,4 @@
-interface textLike {
+interface TEXT_Like {
 	menu : Array<string>;
 	dialog : {
 		confirm : string;
@@ -93,4 +93,4 @@ interface textLike {
 	};
 }
 
-export default textLike;
+export default TEXT_Like;

@@ -1,12 +1,6 @@
 import { gsap } from 'gsap';
 import pos from './position';
 
-interface gsapElement {
-	element ?: HTMLElement;
-	selector : string | HTMLElement;
-	angle ?: number;
-};
-
 class Gsap {
 	timeline = (vars : gsap.TimelineVars = {}) : gsap.core.Timeline => {
 		return gsap.timeline(vars);
@@ -157,4 +151,3 @@ class Gsap {
 };
 
 export default new Gsap();
-export type { gsapElement };

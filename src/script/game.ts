@@ -33,6 +33,7 @@ class Game {
 		[constant.str.system_conf.sound.back, new Map],
 		[constant.str.system_conf.sound.button, new Map]
 	]);
+	version = 0x1362;
 	select = 'Zh_CN';
 	interval = -1;
 	interval_ct = 0;

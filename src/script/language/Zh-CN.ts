@@ -1,6 +1,6 @@
-import textLike from './interface';
+import TEXT_Like from './interface';
 
-const Zh_CN : textLike = {
+const Zh_CN : TEXT_Like = {
 	menu : [
 		'人机模式',
 		'联机模式',
