@@ -97,8 +97,8 @@ fn read_pics(dirs: Vec<String>, file_type: Vec<String>) -> Result<Vec<(String, F
 		for name in &file_type {
 			let full_name: String = format!("{}.jpg", name);
 			let file_path: PathBuf = Path::new(&path).join(full_name);
-	println!("{}", file_path.to_string_lossy());
-			if !exists(&file_path).map_err(|e| e.to_string())? {
+			if !exists(&file_path).map_err(|e| e.to_string())?
+				|| entries.iter().any(|(x, _)| x == name) {
 				continue;
 			}
 			match File::open(&file_path) {

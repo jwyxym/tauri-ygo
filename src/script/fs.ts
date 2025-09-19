@@ -99,8 +99,8 @@ class Fs {
 			const p = await this.path;
 			const entries = await invoke<Array<[string, { content : Uint8Array}]>>('read_pics', {
 				dirs : [
-					await path.join(p, constant.str.exdirs.pics),
 					await path.join(p, constant.str.dirs.expansions, constant.str.exdirs.pics),
+					await path.join(p, constant.str.exdirs.pics)
 				], fileType: file_type
 			});
 			const result = new Map();
