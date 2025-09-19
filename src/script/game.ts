@@ -224,9 +224,9 @@ class Game {
 			}
 			const read_pics = async () : Promise<void> => {
 				deck = deck.filter(filter);
-				const pics : Map<string, Blob> = await fs.read.pics(deck.map(num => num.toString()));
+				const pics : Map<number, Blob> = await fs.read.pics(deck);
 				for (const code of deck) {
-					const blob = pics.get(code.toString());
+					const blob = pics.get(code);
 					if (blob != undefined)
 						this.cards.get(code)!.update_pic(URL.createObjectURL(blob));
 				}
@@ -245,6 +245,7 @@ class Game {
 		card : async () : Promise<void> => {
 			//读取目录下的所有conf
 			for (const [_, conf] of Object.entries(constant.str.files.conf)) {
+				if (!fs.exists(conf)) continue;
 				const text : string | undefined = await fs.read.text(conf);
 				if (text === undefined) continue;
 				const lines : Array<string> = text.split(constant.reg.line_feed);

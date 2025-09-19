@@ -95,15 +95,15 @@ class Fs {
 			}
 			return result;
 		},
-		pics : async (file_type : Array<string> = []) : Promise<Map<string, Blob>> => {
+		pics : async (codes : Array<number> = []) : Promise<Map<number, Blob>> => {
 			const p = await this.path;
-			const entries = await invoke<Array<[string, { content : Uint8Array}]>>('read_pics', {
+			const entries = await invoke<Array<[number, { content : Uint8Array}]>>('read_pics', {
 				dirs : [
 					await path.join(p, constant.str.dirs.expansions, constant.str.exdirs.pics),
 					await path.join(p, constant.str.exdirs.pics)
-				], fileType: file_type
+				], codes: codes
 			});
-			const result = new Map();
+			const result : Map<number, Blob> = new Map();
 			for (const [name, content] of entries) {
 				result.set(name, new Blob([new Uint8Array(content.content)], { type : 'image/jpeg' }));
 			}

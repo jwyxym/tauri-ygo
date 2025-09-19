@@ -93,14 +93,14 @@ fn unzip(path: String, file: String, chk: bool) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn read_pics(dirs: Vec<String>, file_type: Vec<String>) -> Result<Vec<(String, FileContent)>, String> {
-	let mut entries: Vec<(String, FileContent)> = Vec::new();
+fn read_pics(dirs: Vec<String>, codes: Vec<i64>) -> Result<Vec<(i64, FileContent)>, String> {
+	let mut entries: Vec<(i64, FileContent)> = Vec::new();
 	for path in dirs {
-		for name in &file_type {
-			let full_name: String = format!("{}.jpg", name);
+		for code in &codes {
+			let full_name: String = format!("{}.jpg", code);
 			let file_path: PathBuf = Path::new(&path).join(full_name);
 			if !exists(&file_path).map_err(|e| e.to_string())?
-				|| entries.iter().any(|(x, _)| x == name) {
+				|| entries.iter().any(|(x, _)| x == code) {
 				continue;
 			}
 			match File::open(&file_path) {
@@ -108,7 +108,7 @@ fn read_pics(dirs: Vec<String>, file_type: Vec<String>) -> Result<Vec<(String, F
 					let mut content: Vec<u8> = Vec::new();
 					file.read_to_end(&mut content)
 						.map_err(|e| e.to_string())?;
-					entries.push((name.to_string(), FileContent::Binary(content)));
+					entries.push((*code, FileContent::Binary(content)));
 				}
 				Err(_) => ()
 			}
