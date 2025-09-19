@@ -219,6 +219,8 @@ jobs:
     name: Create Release with All Files
     needs: [build-android, build-windows]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
