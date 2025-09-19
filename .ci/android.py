@@ -1,7 +1,7 @@
 with open("../src-tauri/src/lib.rs", "r", encoding="utf-8")as f:
     content = f.read()
 with open("../src-tauri/src/lib.rs", "w", encoding="utf-8")as f:
-    f.write(f'mod assets;\n{content.replace('/*', '').replace('*/', '')}')
+    f.write(f"mod assets;\n{content.replace('/*ifdef android', '').replace('endif android*/', '')}")
 
 import base64
 

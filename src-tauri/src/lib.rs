@@ -7,7 +7,9 @@ use std::{
 use zip::ZipArchive;
 use content_disposition::parse_content_disposition;
 use rand::Rng;
-/*use base64::{engine::general_purpose, Engine as _};*/
+/*ifdef android
+use base64::{engine::general_purpose, Engine as _};
+endif android*/
 
 #[derive(Serialize)]
 #[serde(tag = "type", content = "content")]
@@ -16,7 +18,7 @@ enum FileContent {
 	Text(String),
 }
 
-/*
+/*ifdef android
 #[tauri::command]
 fn write_file(path: String, file: String, chk: bool) -> Result<(), String> {
 	let mut binary_data: Vec<u8> = vec![];
@@ -64,7 +66,7 @@ fn write_file(path: String, file: String, chk: bool) -> Result<(), String> {
 	}
     Ok(())
 }
-*/
+endif android*/
 
 #[tauri::command]
 fn unzip(path: String, file: String, chk: bool) -> Result<(), String> {
@@ -257,7 +259,15 @@ pub fn run() {
 		.plugin(tauri_plugin_os::init())
 		.plugin(tauri_plugin_fs::init())
 		.plugin(tauri_plugin_opener::init())
-		.invoke_handler(tauri::generate_handler![/*write_file, */unzip, read_zip, read_pics, read_db, download])
+		.invoke_handler(tauri::generate_handler![
+/*ifdef android
+			write_file,
+endif android*/
+			unzip,
+			read_zip,
+			read_pics,
+			read_db,
+			download])
 		.run(tauri::generate_context!())
 		.expect("error while running tauri application");
 }
