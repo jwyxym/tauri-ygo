@@ -229,7 +229,7 @@ jobs:
           path: build
 
       - name: Show downloaded structure (for debug)
-        run: ls -R downloaded-artifacts
+        run: ls -R build
 
       - name: Create Release
         id: create_release
