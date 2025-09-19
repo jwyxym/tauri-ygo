@@ -231,7 +231,9 @@ jobs:
           path: build
 
       - name: Show downloaded structure (for debug)
-        run: ls -R build
+        run: |
+          ls -la ./build
+          ls -la ./build/tauri-ygo.apk
 
       - name: Create Release
         id: create_release
