@@ -43,13 +43,9 @@ class Fs {
 		if (!mainGame.is_android()) return false;
 		try {
 			const p = await this.path;
-			for (const [i, v] of (await constant.str.file_list())) {
-				if (!await this.exists(i)) {
-					await invoke<void>('write_file', {
-						path : await path.join(p, i), file : v, chk : chk
-					});
-				}
-			}
+			await invoke<void>('write_file', {
+				path : p, file : constant.str.files.assets, chk : chk
+			});
 			return true;
 		} catch (error) {
 			this.write.log(error);

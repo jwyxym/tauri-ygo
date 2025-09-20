@@ -23,9 +23,12 @@ enum FileContent {
 /*ifdef android
 #[tauri::command]
 fn write_file(path: String, file: String, chk: bool) -> Result<(), String> {
-	binary_data = general_purpose::STANDARD.decode(&assets::ASSETS).map_err(|e| e.to_string())?;
-	let mut file: File = File::create(path).map_err(|e| e.to_string())?;
-	file.write_all(&binary_data).map_err(|e| e.to_string())?;
+	let file_path: PathBuf = Path::new(&path).join(&file);
+	if !exists(&file_path).map_err(|e| e.to_string())? {
+		let binary_data = general_purpose::STANDARD.decode(&assets::ASSETS_ZIP).map_err(|e| e.to_string())?;
+		let mut f: File = File::create(file_path).map_err(|e| e.to_string())?;
+		f.write_all(&binary_data).map_err(|e| e.to_string())?;
+	}
     unzip(path, file, chk)
 }
 endif android*/

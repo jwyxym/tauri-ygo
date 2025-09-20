@@ -7,16 +7,7 @@ import base64
 
 with open("../src-tauri/src/assets.rs", "a", encoding="ascii") as rs:
 	for i in [
-		"pics.zip",
-		"cards.cdb",
-		"lflist.conf",
-		"strings.conf",
-		"cardinfo.conf",
-		"textures\\cardI.jpg",
-		"textures\\cardII.jpg",
-		"textures\\unknown.jpg",
-		"sound\\City of Night.wav",
-		"sound\\Night View.wav"
+		"assets.zip"
 	]:
 		with open(i, "rb") as f:
 			binary_data = f.read()
