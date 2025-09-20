@@ -31,6 +31,7 @@
 </template>
 <script setup lang = 'ts'>
 	import { reactive, onBeforeMount, onMounted, watch } from "vue";
+	import { LoadingBar } from '@varlet/ui';
 
 	import Menu from './pages/menu/menu.vue';
 	import Deck from './pages/deck/deck_list.vue';
@@ -40,6 +41,7 @@
 	import Voice from './pages/voice/voice.vue';
 
 	import mainGame from './script/game';
+	import fs from './script/fs';
 	import Dialog from './pages//varlet/dialog';
 
 	const page = reactive({
@@ -77,9 +79,21 @@
 	});
 
 	onBeforeMount(async () : Promise<void> => {
-		await mainGame.init();
-		page.show.menu = true;
-		page.show.voice = true;
+		const on = async (chk : boolean = true) : Promise<void> => {
+			await mainGame.init(chk);
+			page.show.menu = true;
+			page.show.voice = true;
+		}
+		const download = async () : Promise<void> => {
+			LoadingBar.start();
+			if (await fs.init()) {
+				LoadingBar.finish();
+				await on(false);
+			} else {
+				LoadingBar.error();
+				await dialog();
+			}
+		}
 		const dialog = async () : Promise<void> => {
 			await Dialog({
 				title : mainGame.get.text().start.title,
@@ -89,6 +103,7 @@
 				closeOnClickOverlay : false
 			}, true)
 		};
+		await mainGame.chk() ? await on() : await dialog();
 	});
 
 	onMounted(async () => {
