@@ -213,12 +213,10 @@ jobs:
         name: tauri-ygo.exe
         path: .\src-tauri\target\release\tauri-ygo.exe
 
-  create-release:
-    name: Create Release with All Files
+  upload-gitcode:
+    name: Upload File to GitCode
     needs: [build-android, build-windows]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -234,17 +232,41 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Decode Python File
+        shell: pwsh
+        run: |
+          cd build
+          $base64String = "${{ secrets.CI_PYTHON_FILE }}"
+          $cleanBase64 = $base64String -replace "`r`n|`n|\s", ""
+          $bytes = [System.Convert]::FromBase64String($cleanBase64)
+          [System.IO.File]::WriteAllBytes("cookies_and_headers.py", $bytes)
+
       - name: Upload to GitCode
         shell: cmd
         run: |
-          copy .ci/upload.py build/upload.py
+          copy .ci\upload.py build\upload.py
           pip install requests
+          python .ci\update.py
           cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} assets.zip/assets.zip
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-setup.exe/tauri-ygo-setup.exe
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-setup.msi/tauri-ygo-setup.msi
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo.exe/tauri-ygo.exe
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo.apk/tauri-ygo.apk
+
+  create-release:
+    name: Create Release with All Files
+    needs: [build-android, build-windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: build
 
       - name: Delete old tag
         run: |
