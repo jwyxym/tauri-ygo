@@ -70,7 +70,7 @@ jobs:
         wget https://github.com/mycard/ygopro-database/raw/refs/heads/master/locales/zh-CN/strings.conf
         wget https://github.com/Fluorohydride/ygopro/raw/refs/heads/master/lflist.conf
         wget https://github.com/jwyxym/card-pics/releases/download/pics/pics.zip
-        zip -Z bzip2 -9 -r ./assets.zip pics.zip servers.conf strings.conf system.conf cardinfo.conf cards.cdb lflist.conf sound textures
+        zip -Z bzip2 -9 -r ./assets.zip pics.zip strings.conf cardinfo.conf cards.cdb lflist.conf sound textures
 
     - name: Write Rust File
       shell: cmd
