@@ -81,6 +81,11 @@ jobs:
       run: |
         npm run copy
 
+    - name: Android icon
+      run: |
+        wget https://code.moenext.com/mycard/hd-arts/-/raw/master/arts/84477320.jpg
+        npm run tauri icon -p 84477320.jpg
+
     - name: Android build
       shell: cmd
       env:
