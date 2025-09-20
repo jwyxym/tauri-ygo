@@ -40,13 +40,7 @@
 			"icons/icon.ico"
 		],
 		"resources": [
-			"sound/**/*",
-			"textures/**/*",
-			"pics/**/*",
-			"cardinfo.conf",
-			"strings.conf",
-			"lflist.conf",
-			"cards.cdb"
+			"assets.zip"
 		]
 	}
 }

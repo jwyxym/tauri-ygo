@@ -147,7 +147,7 @@ jobs:
         wget https://github.com/Fluorohydride/ygopro/raw/refs/heads/master/lflist.conf
         wget https://github.com/jwyxym/card-pics/releases/download/pics/pics.zip
         unzip pics.zip
-        zip -9 -r ./assets.zip pics.zip strings.conf cardinfo.conf cards.cdb lflist.conf sound textures
+        zip -9 -r ./assets.zip strings.conf cardinfo.conf cards.cdb lflist.conf sound textures pics
 
     - name: Write Rust File
       shell: cmd

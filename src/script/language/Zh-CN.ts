@@ -9,7 +9,7 @@ const Zh_CN : TEXT_Like = {
 		'退出游戏'
 	],
 	start : {
-		title : '是否下载游戏数据？',
+		title : '需要下载游戏数据',
 		message : '此过程需要流量（约300MB）'
 	},
 	dialog : {

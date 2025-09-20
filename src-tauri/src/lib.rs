@@ -7,6 +7,11 @@ use std::{
 use zip::ZipArchive;
 use content_disposition::parse_content_disposition;
 use rand::Rng;
+use ureq::{
+	http::Response,
+	Body,
+	get
+};
 
 #[derive(Serialize)]
 #[serde(tag = "type", content = "content")]
@@ -162,7 +167,7 @@ fn read_db(path: String) -> Result<Vec<(Vec<i64>, Vec<String>)>, String> {
 
 #[tauri::command]
 async fn download(url: String, path: String, name: String, ex_name: String) -> Result<String, String> {
-	let response: ureq::http::Response<ureq::Body> = ureq::get(&url).call().map_err(|e| e.to_string())?;
+	let response: Response<Body> = get(&url).call().map_err(|e| e.to_string())?;
 	let mut file_name: String = name;
 	if response.status().is_success() {
 		if file_name.len() == 0 {

@@ -40,7 +40,6 @@ class Fs {
 	};
 
 	init = async (chk : boolean = false) : Promise<boolean> => {
-		if (!mainGame.is_android()) return true;
 		try {
 			if (!await this.exists(constant.str.files.assets)) {
 				toast.info(mainGame.get.text().toast.download.start);
