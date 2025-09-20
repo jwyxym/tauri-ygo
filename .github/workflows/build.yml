@@ -116,6 +116,7 @@ jobs:
     - name: Upload to GitCode
       shell: cmd
       run: |
+        pip install requests
         copy .ci\upload.py build\upload.py
         cd build
         python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo.apk
@@ -209,6 +210,7 @@ jobs:
     - name: Upload to GitCode
       shell: cmd
       run: |
+        pip install requests
         cd .ci
         python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} assets.zip
         cd ..
