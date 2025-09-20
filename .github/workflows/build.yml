@@ -218,6 +218,8 @@ jobs:
         cd build
         python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-setup.exe
         python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-setup.msi
+        copy upload.py target\release\upload.py
+        cd target\release
         python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo.exe
 
 
