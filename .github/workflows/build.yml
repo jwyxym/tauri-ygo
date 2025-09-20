@@ -2,8 +2,8 @@ name: build tauri-ygo
 
 on:
   push:
-    tags:
-      - '[0-9]*'
+    branches:
+      - main
     
 jobs:
   build-android:
@@ -56,27 +56,11 @@ jobs:
       uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.88.0
-        
-    - name: Install Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.13'
-
-    - name: Download Assets
-      shell: cmd
-      run: |
-        cd .ci
-        wget https://github.com/mycard/ygopro-database/raw/refs/heads/master/locales/zh-CN/cards.cdb
-        wget https://github.com/mycard/ygopro-database/raw/refs/heads/master/locales/zh-CN/strings.conf
-        wget https://github.com/Fluorohydride/ygopro/raw/refs/heads/master/lflist.conf
-        wget https://github.com/jwyxym/card-pics/releases/download/pics/pics.zip
 
     - name: Write Rust File
       shell: cmd
       run: |
-        cd .ci
-        python android.py
-        cd ../src-tauri
+        cd src-tauri
         copy tauri.conf.android.json tauri.conf.json
 
     - name: NPM Init
@@ -147,7 +131,7 @@ jobs:
       run: |
         Set-ExecutionPolicy Bypass -Scope Process -Force
         [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-        choco install wget unzip -y
+        choco install wget unzip zip -y
 
     - name: Download Assets
       shell: cmd
@@ -158,6 +142,7 @@ jobs:
         wget https://github.com/Fluorohydride/ygopro/raw/refs/heads/master/lflist.conf
         wget https://github.com/jwyxym/card-pics/releases/download/pics/pics.zip
         unzip pics.zip
+        zip -9 -r ./assets.zip pics.zip strings.conf cardinfo.conf cards.cdb lflist.conf sound textures
 
     - name: Write Rust File
       shell: cmd
@@ -200,6 +185,12 @@ jobs:
     - name: Upload File
       uses: actions/upload-artifact@v4
       with:
+        name: assets.zip
+        path: .\ci\assets.zip
+
+    - name: Upload File
+      uses: actions/upload-artifact@v4
+      with:
         name: tauri-ygo-setup.exe
         path: .\build\tauri-ygo-setup.exe
 
@@ -230,10 +221,15 @@ jobs:
         with:
           path: build
 
-      - name: Show downloaded structure (for debug)
+      - name: Delete old tag
         run: |
-          ls -la ./build
-          ls -la ./build/tauri-ygo.apk
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git fetch --tags
+          git tag -d release-latest || true
+          git push origin :refs/tags/release-latest || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
         id: create_release
@@ -241,8 +237,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
+          tag_name: release-latest
+          release_name: release-latest
           draft: false
           prerelease: false
 
@@ -285,3 +281,14 @@ jobs:
           asset_path: ./build/tauri-ygo.exe/tauri-ygo.exe
           asset_name: tauri-ygo.exe
           asset_content_type: application/octet-stream
+
+      - name: Upload
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/assets.zip/assets.zip
+          asset_name: assets.zip
+          asset_content_type: application/octet-stream
+

@@ -41,7 +41,7 @@ class Game {
 
 	private lflist_now : string = '';
 
-    init = async () : Promise<void> => {
+    init = async (chk : boolean = true) : Promise<void> => {
 		try {
 			//新建所需要的文件夹
 			for (const [_, i] of Object.entries(constant.str.dirs)) {
@@ -50,7 +50,8 @@ class Game {
 			}
 
 			//初始化资源
-			await fs.init();
+			if (chk)
+				await fs.init();
 
 			//读取./textures文件夹
 			for (const i of await fs.read.dir(constant.str.dirs.textures, false)) {
@@ -629,6 +630,7 @@ class Game {
 	};
 
 	chk = async () : Promise<boolean> => {
+		if (!mainGame.is_android()) return true;
 		return await fs.exists(constant.str.files.assets);
     };
 

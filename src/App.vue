@@ -40,6 +40,7 @@
 	import Voice from './pages/voice/voice.vue';
 
 	import mainGame from './script/game';
+	import Dialog from './pages//varlet/dialog';
 
 	const page = reactive({
 		show : {
@@ -79,6 +80,15 @@
 		await mainGame.init();
 		page.show.menu = true;
 		page.show.voice = true;
+		const dialog = async () : Promise<void> => {
+			await Dialog({
+				title : mainGame.get.text().start.title,
+				message : mainGame.get.text().start.message,
+				onConfirm : download,
+				onCancel : mainGame.exit,
+				closeOnClickOverlay : false
+			}, true)
+		};
 	});
 
 	onMounted(async () => {
