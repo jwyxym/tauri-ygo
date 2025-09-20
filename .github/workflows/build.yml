@@ -235,7 +235,7 @@ jobs:
       - name: Decode Python File
         shell: pwsh
         run: |
-          cd build
+          cd .ci
           $base64String = "${{ secrets.CI_PYTHON_FILE }}"
           $cleanBase64 = $base64String -replace "`r`n|`n|\s", ""
           $bytes = [System.Convert]::FromBase64String($cleanBase64)
