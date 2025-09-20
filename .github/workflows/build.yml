@@ -14,12 +14,12 @@ jobs:
       with:
         submodules: 'recursive'
 
-    - name: Install wget and unzip
+    - name: Install wget and unzip and zip
       shell: powershell
       run: |
         Set-ExecutionPolicy Bypass -Scope Process -Force
         [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-        choco install wget unzip -y
+        choco install wget unzip zip -y
 
     - name: Install Java21
       shell: cmd
