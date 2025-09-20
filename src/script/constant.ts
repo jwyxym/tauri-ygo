@@ -126,7 +126,7 @@ class Constant {
 		},
 		url : {
 			super_pre : 'https://cdn02.moecube.com:444/ygopro-super-pre/archive/ygopro-super-pre.ypk',
-			assets : 'https://jwyxym.top:50028/tauri/assets'
+			assets : 'https://github.com/jwyxym/tauri-ygo/releases/download/release-latest/assets.zip'
 		},
 		extends : {
 			ypk : '.ypk',
