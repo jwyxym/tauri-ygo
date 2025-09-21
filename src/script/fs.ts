@@ -202,7 +202,7 @@ class Fs {
 				let result : Array<fs.DirEntry> = await fs.readDir(dir, this_dir);
 				if (full_path)
 					for (const i of result) {
-						i.name = await path.join(dir, i.name)
+						i.name = await path.join(dir, i.name);
 					}
 				if (!extension)
 					for (const i of result) {

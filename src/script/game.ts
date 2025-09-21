@@ -134,7 +134,7 @@ class Game {
 			files : Array<DirEntry>;
 		}> => {
 			const load_expansion : Array<string> = this.get.system(constant.str.system_conf.string.expansion) as Array<string> ?? [];
-			const expansion_files : Array<DirEntry> = (await fs.read.dir(constant.str.dirs.expansions, false));
+			const expansion_files : Array<DirEntry> = await fs.read.dir(constant.str.dirs.expansions, false);
 			const expansion_ypk : Array<DirEntry> = expansion_files.filter(i => i.isFile && i.name.match(constant.reg.zip));
 			const load : Array<string> = load_expansion.filter(i => { return expansion_ypk.findIndex(j => j.name === i) > -1; });
 			this.system.set(constant.str.system_conf.string.expansion, load.join('&&'));
@@ -144,7 +144,7 @@ class Game {
 			return {
 				loading : load,
 				ypk : expansion_ypk,
-				files : expansion_files
+				files : await fs.read.dir(constant.str.dirs.expansions)
 			};
 		},
 		lflist : (key : string, card : string | number) : number => {
@@ -273,7 +273,7 @@ class Game {
 		},
 		expansion : async () : Promise<void> => {
 			// 读取expnasions文件夹
-			const expansion = (await this.get.expansions())
+			const expansion = await this.get.expansions();
 			const files = expansion.files.map(i => i.name);
 			const load = expansion.loading;
 			//读取cdb
