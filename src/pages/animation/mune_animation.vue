@@ -25,7 +25,7 @@
 	import * as path from '@tauri-apps/api/path';
 
 	import fs from '../../script/fs';
-	import pos, { posLike } from '../../script/position';
+	import pos, { POS_Like } from '../../script/position';
 	import gsap from '../../script/gsap';
 	import mainGame from '../../script/game';
 	import constant from '../../script/constant';
@@ -34,7 +34,7 @@
 	const picII : Ref<HTMLElement | null> = ref(null);
 	const body : Ref<HTMLElement | null> = ref(null);
 
-	const position : Reactive<posLike> = reactive({
+	const position : Reactive<POS_Like> = reactive({
 		bottom : 0,
 		height : 0,
 		left : 0,
