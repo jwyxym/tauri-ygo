@@ -7,7 +7,6 @@
 		text-color = 'white'
 		blur-color = 'white'
 		size = 'small'
-		ref = 'input'
 		:get-show = '() => { return true; }'
 	/>
 </template>

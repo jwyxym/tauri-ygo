@@ -14,16 +14,22 @@
 		align-self: center;
 		display: flex;
 		flex-direction: column;
-		gap: 1vh;
+		gap: 10px;
 		align-content: center;
 		align-items: center;
 		overflow-y: auto;
 		width: 80%;
 		margin-bottom: 5%;
-		.var-select, .var-input, .var-auto-complete, .pass {
+		.var-select, .var-input, .var-auto-complete, .pass, .var-list {
 			width: 100%;
 		}
-		.button_list, .pass {
+		.var-list {
+			height: 265px;
+			.var-cell {
+				width: 80%;
+			}
+		}
+		.pass, .start {
 			display: grid;
 			width: 100%;
 			grid-template-columns: repeat(2, 1fr);

@@ -197,6 +197,7 @@
 		--button-large-padding: 4px 4px !important;
 		--cell-min-height: 5vh !important;
 		--cell-padding: 1vh 20px !important;
+		--field-decorator-line-size: 0.5px !important;
 		user-select: none;
 	}
 </style>

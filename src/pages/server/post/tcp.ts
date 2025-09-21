@@ -21,22 +21,16 @@ interface CTOS_JoinGame {
 
 class Tcp {
 	cid : string;
+	address : string;
 	constructor () {
 		this.cid = constant.str.title;
+		this.address = '';
 	}
+
 	connect = async (address : string, name : string, pass : string, connect : Reactive<any>) : Promise<boolean> => {
 		try {
+			this.address = address;
 			await tcp.connect(this.cid, address);
-			await tcp.listen(async (x) => {
-				if (x.payload.id === this.cid) {
-					if (x.payload.event.disconnect == address)
-						connect.state = false;
-					else if (x.payload.event.message) {
-						this.listen(new Uint8Array(x.payload.event.message.data));
-						connect.state = true;
-					}
-				}
-			});
 			const message_address : CTOS_ExternalAddress = {
 				padding : new Message(0, 32),
 				name : new Message(address),
@@ -57,25 +51,36 @@ class Tcp {
 		return true;
 	}
 
-	listen = (buffer : Uint8Array<ArrayBuffer>) : void => {
-		const data = new DataView(buffer.buffer);
-		const len = data.getUint16(0, true);
-		const proto = data.getUint8(2);
-				console.log(len)
-				console.log(proto)
-		switch (proto) {
-			case 0x19:
-				let str = '';
-				for (let i = 0; i < ((len - 1) / 2) - 1; i++) {
-					const pos = 5 + i * 2;
-					if (pos >= buffer.byteLength)
-						break;
-					const char = String.fromCharCode(data.getUint16(pos, true));
-					str += char;
+	listen = async (connect : Reactive<any>) : Promise<void> => {
+		await tcp.listen(async (x) => {
+			if (x.payload.id === this.cid && this.address !== '') {
+				if (x.payload.event.disconnect == this.address) {
+					connect.state = false;
+					this.address = '';
+				} else if (x.payload.event.message) {
+					listen(new Uint8Array(x.payload.event.message.data));
+					connect.state = true;
 				}
-				toast.info(str)
-			break;
-		}
+			}
+		});
+		const listen = (buffer : Uint8Array<ArrayBuffer>) : void => {
+			const data = new DataView(buffer.buffer);
+			const len = data.getUint16(0, true);
+			const proto = data.getUint8(2);
+			switch (proto) {
+				case 0x19:
+					let str = '';
+					for (let i = 0; i < ((len - 1) / 2) - 1; i++) {
+						const pos = 5 + i * 2;
+						if (pos >= buffer.byteLength)
+							break;
+						const char = String.fromCharCode(data.getUint16(pos, true));
+						str += char;
+					}
+					toast.info(str)
+				break;
+			}
+		};
 	};
 
 	send = async (proto : number, message : object) : Promise<void> => {
@@ -102,6 +107,7 @@ class Tcp {
 			await tcp.disconnect(this.cid);
 		} catch {}
 		connect.state = false;
+		this.address = '';
 	}
 }
 

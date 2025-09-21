@@ -32,18 +32,42 @@
 		</var-form>
 	</var-popup>
 	<var-popup v-model:show = 'page.wait' :close-on-key-escape = 'false' :overlay = 'false'>
-		<div class = 'content'>
-			<div class = 'button_list'>
+		<var-form>
+			<div class = 'exit'>
 				<Button
 					@click = 'page.disconnect'
 					icon_name = 'exit'
 				></Button>
-				<Button
-					@click = 'page.start'
-					icon_name = 'socket'
-				></Button>
 			</div>
-		</div>
+			<div class = 'content'>
+				<var-list>
+					<TransitionGroup
+						name = 'opacity'
+						tag = 'div'
+					>
+						<var-cell
+							v-for = 'i in connect.player'
+							:key = 'i'
+							:title = 'i'
+							:border = 'true'
+						>
+							<template #extra>
+								<var-checkbox
+									@change = 'connect.prepare'
+								></var-checkbox>
+							</template>
+						</var-cell>
+					</TransitionGroup>
+				</var-list>
+				<div class = 'start'>
+					<Select name = 'forbidden' v-model = 'server.deck' :multiple = 'true' :chip = 'true'></Select>
+					<Button
+						@click = 'connect.start'
+						icon_name = 'socket'
+					></Button>
+				</div>
+			</div>
+		</var-form>
 	</var-popup>
 </template>
 <script setup lang = 'ts'>
@@ -54,11 +78,13 @@
 	import fs from '../../script/fs';
 	import Tcp from './post/tcp';
 
+	import Select from '../varlet/select.vue';
 	import Button from '../varlet/button.vue';
 	import Input from '../varlet/input.vue';
 	import AutoInput from '../varlet/auto_input.vue';
+	import Deck from '../deck/deck';
 
-	let tcp = new Tcp();
+	let tcp : Tcp | null = null;
 
 	const page = reactive({
 		server : false,
@@ -71,28 +97,31 @@
 		},
 		connect : async () : Promise<void> => {
 			page.loading = true;
-			if (!await tcp.connect(server.address ?? '', server.name ?? '', server.pass ?? '', connect))
-				page.loading = false;
-			else {
+			if (await tcp!.connect(server.address ?? '', server.name ?? '', server.pass ?? '', connect)) {
 				mainGame.push.system(constant.str.system_conf.string.server_address, server.address);
 				mainGame.push.system(constant.str.system_conf.string.server_name, server.name);
 				mainGame.push.system(constant.str.system_conf.string.server_pass, server.pass);
 				fs.write.system();
+			} else {
+				page.loading = false;
 			}
 		},
 		disconnect : async () : Promise<void> => {
-			await tcp.disconnect(connect);
-		},
+			await tcp!.disconnect(connect);
+		}
+	});
+
+	const connect = reactive({
+		state : false,
+		player : [] as Array<string>,
 		start : async () : Promise<void> => {
 			// await tcp.disconnect();
 			// page.wait = false;
 			// await (new Promise(resolve => setTimeout(resolve, 200)));
 			// page.server = true;
-		}
-	});
-
-	const connect = reactive({
-		state : false
+		},
+		prepare : async () : Promise<void> => {
+		},
 	});
 
 	const server = reactive({
@@ -102,10 +131,12 @@
 		options : computed(() => {
 			return Array.from(mainGame.servers).map(([k, v]) => ({ label: k, value: v }));
 		}),
+		deck : undefined as Deck | undefined
 	});
 
-	onBeforeMount(() => {
-		
+	onBeforeMount(async () => {
+		tcp = new Tcp();
+		await tcp.listen(connect);
 	});
 
 	onMounted(() => {
@@ -118,12 +149,13 @@
 			await (new Promise(resolve => setTimeout(resolve, 200)));
 			page.wait = true;
 			page.loading = false;
+			connect.player.push(server.name);
 		}
 		const off = async () => {
 			page.wait = false;
 			await (new Promise(resolve => setTimeout(resolve, 200)));
 			page.server = true;
-			tcp = new Tcp();
+			connect.player = [];
 		}
 		n ? await on() : await off();
 	});
