@@ -232,22 +232,11 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Decode Python File
-        shell: pwsh
-        run: |
-          cd .ci
-          $base64String = "${{ secrets.CI_PYTHON_FILE }}"
-          $cleanBase64 = $base64String -replace "`r`n|`n|\s", ""
-          $bytes = [System.Convert]::FromBase64String($cleanBase64)
-          $scriptDir = $PWD.Path
-          [System.IO.File]::WriteAllBytes("$scriptDir\cookies_and_headers.py", $bytes)
-
       - name: Upload to GitCode
         shell: cmd
         run: |
           copy .ci\upload.py build\upload.py
           pip install requests
-          python .ci\update.py
           cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} assets.zip/assets.zip
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-setup.exe/tauri-ygo-setup.exe

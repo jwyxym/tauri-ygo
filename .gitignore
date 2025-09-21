@@ -47,3 +47,4 @@ src-tauri/textures
 .ci/*.conf
 *.zip
 .ci/cookies_and_headers.py
+/.ci/__pycache__
