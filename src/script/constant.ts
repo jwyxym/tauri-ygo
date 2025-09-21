@@ -1,6 +1,7 @@
 import * as fs from '@tauri-apps/plugin-fs';
 import * as path from '@tauri-apps/api/path';
 import { platform } from '@tauri-apps/plugin-os';
+import { server } from 'typescript';
 
 class System {
 	system : string
@@ -109,7 +110,8 @@ class Constant {
 				button : 'button'
 			},
 			string : {
-				expansion : 'load'
+				expansion : 'load',
+				server : 'server'
 			},
 			sound : {
 				back : 'back_sound',

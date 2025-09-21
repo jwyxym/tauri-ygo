@@ -1,6 +1,7 @@
-import * as tcp from "@kuyoonjo/tauri-plugin-tcp";
+import * as tcp from '@kuyoonjo/tauri-plugin-tcp';
 import { Buffer } from 'buffer';
 import mainGame from '../../../script/game';
+import fs from '../../../script/fs';
 import Message from './message';
 import constant from '../../../script/constant';
 
@@ -21,25 +22,31 @@ class Tcp {
 	constructor () {
 		this.cid = constant.str.title;
 	}
-	connect = async (address : string, name : string, pass : string) => {
-		await tcp.connect(this.cid, address);
-		await tcp.listen(async (x) => {
-			if (x.payload.id === this.cid && x.payload.event.message)
-				this.listen(x.payload.event.message.data);
-		});
-		const message_address : CTOS_ExternalAddress = {
-			padding : new Message(0, 32),
-			name : new Message(address),
-		};
-		await this.send(0x17, message_address);
-		await this.send(0x10, new Message(name, 40));
-		const message_join : CTOS_JoinGame = {
-			version : new Message(mainGame.version, 16),
-			padding : new Message(0, 16),
-			id : new Message(0, 32),
-			pass : new Message(pass, 40),
-		};
-		await this.send(0x12, message_join);
+	connect = async (address : string, name : string, pass : string) : Promise<boolean> => {
+		try {
+			await tcp.connect(this.cid, address);
+			await tcp.listen(async (x) => {
+				if (x.payload.id === this.cid && x.payload.event.message)
+					this.listen(x.payload.event.message.data);
+			});
+			const message_address : CTOS_ExternalAddress = {
+				padding : new Message(0, 32),
+				name : new Message(address),
+			};
+			await this.send(0x17, message_address);
+			await this.send(0x10, new Message(name, 40));
+			const message_join : CTOS_JoinGame = {
+				version : new Message(mainGame.version, 16),
+				padding : new Message(0, 16),
+				id : new Message(0, 32),
+				pass : new Message(pass, 40),
+			};
+			await this.send(0x12, message_join);
+		} catch (e) {
+			fs.write.log(e)
+			return false;
+		}
+		return true;
 	}
 
 	listen = (data : Array<number>) : void => {

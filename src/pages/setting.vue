@@ -62,7 +62,7 @@
 			>
 				<var-list>
 					<var-cell
-						v-for = '(i, v) in Object.entries(constant.str.system_conf.sound).map(i => i[1])'
+						v-for = 'i in Object.entries(constant.str.system_conf.sound).map(i => i[1])'
 						:key = 'i'
 						:border = 'true'
 					>

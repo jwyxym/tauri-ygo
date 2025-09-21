@@ -53,6 +53,11 @@ const Zh_CN : TEXT_Like = {
 			message : '[{:?}]将会永久消失！（真的很久！）'
 		}
 	},
+	server : {
+		address : '服务器地址',
+		name : '名称',
+		password : '房间密码'
+	},
 	rule : {
 		search : '搜索词不合规',
 		name : {

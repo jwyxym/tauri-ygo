@@ -33,6 +33,7 @@
 				case 0:
 					break;
 				case 1:
+					await props.select.server();
 					break;
 				case 2:
 					await props.select.deck();

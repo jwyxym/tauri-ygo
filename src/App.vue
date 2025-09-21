@@ -9,6 +9,12 @@
 				></Deck>
 			</transition>
 			<transition name = 'opacity'>
+				<Server
+					v-if = 'page.show.server'
+					:select = 'page.select'
+				></Server>
+			</transition>
+			<transition name = 'opacity'>
 				<Setting
 					v-if = 'page.show.setting'
 					:select = 'page.select'
@@ -30,13 +36,13 @@
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { reactive, onBeforeMount, onMounted, watch } from "vue";
+	import { reactive, onBeforeMount, onMounted } from "vue";
 	import { LoadingBar } from '@varlet/ui';
 
 	import Menu from './pages/menu/menu.vue';
-	import Deck from './pages/deck/deck_list.vue';
 	import Animation from './pages/animation/mune_animation.vue';
-
+	import Deck from './pages/deck/deck_list.vue';
+	import Server from './pages/server/server.vue';
 	import Setting from './pages/setting.vue';
 	import Voice from './pages/voice/voice.vue';
 
@@ -49,15 +55,23 @@
 			voice : false,
 			dialog : false,
 			menu : false,
+			server : false,
 			deck : false,
 			setting : false,
 		},
 		select : {
 			menu : () : void => {
+				page.show.server = false;
 				page.show.deck = false;
 				page.show.setting = false;
 				setTimeout(() => {
 					page.show.menu = true;
+				}, 500);
+			},
+			server : () : void => {
+				page.show.menu = false;
+				setTimeout(() => {
+					page.show.server = true;
 				}, 500);
 			},
 			deck : () : void => {
@@ -153,13 +167,18 @@
 			font-size: min(4vh, var(--font-size-md)) !important;
 		}
 	}
+	.var-menu-select--scrollable, .var-select__scroller {
+		&::-webkit-scrollbar {
+			display: none;
+		}
+	}
 	:root {
 		--card-background: transparent !important;
 		--dialog-background: transparent !important;
 		--popup-content-background-color: transparent !important;
 		--tabs-background: transparent !important;
-		--select-scroller-background: rgba(0, 0, 0, 0.8) !important;
-		--menu-select-menu-background-color: rgba(0, 0, 0, 0.8) !important;
+		--select-scroller-background: rgba(0, 0, 0, 0.5) !important;
+		--menu-select-menu-background-color: rgba(0, 0, 0, 0.5) !important;
 		--dialog-message-color: white !important;
 		--dialog-title-color: white !important;
 		--list-loading-color: white !important;

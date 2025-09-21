@@ -383,6 +383,7 @@
 			}, mainGame.get.system(constant.str.system_conf.chk.deck_delete));
 		},
 		exit : async () : Promise<void> => {
+			console.log(mainGame.get.system(constant.str.system_conf.chk.deck_exit))
 			Dialog({
 				title : mainGame.get.text().deck.exit,
 				onConfirm : props.offdeck

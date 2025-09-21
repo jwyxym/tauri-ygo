@@ -2,7 +2,7 @@ import { Dialog, DialogOptions, DialogActions } from '@varlet/ui'
 import mainGame from '../../script/game';
 import constant from '../../script/constant';
 
-const dialog = async (option : DialogOptions, need_confirm : boolean | number | Array<string> = true) : Promise<void> => {
+const dialog = async (option : DialogOptions, need_confirm : boolean | number | Array<string> | string = true) : Promise<void> => {
 	const chk = mainGame.get.system(constant.str.system_conf.chk.button);
 	option.dialogClass = 'dialog';
 	option.cancelButtonTextColor = 'white';
@@ -14,8 +14,9 @@ const dialog = async (option : DialogOptions, need_confirm : boolean | number | 
 	option.onConfirm = chk ? confirm : cancel;
 	option.onCancel = chk ? cancel : confirm;
 	const quit = async () : Promise<void> => {
-		if (option.onConfirm !== undefined)
-			await option.onConfirm();
+		console.log(option.onConfirm)
+		if (confirm !== undefined)
+			await confirm();
 	};
 	need_confirm ? await Dialog(option) : await quit();
 }

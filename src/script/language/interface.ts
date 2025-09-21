@@ -45,6 +45,11 @@ interface TEXT_Like {
 			message : string;
 		};
 	};
+	server : {
+		address : string;
+		name : string;
+		password : string;
+	};
 	rule : {
 		search : string;
 		name : {

@@ -108,11 +108,13 @@ class Game {
 			}
 			return Zh_CN;
 		},
-		system : (key : string) : Array<string> | number | boolean | undefined => {
+		system : (key : string) : Array<string> | string | number | boolean | undefined => {
 			const value = this.system.get(key);
 			const number = Number(value)
 			if (key === constant.str.system_conf.string.expansion) {
 				return (value ?? '').split('&&').filter(i => i !== '');
+			} else if (Object.entries(constant.str.system_conf.string).findIndex(i => i[1] === key) > -1) {
+				return value ?? '';
 			} else if (Object.entries(constant.str.system_conf.sound).findIndex(i => i[1] === key) > -1) {
 				return isNaN(number) ? 0 : number;
 			} else {

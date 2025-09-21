@@ -1,0 +1,35 @@
+.var-form {
+	display: flex;
+	flex-direction: column;
+	width: 50vw;
+	max-height: 80vh;
+	border: 1px solid white;
+	background-color: rgba(0, 0, 0, 0.2);
+	.exit {
+		align-self: left;
+	}
+	.content {
+		align-self: center;
+		display: flex;
+		flex-direction: column;
+		gap: 1vh;
+		align-content: center;
+		align-items: center;
+		overflow-y: auto;
+		width: 80%;
+		margin-bottom: 5%;
+		.var-select, .var-input, .var-auto-complete, .pass {
+			width: 100%;
+		}
+		.button_list, .pass {
+			display: grid;
+			width: 100%;
+			grid-template-columns: repeat(2, 1fr);
+			justify-items: center;
+			align-items: end;
+		}
+		&::-webkit-scrollbar {
+			display: none;
+		}
+	}
+}
