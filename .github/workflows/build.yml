@@ -237,6 +237,7 @@ jobs:
         run: |
           copy .ci\upload.py build\upload.py
           pip install requests
+          python .ci\update.py ${{ secrets.GITCODE_ACCESS_TOKEN }}
           cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} assets.zip/assets.zip
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-setup.exe/tauri-ygo-setup.exe
