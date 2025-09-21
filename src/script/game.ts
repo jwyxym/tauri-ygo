@@ -128,19 +128,22 @@ class Game {
 			key = typeof key == 'string' ? parseInt(key) : key;
 			return this.cards.get(key) ?? this.unknown;
 		},
-		ypk : async () : Promise<{
+		expansions : async () : Promise<{
 			loading : Array<string>;
+			ypk :  Array<DirEntry>;
 			files : Array<DirEntry>;
 		}> => {
 			const load_expansion : Array<string> = this.get.system(constant.str.system_conf.string.expansion) as Array<string> ?? [];
-			const expansion_files : Array<DirEntry> = (await fs.read.dir(constant.str.dirs.expansions, false))?.filter(i => i.isFile && i.name.match(constant.reg.zip));
-			const load : Array<string> = load_expansion.filter(i => { return expansion_files.findIndex(j => j.name === i) > -1; });
+			const expansion_files : Array<DirEntry> = (await fs.read.dir(constant.str.dirs.expansions, false));
+			const expansion_ypk : Array<DirEntry> = expansion_files.filter(i => i.isFile && i.name.match(constant.reg.zip));
+			const load : Array<string> = load_expansion.filter(i => { return expansion_ypk.findIndex(j => j.name === i) > -1; });
 			this.system.set(constant.str.system_conf.string.expansion, load.join('&&'));
 			for (let i = 0; i < load.length; i++) {
 				load[i] = await join(constant.str.dirs.expansions, load[i]);
 			}
 			return {
 				loading : load,
+				ypk : expansion_ypk,
 				files : expansion_files
 			};
 		},
@@ -216,7 +219,7 @@ class Game {
 			}
 			deck = deck.filter(filter);
 			if (deck.length === 0) return;
-			const load = (await this.get.ypk()).loading;
+			const load = (await this.get.expansions()).loading;
 			for (const i of load.filter(i => i.match(constant.reg.zip))) {
 				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(i, deck.map(num => num.toString()));
 				for (const code of deck) {
@@ -270,15 +273,17 @@ class Game {
 		},
 		expansion : async () : Promise<void> => {
 			// 读取expnasions文件夹
-			const expansion_files = (await fs.read.dir(constant.str.dirs.expansions)).map(i => i.name);
+			const expansion = (await this.get.expansions())
+			const files = expansion.files.map(i => i.name);
+			const load = expansion.loading;
 			//读取cdb
-			for (const i of expansion_files.filter(i => i.match(constant.reg.database))) {
+			for (const i of files.filter(i => i.match(constant.reg.database))) {
 				const database : Array<Array<string | number>> | undefined = await fs.read.database(i);
 				if (database !== undefined)
 					this.read.database(database);
 			}
 			//读取conf
-			for (const i of expansion_files.filter(i => i.match(constant.reg.conf))) {
+			for (const i of files.filter(i => i.match(constant.reg.conf))) {
 				if (i.endsWith(constant.str.files.conf.strings)) {
 					const text : string | undefined = await fs.read.text(i);
 					if (text === undefined) continue;
@@ -316,12 +321,11 @@ class Game {
 				}
 			}
 			//读取ini
-			for (const i of expansion_files.filter(i => i.match(constant.reg.ini))) {
+			for (const i of files.filter(i => i.match(constant.reg.ini))) {
 				const string : string | undefined = await fs.read.text(i);
 				if (string !== undefined)
 					this.read.ini(string);
 			}
-			const load = (await this.get.ypk()).loading;
 			//读取ypk\zip
 			for (const i of load.filter(i => i.match(constant.reg.zip))) {
 				this.load.ypk(i);

@@ -173,8 +173,8 @@
 			const path = await fs.write.ypk(url, name);
 			if (path.length == 2) {
 				mainGame.push.system(constant.str.system_conf.string.expansion, path[1]);
-				const load = await mainGame.get.ypk();
-				setting.expansion = load.files.map(i => i.name);
+				const load = await mainGame.get.expansions();
+				setting.expansion = load.ypk.map(i => i.name);
 				if (!setting.load.includes(path[1]) && setting.expansion.includes(path[1]))
 					setting.load.push(path[1]);
 				await mainGame.load.ypk(path[0]);
@@ -214,8 +214,8 @@
 				title : mainGame.get.text().setting.delete,
 				onConfirm : async () : Promise<void> => {
 					if (await fs.delete.ypk(setting.expansion[v])) {
-						const load = await mainGame.get.ypk();
-						setting.expansion = load.files.map(i => i.name);
+						const load = await mainGame.get.expansions();
+						setting.expansion = load.ypk.map(i => i.name);
 						toast.info(mainGame.get.text().toast.delete)
 					}
 				}
@@ -223,8 +223,8 @@
 		},
 		change : async (value : string | boolean, v : number) : Promise<void> => {
 			setting.loading = true;
-			const load = await mainGame.get.ypk();
-			setting.expansion = load.files.map(i => i.name);
+			const load = await mainGame.get.expansions();
+			setting.expansion = load.ypk.map(i => i.name);
 			if (typeof value === 'string') {
 				mainGame.push.system(constant.str.system_conf.string.expansion, value);
 				await mainGame.load.ypk(await join(constant.str.dirs.expansions, value));
@@ -265,8 +265,8 @@
 	defineProps(['select']);
 
 	onBeforeMount(async () : Promise<void> => {
-		const load = await mainGame.get.ypk();
-		setting.expansion = load.files.map(i => i.name);
+		const load = await mainGame.get.expansions();
+		setting.expansion = load.ypk.map(i => i.name);
 		setting.load = (mainGame.get.system(constant.str.system_conf.string.expansion) as Array<string> | undefined) ?? [];
 		const items = Object.entries(constant.str.system_conf.chk);
 		setting.items = items.map(i => i[1]);
