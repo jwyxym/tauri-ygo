@@ -270,15 +270,15 @@ class Game {
 		},
 		expansion : async () : Promise<void> => {
 			// 读取expnasions文件夹
-			const load = (await this.get.ypk()).loading;
+			const expansion_files = (await fs.read.dir(constant.str.dirs.expansions)).map(i => i.name);
 			//读取cdb
-			for (const i of load.filter(i => i.match(constant.reg.database))) {
+			for (const i of expansion_files.filter(i => i.match(constant.reg.database))) {
 				const database : Array<Array<string | number>> | undefined = await fs.read.database(i);
 				if (database !== undefined)
 					this.read.database(database);
 			}
 			//读取conf
-			for (const i of load.filter(i => i.match(constant.reg.conf))) {
+			for (const i of expansion_files.filter(i => i.match(constant.reg.conf))) {
 				if (i.endsWith(constant.str.files.conf.strings)) {
 					const text : string | undefined = await fs.read.text(i);
 					if (text === undefined) continue;
@@ -316,11 +316,12 @@ class Game {
 				}
 			}
 			//读取ini
-			for (const i of load.filter(i => i.match(constant.reg.ini))) {
+			for (const i of expansion_files.filter(i => i.match(constant.reg.ini))) {
 				const string : string | undefined = await fs.read.text(i);
 				if (string !== undefined)
 					this.read.ini(string);
 			}
+			const load = (await this.get.ypk()).loading;
 			//读取ypk\zip
 			for (const i of load.filter(i => i.match(constant.reg.zip))) {
 				this.load.ypk(i);
@@ -436,20 +437,20 @@ class Game {
 			let name : string = '';
 			let host : string = '';
 			let port : string = '';
-			for (const l in lines) {
+			for (const l of lines) {
 				const line = l.trim();
 				if (line.startsWith(constant.str.ini.name)) {
 					const i = line.split('=');
 					if (i.length == 2)
-						name = i[1];
+						name = i[1].trim();
 				} else if (line.startsWith(constant.str.ini.host)) {
 					const i = line.split('=');
 					if (i.length == 2)
-						host = i[1];
+						host = i[1].trim();
 				} else if (line.startsWith(constant.str.ini.port)) {
 					const i = line.split('=');
 					if (i.length == 2)
-						port = i[1];
+						port = i[1].trim();
 				}
 			}
 			if (name.length > 0 && host.length > 0)
@@ -595,6 +596,8 @@ class Game {
 			}
 			if (key === constant.str.system_conf.string.expansion) {
 				this.system.set(key, to_string(n as string));
+			} else if (Object.entries(constant.str.system_conf.string).findIndex(i => i[1] === key) > -1) {
+				this.system.set(key, n as string);
 			} else if (Object.entries(constant.str.system_conf.sound).findIndex(i => i[1] === key) > -1) {
 				this.system.set(key, n.toString());
 				voice.update(key);

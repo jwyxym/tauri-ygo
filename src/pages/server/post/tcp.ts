@@ -1,9 +1,11 @@
 import * as tcp from '@kuyoonjo/tauri-plugin-tcp';
+import { Reactive } from 'vue';
 import { Buffer } from 'buffer';
 import mainGame from '../../../script/game';
 import fs from '../../../script/fs';
 import Message from './message';
 import constant from '../../../script/constant';
+import toast from '../../../script/toast';
 
 interface CTOS_ExternalAddress {
 	padding : Message<number>;
@@ -22,12 +24,18 @@ class Tcp {
 	constructor () {
 		this.cid = constant.str.title;
 	}
-	connect = async (address : string, name : string, pass : string) : Promise<boolean> => {
+	connect = async (address : string, name : string, pass : string, connect : Reactive<any>) : Promise<boolean> => {
 		try {
 			await tcp.connect(this.cid, address);
 			await tcp.listen(async (x) => {
-				if (x.payload.id === this.cid && x.payload.event.message)
-					this.listen(x.payload.event.message.data);
+				if (x.payload.id === this.cid) {
+					if (x.payload.event.disconnect == address)
+						connect.state = false;
+					else if (x.payload.event.message) {
+						this.listen(new Uint8Array(x.payload.event.message.data));
+						connect.state = true;
+					}
+				}
 			});
 			const message_address : CTOS_ExternalAddress = {
 				padding : new Message(0, 32),
@@ -49,8 +57,25 @@ class Tcp {
 		return true;
 	}
 
-	listen = (data : Array<number>) : void => {
-		
+	listen = (buffer : Uint8Array<ArrayBuffer>) : void => {
+		const data = new DataView(buffer.buffer);
+		const len = data.getUint16(0, true);
+		const proto = data.getUint8(2);
+				console.log(len)
+				console.log(proto)
+		switch (proto) {
+			case 0x19:
+				let str = '';
+				for (let i = 0; i < ((len - 1) / 2) - 1; i++) {
+					const pos = 5 + i * 2;
+					if (pos >= buffer.byteLength)
+						break;
+					const char = String.fromCharCode(data.getUint16(pos, true));
+					str += char;
+				}
+				toast.info(str)
+			break;
+		}
 	};
 
 	send = async (proto : number, message : object) : Promise<void> => {
@@ -72,9 +97,12 @@ class Tcp {
 		await tcp.send(this.cid, buffer);
 	}
 
-	disconnect = async () : Promise<void> => {
-		await tcp.disconnect(this.cid);
+	disconnect = async (connect : Reactive<any>) : Promise<void> => {
+		try {
+			await tcp.disconnect(this.cid);
+		} catch {}
+		connect.state = false;
 	}
 }
 
-export default new Tcp();
+export default Tcp;

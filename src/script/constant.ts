@@ -111,7 +111,9 @@ class Constant {
 			},
 			string : {
 				expansion : 'load',
-				server : 'server'
+				server_address : 'server_address',
+				server_name : 'server_name',
+				server_pass : 'server_pass',
 			},
 			sound : {
 				back : 'back_sound',

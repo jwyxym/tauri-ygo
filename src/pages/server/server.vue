@@ -23,6 +23,7 @@
 						v-model = 'server.pass'
 					/>
 					<Button
+						:loading = 'page.loading'
 						@click = 'page.connect'
 						icon_name = 'socket'
 					></Button>
@@ -39,43 +40,48 @@
 				></Button>
 				<Button
 					@click = 'page.start'
-					icon_name = 'refresh'
+					icon_name = 'socket'
 				></Button>
 			</div>
 		</div>
 	</var-popup>
 </template>
 <script setup lang = 'ts'>
-	import { reactive, onBeforeMount, onMounted, computed } from 'vue';
+	import { reactive, onBeforeMount, onMounted, computed, watch } from 'vue';
 
 	import mainGame from '../../script/game';
 	import constant from '../../script/constant';
-	import tcp from './post/tcp';
+	import fs from '../../script/fs';
+	import Tcp from './post/tcp';
 
 	import Button from '../varlet/button.vue';
 	import Input from '../varlet/input.vue';
 	import AutoInput from '../varlet/auto_input.vue';
 
+	let tcp = new Tcp();
+
 	const page = reactive({
 		server : false,
 		wait : false,
+		loading : false,
 		exit : async () : Promise<void> => {
 			page.server = false;
 			await (new Promise(resolve => setTimeout(resolve, 200)));
 			props.select.menu();
 		},
 		connect : async () : Promise<void> => {
-			if (await tcp.connect(server.address ?? '', server.name ?? '', server.pass ?? '')) {
-				page.server = false;
-				await (new Promise(resolve => setTimeout(resolve, 200)));
-				page.wait = true;
+			page.loading = true;
+			if (!await tcp.connect(server.address ?? '', server.name ?? '', server.pass ?? '', connect))
+				page.loading = false;
+			else {
+				mainGame.push.system(constant.str.system_conf.string.server_address, server.address);
+				mainGame.push.system(constant.str.system_conf.string.server_name, server.name);
+				mainGame.push.system(constant.str.system_conf.string.server_pass, server.pass);
+				fs.write.system();
 			}
 		},
 		disconnect : async () : Promise<void> => {
-			await tcp.disconnect();
-			page.wait = false;
-			await (new Promise(resolve => setTimeout(resolve, 200)));
-			page.server = true;
+			await tcp.disconnect(connect);
 		},
 		start : async () : Promise<void> => {
 			// await tcp.disconnect();
@@ -85,10 +91,14 @@
 		}
 	});
 
+	const connect = reactive({
+		state : false
+	});
+
 	const server = reactive({
-		name : '',
-		address : mainGame.get.system(constant.str.system_conf.string.server) as string,
-		pass : '',
+		name : mainGame.get.system(constant.str.system_conf.string.server_name) as string,
+		address : mainGame.get.system(constant.str.system_conf.string.server_address) as string,
+		pass : mainGame.get.system(constant.str.system_conf.string.server_pass) as string,
 		options : computed(() => {
 			return Array.from(mainGame.servers).map(([k, v]) => ({ label: k, value: v }));
 		}),
@@ -100,6 +110,22 @@
 
 	onMounted(() => {
 		page.server = true;
+	});
+
+	watch(() => { return connect.state; }, async (n) => {
+		const on = async () => {
+			page.server = false;
+			await (new Promise(resolve => setTimeout(resolve, 200)));
+			page.wait = true;
+			page.loading = false;
+		}
+		const off = async () => {
+			page.wait = false;
+			await (new Promise(resolve => setTimeout(resolve, 200)));
+			page.server = true;
+			tcp = new Tcp();
+		}
+		n ? await on() : await off();
 	});
 
 	const props = defineProps(['select']);
