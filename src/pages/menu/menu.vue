@@ -30,6 +30,10 @@
 	const select = async (v : number) : Promise<void> => {
 		const leave = async () : Promise<void> => {
 			switch (v) {
+				case 0:
+					break;
+				case 1:
+					break;
 				case 2:
 					await props.select.deck();
 					break;

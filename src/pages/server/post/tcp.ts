@@ -1,7 +1,8 @@
 import * as tcp from "@kuyoonjo/tauri-plugin-tcp";
 import { Buffer } from 'buffer';
-import mainGame from '../game';
+import mainGame from '../../../script/game';
 import Message from './message';
+import constant from '../../../script/constant';
 
 interface CTOS_ExternalAddress {
 	padding : Message<number>;
@@ -18,30 +19,32 @@ interface CTOS_JoinGame {
 class Tcp {
 	cid : string;
 	constructor () {
-		this.cid = "jwyxym";
+		this.cid = constant.str.title;
 	}
-	connect = async () => {
-		await tcp.connect(this.cid, 'jwyxym.top:50005');
+	connect = async (address : string, name : string, pass : string) => {
+		await tcp.connect(this.cid, address);
 		await tcp.listen(async (x) => {
-			if (x.payload.id === this.cid && x.payload.event.message) {
-				let str = Buffer.from(x.payload.event.message.data).toString();
-				console.log(str);
-			}
+			if (x.payload.id === this.cid && x.payload.event.message)
+				this.listen(x.payload.event.message.data);
 		});
 		const message_address : CTOS_ExternalAddress = {
 			padding : new Message(0, 32),
-			name : new Message('jwyxym.top:50005'),
+			name : new Message(address),
 		};
 		await this.send(0x17, message_address);
-		await this.send(0x10, new Message('今晚有宵夜吗', 40));
+		await this.send(0x10, new Message(name, 40));
 		const message_join : CTOS_JoinGame = {
 			version : new Message(mainGame.version, 16),
 			padding : new Message(0, 16),
 			id : new Message(0, 32),
-			pass : new Message('1234', 40),
+			pass : new Message(pass, 40),
 		};
 		await this.send(0x12, message_join);
 	}
+
+	listen = (data : Array<number>) : void => {
+		
+	};
 
 	send = async (proto : number, message : object) : Promise<void> => {
 		const to_buffer = (proto : number, obj : object) : Uint8Array<ArrayBuffer> => {
