@@ -45,7 +45,7 @@
 	import { LoadingBar } from '@varlet/ui';
 
 	import Menu from './pages/menu/menu.vue';
-	import Canvas from './pages/animation/backanimation.vue';
+	import Canvas from './pages/animation/back.vue';
 	import Animation from './pages/animation/mune_animation.vue';
 	import Deck from './pages/deck/deck_list.vue';
 	import Server from './pages/server/server.vue';
