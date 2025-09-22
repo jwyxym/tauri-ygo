@@ -138,6 +138,10 @@ class Card {
 			URL.revokeObjectURL(this.pic);
 	};
 
+	has_pic = () : boolean => {
+		return this.pic !== '' && this.pic !== mainGame.get.textures(constant.str.files.textures.unknown);
+	};
+
 	is_link = () : boolean => {
 		return (this.type & 0x4000000) === 0x4000000;
 	};

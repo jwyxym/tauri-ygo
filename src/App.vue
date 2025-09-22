@@ -1,6 +1,11 @@
 <template>
 	<div class = 'main' @contextmenu = 'page.contextmenu'>
 		<starry-sky :stars-count = '1500' :distance = '800' id = 'back'/>
+		<transition name = 'opacity'>
+			<Canvas
+				v-if = 'page.show.menu'
+			></Canvas>
+		</transition>
 		<div class = 'body'>
 			<transition name = 'opacity'>
 				<Deck
@@ -26,11 +31,11 @@
 					:select = 'page.select'
 				></Menu>
 			</transition>
-			<transition name = 'opacity'>
+			<!-- <transition name = 'opacity'>
 				<Animation
 					v-if = 'page.show.menu'
 				></Animation>
-			</transition>
+			</transition> -->
 		</div>
 		<Voice v-if = 'page.show.voice'></Voice>
 	</div>
@@ -40,6 +45,7 @@
 	import { LoadingBar } from '@varlet/ui';
 
 	import Menu from './pages/menu/menu.vue';
+	import Canvas from './pages/animation/backanimation.vue';
 	import Animation from './pages/animation/mune_animation.vue';
 	import Deck from './pages/deck/deck_list.vue';
 	import Server from './pages/server/server.vue';
@@ -127,6 +133,7 @@
 <style scoped lang = 'scss'> 
 	.main {
 		overflow: hidden;
+		position: relative;
 		.body {
 			height: 97vh;
 			width: 100vw;
@@ -139,7 +146,6 @@
 			background: linear-gradient(#1c1a2e, #2f2434);
 		}
 	}
-
 </style>
 <style lang = 'scss'>
 	@use './style/font.scss';

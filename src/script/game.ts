@@ -85,6 +85,8 @@ class Game {
 			await fs.write.system();
 			await this.load.card();
 			await this.load.expansion();
+			const deck = Array.from(this.cards.keys()).filter(_ => Math.random() > 0.5);
+			await this.load.pic(deck.splice(0, deck.length > 100 ? 100 : deck.length));
 		} catch (error) {
 			fs.write.log(error);
 		}
@@ -154,7 +156,10 @@ class Game {
 				return lflist.get(card) ?? 3;
 			}
 			return 3;
-		}
+		},
+		pics : () : Array<string> => {
+			return Array.from(this.cards.values()).filter(i => i.has_pic()).map(i => i.pic);
+		},
 	}
 
 	load = {
@@ -236,6 +241,11 @@ class Game {
 				if (blob != undefined)
 					this.cards.get(code)!.update_pic(URL.createObjectURL(blob));
 			}
+			deck = deck.filter(filter);
+			for (const code of deck) {
+				this.cards.get(code)!.update_pic(this.get.textures(constant.str.files.textures.unknown) ?? '');
+			}
+
 		},
 		card : async () : Promise<void> => {
 			//读取目录下的所有conf

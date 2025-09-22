@@ -78,6 +78,7 @@ class Constant {
 			},
 			textures : {
 				unknown : 'unknown.jpg',
+				back : 'back.jpg',
 				pic : ['cardI.jpg', 'cardII.jpg']
 			},
 			sound : {

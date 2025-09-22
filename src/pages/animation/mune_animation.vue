@@ -45,11 +45,6 @@
 		y : 0
 	});
 
-	const url = reactive({
-		I : '',
-		II : ''
-	})
-
 	const animation = reactive({
 		on : async () : Promise<void> => {
 			animation.count = animation.count > 0 ? 0 : 1;
@@ -75,12 +70,6 @@
 
 	onMounted(async () : Promise<void> => {
 		pos.reactive.get(position, body.value!);
-		const fileI = await path.join('textures', 'cardI.jpg')
-		const fileII = await path.join('textures', 'cardII.jpg')
-		if (await fs.exists(fileI))
-			url.I = await fs.read.picture(fileI) ?? '';
-		if (await fs.exists(fileII))
-			url.II = await fs.read.picture(fileII) ?? '';
 	});
 
 	watch(picI, (n) : void => {
