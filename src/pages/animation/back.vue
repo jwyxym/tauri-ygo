@@ -5,6 +5,8 @@
 <script setup lang = 'ts'>
 	import { ref, onMounted, Ref, watch, Reactive, reactive } from 'vue';
 	import * as THREE from 'three';
+	import TWEEN from '@tweenjs/tween.js';
+	import gsap from 'gsap';
 
 	import mainGame from '../../script/game';
 	import constant from '../../script/constant';
@@ -34,11 +36,11 @@
 		const renderer = new THREE.WebGLRenderer({ alpha: true });
     	renderer.setSize(window.innerWidth, window.innerHeight);
 
-		const clock = new THREE.Clock();
 		const scene = new THREE.Scene();
 		const camera = new THREE.PerspectiveCamera();
 
-		camera.position.set(0, 0, 200);
+		camera.position.set(-50, 50, 200);
+		// camera.position.set(0, 20, 400);
 		camera.lookAt(0, 0, 0);
 
 		const geometry = new THREE.PlaneGeometry(card_size.width, card_size.height);
@@ -47,14 +49,18 @@
 
 		const cards = new THREE.AnimationObjectGroup();
 		const pics = mainGame.get.pics();
-		const ct = 10;
-		const randoms = random(ct, 0, pics.length);
-		for (let i = ct / -2; i < ct / 2; i++) {
-			const front_map = texture.load(pics[randoms[i + ct / 2]]);
+		const ct = {
+			x : 1,
+			y : 1,
+			z : 6
+		}
+		for (let z = 0; z < ct.z; z++) {
+			const front_map = texture.load(pics[Math.floor(Math.random() * pics.length)]);
 			front_map.colorSpace  = THREE.SRGBColorSpace;
 			const front = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ 
 				map : front_map,
 				side : THREE.FrontSide,
+				transparent: true,
 				opacity : 0
 			}));
 			const back_map = texture.load(mainGame.get.textures(constant.str.files.textures.back));
@@ -62,18 +68,16 @@
 			const back = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ 
 				map : back_map,
 				side : THREE.BackSide,
+				transparent: true,
 				opacity : 0
 			}));
 			const card = new THREE.Group();
 			card.add(front);
 			card.add(back);
 			scene.add(card);
-			if (i !== 0) {
-				card.position.x += i * 100;
-				card.position.y = window.innerHeight * (1 - Math.random() * 2);
-			}
-			card.position.z = -1200;
-
+			card.position.x = 0;
+			card.position.y = 0;
+			card.position.z = z * -300;
 			cards.add(card);
 		}
 
@@ -82,38 +86,25 @@
 		const el = renderer.domElement;
 		canvas.value!.appendChild(el);
 
-		const ani = new THREE.AnimationClip('ani', 6, [
-			new THREE.KeyframeTrack('.position[z]', [0, 6], [-1200, 200]),
-			new THREE.KeyframeTrack('.rotation[y]', [0, 6], [0, Math.PI * 6]),
-		]);
-
-		const mixer = new THREE.AnimationMixer(cards);
-		const action = mixer.clipAction(ani);
-		action.play();
-		console.log(cards)
-
 		const animate = () => {
 			requestAnimationFrame(animate);
-			const delta = clock.getDelta();
-			mixer.update(delta);
-			(cards._objects as Array<any>).forEach((i) => {
+			(cards._objects as Array<any>).forEach((i, v) => {
 				(i.children as Array<any>).forEach((el) => {
-					el.material.map.opacity += 0.01;
+					if (el.material.opacity < 1)
+						el.material.opacity += 0.005;
+					if (el.position.z < (v + 1) * 300) {
+						el.position.z += 1;
+					} else {
+						el.position.z = (v + 1) * 300 - ct.z * 300;
+						el.material.opacity = 0;
+						const pic = new THREE.TextureLoader().load(pics[Math.floor(Math.random() * pics.length)])
+						pic.colorSpace  = THREE.SRGBColorSpace;
+						i.children[0].material.map = pic;
+					}
 				});
 			});
 			renderer.render(scene, camera);
 		}
-		
-		mixer.addEventListener('loop', () => {
-			const pics = mainGame.get.pics();
-			(cards._objects as Array<any>).forEach((i) => {
-				const pic = new THREE.TextureLoader().load(pics[Math.floor(Math.random() * pics.length)])
-				pic.colorSpace  = THREE.SRGBColorSpace;
-				i.children[0].material.map = pic;
-				if (i.position.x !== 0 && i.position.y !== 0)
-					i.position.y = window.innerHeight * (1 - Math.random() * 2);
-			})
-		});
 
 		animate();
 	})

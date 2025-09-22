@@ -559,9 +559,19 @@ class Game {
 						const id = Number(i);
 						if (
 							(i !== '' && !card.name.includes(i) && !card.desc.includes(i))
-								&& (isNaN(id) ? true : card.id !== id && card.alias !== id)
+								&& (isNaN(id) ? true : card.id !== id && card.alias !== id && desc.length == 1)
 						)
 							return false;
+					}
+					if (desc.length == 2 && desc.every(i => {
+						const id = Number(i);
+						return !isNaN(id);
+					})) {
+						const id = desc.map(i => Number(i)).sort((a, b) => { return a - b; });
+						console.log(card.id, card.alias)
+						if ((card.id < id[0] || card.id > id[1]) && (card.alias < id[0] || card.alias > id[1]))
+							return false;
+
 					}
 				}
 
