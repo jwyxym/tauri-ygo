@@ -54,13 +54,15 @@
 			front_map.colorSpace  = THREE.SRGBColorSpace;
 			const front = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ 
 				map : front_map,
-				side : THREE.FrontSide
+				side : THREE.FrontSide,
+				opacity : 0
 			}));
 			const back_map = texture.load(mainGame.get.textures(constant.str.files.textures.back));
 			back_map.colorSpace = THREE.SRGBColorSpace;
 			const back = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ 
 				map : back_map,
-				side : THREE.BackSide
+				side : THREE.BackSide,
+				opacity : 0
 			}));
 			const card = new THREE.Group();
 			card.add(front);
@@ -82,17 +84,23 @@
 
 		const ani = new THREE.AnimationClip('ani', 6, [
 			new THREE.KeyframeTrack('.position[z]', [0, 6], [-1200, 200]),
-			new THREE.KeyframeTrack('.rotation[y]', [0, 2, 4, 6], [0, Math.PI * 2, Math.PI * 4, Math.PI * 6]),
+			new THREE.KeyframeTrack('.rotation[y]', [0, 6], [0, Math.PI * 6]),
 		]);
 
 		const mixer = new THREE.AnimationMixer(cards);
 		const action = mixer.clipAction(ani);
 		action.play();
+		console.log(cards)
 
 		const animate = () => {
 			requestAnimationFrame(animate);
 			const delta = clock.getDelta();
 			mixer.update(delta);
+			(cards._objects as Array<any>).forEach((i) => {
+				(i.children as Array<any>).forEach((el) => {
+					el.material.map.opacity += 0.01;
+				});
+			});
 			renderer.render(scene, camera);
 		}
 		
