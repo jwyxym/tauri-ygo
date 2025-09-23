@@ -24,7 +24,7 @@ class Game {
 		[constant.str.info_conf.race, new Map],
 		[constant.str.info_conf.type, new Map]
 	]);
-	lflist : Map<string, Map<number, number>> = new Map;
+	lflist : Map<string, {hash : number, map : Map<number, number>}> = new Map;
 	system : Map<string, string> = new Map;
 	servers : Map<string, string> = new Map;
 	cards : Map<number, Card> = new Map;
@@ -149,13 +149,18 @@ class Game {
 				files : await fs.read.dir(constant.str.dirs.expansions)
 			};
 		},
-		lflist : (key : string, card : string | number) : number => {
-			const lflist = this.lflist.get(key);
-			if (lflist) {
-				card = typeof card == 'string' ? parseInt(card) : card;
-				return lflist.get(card) ?? 3;
+		lflist : (key : string | number, card : string | number | undefined = undefined) : string | number => {
+			if (typeof key === 'string' && card) {
+				const lflist = this.lflist.get(key);
+				if (lflist) {
+					card = typeof card == 'string' ? parseInt(card) : card;
+					return lflist.map.get(card) ?? 3;
+				}
+				return 3;
+			} else {
+				const name = Array.from(this.lflist).find(i => i[1].hash === key) ?? [this.get.text().unknow];
+				return name[0];
 			}
-			return 3;
 		},
 		pics : () : Array<string> => {
 			return Array.from(this.cards.values()).filter(i => i.has_pic()).map(i => i.pic);
@@ -417,17 +422,17 @@ class Game {
 			if (line.startsWith('#'))
 				return;
 			if (line.startsWith('!')) {
-				this.lflist.set(line.slice(1), new Map());
+				this.lflist.set(line.slice(1), {hash : 0x7dfcee6a, map : new Map()});
 				this.lflist_now = line.slice(1);
 			} else if (this.lflist_now !== '') {
 				const key_value = line.split(' ');
-				if (key_value.length >= 2)
-					this.lflist.get(
-						this.lflist_now
-					)!.set(
-						parseInt(key_value[0]),
-						parseInt(key_value[1])
-					);
+				if (key_value.length >= 2) {
+					const code = parseInt(key_value[0]);
+					const count = parseInt(key_value[1]);
+					const lflist = this.lflist.get(this.lflist_now)!;
+					lflist.map.set(code, count);
+					lflist.hash ^= ((code << 18) | (code >> 14)) ^ ((code << (27 + count)) | (code >> (5 - count)));
+				}
 			}
 		},
 		system_conf : (line : string) : void => {
@@ -546,11 +551,11 @@ class Game {
 			const atk = search.atk?.split(' ') ?? [];
 			const def = search.def?.split(' ') ?? [];
 			const link = search.link === undefined ? 0 : search.link;
-			const lflist = search.lflist !== undefined && this.lflist.has(search.lflist) ? this.lflist.get(search.lflist)! : new Map;
+			const lflist = search.lflist !== undefined && this.lflist.has(search.lflist) ? this.lflist.get(search.lflist)!.map : new Map;
 			const forbidden = search.forbidden ?? [];
 			const filter = (card : Card) : boolean => {
 				if (forbidden.length > 0) {
-					const ct = lflist.get(card.id);
+					const ct = lflist.get(card.id) as number;
 					if (ct === undefined ? !forbidden.includes(3) : !forbidden.includes(ct))
 						return false;
 				}

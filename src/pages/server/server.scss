@@ -23,10 +23,23 @@
 		.var-select, .var-input, .var-auto-complete, .pass, .var-list {
 			width: 100%;
 		}
-		.var-list {
+		.home {
 			height: 265px;
-			.var-cell {
-				width: 80%;
+			width: 100%;
+			display: flex;
+			gap : 10%;
+			.var-list {
+				width: 60%;
+				.var-cell {
+					width: 100%;
+				}
+			}
+			.info {
+				display: flex;
+				flex-direction: column;
+				width: 30%;
+				font-size: max(2vh, var(--font-size-md));
+				color: white;
 			}
 		}
 		.pass, .start {
@@ -36,6 +49,12 @@
 			justify-items: center;
 			align-items: end;
 		}
+		.start {
+			grid-template-columns: repeat(3, 1fr);
+			font-size: max(2vh, var(--font-size-md));
+			color: white;
+		}
+
 		&::-webkit-scrollbar {
 			display: none;
 		}

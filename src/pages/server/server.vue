@@ -40,27 +40,41 @@
 				></Button>
 			</div>
 			<div class = 'content'>
-				<var-list>
-					<TransitionGroup
-						name = 'opacity'
-						tag = 'div'
-					>
-						<var-cell
-							v-for = 'i in connect.player'
-							:key = 'i'
-							:title = 'i'
-							:border = 'true'
+				<div class = 'home'>
+					<var-list>
+						<TransitionGroup
+							name = 'opacity'
+							tag = 'div'
 						>
-							<template #extra>
-								<var-checkbox
-									@change = 'connect.prepare'
-								></var-checkbox>
-							</template>
-						</var-cell>
-					</TransitionGroup>
-				</var-list>
+							<var-cell
+								v-for = 'i in connect.player'
+								:key = 'i'
+								:title = 'i.name'
+								:border = 'true'
+							>
+								<template #extra>
+									<var-checkbox
+										:readonly = 'i !== server'
+										@change = 'connect.prepare'
+									></var-checkbox>
+								</template>
+							</var-cell>
+						</TransitionGroup>
+					</var-list>
+					<div class = 'info'>
+						<span>{{ `${mainGame.get.text().server.home.lflist} : ${mainGame.get.lflist(connect.home.lflist)}` }}</span>
+						<span>{{ `${mainGame.get.text().server.home.rule} : ${mainGame.get.text().server.rule[connect.home.rule] ?? mainGame.get.text().unknow}` }}</span>
+						<span>{{ `${mainGame.get.text().server.home.mode} : ${mainGame.get.text().server.mode[connect.home.mode] ?? mainGame.get.text().unknow}` }}</span>
+						<span>{{ `${mainGame.get.text().server.home.time_limit} : ${connect.home.time_limit}` }}</span>
+						<span>{{ `${mainGame.get.text().server.home.start_lp} : ${connect.home.start_lp}` }}</span>
+						<span>{{ `${mainGame.get.text().server.home.start_hand} : ${connect.home.start_hand}` }}</span>
+						<span v-show = 'connect.home.no_check_deck'>{{ mainGame.get.text().server.no_check_deck }}</span>
+						<span v-show = 'connect.home.no_shuffle_deck'>{{ mainGame.get.text().server.no_shuffle_deck }}</span>
+					</div>
+				</div>
 				<div class = 'start'>
-					<Select name = 'forbidden' v-model = 'server.deck' :multiple = 'true' :chip = 'true'></Select>
+					<span>{{ `${mainGame.get.text().server.home.watch} : ${connect.home.watch}` }}</span>
+					<Select name = 'deck' v-model = 'connect.deck'></Select>
 					<Button
 						@click = 'connect.start'
 						icon_name = 'socket'
@@ -76,7 +90,7 @@
 	import mainGame from '../../script/game';
 	import constant from '../../script/constant';
 	import fs from '../../script/fs';
-	import Tcp from './post/tcp';
+	import Tcp, * as TCP from './post/tcp';
 
 	import Select from '../varlet/select.vue';
 	import Button from '../varlet/button.vue';
@@ -97,7 +111,7 @@
 		},
 		connect : async () : Promise<void> => {
 			page.loading = true;
-			if (await tcp!.connect(server.address ?? '', server.name ?? '', server.pass ?? '', connect)) {
+			if (await tcp!.connect(server.address ?? '', server.name ?? '', server.pass ?? '')) {
 				mainGame.push.system(constant.str.system_conf.string.server_address, server.address);
 				mainGame.push.system(constant.str.system_conf.string.server_name, server.name);
 				mainGame.push.system(constant.str.system_conf.string.server_pass, server.pass);
@@ -113,7 +127,21 @@
 
 	const connect = reactive({
 		state : false,
-		player : [] as Array<string>,
+		deck : undefined as Deck | undefined,
+		player : [] as Array<{ name : string}>,
+		home : {
+			lflist : 0,
+			rule : 0,
+			mode : 0,
+			duel_rule : 0,
+			no_check_deck : false,
+			no_shuffle_deck : false,
+			start_lp : 0,
+			start_hand : 0,
+			draw_count : 0,
+			time_limit : 0,
+			watch : 0
+		} as TCP.HostInfo,
 		start : async () : Promise<void> => {
 			// await tcp.disconnect();
 			// page.wait = false;
@@ -122,6 +150,22 @@
 		},
 		prepare : async () : Promise<void> => {
 		},
+		clear : () => {
+			connect.player = [];
+			connect.home = {
+				lflist : 0,
+				rule : 0,
+				mode : 0,
+				duel_rule : 0,
+				no_check_deck : false,
+				no_shuffle_deck : false,
+				start_lp : 0,
+				start_hand : 0,
+				draw_count : 0,
+				time_limit : 0,
+				watch : 0
+			};
+		}
 	});
 
 	const server = reactive({
@@ -130,8 +174,7 @@
 		pass : mainGame.get.system(constant.str.system_conf.string.server_pass) as string,
 		options : computed(() => {
 			return Array.from(mainGame.servers).map(([k, v]) => ({ label: k, value: v }));
-		}),
-		deck : undefined as Deck | undefined
+		})
 	});
 
 	onBeforeMount(async () => {
@@ -149,13 +192,13 @@
 			await (new Promise(resolve => setTimeout(resolve, 200)));
 			page.wait = true;
 			page.loading = false;
-			connect.player.push(server.name);
+			connect.player.push(server);
 		}
 		const off = async () => {
 			page.wait = false;
 			await (new Promise(resolve => setTimeout(resolve, 200)));
 			page.server = true;
-			connect.player = [];
+			connect.clear();
 		}
 		n ? await on() : await off();
 	});

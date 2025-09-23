@@ -239,7 +239,7 @@
 			}
 		},
 		get_ct : (id : number) : number => {
-			return search.rule.forbidden() ? 3 : mainGame.get.lflist(search.info.lflist!, id);
+			return search.rule.forbidden() ? 3 : mainGame.get.lflist(search.info.lflist!, id) as number;
 		},
 		get_pic : (card : string | number) : string => {
 			const pic = mainGame.get.card(card).pic;
@@ -317,7 +317,7 @@
 			const extra = deck.get_dom(1);
 			const side = deck.get_dom(2);
 			const cards = [...main, ...extra, ...side];
-			const ct = search.info.lflist ? mainGame.get.lflist(search.info.lflist, card.id) : 3;
+			const ct = search.info.lflist ? mainGame.get.lflist(search.info.lflist, card.id) as number : 3;
 			if (cards.filter(i => i.children[0].id === card.id.toString()).length + 1 > ct) {
 				toast.error(mainGame.get.text().rule.deck.card_count.replace(constant.str.replace,ct.toString()));
 			} else {
@@ -588,7 +588,7 @@
 			const el = deck.get_card(evt.dragged as HTMLElement);
 			if (el) {
 				const card = mainGame.get.card(deck.get_id(el));
-				const ct = search.info.lflist ? mainGame.get.lflist(search.info.lflist, card.id) : 3;
+				const ct = search.info.lflist ? mainGame.get.lflist(search.info.lflist, card.id) as number : 3;
 				const id = card.id.toString() ?? '';
 				if(card.is_token())
 					return false;

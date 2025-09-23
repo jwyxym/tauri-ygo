@@ -1,6 +1,7 @@
 import TEXT_Like from './interface';
 
 const Zh_CN : TEXT_Like = {
+	unknow : '???',
 	menu : [
 		'人机模式',
 		'联机模式',
@@ -56,7 +57,23 @@ const Zh_CN : TEXT_Like = {
 	server : {
 		address : '服务器地址',
 		name : '名称',
-		password : '房间密码'
+		password : '房间密码',
+		no_check_deck : '*不检查卡组',
+		no_shuffle_deck : '*不切洗手卡',
+		watcher : '观战者',
+		deck : '选择卡组',
+		rule : ['OCG', 'TCG', '简体中文', '自定义卡', '无独有卡', '所有卡片'],
+		mode : ['单局模式', '比赛模式', '双打模式'],
+		home : {
+			lflist : '禁限卡表',
+			rule : '卡片允许',
+			mode : '决斗模式',
+			start_lp : '基本分',
+			start_hand : '初始手牌',
+			draw_count : '每轮抽卡',
+			time_limit : '回合时间',
+			watch : '观战人数'
+		}
 	},
 	rule : {
 		search : '搜索词不合规',

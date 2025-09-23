@@ -1,4 +1,5 @@
 interface TEXT_Like {
+	unknow : string;
 	menu : Array<string>;
 	start : {
 		title : string;
@@ -49,6 +50,22 @@ interface TEXT_Like {
 		address : string;
 		name : string;
 		password : string;
+		no_check_deck : string;
+		no_shuffle_deck : string;
+		watcher : string;
+		deck : string;
+		rule : Array<string>;
+		mode : Array<string>;
+		home : {
+			lflist : string;
+			rule : string;
+			mode : string;
+			start_lp : string;
+			start_hand : string;
+			draw_count : string;
+			time_limit : string;
+			watch : string;
+		}
 	};
 	rule : {
 		search : string;
