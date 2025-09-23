@@ -571,7 +571,6 @@ class Game {
 						console.log(card.id, card.alias)
 						if ((card.id < id[0] || card.id > id[1]) && (card.alias < id[0] || card.alias > id[1]))
 							return false;
-
 					}
 				}
 

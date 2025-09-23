@@ -96,7 +96,7 @@
 	</div>
 </template>
 <script setup lang='ts'>
-	import { reactive, onBeforeMount, TransitionGroup } from 'vue';
+	import { reactive, onBeforeMount, TransitionGroup, watch } from 'vue';
 	import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 
 	import mainGame from '../../script/game';
@@ -250,7 +250,11 @@
 		}
 	});
 
-	defineProps(['select']);
+	watch(() => { return list.select; }, (n) => {
+		props.select.canvas(n < 0);
+	});
+
+	const props = defineProps(['select']);
 
 	onBeforeMount(list.load)
 </script>

@@ -3,49 +3,52 @@
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { ref, onMounted, Ref, watch, Reactive, reactive } from 'vue';
+	import { ref, onMounted, Ref, watch, Reactive, reactive, onUnmounted } from 'vue';
 	import * as THREE from 'three';
-	import TWEEN from '@tweenjs/tween.js';
-	import gsap from 'gsap';
 
 	import mainGame from '../../script/game';
 	import constant from '../../script/constant';
+	import { gsap } from 'gsap';
 
 	const canvas : Ref<HTMLElement | null> = ref(null);
 
-	onMounted(() => {
-		function random(count : number, min : number, max : number) {
-			const numbers = [];
-			for (let i = min; i <= max; i++) {
-				numbers.push(i);
+	const three = {
+		renderer : new THREE.WebGLRenderer({ alpha: true }),
+		scene : new THREE.Scene(),
+		camera : new THREE.PerspectiveCamera(),
+		resize : () => {
+			three.renderer.setSize(window.innerWidth, window.innerHeight);
+		},
+		render : () => {
+			three.renderer.render(three.scene, three.camera);
+		},
+		texture : {
+			this : new THREE.TextureLoader(),
+			front : (url : string) => {
+				const texture = three.texture.this.load(url);
+				texture.colorSpace = THREE.SRGBColorSpace;
+				return texture;
+			},
+			back : () => {
+				const texture = three.texture.this.load(mainGame.get.textures(constant.str.files.textures.back));
+				texture.colorSpace = THREE.SRGBColorSpace;
+				return texture;
 			}
-
-			for (let i = numbers.length - 1; i > 0; i--) {
-				const j = Math.floor(Math.random() * i);
-				[numbers[i], numbers[j]] = [numbers[j], numbers[i]];
-			}
-
-			return numbers.slice(0, count);
 		}
+	}
 
+	onMounted(() => {
 		const card_size = {
 			width : window.innerWidth / 80,
 			height : 0
 		}
 		card_size.height = card_size.width * 2 / 0.684;
-		const renderer = new THREE.WebGLRenderer({ alpha: true });
-    	renderer.setSize(window.innerWidth, window.innerHeight);
+    	three.renderer.setSize(window.innerWidth, window.innerHeight);
 
-		const scene = new THREE.Scene();
-		const camera = new THREE.PerspectiveCamera();
-
-		camera.position.set(-50, 50, 200);
-		// camera.position.set(0, 20, 400);
-		camera.lookAt(0, 0, 0);
+		three.camera.position.set(-50, 50, 200);
+		three.camera.lookAt(0, 0, 0);
 
 		const geometry = new THREE.PlaneGeometry(card_size.width, card_size.height);
-
-		const texture = new THREE.TextureLoader();
 
 		const cards = new THREE.AnimationObjectGroup();
 		const pics = mainGame.get.pics();
@@ -55,16 +58,14 @@
 			z : 6
 		}
 		for (let z = 0; z < ct.z; z++) {
-			const front_map = texture.load(pics[Math.floor(Math.random() * pics.length)]);
-			front_map.colorSpace  = THREE.SRGBColorSpace;
+			const front_map = three.texture.front(pics[Math.floor(Math.random() * pics.length)]);
 			const front = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ 
 				map : front_map,
 				side : THREE.FrontSide,
 				transparent: true,
 				opacity : 0
 			}));
-			const back_map = texture.load(mainGame.get.textures(constant.str.files.textures.back));
-			back_map.colorSpace = THREE.SRGBColorSpace;
+			const back_map = three.texture.back();
 			const back = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ 
 				map : back_map,
 				side : THREE.BackSide,
@@ -74,39 +75,63 @@
 			const card = new THREE.Group();
 			card.add(front);
 			card.add(back);
-			scene.add(card);
+			three.scene.add(card);
 			card.position.x = 0;
 			card.position.y = 0;
 			card.position.z = z * -300;
 			cards.add(card);
+			gsap.to(card.position, {
+				z : 200,
+				duration : z,
+				onComplete : () => {
+					const pics = mainGame.get.pics();
+					card.children[0].material.map = three.texture.front(pics[Math.floor(Math.random() * pics.length)])
+					gsap.fromTo(card.position,{
+						z : ct.z * -300
+					}, {
+						z : 200,
+						duration : ct.z,
+						repeat : -1
+					});
+					(card.children as Array<any>).forEach((el) => {
+						const tl = gsap.timeline({
+							repeat : -1
+						})
+						tl.fromTo(el.material, {
+							opacity : 0
+						}, {
+							opacity : 1,
+							duration : 1,
+						});
+						tl.to({}, {duration : ct.z - 1});
+					});
+				}
+			});
+			(card.children as Array<any>).forEach((el) => {
+				gsap.to(el.material, {
+					opacity : 1,
+					duration : 1
+				});
+			});
 		}
 
-		renderer.render(scene, camera);
-		renderer.outputEncoding = THREE.sRGBEncoding;
-		const el = renderer.domElement;
+		three.render();
+		three.renderer.outputEncoding = THREE.sRGBEncoding;
+		const el = three.renderer.domElement;
 		canvas.value!.appendChild(el);
 
 		const animate = () => {
 			requestAnimationFrame(animate);
-			(cards._objects as Array<any>).forEach((i, v) => {
-				(i.children as Array<any>).forEach((el) => {
-					if (el.material.opacity < 1)
-						el.material.opacity += 0.005;
-					if (el.position.z < (v + 1) * 300) {
-						el.position.z += 1;
-					} else {
-						el.position.z = (v + 1) * 300 - ct.z * 300;
-						el.material.opacity = 0;
-						const pic = new THREE.TextureLoader().load(pics[Math.floor(Math.random() * pics.length)])
-						pic.colorSpace  = THREE.SRGBColorSpace;
-						i.children[0].material.map = pic;
-					}
-				});
-			});
-			renderer.render(scene, camera);
+			three.render();
 		}
 
 		animate();
+
+		window.addEventListener("resize", three.resize);
+	})
+
+	onUnmounted(() => {
+		window.removeEventListener("resize", three.resize);
 	})
 
 </script>

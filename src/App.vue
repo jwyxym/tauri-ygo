@@ -3,7 +3,7 @@
 		<starry-sky :stars-count = '1500' :distance = '800' id = 'back'/>
 		<transition name = 'opacity'>
 			<Canvas
-				v-if = 'page.show.menu'
+				v-if = 'page.show.canvas'
 			></Canvas>
 		</transition>
 		<div class = 'body'>
@@ -64,6 +64,7 @@
 			server : false,
 			deck : false,
 			setting : false,
+			canvas  :false
 		},
 		select : {
 			menu : () : void => {
@@ -72,6 +73,8 @@
 				page.show.setting = false;
 				setTimeout(() => {
 					page.show.menu = true;
+					if (!page.show.canvas)
+						page.show.canvas = true;
 				}, 500);
 			},
 			server : () : void => {
@@ -91,6 +94,9 @@
 				setTimeout(() => {
 					page.show.setting = true;
 				}, 500);
+			},
+			canvas : (bool : boolean) : void => {
+				page.show.canvas = bool;
 			}
 		},
 		contextmenu : (event : MouseEvent) : void => {
@@ -103,6 +109,7 @@
 			await mainGame.init(chk);
 			page.show.menu = true;
 			page.show.voice = true;
+			page.show.canvas = true;
 		}
 		const download = async () : Promise<void> => {
 			LoadingBar.start();
