@@ -5,7 +5,8 @@
 <script setup lang = 'ts'>
 	import { ref, onMounted, Ref, watch, Reactive, reactive, onUnmounted } from 'vue';
 	import * as THREE from 'three';
-
+	import { OrbitControls } from '@three-ts/orbit-controls';
+	
 	import mainGame from '../../script/game';
 	import constant from '../../script/constant';
 	import { gsap } from 'gsap';
@@ -43,83 +44,69 @@
 		card_size.height = card_size.width * 2 / 0.684;
     	three.renderer.setSize(window.innerWidth, window.innerHeight);
 
-		three.camera.position.set(-50, 50, 200);
+		three.camera.position.set(0, -200, 300);
 		three.camera.lookAt(0, 0, 0);
 
-		const geometry = new THREE.PlaneGeometry(card_size.width, card_size.height);
+		const geometry = new THREE.BoxGeometry(card_size.width, card_size.height, 0.2);
 
-		const cards = new THREE.AnimationObjectGroup();
 		const pics = mainGame.get.pics();
-		const ct = {
-			x : 1,
-			y : 1,
-			z : 6
-		}
-		for (let z = 0; z < ct.z; z++) {
+
+		for (let x = -3; x < 4; x++)
+			for (let y = -2; y < 3; y++) {
+				if (y === 0 && x % 2 === 0)
+					continue;
+				const bottom = new THREE.PlaneGeometry(card_size.width, card_size.height);
+				const boder = new THREE.EdgesGeometry(bottom);
+				const boder_material = new THREE.LineBasicMaterial({ color : 'white' });
+				const line = new THREE.LineSegments(boder, boder_material);
+				line.position.x = (card_size.width + 2) * x;
+				line.position.y = (card_size.height + 2) * y;
+    			three.scene.add(line);
+			}
+
+		for (let z = 1; z < 61; z++) {
 			const front_map = three.texture.front(pics[Math.floor(Math.random() * pics.length)]);
-			const front = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ 
+			const front = new THREE.MeshStandardMaterial({ 
 				map : front_map,
-				side : THREE.FrontSide,
-				transparent: true,
-				opacity : 0
-			}));
+			});
 			const back_map = three.texture.back();
-			const back = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ 
+			const back = new THREE.MeshStandardMaterial({ 
 				map : back_map,
-				side : THREE.BackSide,
-				transparent: true,
-				opacity : 0
-			}));
-			const card = new THREE.Group();
-			card.add(front);
-			card.add(back);
+			});
+			const boder = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+			const materials = [
+				boder,
+				boder,
+				boder,
+				boder,
+				front,
+				back
+			];
+
+			const card = new THREE.Mesh(geometry, materials);
+				console.log(card)
+
+			card.position.x = (card_size.width + 2) * 3;
+			card.position.y = (card_size.height + 2) * -2;
+			card.position.z = z * 0.2;
+			card.rotation.y = - Math.PI;
 			three.scene.add(card);
-			card.position.x = 0;
-			card.position.y = 0;
-			card.position.z = z * -300;
-			cards.add(card);
-			gsap.to(card.position, {
-				z : 200,
-				duration : z,
-				onComplete : () => {
-					const pics = mainGame.get.pics();
-					((card.children[0] as THREE.Mesh).material as THREE.MeshBasicMaterial).map = three.texture.front(pics[Math.floor(Math.random() * pics.length)])
-					gsap.fromTo(card.position,{
-						z : ct.z * -300
-					}, {
-						z : 200,
-						duration : ct.z,
-						repeat : -1
-					});
-					card.children.forEach((el) => {
-						const tl = gsap.timeline({
-							repeat : -1
-						})
-						tl.fromTo((el as THREE.Mesh).material, {
-							opacity : 0
-						}, {
-							opacity : 1,
-							duration : 1,
-						});
-						tl.to({}, {duration : ct.z - 1});
-					});
-				}
-			});
-			(card.children as Array<any>).forEach((el) => {
-				gsap.to(el.material, {
-					opacity : 1,
-					duration : 1
-				});
-			});
 		}
+		const ambientLight = new THREE.AmbientLight('white', 1);
+		three.scene.add(ambientLight);
 
 		three.render();
-		console.log(cards)
 		const el = three.renderer.domElement;
 		canvas.value!.appendChild(el);
+		const controls = new OrbitControls(three.camera, window.document.documentElement);
+		controls.minPolarAngle = 0;
+		controls.maxPolarAngle = Math.PI;
+		controls.minDistance = 0;
+		controls.maxDistance = Infinity;
 
 		const animate = () => {
 			requestAnimationFrame(animate);
+			controls.update();
 			three.render();
 		}
 
@@ -140,6 +127,6 @@
 		left: 0;
 		height: 100%;
 		width: 100%;
-		z-index: -9;
+		z-index: -8;
 	}
 </style>

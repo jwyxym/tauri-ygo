@@ -7,4 +7,3 @@ declare module "*.vue" {
 }
 declare module 'vue3-starry-sky';
 declare module 'sortablejs';
-declare module 'three';

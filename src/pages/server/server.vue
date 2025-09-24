@@ -54,7 +54,7 @@
 							>
 								<template #extra>
 									<var-checkbox
-										:readonly = 'i !== server'
+										:readonly = 'true'
 										@change = 'connect.prepare'
 									></var-checkbox>
 								</template>
@@ -192,13 +192,14 @@
 			await (new Promise(resolve => setTimeout(resolve, 200)));
 			page.wait = true;
 			page.loading = false;
-			connect.player.push(server);
 		}
 		const off = async () => {
 			page.wait = false;
 			await (new Promise(resolve => setTimeout(resolve, 200)));
 			page.server = true;
 			connect.clear();
+			if (connect.player.length === 0)
+				connect.player.push(server)
 		}
 		n ? await on() : await off();
 	});

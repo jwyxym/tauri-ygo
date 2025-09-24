@@ -80,17 +80,25 @@ class Tcp {
 		});
 		const listen = (buffer : Uint8Array<ArrayBuffer>) : void => {
 			const data = new DataView(buffer.buffer);
-			const len = data.getUint16(0, true);
-			const proto = data.getUint8(2);
-			const func = funcs.get(proto);
-			// console.log(len, proto.toString(16))
-			if (func)
-				func(buffer, data, len, connect);
+			let pos = 0
+			while (pos < buffer.byteLength - 3) {
+				if (data.getUint8(pos) === 0) {
+					pos ++;
+					continue;
+				}
+				const len = data.getUint16(pos, true);
+				const proto = data.getUint8(pos + 2);
+				const func = funcs.get(proto);
+				console.log(len, proto.toString(16))
+				if (func)
+					func(buffer, data, len, connect, pos);
+				pos += len + 2;
+			}
 		};
 
-		const to_package = (buffer : Uint8Array<ArrayBuffer>, data : DataView, lens : Array<number>) : Array<any> => {
+		const to_package = (buffer : Uint8Array<ArrayBuffer>, data : DataView, lens : Array<number>, pos : number) : Array<any> => {
 			let result : Array<any> = [];
-			let pos = 3;
+			pos += 3;
 			for (let len of lens) {
 				if (len < 0) {
 					pos -= len;
@@ -141,8 +149,8 @@ class Tcp {
 
 		const funcs : Map<number, Function> = new Map([
 			[STOC.JOIN_GAME,
-				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>) => {
-					const pack = to_package(buffer, data, [32, ...new Array(5).fill(8), -3, 32, 8, 8, 16]);
+				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+					const pack = to_package(buffer, data, [32, ...new Array(5).fill(8), -3, 32, 8, 8, 16], pos);
 					connect.home.lflist = pack[0];
 					connect.home.rule = pack[1];
 					connect.home.mode = pack[2];
@@ -156,13 +164,13 @@ class Tcp {
 				}
 			],
 			[STOC.CHAT,
-				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>) => {
-					let pack = to_package(buffer, data, [16, len]);
+				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+					let pack = to_package(buffer, data, [16, len], pos);
 					const player = pack[0];
 					let str = '';
 					if (player < 4) {
 						str += connect.player[player];
-					} else if (player < 11 || player > 19) {
+					} else if ((player < 11 || player > 19) && player !== 8) {
 						str += mainGame.get.text().server.watcher
 					}
 					if (str.length > 0)
@@ -172,26 +180,26 @@ class Tcp {
 				}
 			],
 			[STOC.HS_PLAYER_ENTER,
-				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>) => {
-					const pack = to_package(buffer, data, [40, 8]);
-					console.log(pack)
+				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+					const pack = to_package(buffer, data, [40, 8], pos);
 					connect.player.push({ name : pack[0] });
 				}
 			],
 			[STOC.HS_PLAYER_CHANGE,
-				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>) => {
-					const pack = to_package(buffer, data, [8]);
+				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+					const pack = to_package(buffer, data, [8], pos);
 					const state = pack[0] & 0xf;
-					if (state <= 8) {
+					if (state === 8) {
 						connect.player.splice((pack[0] >> 4) & 0xf, 1);
-						if (state === 8)
-							connect.home.watch ++;
+						connect.home.watch ++;
+					} else if (state === 11) {
+						connect.player.splice((pack[0] >> 4) & 0xf, 1);
 					}
 				}
 			],
 			[STOC.HS_WATCH_CHANGE,
-				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>) => {
-					const pack = to_package(buffer, data, [16]);
+				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+					const pack = to_package(buffer, data, [16], pos);
 					connect.home.watch = pack[0];
 				}
 			],
