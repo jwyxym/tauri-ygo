@@ -6,6 +6,11 @@
 				v-if = 'page.show.canvas'
 			></Canvas>
 		</transition>
+		<transition name = 'opacity'>
+			<Duel
+				v-if = 'page.show.canvas'
+			></Duel>
+		</transition>
 		<div class = 'body'>
 			<transition name = 'opacity'>
 				<Deck
