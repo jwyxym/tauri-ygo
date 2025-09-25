@@ -50,23 +50,24 @@
 
 		const cards = new THREE.AnimationObjectGroup();
 		const pics = mainGame.get.pics();
+		const front_map = pics.map(i => three.texture.front(i));
+		const back_map = three.texture.back();
+		const back = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ 
+			map : back_map,
+			side : THREE.BackSide,
+			transparent: true,
+			opacity : 0
+		}));
+
 		const ct = {
 			x : 1,
 			y : 1,
 			z : 6
 		}
 		for (let z = 0; z < ct.z; z++) {
-			const front_map = three.texture.front(pics[Math.floor(Math.random() * pics.length)]);
 			const front = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ 
-				map : front_map,
+				map : front_map[Math.floor(Math.random() * front_map.length)],
 				side : THREE.FrontSide,
-				transparent: true,
-				opacity : 0
-			}));
-			const back_map = three.texture.back();
-			const back = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ 
-				map : back_map,
-				side : THREE.BackSide,
 				transparent: true,
 				opacity : 0
 			}));
@@ -114,7 +115,6 @@
 		}
 
 		three.render();
-		console.log(cards)
 		const el = three.renderer.domElement;
 		canvas.value!.appendChild(el);
 
