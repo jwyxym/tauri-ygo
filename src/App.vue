@@ -1,12 +1,17 @@
 <template>
 	<div class = 'main' @contextmenu = 'page.contextmenu'>
 		<starry-sky :stars-count = '1500' :distance = '800' id = 'back'/>
-		<transition name = 'opacity'>
+		<!-- <transition name = 'opacity'>
 			<Canvas
 				v-if = 'page.show.canvas'
 			></Canvas>
+		</transition> -->
+		<transition name = 'opacity'>
+			<Duel
+				v-if = 'page.show.canvas'
+			></Duel>
 		</transition>
-		<div class = 'body'>
+		<!-- <div class = 'body'>
 			<transition name = 'opacity'>
 				<Deck
 					v-if = 'page.show.deck'
@@ -31,12 +36,7 @@
 					:select = 'page.select'
 				></Menu>
 			</transition>
-			<!-- <transition name = 'opacity'>
-				<Animation
-					v-if = 'page.show.menu'
-				></Animation>
-			</transition> -->
-		</div>
+		</div> -->
 		<Voice v-if = 'page.show.voice'></Voice>
 	</div>
 </template>
@@ -46,6 +46,7 @@
 
 	import Menu from './pages/menu/menu.vue';
 	import Canvas from './pages/animation/back.vue';
+	import Duel from './pages/animation/duel.vue';
 	import Animation from './pages/animation/mune_animation.vue';
 	import Deck from './pages/deck/deck_list.vue';
 	import Server from './pages/server/server.vue';

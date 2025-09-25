@@ -6,15 +6,17 @@
 	import { ref, onMounted, Ref, watch, Reactive, reactive, onUnmounted } from 'vue';
 	import * as THREE from 'three';
 	import { OrbitControls } from '@three-ts/orbit-controls';
+	import * as CSS from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 	
 	import mainGame from '../../script/game';
 	import constant from '../../script/constant';
-	import { gsap } from 'gsap';
+	import gsap from '../../script/gsap';
+	import position from '../../script/position';
 
 	const canvas : Ref<HTMLElement | null> = ref(null);
 
 	const three = {
-		renderer : new THREE.WebGLRenderer({ alpha: true }),
+		renderer : new CSS.CSS3DRenderer(),
 		scene : new THREE.Scene(),
 		camera : new THREE.PerspectiveCamera(),
 		resize : () => {
@@ -22,95 +24,67 @@
 		},
 		render : () => {
 			three.renderer.render(three.scene, three.camera);
-		},
-		texture : {
-			this : new THREE.TextureLoader(),
-			front : (url : string) => {
-				const texture = three.texture.this.load(url);
-				return texture;
-			},
-			back : () => {
-				const texture = three.texture.this.load(mainGame.get.textures(constant.str.files.textures.back) ?? '');
-				return texture;
-			}
 		}
 	}
 
 	onMounted(() => {
 		const card_size = {
-			width : window.innerWidth / 80,
-			height : 0
+			width : 0,
+			height : window.innerHeight / 10
 		}
-		card_size.height = card_size.width * 2 / 0.684;
-    	three.renderer.setSize(window.innerWidth, window.innerHeight);
-
-		three.camera.position.set(0, -200, 400);
-		three.camera.lookAt(0, -40, 0);
-
-		const geometry = new THREE.BoxGeometry(card_size.width, card_size.height, 0.1);
-		const bottom = new THREE.PlaneGeometry(card_size.width, card_size.height);
-		const boder = new THREE.EdgesGeometry(bottom);
-		const boder_material = new THREE.LineBasicMaterial({
-			color : 'white'
-		});
-		const back_map = three.texture.back();
-		const back = new THREE.MeshStandardMaterial({ 
-			map : back_map,
-		});
-		const pics = mainGame.get.pics();
-		const front_map = pics.map(i => three.texture.front(i));
+		card_size.width = card_size.height / 2.9;
+		three.renderer.setSize(window.innerWidth, window.innerHeight);
+		three.renderer.domElement.style.position = 'fixed';
+  		three.renderer.domElement.style.top = '0';
+		three.camera.position.set(0, -200, 600);
+		three.camera.lookAt(0, -30, 0);
 
 		for (let x = -3; x < 4; x++)
 			for (let y = -2; y < 3; y++) {
 				if (y === 0 && x % 2 === 0)
 					continue;
-
-				const line = new THREE.LineSegments(boder, boder_material);
-				line.position.set((card_size.width + 2) * x, (card_size.height + 2) * y, 0);
-    			three.scene.add(line);
+				const dom = document.createElement('div');
+				const child = document.createElement('div');
+				child.style.width = `${card_size.height}px`;
+				child.style.height = `${card_size.height}px`;
+				child.style.border = '1px solid #9ed3ff';
+				dom.appendChild(child);
+				const css = new CSS.CSS3DObject(dom);
+				css.position.set((card_size.height + 5) * x, (card_size.height + 5) * y, 0);
+    			three.scene.add(css);
 			}
 
 		for (let z = 1; z < 61; z++) {
-			const front = new THREE.MeshStandardMaterial({ 
-				map : front_map[Math.floor(Math.random() * front_map.length)],
-			});
-			const front_boder = new THREE.MeshStandardMaterial({ color: 0x61060d });
-			const back_boder = new THREE.MeshStandardMaterial({ color: 0xd99652 });
-			const front_materials = [
-				front_boder,
-				front_boder,
-				front_boder,
-				front_boder,
-				front,
-				back
-			];
-			const back_materials = [
-				back_boder,
-				back_boder,
-				back_boder,
-				back_boder,
-				front,
-				back
-			];
-
-			const card = new THREE.Group();
-			card.add(new THREE.Mesh(geometry, front_materials));
-			card.add(new THREE.Mesh(geometry, back_materials));
-			card.position.set((card_size.width + 2) * 3, (card_size.height + 2) * -2, z * 0.2);
-			card.rotation.set(0, - Math.PI, 0);
-			three.scene.add(card);
+			const dom = document.createElement('div');
+			const child = document.createElement('img');
+			child.src = mainGame.get.textures(constant.str.files.textures.pic[0]) ?? '';
+			child.style.width = `${card_size.width * 2}px`;
+			child.style.height = `${card_size.height}px`;
+			dom.appendChild(child);
+			const css = new CSS.CSS3DObject(dom);
+			css.position.set((card_size.height + 5) * -3, (card_size.height + 5) * 2, z * 0.2);
+			three.scene.add(css);
+			// gsap.turn(child, mainGame.get.textures(constant.str.files.textures.back));
+			// gsap.turn(child, mainGame.get.textures(constant.str.files.textures.pic[0]));
+		}
+		for (let z = 1; z < 61; z++) {
+			const dom = document.createElement('div');
+			const child = document.createElement('img');
+			child.style.width = `${card_size.width * 2}px`;
+			child.style.height = `${card_size.height}px`;
+			child.src = mainGame.get.textures(constant.str.files.textures.back) ?? '';
+			dom.appendChild(child);
+			const css = new CSS.CSS3DObject(dom);
+			css.position.set((card_size.height + 5) * 3, (card_size.height + 5) * -2, z * 0.2);
+			three.scene.add(css);
 		}
 		const ambientLight = new THREE.AmbientLight('white', 1);
 		three.scene.add(ambientLight);
 
 		three.render();
-		const el = three.renderer.domElement;
-		canvas.value!.appendChild(el);
+		canvas.value!.appendChild(three.renderer.domElement);
 		// const controls = new OrbitControls(three.camera, window.document.documentElement);
 		// controls.minPolarAngle = 0;
-		// controls.maxPolarAngle = Math.PI;
-		// controls.minAzimuthAngle = Math.PI / -2;
-		// controls.maxAzimuthAngle = Math.PI / 2;
 		// controls.minDistance = 0;
 		// controls.maxDistance = Infinity;
 

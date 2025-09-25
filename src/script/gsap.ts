@@ -148,6 +148,24 @@ class Gsap {
 		}
 		return tl;
 	};
+
+	turn = (el : HTMLImageElement, pic : string | undefined) => {
+		const tl = this.timeline();
+		tl.set(el, {
+			rorationY : 0
+		})
+		tl.to(el, {
+			rotationY : 90,
+			duration : 0.4,
+			onComplete: () => {
+				el.src = pic ?? '';
+			}
+		});
+		tl.to(el, {
+			rotationY : 180,
+			duration : 0.4
+		});
+	}
 };
 
 export default new Gsap();
