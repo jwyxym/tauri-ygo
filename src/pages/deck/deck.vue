@@ -298,9 +298,9 @@
 					side : side_deck,
 					name : deck.name
 				});
-				const write = await fs.write.ydk(props.this_deck.name.length > 0 ? props.this_deck.name : deck.name, write_deck);
+				const write = await fs.write.ydk(props.this_deck.name?.length ?? 0 > 0 ? props.this_deck.name : deck.name, write_deck);
 				let rename = true;
-				if (write && deck.name !== props.this_deck.name && props.this_deck.name.length > 0) {
+				if (write && deck.name !== props.this_deck.name && (props.this_deck.name?.length ?? 0 > 0)) {
 					rename = await fs.rename.ydk(props.this_deck.name, deck.name);
 				}
 				if (write && rename)
@@ -319,28 +319,28 @@
 			const cards = [...main, ...extra, ...side];
 			const ct = search.info.lflist ? mainGame.get.lflist(search.info.lflist, card.id) as number : 3;
 			if (cards.filter(i => i.children[0].id === card.id.toString()).length + 1 > ct) {
-				toast.error(mainGame.get.text().rule.deck.card_count.replace(constant.str.replace,ct.toString()));
+				toast.error(mainGame.get.text().rule.deck.card_count.replace(constant.str.replace.tauri,ct.toString()));
 			} else {
 				if (to_deck > 2) {
 					to_deck = card.is_ex() ? (extra.length + 1 > 15 ? 2 : 1) : (main.length + 1 > 60 ? 2 : 0);
 					if (to_deck == 2 && side.length + 1 > 15) {
-						toast.error(mainGame.get.text().rule.deck.deck_count.replace(constant.str.replace, ''))
+						toast.error(mainGame.get.text().rule.deck.deck_count.replace(constant.str.replace.tauri, ''))
 						return;
 					}
 				}
 				switch(to_deck) {
 					case 0:
-						main.length + 1 > 60 ? toast.error(mainGame.get.text().rule.deck.deck_count.replace(constant.str.replace, '60')) :
+						main.length + 1 > 60 ? toast.error(mainGame.get.text().rule.deck.deck_count.replace(constant.str.replace.tauri, '60')) :
 							deck.main.push(card.id);
 						deck.ct.main ++;
 						break;
 					case 1:
-						extra.length + 1 > 15 ? toast.error(mainGame.get.text().rule.deck.deck_count.replace(constant.str.replace, '15')) : 
+						extra.length + 1 > 15 ? toast.error(mainGame.get.text().rule.deck.deck_count.replace(constant.str.replace.tauri, '15')) : 
 							deck.extra.push(card.id);
 						deck.ct.extra ++;
 						break;
 					case 2:
-						side.length + 1 > 15 ? toast.error(mainGame.get.text().rule.deck.deck_count.replace(constant.str.replace, '15')) : 
+						side.length + 1 > 15 ? toast.error(mainGame.get.text().rule.deck.deck_count.replace(constant.str.replace.tauri, '15')) : 
 							deck.side.push(card.id);
 						deck.ct.side ++;
 						break;
@@ -350,7 +350,7 @@
 		move : (el: HTMLElement, card : Card, to_deck : number) : void => {
 			const to = deck.get_dom(to_deck);
 			if (to.length + 1 > [60, 15, 15][to_deck]) {
-				toast.error(mainGame.get.text().rule.deck.deck_count.replace(constant.str.replace, [60, 15, 15][to_deck].toString()));
+				toast.error(mainGame.get.text().rule.deck.deck_count.replace(constant.str.replace.tauri, [60, 15, 15][to_deck].toString()));
 			} else {
 				gsap.scale(el, () => { el.style.display = 'none'; deck.ct.remove(el); });
 				switch(to_deck) {
@@ -370,7 +370,7 @@
 			}
 		},
 		remove : async (el : HTMLElement, name : string) : Promise<void> => {
-			const title = mainGame.get.text().deck.remove.replace(constant.str.replace, name);
+			const title = mainGame.get.text().deck.remove.replace(constant.str.replace.tauri, name);
 			const leave = () => {
 				gsap.leave(el, () : void => {
 					el.style.display = 'none';
@@ -630,11 +630,13 @@
 	}
 
 	onBeforeMount(async () : Promise<void> => {
+		const d = props.this_deck;
+		await mainGame.load.pic([...d.main, ...d.extra, ...d.side]);
 		if (props.this_deck) {
-			deck.main = props.this_deck.main;
-			deck.extra = props.this_deck.extra;
-			deck.side = props.this_deck.side;
-			deck.name = props.this_deck.name;
+			deck.main = d.main;
+			deck.extra = d.extra;
+			deck.side = d.side;
+			deck.name = d.name;
 		}
 		await search.on();
 	});

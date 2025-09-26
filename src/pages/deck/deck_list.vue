@@ -142,7 +142,7 @@
 				show : false,
 				input : '',
 				confirm : () : void => {
-					const deck = Deck.fromYdkString(page.popup.code.input);
+					const deck = Deck.fromYdkString(page.popup.code.input, true);
 					deck.main = deck.main.filter(i => mainGame.cards.has(i));
 					deck.extra = deck.extra.filter(i => mainGame.cards.has(i));
 					deck.side = deck.side.filter(i => mainGame.cards.has(i));
@@ -224,7 +224,7 @@
 			}
 			Dialog({
 				title : mainGame.get.text().deck.delete.title,
-				message : mainGame.get.text().deck.delete.message.replace(constant.str.replace, list.decks[list.select].name ?? ''),
+				message : mainGame.get.text().deck.delete.message.replace(constant.str.replace.tauri, list.decks[list.select].name ?? ''),
 				onConfirm : confirm
 			});
 		},

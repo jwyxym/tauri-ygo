@@ -78,8 +78,7 @@
 				break;
 			case 'deck':
 				select.placeholder = mainGame.get.text().server.deck;
-				select.array = (await mainGame.load.deck()).map(i => [i.name, i]);
-				select.label = true;
+				select.array = (await mainGame.load.deck()).map(i => [i, i.name]);
 				break;
 		}
 	});

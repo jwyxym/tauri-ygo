@@ -56,7 +56,10 @@ class Constant {
 	str = {
 		blob : 'blob:http',
 		title : 'Tauri-YGO',
-		replace : '{:?}',
+		replace : {
+			tauri : '{:?}',
+			strings : ['%ls', '%d']
+		},
 		dirs : {
 			textures : 'textures',
 			expansions : 'expansions',

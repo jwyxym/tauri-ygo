@@ -6,11 +6,6 @@
 				v-if = 'page.show.canvas'
 			></Canvas>
 		</transition>
-		<transition name = 'opacity'>
-			<Duel
-				v-if = 'page.show.canvas'
-			></Duel>
-		</transition>
 		<div class = 'body'>
 			<transition name = 'opacity'>
 				<Deck
@@ -46,7 +41,7 @@
 
 	import Menu from './pages/menu/menu.vue';
 	import Canvas from './pages/animation/back.vue';
-	import Duel from './pages/animation/duel.vue';
+	import Duel from './pages/server/duel.vue';
 	import Deck from './pages/deck/deck_list.vue';
 	import Server from './pages/server/server.vue';
 	import Setting from './pages/setting.vue';

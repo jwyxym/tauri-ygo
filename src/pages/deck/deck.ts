@@ -35,8 +35,8 @@ class Deck extends YGOProDeck {
 	};
 
 
-	static fromYdkString (str: string) : Deck {
-		const lines = str.split(constant.reg.line_feed);
+	static fromYdkString (str: string, input : boolean = false) : Deck {
+		const lines = str.split(input ? ' ' : constant.reg.line_feed);
 		const deck = new Deck();
 		try {
 			let current = deck.main;

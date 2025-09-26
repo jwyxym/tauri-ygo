@@ -34,10 +34,11 @@ class Game {
 		[constant.str.system_conf.sound.button, new Map]
 	]);
 	version = 0x1362;
+	max_card_id = 0x0fffffff;
 	select = 'Zh_CN';
 	interval = -1;
 	interval_ct = 0;
-	unknown : Card = new Card([...new Array(11).fill(0), new Array(19).fill('')]);
+	unknown : Card = new Card([...new Array(11).fill(0), ...new Array(19).fill('')]);
 
 	private lflist_now : string = '';
 
@@ -165,6 +166,16 @@ class Game {
 		pics : () : Array<string> => {
 			return Array.from(this.cards.values()).filter(i => i.has_pic()).map(i => i.pic);
 		},
+		strings : {
+			system : (key : number, replace : Array<string | number> | string | number = []) : string => {
+				let value = this.strings.get(constant.str.string_conf.system)!.get(key) ?? this.get.text().unknow;
+				replace = typeof replace === 'object' ? replace : [replace];
+				for (const str of replace) {
+					value = value.replace(constant.str.replace.strings[typeof str === 'string' ? 0 : 1], `${str}`);
+				}
+				return value;
+			}
+		}
 	}
 
 	load = {
