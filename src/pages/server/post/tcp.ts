@@ -236,7 +236,7 @@ class Tcp {
 			[STOC.HS_PLAYER_ENTER,
 				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					const pack = to_package(buffer, data, [40, 8], pos);
-					connect.player.push({ name : pack[0], ready : false });
+					connect.player[pack[1]] = { name : pack[0], ready : false };
 				}
 			],
 			[STOC.HS_PLAYER_CHANGE,
@@ -246,7 +246,7 @@ class Tcp {
 					const player = (pack[0] >> 4) & 0xf;
 					switch (state) {
 						case 8:
-							connect.player.splice(player, 1);
+							connect.player[player] = { name : '' };
 							connect.home.watch ++;
 							break;
 						case 9:
@@ -257,10 +257,18 @@ class Tcp {
 							connect.player[player].ready = false;
 							break;
 						case 11:
-							connect.player.splice(player, 1);
+							connect.player[player] = { name : '' };
 							break;
 						default:
 							console.log(state, player)
+							connect.player[state] = connect.player[player];
+							connect.player[player] = { name : '' };
+							// if (state < 4) {
+							// 	while (connect.player.length < state + 1)
+							// 		connect.player.splice(state - 1, 0, { name : '' });
+							// 	while (connect.player.length > state + 1)
+							// 		connect.player.splice(connect.player.length, 0, { name : '' });
+							// }
 							break;
 					}
 				}
@@ -308,6 +316,12 @@ class Tcp {
 		},
 		kick : async (v : number) : Promise<void> => {
 			this.send.on(CTOS.HS_KICK, new Message(v, 8));
+		},
+		to_duelist : async () : Promise<void> => {
+			this.send.on(CTOS.HS_TODUELIST);
+		},
+		to_watcher : async () : Promise<void> => {
+			this.send.on(CTOS.HS_TOOBSERVER);
 		},
 	}
 

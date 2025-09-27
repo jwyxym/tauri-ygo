@@ -56,6 +56,10 @@ interface TEXT_Like {
 		deck : string;
 		rule : Array<string>;
 		mode : Array<string>;
+		to : {
+			duelist : string;
+			watcher : string;
+		}
 		home : {
 			lflist : string;
 			rule : string;

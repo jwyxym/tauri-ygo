@@ -180,6 +180,9 @@
 			display: none;
 		}
 	}
+	.readonly {
+		--checkbox-unchecked-color: #555 !important;
+	}
 	:root {
 		--card-background: transparent !important;
 		--dialog-background: transparent !important;

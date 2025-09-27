@@ -2,7 +2,7 @@
 	<div>
 		<var-popup v-model:show = 'page.server' :close-on-key-escape = 'false' :overlay = 'false'>
 			<var-form>
-				<div class = 'exit'>
+				<div class = 'button_list'>
 					<Button
 						@click = 'page.exit'
 						icon_name = 'exit'
@@ -34,41 +34,45 @@
 		</var-popup>
 		<var-popup v-model:show = 'page.wait' :close-on-key-escape = 'false' :overlay = 'false'>
 			<var-form>
-				<div class = 'exit'>
+				<div class = 'button_list'>
 					<Button
 						@click = 'page.disconnect'
 						icon_name = 'exit'
+					></Button>
+					<Button
+						@click = 'connect.to.duelist'
+						:content = mainGame.get.text().server.to.duelist
+					></Button>
+					<Button
+						@click = 'connect.to.watcher'
+						:content = mainGame.get.text().server.to.watcher
 					></Button>
 				</div>
 				<div class = 'content'>
 					<div class = 'home'>
 						<var-list>
-							<TransitionGroup
-								name = 'opacity'
-								tag = 'div'
+							<var-cell
+								v-for = '(i, v) in connect.player'
+								:title = 'i.name'
+								:border = 'true'
+								:key = 'v'
 							>
-								<var-cell
-									v-for = '(i, v) in connect.player'
-									:title = 'i.name'
-									:border = 'true'
-									:key = 'i'
-								>
-									<template #extra>
-										<div class = 'extra'>
-											<var-checkbox
-												:readonly = 'connect.self !== v'
-												v-model = 'i.ready'
-											></var-checkbox>
-											<var-icon
-												v-if = 'connect.self !== v && connect.is_host'
-												color = 'white'
-												name = 'close-circle-outline'
-												@click = 'connect.kick(v)'
-											/>
-										</div>
-									</template>
-								</var-cell>
-							</TransitionGroup>
+								<template #extra>
+									<div class = 'extra' v-if = 'i.ready !== undefined'>
+										<var-checkbox
+											:class = "{ 'readonly' : connect.self !== v}"
+											:readonly = 'connect.self !== v'
+											v-model = 'i.ready'
+										></var-checkbox>
+										<var-icon
+											v-if = 'connect.is_host'
+											:color = "connect.self !== v ? 'white' : '#555'"
+											name = 'close-circle-outline'
+											@click = 'connect.kick(v)'
+										/>
+									</div>
+								</template>
+							</var-cell>
 						</var-list>
 						<div class = 'info'>
 							<span>{{ `${mainGame.get.text().server.home.lflist} : ${mainGame.get.lflist(connect.home.lflist)}` }}</span>
@@ -123,7 +127,7 @@
 
 	interface player {
 		name : string;
-		ready : boolean;
+		ready ?: boolean;
 	};
 
 	let tcp : Tcp | null = null;
@@ -162,7 +166,7 @@
 		self : 0,
 		chk_deck : undefined as string | boolean | undefined,
 		deck : undefined as Deck | undefined,
-		player : [] as Array<player>,
+		player : new Array(4).fill({ name : '' }) as Array<player>,
 		home : {
 			lflist : 0,
 			rule : 0,
@@ -197,7 +201,16 @@
 			}
 		},
 		kick : async (v : number) : Promise<void> => {
-			await tcp!.send.kick(v);
+			if (connect.self !== v)
+				await tcp!.send.kick(v);
+		},
+		to : {
+			duelist : async () : Promise<void> => {
+				await tcp!.send.to_duelist();
+			},
+			watcher : async () : Promise<void> => {
+				await tcp!.send.to_watcher();
+			},
 		},
 		clear : () => {
 			connect.player = [];

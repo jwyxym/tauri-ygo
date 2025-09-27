@@ -64,6 +64,10 @@ const Zh_CN : TEXT_Like = {
 		deck : '选择卡组',
 		rule : ['OCG', 'TCG', '简体中文', '自定义卡', '无独有卡', '所有卡片'],
 		mode : ['单局模式', '比赛模式', '双打模式'],
+		to : {
+			duelist : '决斗者',
+			watcher : '观战者'
+		},
 		home : {
 			lflist : '禁限卡表',
 			rule : '卡片允许',
