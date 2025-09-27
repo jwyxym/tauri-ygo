@@ -41,7 +41,6 @@
 
 	import Menu from './pages/menu/menu.vue';
 	import Canvas from './pages/animation/back.vue';
-	import Duel from './pages/server/duel.vue';
 	import Deck from './pages/deck/deck_list.vue';
 	import Server from './pages/server/server.vue';
 	import Setting from './pages/setting.vue';
