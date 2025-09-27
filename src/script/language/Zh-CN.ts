@@ -129,7 +129,8 @@ const Zh_CN : TEXT_Like = {
 			},
 			setting : {
 				download : 'url不可为空'
-			}
+			},
+			deck : '请选择卡组'
 		},
 		download : {
 			start : '开始下载',

@@ -233,10 +233,11 @@ class Game {
 			}
 			return decks;
 		},
-		pic : async (deck : Array<number>) : Promise<void> => {
+		pic : async (deck : Array<number> | Deck) : Promise<void> => {
+			deck = deck instanceof Deck ? [...deck.main, ...deck.side, ...deck.extra] : deck;
 			const filter = (i : number, v : number, a : Array<number>) => {
 				const card = this.cards.get(i);
-				return a.indexOf(i) === v && card != undefined && card.pic === ''
+				return a.indexOf(i) === v && card != undefined && card.pic === '';
 			}
 			deck = deck.filter(filter);
 			if (deck.length === 0) return;

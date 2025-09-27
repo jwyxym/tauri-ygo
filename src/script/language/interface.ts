@@ -115,6 +115,7 @@ interface TEXT_Like {
 			setting : {
 				download : string;
 			};
+			deck : string;
 		};
 		download : {
 			start : string;

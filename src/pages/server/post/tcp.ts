@@ -44,8 +44,9 @@ class Tcp {
 		this.address = '';
 	}
 
-	connect = async (address : string, name : string, pass : string) : Promise<boolean> => {
+	connect = async (address : string, name : string, pass : string, connect : Reactive<any>) : Promise<boolean> => {
 		try {
+			connect.state = -1;
 			this.address = address;
 			await tcp.connect(this.cid, address);
 			const message_address : CTOS_ExternalAddress = {
@@ -72,11 +73,10 @@ class Tcp {
 		await tcp.listen(async (x) => {
 			if (x.payload.id === this.cid && this.address !== '') {
 				if (x.payload.event.disconnect == this.address) {
-					connect.state = false;
+					connect.state = 0;
 					this.address = '';
 				} else if (x.payload.event.message) {
 					listen(new Uint8Array(x.payload.event.message.data));
-					connect.state = true;
 				}
 			}
 		});
@@ -193,6 +193,12 @@ class Tcp {
 					}
 				}
 			],
+			[STOC.DECK_COUNT,
+				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+					const pack = to_package(buffer, data, new Array(6).fill(16), pos);
+					console.log(pack)
+				}
+			],
 			[STOC.JOIN_GAME,
 				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					const pack = to_package(buffer, data, [32, ...new Array(5).fill(8), -3, 32, 8, 8, 16], pos);
@@ -206,6 +212,7 @@ class Tcp {
 					connect.home.start_hand = pack[7];
 					connect.home.draw_count = pack[8];
 					connect.home.time_limit = pack[9];
+					connect.state = 1;
 				}
 			],
 			[STOC.TYPE_CHANGE,
@@ -215,6 +222,11 @@ class Tcp {
 					const is_host = ((pack[0] >> 4) & 0xf) != 0;
 					connect.is_host = is_host;
 					connect.self = self;
+				}
+			],
+			[STOC.DUEL_START,
+				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+					connect.state = 2;
 				}
 			],
 			[STOC.CHAT,
@@ -260,15 +272,10 @@ class Tcp {
 							connect.player[player] = { name : '' };
 							break;
 						default:
-							console.log(state, player)
-							connect.player[state] = connect.player[player];
-							connect.player[player] = { name : '' };
-							// if (state < 4) {
-							// 	while (connect.player.length < state + 1)
-							// 		connect.player.splice(state - 1, 0, { name : '' });
-							// 	while (connect.player.length > state + 1)
-							// 		connect.player.splice(connect.player.length, 0, { name : '' });
-							// }
+							if (state < 4) {
+								connect.player[state] = connect.player[player];
+								connect.player[player] = { name : '' };
+							}
 							break;
 					}
 				}
@@ -323,13 +330,16 @@ class Tcp {
 		to_watcher : async () : Promise<void> => {
 			this.send.on(CTOS.HS_TOOBSERVER);
 		},
+		start : async () : Promise<void> => {
+			this.send.on(CTOS.HS_START);
+		},
 	}
 
 	disconnect = async (connect : Reactive<any>) : Promise<void> => {
 		try {
 			await tcp.disconnect(this.cid);
 		} catch {}
-		connect.state = false;
+		connect.state = 0;
 		this.address = '';
 	}
 }

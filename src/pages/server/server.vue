@@ -95,6 +95,7 @@
 							:rules = 'connect.rule'
 						></Select>
 						<Button
+							:loading = 'page.loading'
 							v-if = 'connect.is_host'
 							@click = 'connect.start'
 							icon_name = 'socket'
@@ -124,6 +125,7 @@
 	import AutoInput from '../varlet/auto_input.vue';
 	import Deck from '../deck/deck';
 	import Duel from './duel.vue';
+	import toast from '../../script/toast';
 
 	interface player {
 		name : string;
@@ -145,7 +147,7 @@
 		},
 		connect : async () : Promise<void> => {
 			page.loading = true;
-			if (await tcp!.connect(server.address ?? '', server.name ?? '', server.pass ?? '')) {
+			if (await tcp!.connect(server.address ?? '', server.name ?? '', server.pass ?? '', connect)) {
 				mainGame.push.system(constant.str.system_conf.string.server_address, server.address);
 				mainGame.push.system(constant.str.system_conf.string.server_name, server.name);
 				mainGame.push.system(constant.str.system_conf.string.server_pass, server.pass);
@@ -160,7 +162,7 @@
 	});
 
 	const connect = reactive({
-		state : false,
+		state : 0,
 		duel : false,
 		is_host : false,
 		self : 0,
@@ -181,10 +183,13 @@
 			watch : 0
 		} as TCP.HostInfo,
 		start : async () : Promise<void> => {
-			// await tcp.disconnect();
-			// page.wait = false;
-			// await (new Promise(resolve => setTimeout(resolve, 200)));
-			// page.server = true;
+			if (connect.deck) {
+				page.loading = true;
+				await tcp!.send.start();
+				await mainGame.load.pic(connect.deck);
+			} else {
+				toast.error(mainGame.get.text().toast.error.deck)
+			}
 		},
 		ready : async (deck : Deck | undefined) : Promise<void> => {
 			deck ? await tcp!.send.ready(deck) : await tcp!.send.un_ready();
@@ -249,20 +254,33 @@
 		page.server = true;
 	});
 
+	watch(() => {}, () => {
+		
+	});
+
 	watch(() => { return connect.state; }, async (n) => {
+		if (![0, 1, 2].includes(n)) return;
 		const on = async () => {
 			page.server = false;
 			await (new Promise(resolve => setTimeout(resolve, 200)));
 			page.wait = true;
 			page.loading = false;
-		}
+		};
+		const start = async () => {
+			page.wait = false;
+			await (new Promise(resolve => setTimeout(resolve, 200)));
+			page.duel = true;
+			page.loading = false;
+		};
 		const off = async () => {
 			page.wait = false;
+			page.duel = false;
 			await (new Promise(resolve => setTimeout(resolve, 200)));
 			page.server = true;
 			connect.clear();
-		}
-		n ? await on() : await off();
+			page.loading = false;
+		};
+		await [off, on, start][n]();
 	});
 
 	const props = defineProps(['select']);
