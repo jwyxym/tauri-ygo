@@ -637,14 +637,14 @@
 			deck.extra = d.extra;
 			deck.side = d.side;
 			deck.name = d.name;
+			deck.ct.main = d.main.length;
+			deck.ct.extra = d.extra.length;
+			deck.ct.side = d.side.length;
 		}
 		await search.on();
 	});
 
 	onMounted(() : void => {
-		deck.ct.main = deck.get_dom(0).length;
-		deck.ct.extra = deck.get_dom(1).length;
-		deck.ct.side = deck.get_dom(2).length;
 		if (mainGame.is_android()) {
 			for (const i of [main, extra, side]) {
 				Sortable.create(i.value!.children[0], {

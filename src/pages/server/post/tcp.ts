@@ -1,6 +1,5 @@
 import * as tcp from '@kuyoonjo/tauri-plugin-tcp';
 import { Reactive } from 'vue';
-import { Base64 } from 'js-base64';
 
 import mainGame from '../../../script/game';
 import fs from '../../../script/fs';
@@ -161,29 +160,35 @@ class Tcp {
 						case 2:
 							const flag = code >> 28;
 							const id = code & mainGame.max_card_id;
+							let str;
 							switch (flag) {
 								case 1:
-									toast.error(mainGame.get.strings.system(1407, mainGame.get.card(id).name));
+									str = (mainGame.get.strings.system(1407, mainGame.get.card(id).name));
 									break;
 								case 2:
-									toast.error(mainGame.get.strings.system(1413, mainGame.get.card(id).name));
+									str = (mainGame.get.strings.system(1413, mainGame.get.card(id).name));
 									break;
 								case 3:
-									toast.error(mainGame.get.strings.system(1414, mainGame.get.card(id).name));
+									str = mainGame.get.strings.system(1414, mainGame.get.card(id).name);
 									break;
 								case 4:
-									toast.error(mainGame.get.strings.system(1415, [mainGame.get.card(id).name, id]));
+									str = mainGame.get.strings.system(1415, [mainGame.get.card(id).name, id]);
 									break;
 								case 5:
-									toast.error(mainGame.get.strings.system(1416, mainGame.get.card(id).name));
+									str = mainGame.get.strings.system(1416, mainGame.get.card(id).name);
 									break;
 								case 6:
-									toast.error(mainGame.get.strings.system(1417, id));
+									str = mainGame.get.strings.system(1417, id);
 									break;
 								case 7:
-									toast.error(mainGame.get.strings.system(id > 0 ? 1418 : 1420, mainGame.get.card(id).name));
+									str = mainGame.get.strings.system(id > 0 ? 1418 : 1420, mainGame.get.card(id).name);
+									break;
+								default:
+									str = mainGame.get.text().unknow;
 									break;
 							}
+							connect.chk_deck = str;
+							toast.error(str);
 							break;
 					}
 				}
@@ -201,6 +206,15 @@ class Tcp {
 					connect.home.start_hand = pack[7];
 					connect.home.draw_count = pack[8];
 					connect.home.time_limit = pack[9];
+				}
+			],
+			[STOC.TYPE_CHANGE,
+				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+					const pack = to_package(buffer, data, [8], pos);
+					const self = pack[0] & 0xf;
+					const is_host = ((pack[0] >> 4) & 0xf) != 0;
+					connect.is_host = is_host;
+					connect.self = self;
 				}
 			],
 			[STOC.CHAT,
@@ -237,6 +251,7 @@ class Tcp {
 							break;
 						case 9:
 							connect.player[player].ready = true;
+							connect.chk_deck = true;
 							break;
 						case 10:
 							connect.player[player].ready = false;
@@ -290,6 +305,9 @@ class Tcp {
 		},
 		un_ready : async () : Promise<void> => {
 			this.send.on(CTOS.HS_NOTREADY);
+		},
+		kick : async (v : number) : Promise<void> => {
+			this.send.on(CTOS.HS_KICK, new Message(v, 8));
 		},
 	}
 

@@ -48,16 +48,24 @@
 								tag = 'div'
 							>
 								<var-cell
-									v-for = 'i in connect.player'
-									:key = 'i'
+									v-for = '(i, v) in connect.player'
 									:title = 'i.name'
 									:border = 'true'
+									:key = 'i'
 								>
 									<template #extra>
-										<var-checkbox
-											:readonly = 'true'
-											v-model = 'i.ready'
-										></var-checkbox>
+										<div class = 'extra'>
+											<var-checkbox
+												:readonly = 'connect.self !== v'
+												v-model = 'i.ready'
+											></var-checkbox>
+											<var-icon
+												v-if = 'connect.self !== v && connect.is_host'
+												color = 'white'
+												name = 'close-circle-outline'
+												@click = 'connect.kick(v)'
+											/>
+										</div>
 									</template>
 								</var-cell>
 							</TransitionGroup>
@@ -79,10 +87,11 @@
 							ref = 'deck'
 							name = 'deck'
 							v-model = 'connect.deck'
-							:validate-trigger = "['onChange']"
 							@change = 'connect.ready'
+							:rules = 'connect.rule'
 						></Select>
 						<Button
+							v-if = 'connect.is_host'
 							@click = 'connect.start'
 							icon_name = 'socket'
 						></Button>
@@ -111,6 +120,11 @@
 	import AutoInput from '../varlet/auto_input.vue';
 	import Deck from '../deck/deck';
 	import Duel from './duel.vue';
+
+	interface player {
+		name : string;
+		ready : boolean;
+	};
 
 	let tcp : Tcp | null = null;
 	const deck = ref<HTMLElement | null>();
@@ -144,8 +158,11 @@
 	const connect = reactive({
 		state : false,
 		duel : false,
+		is_host : false,
+		self : 0,
+		chk_deck : undefined as string | boolean | undefined,
 		deck : undefined as Deck | undefined,
-		player : [] as Array<{ name : string, ready : boolean}>,
+		player : [] as Array<player>,
 		home : {
 			lflist : 0,
 			rule : 0,
@@ -167,6 +184,20 @@
 		},
 		ready : async (deck : Deck | undefined) : Promise<void> => {
 			deck ? await tcp!.send.ready(deck) : await tcp!.send.un_ready();
+		},
+		rule : async (deck : Deck | undefined) : Promise<string | boolean> => {
+			if (deck) {
+				while (connect.chk_deck === undefined)
+					await (new Promise(resolve => setTimeout(resolve, 200)));
+				const result = connect.chk_deck;
+				connect.chk_deck = undefined;
+				return result;
+			} else {
+				return true;
+			}
+		},
+		kick : async (v : number) : Promise<void> => {
+			await tcp!.send.kick(v);
 		},
 		clear : () => {
 			connect.player = [];
