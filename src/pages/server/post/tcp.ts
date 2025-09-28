@@ -10,6 +10,18 @@ import STOC from './stoc';
 import CTOS from './ctos';
 import Deck from '../../deck/deck';
 
+interface Player {
+	name : string;
+	ready ?: boolean;
+};
+
+interface Chat {
+	msg : string;
+	contentType : number;
+};
+
+type Chats = Array<Chat>;
+
 interface HostInfo {
 	lflist : number;
 	rule : number;
@@ -242,7 +254,8 @@ class Tcp {
 					if (str.length > 0)
 						str += ' : '
 					str += pack[1];
-					toast.info(str);
+					toast.info(str, true);
+					connect.chat.push({ msg : str, contentType : 1 } as Chat);
 				}
 			],
 			[STOC.HS_PLAYER_ENTER,
@@ -345,4 +358,4 @@ class Tcp {
 }
 
 export default Tcp;
-export type { HostInfo };
+export type { HostInfo, Player, Chats };

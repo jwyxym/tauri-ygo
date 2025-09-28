@@ -112,10 +112,12 @@
 			></Duel>
 		</transition>
 		<var-popup v-model:show = 'page.chat' :overlay = 'false' position = 'right'>
-			<div
+			<ConversationBlock
 				class = 'chat'
-			>
-			</div>
+				:list = 'connect.chat'
+				:userOptions = "{ position: 'left' }"
+				:answerOptions = "{ position: 'right' }"
+			/>
 		</var-popup>
 	</div>
 </template>
@@ -134,11 +136,7 @@
 	import Deck from '../deck/deck';
 	import Duel from './duel.vue';
 	import toast from '../../script/toast';
-
-	interface player {
-		name : string;
-		ready ?: boolean;
-	};
+	import { ConversationBlock } from 'conversation-vue'
 
 	let tcp : Tcp | null = null;
 	const deck = ref<HTMLElement | null>();
@@ -177,8 +175,8 @@
 		self : -1,
 		chk_deck : undefined as string | boolean | undefined,
 		deck : undefined as Deck | undefined,
-		player : new Array(4).fill({ name : '' }) as Array<player>,
-		chats : [] as Array<string>,
+		player : new Array(4).fill({ name : '' }) as Array<TCP.Player>,
+		chat : [] as TCP.Chats,
 		home : {
 			lflist : 0,
 			rule : 0,
@@ -232,7 +230,7 @@
 			},
 		},
 		clear : () => {
-			connect.player = new Array(4).fill({ name : '' }) as Array<player>;
+			connect.player = new Array(4).fill({ name : '' }) as Array<TCP.Player>;
 			connect.home = {
 				lflist : 0,
 				rule : 0,
@@ -266,11 +264,12 @@
 
 	onMounted(() => {
 		page.server = true;
+		page.chat = true;
 	});
 
-	watch(() => {return connect.is_host}, (n) => {
-		console.log(n)
-	});
+	watch(() => {return page.chat}, (n) => {
+		n ? toast.off() : toast.on();
+	}, { immediate : true });
 
 	watch(() => { return connect.state; }, async (n) => {
 		if (![0, 1, 2].includes(n)) return;

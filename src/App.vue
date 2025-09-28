@@ -180,9 +180,14 @@
 			font-size: min(4vh, var(--font-size-md)) !important;
 		}
 	}
-	.var-menu-select--scrollable, .var-select__scroller {
+	.var-menu-select--scrollable, .var-select__scroller, .ConversationBlock {
 		&::-webkit-scrollbar {
 			display: none;
+		}
+	}
+	.ConversationBlock {
+		.content-align-right {
+			color: black !important;
 		}
 	}
 	.readonly {

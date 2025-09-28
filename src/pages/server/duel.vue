@@ -96,12 +96,12 @@
 
 		animate();
 
-		window.addEventListener("resize", three.resize);
+		window.addEventListener('resize', three.resize);
 	})
 
 	onUnmounted(() => {
-		window.removeEventListener("resize", three.resize);
-	})
+		window.removeEventListener('resize', three.resize);
+	});
 
 </script>
 <style scoped lang = 'scss'>
