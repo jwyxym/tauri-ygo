@@ -29,7 +29,7 @@
 		}
 		.home {
 			width: 100%;
-			height: calc(100% - 30px);
+			height: calc(100% - 100px);
 			display: flex;
 			gap : 10%;
 			.var-list {
@@ -57,15 +57,16 @@
 			grid-template-columns: repeat(2, 1fr);
 			justify-items: center;
 			align-items: center;
-			.var-select {
-				align-self: flex-start;
-			}
+			
 		}
 		.start {
 			height: 100px;
 			grid-template-columns: repeat(3, 1fr);
 			font-size: max(2vh, var(--font-size-md));
 			color: white;
+			.var-select {
+				align-self: flex-start;
+			}
 		}
 
 		&::-webkit-scrollbar {

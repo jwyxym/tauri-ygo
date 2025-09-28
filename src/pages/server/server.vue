@@ -42,17 +42,19 @@
 					<Button
 						@click = 'connect.to.duelist'
 						:content = mainGame.get.text().server.to.duelist
+						:class = "{ 'readonly' : connect.self < 4 && connect.home.mode !== 2 }"
 					></Button>
 					<Button
 						@click = 'connect.to.watcher'
 						:content = mainGame.get.text().server.to.watcher
+						:class = "{ 'readonly' : connect.self >= 4 }"
 					></Button>
 				</div>
 				<div class = 'content'>
 					<div class = 'home'>
 						<var-list>
 							<var-cell
-								v-for = '(i, v) in connect.player'
+								v-for = '(i, v) in connect.player.slice(0, connect.home.mode === 2 ? 4 : 2)'
 								:title = 'i.name'
 								:border = 'true'
 								:key = 'v'
@@ -60,13 +62,13 @@
 								<template #extra>
 									<div class = 'extra' v-if = 'i.ready !== undefined'>
 										<var-checkbox
-											:class = "{ 'readonly' : connect.self !== v}"
-											:readonly = 'connect.self !== v'
+											class = 'readonly'
+											:readonly = 'true'
 											v-model = 'i.ready'
 										></var-checkbox>
 										<var-icon
 											v-if = 'connect.is_host'
-											:color = "connect.self !== v ? 'white' : '#555'"
+											:color = "connect.self === v ? '#555' : 'white'"
 											name = 'close-circle-outline'
 											@click = 'connect.kick(v)'
 										/>
@@ -165,10 +167,11 @@
 		state : 0,
 		duel : false,
 		is_host : false,
-		self : 0,
+		self : -1,
 		chk_deck : undefined as string | boolean | undefined,
 		deck : undefined as Deck | undefined,
 		player : new Array(4).fill({ name : '' }) as Array<player>,
+		chats : [] as Array<string>,
 		home : {
 			lflist : 0,
 			rule : 0,
@@ -211,14 +214,18 @@
 		},
 		to : {
 			duelist : async () : Promise<void> => {
-				await tcp!.send.to_duelist();
+				if (connect.self >= 4 || connect.home.mode === 2) {
+					await tcp!.send.to_duelist();
+				}
 			},
 			watcher : async () : Promise<void> => {
-				await tcp!.send.to_watcher();
+				if (connect.self < 4) {
+					await tcp!.send.to_watcher();
+				}
 			},
 		},
 		clear : () => {
-			connect.player = [];
+			connect.player = new Array(4).fill({ name : '' }) as Array<player>;
 			connect.home = {
 				lflist : 0,
 				rule : 0,
@@ -254,8 +261,8 @@
 		page.server = true;
 	});
 
-	watch(() => {}, () => {
-		
+	watch(() => {return connect.is_host}, (n) => {
+		console.log(n)
 	});
 
 	watch(() => { return connect.state; }, async (n) => {

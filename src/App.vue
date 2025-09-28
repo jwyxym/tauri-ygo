@@ -166,8 +166,14 @@
 	.var-divider {
 		color: white !important;
 	}
+	.var-back-top {
+		background: none !important;
+		button {
+			background: none !important;
+		}
+	}
 	.var-card {
-		background-color: transparent;
+		background-color: transparent !important;
 	}
 	.var-button {
 		span {
@@ -181,6 +187,7 @@
 	}
 	.readonly {
 		--checkbox-unchecked-color: #555 !important;
+		color: #555 !important;
 	}
 	:root {
 		--card-background: transparent !important;

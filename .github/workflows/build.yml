@@ -283,6 +283,13 @@ jobs:
         with:
           path: build
 
+      - name: 删除 Tag 为 release-latest 的 Release
+        run: |
+          TAG_NAME=release-latest
+          gh release delete "$TAG_NAME" --yes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Delete old tag
         run: |
           git config --global user.name "GitHub Actions"

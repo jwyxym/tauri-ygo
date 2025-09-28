@@ -163,6 +163,7 @@
 						</div>
 					</div>
 				</div>
+				<var-back-top :duration = '800'/>
 			</var-list>
 		</div>
 		<var-popup v-model:show = 'search.show_setting' position = 'right'>
