@@ -264,7 +264,6 @@
 
 	onMounted(() => {
 		page.server = true;
-		page.chat = true;
 	});
 
 	watch(() => {return page.chat}, (n) => {
