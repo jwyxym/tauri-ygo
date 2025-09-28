@@ -111,6 +111,12 @@
 				v-if = 'page.duel'
 			></Duel>
 		</transition>
+		<var-popup v-model:show = 'page.chat' :overlay = 'false' position = 'right'>
+			<div
+				class = 'chat'
+			>
+			</div>
+		</var-popup>
 	</div>
 </template>
 <script setup lang = 'ts'>
@@ -141,6 +147,7 @@
 		server : false,
 		wait : false,
 		duel : false,
+		chat : false,
 		loading : false,
 		exit : async () : Promise<void> => {
 			page.server = false;

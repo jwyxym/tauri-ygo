@@ -1,7 +1,7 @@
 .var-form {
 	display: flex;
 	flex-direction: column;
-	width: 60vw;
+	width: 50vw;
 	max-height: 80vh;
 	border: 1px solid white;
 	background-color: rgba(0, 0, 0, 0.2);
@@ -52,6 +52,7 @@
 			}
 		}
 		.pass, .start {
+			height: 50px;
 			display: grid;
 			width: 100%;
 			grid-template-columns: repeat(2, 1fr);
@@ -72,4 +73,12 @@
 			display: none;
 		}
 	}
+}
+
+.chat {
+	border: 1px solid white;
+	color: white;
+	width: 30vw;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.2);
 }
