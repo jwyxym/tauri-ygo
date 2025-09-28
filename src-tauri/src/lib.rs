@@ -21,7 +21,7 @@ enum FileContent {
 }
 
 #[tauri::command]
-fn unzip(path: String, file: String, chk: bool) -> Result<(), String> {
+async fn unzip(path: String, file: String, chk: bool) -> Result<(), String> {
 	let file = File::open(file).map_err(|e| e.to_string())?;
 	let mut archive = ZipArchive::new(file).map_err(|e| e.to_string())?;
 
@@ -45,7 +45,7 @@ fn unzip(path: String, file: String, chk: bool) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn read_pics(dirs: Vec<String>, codes: Vec<i64>) -> Result<Vec<(i64, FileContent)>, String> {
+async fn read_pics(dirs: Vec<String>, codes: Vec<i64>) -> Result<Vec<(i64, FileContent)>, String> {
 	let mut entries: Vec<(i64, FileContent)> = Vec::new();
 	for path in dirs {
 		for code in &codes {
@@ -70,7 +70,7 @@ fn read_pics(dirs: Vec<String>, codes: Vec<i64>) -> Result<Vec<(i64, FileContent
 }
 
 #[tauri::command]
-fn read_zip(path: String, file_type: Vec<String>) -> Result<Vec<(String, FileContent)>, String> {
+async fn read_zip(path: String, file_type: Vec<String>) -> Result<Vec<(String, FileContent)>, String> {
 	let file: File = File::open(&path).map_err(|e| e.to_string())?;
 	let mut archive: ZipArchive<File> = ZipArchive::new(file)
 		.map_err(|e| e.to_string())?;
@@ -132,7 +132,7 @@ fn read_zip(path: String, file_type: Vec<String>) -> Result<Vec<(String, FileCon
 }
 
 #[tauri::command]
-fn read_db(path: String) -> Result<Vec<(Vec<i64>, Vec<String>)>, String> {
+async fn read_db(path: String) -> Result<Vec<(Vec<i64>, Vec<String>)>, String> {
 	let conn: Connection = Connection::open(&path)
 		.map_err(|e| e.to_string())?;
 

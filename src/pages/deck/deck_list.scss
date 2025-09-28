@@ -10,10 +10,11 @@
 			gap: 10px;
 			.button_list {
 				display: flex;
+				height: 30px;
 				gap: 10px;
 			}
 			.var-list {
-				height: 100%;
+				height: calc(100% - 30px);
 				width: 80%;
 				display: flex;
 				flex-direction: column;

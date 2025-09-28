@@ -289,6 +289,7 @@
 		gap: 10px;
 		.button_list {
 			display: flex;
+			height: 30px;
 			gap: 10px;
 		}
 		.content {
@@ -298,8 +299,8 @@
 			gap: 10%;
 			.expansion_list {
 				width: 40%;
-				height: 100%;
 				display: flex;
+				height: calc(100% - 30px);
 				flex-direction: column;
 				gap: 10px;
 				.head {
@@ -320,7 +321,7 @@
 			}
 			.items {
 				width: 40%;
-				height: 100%;
+				height: calc(100% - 30px);
 				overflow-y: auto;
 				&::-webkit-scrollbar {
 					display: none;
