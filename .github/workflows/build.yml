@@ -238,11 +238,35 @@ jobs:
           copy .ci\upload.py build\upload.py
           pip install requests
           python .ci\update.py ${{ secrets.GITCODE_ACCESS_TOKEN }}
+
+      - name: Upload Zip
+        shell: cmd
+        run: |
           cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} assets.zip/assets.zip
+
+      - name: Upload Setup Exe
+        shell: cmd
+        run: |
+          cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-setup.exe/tauri-ygo-setup.exe
+
+      - name: Upload Setup Msi
+        shell: cmd
+        run: |
+          cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-setup.msi/tauri-ygo-setup.msi
+
+      - name: Upload Exe
+        shell: cmd
+        run: |
+          cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo.exe/tauri-ygo.exe
+
+      - name: Upload Apk
+        shell: cmd
+        run: |
+          cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo.apk/tauri-ygo.apk
 
   create-release:
