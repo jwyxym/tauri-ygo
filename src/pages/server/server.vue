@@ -268,7 +268,7 @@
 
 	watch(() => {return page.chat}, (n) => {
 		n ? toast.off() : toast.on();
-	}, { immediate : true });
+	});
 
 	watch(() => { return connect.state; }, async (n) => {
 		if (![0, 1, 2].includes(n)) return;
