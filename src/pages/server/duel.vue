@@ -30,7 +30,7 @@
 	onMounted(() => {
 		const card_size = {
 			width : 0,
-			height : window.innerHeight / 10
+			height : 90
 		}
 		card_size.width = card_size.height / 2.9;
 		three.renderer.setSize(window.innerWidth, window.innerHeight);
