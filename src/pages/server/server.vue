@@ -245,6 +245,7 @@
 				watch : 0
 			};
 			connect.deck = undefined;
+			connect.chat = [] as TCP.Chats;
 		}
 	});
 
@@ -287,6 +288,7 @@
 		const off = async () => {
 			page.wait = false;
 			page.duel = false;
+			page.chat = false;
 			await (new Promise(resolve => setTimeout(resolve, 200)));
 			page.server = true;
 			connect.clear();
