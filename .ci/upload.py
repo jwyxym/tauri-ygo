@@ -12,9 +12,7 @@ headers = {
 	'Accept': 'application/json'
 }
 
-print(f'开始传输：{file_name}')
 response = requests.request("GET", url, headers=headers, data=payload)
 data = json.loads(response.text)
 files = {"file": (file_name, open(file_path, "rb"), "application/octet-stream")}
 response = requests.request("PUT", data.get('url'), headers=data.get('headers'), files=files)
-print(f'传输完成：{file_name}')

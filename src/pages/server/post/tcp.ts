@@ -205,6 +205,17 @@ class Tcp {
 					}
 				}
 			],
+			[STOC.SELECT_TP,
+				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+					connect.tp.chk = true;
+				}
+			],
+			[STOC.HAND_RESULT,
+				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+					const pack = to_package(buffer, data, new Array(2).fill(8), pos);
+					connect.rps.result = pack;
+				}
+			],
 			[STOC.DECK_COUNT,
 				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					const pack = to_package(buffer, data, new Array(6).fill(16), pos);
@@ -239,6 +250,7 @@ class Tcp {
 			[STOC.DUEL_START,
 				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					connect.state = 2;
+					connect.rps.chk = true;
 				}
 			],
 			[STOC.CHAT,
@@ -247,7 +259,7 @@ class Tcp {
 					const player = pack[0];
 					let str = '';
 					if (player < 4) {
-						str += connect.player[player];
+						str += connect.player[player].name;
 					} else if ((player < 11 || player > 19) && player !== 8) {
 						str += mainGame.get.text().server.watcher
 					}
@@ -345,6 +357,12 @@ class Tcp {
 		},
 		start : async () : Promise<void> => {
 			this.send.on(CTOS.HS_START);
+		},
+		rps : async (v : number) : Promise<void> => {
+			this.send.on(CTOS.HAND_RESULT, new Message(v + 1, 8));
+		},
+		select_tp : async (tp : number) : Promise<void> => {
+			this.send.on(CTOS.TP_RESULT, new Message(tp, 8));
 		},
 	}
 

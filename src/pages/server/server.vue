@@ -106,11 +106,20 @@
 				</div>
 			</var-form>
 		</var-popup>
-		<transition name = 'opacity'>
+		<TransitionGroup tag = 'div' name = 'opacity'>
 			<Duel
 				v-if = 'page.duel'
+				:connect = 'connect'
 			></Duel>
-		</transition>
+			<RPS
+				v-if = 'page.duel && connect.rps.chk'
+				:connect = 'connect'
+			></RPS>
+			<RPS
+				v-if = 'page.duel && connect.tp.chk'
+				:connect = 'connect'
+			></RPS>
+		</TransitionGroup>
 		<var-popup v-model:show = 'page.chat' :overlay = 'false' position = 'right'>
 			<ConversationBlock
 				class = 'chat'
@@ -122,12 +131,14 @@
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { ref, reactive, onBeforeMount, onMounted, computed, watch } from 'vue';
+	import { ref, reactive, onBeforeMount, onMounted, computed, watch, TransitionGroup } from 'vue';
+	import { ConversationBlock } from 'conversation-vue'
 
 	import mainGame from '../../script/game';
 	import constant from '../../script/constant';
 	import fs from '../../script/fs';
 	import Tcp, * as TCP from './post/tcp';
+	import toast from '../../script/toast';
 
 	import Select from '../varlet/select.vue';
 	import Button from '../varlet/button.vue';
@@ -135,8 +146,7 @@
 	import AutoInput from '../varlet/auto_input.vue';
 	import Deck from '../deck/deck';
 	import Duel from './duel.vue';
-	import toast from '../../script/toast';
-	import { ConversationBlock } from 'conversation-vue'
+	import RPS from './rps.vue';
 
 	let tcp : Tcp | null = null;
 	const deck = ref<HTMLElement | null>();
@@ -228,6 +238,27 @@
 					await tcp!.send.to_watcher();
 				}
 			},
+		},
+		rps : {
+			chk : false,
+			result : [0, 0],
+			select : async (v : number) : Promise<void> => {
+				await tcp!.send.rps(v);
+			},
+			off : () : void => {
+				connect.rps.chk = false;
+			},
+		},
+		tp : {
+			chk : false,
+			select : 0,
+			selected : async (tp : number) : Promise<void> => {
+				connect.tp.select = tp;
+				await tcp!.send.select_tp(tp);
+			},
+			off : () : void => {
+				connect.tp.chk = false;
+			}
 		},
 		clear : () => {
 			connect.player = new Array(4).fill({ name : '' }) as Array<TCP.Player>;

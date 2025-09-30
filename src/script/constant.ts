@@ -82,7 +82,8 @@ class Constant {
 			textures : {
 				unknown : 'unknown.jpg',
 				back : 'back.jpg',
-				pic : ['cardI.jpg', 'cardII.jpg']
+				pic : ['cardI.jpg', 'cardII.jpg'],
+				rps : ['s.png', 'r.png', 'p.png']
 			},
 			sound : {
 				back : 'Night View.wav',
@@ -90,7 +91,7 @@ class Constant {
 			},
 			database : 'cards.cdb',
 			pics : 'pics.zip',
-			assets : 'assets.zip'
+			assets : 'assets.zip',
 		},
 		string_conf : {
 			system : '!system',
