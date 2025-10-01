@@ -9,9 +9,12 @@ use content_disposition::parse_content_disposition;
 use rand::Rng;
 use ureq::{
 	http::Response,
+	RequestBuilder,
+	typestate::WithoutBody,
 	Body,
 	get
 };
+use serde_json::{Value, from_str};
 
 #[derive(Serialize)]
 #[serde(tag = "type", content = "content")]
@@ -166,6 +169,36 @@ async fn read_db(path: String) -> Result<Vec<(Vec<i64>, Vec<String>)>, String> {
 }
 
 #[tauri::command]
+async fn version(url: String, headers: Vec<(String, String)>) -> Result<String, String> {
+	let mut req: RequestBuilder<WithoutBody> = get(&url);
+	for (key, value) in headers {
+        req = req.header(key, value);
+    }
+	let response: Response<Body> = req.call().map_err(|e| e.to_string())?;
+	if response.status().is_success() {
+		let mut body = response.into_body();
+		let mut reader = body.as_reader();
+		let mut content: String = "".to_string();
+		reader.read_to_string(&mut content).map_err(|e| e.to_string())?;
+		let json_data: Value = from_str(&content).map_err(|e| e.to_string())?;
+		if let Some(contents) = json_data.get("content") {
+			if let Value::Array(arr) = contents {
+				if let Some(content) = arr.get(0) {
+					if let Some(created_at) = content.get("created_at") {
+						if let Value::String(created_time) = created_at {
+							return Ok(created_time.to_string());
+						}
+					}
+				}
+			}
+		}
+	} else {
+		return Err(format!("{}", response.status()));
+	}
+	Err("No Data".to_string())
+}
+
+#[tauri::command]
 async fn download(url: String, path: String, name: String, ex_name: String) -> Result<String, String> {
 	let response: Response<Body> = get(&url).call().map_err(|e| e.to_string())?;
 	let mut file_name: String = name;
@@ -216,6 +249,7 @@ pub fn run() {
 			read_zip,
 			read_pics,
 			read_db,
+			version,
 			download])
 		.run(tauri::generate_context!())
 		.expect("error while running tauri application");

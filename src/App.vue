@@ -124,7 +124,7 @@
 				closeOnClickOverlay : false
 			}, true)
 		};
-		await mainGame.chk() ? await on() : await dialog();
+		await mainGame.chk.file() ? await on() : await dialog();
 	});
 
 	onMounted(async () => {

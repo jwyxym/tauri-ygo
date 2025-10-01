@@ -177,14 +177,14 @@ jobs:
 
         for %%f in (.\src-tauri\target\release\bundle\msi\*) do (
             if not defined found_msi (
-                copy "%%f" ".\build\tauri-ygo-setup.msi"
+                copy "%%f" ".\build\tauri-ygo-windows.msi"
                 set "found_msi=1"
             )
         )
 
         for %%f in (.\src-tauri\target\release\bundle\nsis\*) do (
             if not defined found_exe (
-                copy "%%f" ".\build\tauri-ygo-setup.exe"
+                copy "%%f" ".\build\tauri-ygo-windows.exe"
                 set "found_exe=1"
             )
         )
@@ -198,14 +198,14 @@ jobs:
     - name: Upload File
       uses: actions/upload-artifact@v4
       with:
-        name: tauri-ygo-setup.exe
-        path: .\build\tauri-ygo-setup.exe
+        name: tauri-ygo-windows.exe
+        path: .\build\tauri-ygo-windows.exe
 
     - name: Upload File
       uses: actions/upload-artifact@v4
       with:
-        name: tauri-ygo-setup.msi
-        path: .\build\tauri-ygo-setup.msi
+        name: tauri-ygo-windows.msi
+        path: .\build\tauri-ygo-windows.msi
 
     - name: Upload File
       uses: actions/upload-artifact@v4
@@ -239,23 +239,11 @@ jobs:
           pip install requests
           python .ci\update.py ${{ secrets.GITCODE_ACCESS_TOKEN }}
 
-      - name: Upload Zip
-        shell: cmd
-        run: |
-          cd build
-          python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} assets.zip/assets.zip
-
-      - name: Upload Setup Exe
-        shell: cmd
-        run: |
-          cd build
-          python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-setup.exe/tauri-ygo-setup.exe
-
       - name: Upload Setup Msi
         shell: cmd
         run: |
           cd build
-          python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-setup.msi/tauri-ygo-setup.msi
+          python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-windows.msi/tauri-ygo-windows.msi
 
       - name: Upload Exe
         shell: cmd
@@ -268,6 +256,70 @@ jobs:
         run: |
           cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo.apk/tauri-ygo.apk
+
+  upload-gitcode:
+    name: Upload File to GitCode
+    needs: [build-android, build-windows]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: build
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Upload to GitCode Assets
+        shell: cmd
+        run: |
+          copy .ci\upload.py build\upload.py
+          pip install requests
+          python .ci\update.py ${{ secrets.GITCODE_ACCESS_TOKEN }}
+
+      - name: Upload Zip
+        shell: cmd
+        run: |
+          cd build
+          python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} assets.zip/assets.zip
+
+  upload-gitcode:
+    name: Upload File to GitCode Exe
+    needs: [build-android, build-windows]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: build
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Upload to GitCode
+        shell: cmd
+        run: |
+          copy .ci\upload.py build\upload.py
+          pip install requests
+          python .ci\update.py ${{ secrets.GITCODE_ACCESS_TOKEN }}
+
+      - name: Upload Setup Exe
+        shell: cmd
+        run: |
+          cd build
+          python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-windows.exe/tauri-ygo-windows.exe
 
   create-release:
     name: Create Release with All Files
@@ -327,8 +379,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/tauri-ygo-setup.msi/tauri-ygo-setup.msi
-          asset_name: tauri-ygo-setup.msi
+          asset_path: ./build/tauri-ygo-windows.msi/tauri-ygo-windows.msi
+          asset_name: tauri-ygo-windows.msi
           asset_content_type: application/octet-stream
 
       - name: Upload
@@ -337,8 +389,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/tauri-ygo-setup.exe/tauri-ygo-setup.exe
-          asset_name: tauri-ygo-setup.exe
+          asset_path: ./build/tauri-ygo-windows.exe/tauri-ygo-windows.exe
+          asset_name: tauri-ygo-windows.exe
           asset_content_type: application/octet-stream
 
       - name: Upload

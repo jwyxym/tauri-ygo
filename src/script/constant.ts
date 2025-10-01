@@ -119,6 +119,7 @@ class Constant {
 				server_address : 'server_address',
 				server_name : 'server_name',
 				server_pass : 'server_pass',
+				download_time : 'download_time'
 			},
 			sound : {
 				back : 'back_sound',
@@ -135,7 +136,11 @@ class Constant {
 		},
 		url : {
 			super_pre : 'https://cdn02.moecube.com:444/ygopro-super-pre/archive/ygopro-super-pre.ypk',
-			assets : 'https://api.gitcode.com/api/v5/repos/jwyxym/tauri-ygo/releases/release-latest/attach_files/assets.zip/download'
+			assets : 'https://api.gitcode.com/api/v5/repos/jwyxym/tauri-ygo/releases/release-latest/attach_files/assets.zip/download',
+			version : 'https://web-api.gitcode.com/api/v2/projects/jwyxym%2Ftauri-ygo/releases?repoId=jwyxym%252Ftauri-ygo',
+			headers : {
+				version : [['Referer', 'https://gitcode.com/']] as Array<[string, string]>
+			}
 		},
 		extends : {
 			ypk : '.ypk',

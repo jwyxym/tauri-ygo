@@ -4,6 +4,7 @@ import { join } from '@tauri-apps/api/path';
 
 import fs from './fs';
 import constant from './constant';
+import invoke from './invoke';
 import Card, { Search } from './card';
 import textLike from './language/interface';
 import Zh_CN from './language/Zh-CN';
@@ -662,9 +663,20 @@ class Game {
 		}
 	};
 
-	chk = async () : Promise<boolean> => {
-		return await fs.exists(constant.str.files.assets);
-    };
+	chk = {
+		file : async () : Promise<boolean> => {
+			return await fs.exists(constant.str.files.assets);
+		},
+		version :  async () : Promise<boolean> => {
+			const time = await invoke.version(constant.str.url.version, constant.str.url.headers.version);
+			const local = this.get.system(constant.str.system_conf.string.download_time);
+			if (typeof time === 'string' && typeof local === 'string') {
+				return new Date(time) <= new Date(local);
+			} else if (local === undefined)
+				return true;
+			return false;
+		},
+	}
 
 	exit = async () : Promise<void> => {
 		return await exit(1);
