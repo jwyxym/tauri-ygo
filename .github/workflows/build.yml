@@ -6,7 +6,7 @@ on:
       - main
     
 jobs:
-  mirror:
+  push-gitcode:
     runs-on: ubuntu-latest
 
     steps:
