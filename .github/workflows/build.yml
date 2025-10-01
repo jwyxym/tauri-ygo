@@ -252,12 +252,16 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Upload Exe
+      - name: PrePare
         shell: cmd
         run: |
           copy .ci\upload.py build\upload.py
-          cd build
           pip install requests
+
+      - name: Upload Exe
+        shell: cmd
+        run: |
+          cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo.exe/tauri-ygo.exe
 
   upload-gitcode-apk:
@@ -279,12 +283,16 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Upload Apk
+      - name: PrePare
         shell: cmd
         run: |
           copy .ci\upload.py build\upload.py
-          cd build
           pip install requests
+
+      - name: Upload Apk
+        shell: cmd
+        run: |
+          cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo.apk/tauri-ygo.apk
 
   upload-gitcode-assets_zip:
@@ -306,12 +314,16 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Upload Zip
+      - name: PrePare
         shell: cmd
         run: |
           copy .ci\upload.py build\upload.py
-          cd build
           pip install requests
+
+      - name: Upload Zip
+        shell: cmd
+        run: |
+          cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} assets.zip/assets.zip
 
   upload-gitcode-windows_msi:
@@ -333,12 +345,16 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Upload Setup Msi
+      - name: PrePare
         shell: cmd
         run: |
           copy .ci\upload.py build\upload.py
-          cd build
           pip install requests
+
+      - name: Upload Setup Msi
+        shell: cmd
+        run: |
+          cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-windows.msi/tauri-ygo-windows.msi
 
 
@@ -361,12 +377,16 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Upload Setup Exe
+      - name: PrePare
         shell: cmd
         run: |
           copy .ci\upload.py build\upload.py
-          cd build
           pip install requests
+
+      - name: Upload Setup Exe
+        shell: cmd
+        run: |
+          cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-windows.exe/tauri-ygo-windows.exe
 
   create-release:
@@ -383,7 +403,7 @@ jobs:
         with:
           path: build
 
-      - name: 删除 Tag 为 release-latest 的 Release
+      - name: Delete old Release
         run: |
           TAG_NAME=release-latest
           gh release delete "$TAG_NAME" --yes
