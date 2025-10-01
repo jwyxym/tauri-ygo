@@ -1,8 +1,24 @@
 use regex::Regex;
-use rusqlite::{Connection, Result};
 use serde::Serialize;
+use rusqlite::{
+	Connection,
+	Result
+};
 use std::{
-	fs::{create_dir_all, exists, File}, io::{copy, Read, Write}, path::{Path, PathBuf}
+	fs::{
+		create_dir_all,
+		exists,
+		File
+	},
+	io::{
+		copy,
+		Read,
+		Write
+	},
+	path::{
+		Path,
+		PathBuf
+	}
 };
 use zip::ZipArchive;
 use content_disposition::parse_content_disposition;
@@ -14,7 +30,23 @@ use ureq::{
 	Body,
 	get
 };
-use serde_json::{Value, from_str};
+use serde_json::{
+	Value,
+	from_str
+};
+
+use trust_dns_resolver::{
+	Resolver,
+	config::*
+};
+
+#[derive(Serialize)]
+struct Srv {
+	priority: u16,
+	weight: u16,
+	port: u16,
+	target: String
+}
 
 #[derive(Serialize)]
 #[serde(tag = "type", content = "content")]
@@ -169,6 +201,35 @@ async fn read_db(path: String) -> Result<Vec<(Vec<i64>, Vec<String>)>, String> {
 }
 
 #[tauri::command]
+fn get_srv(url: String) -> Result<Vec<Srv>, String> {
+	let mut result: Vec<Srv> = Vec::new();
+	let resolver: Resolver = Resolver::new(ResolverConfig::default(), ResolverOpts::default()).map_err(|e| e.to_string())?;
+
+	match resolver.srv_lookup(&url) {
+		Ok(response) => {
+			for ip in response.iter() {
+				result.push(Srv{
+					priority: ip.priority(),
+					weight: ip.weight(),
+					port: ip.port(),
+					target: ip.target().to_string()
+				});
+			}
+			result.sort_by_key(|srv| srv.priority);
+		}
+		Err(_) => {
+			result.push(Srv{
+				priority: 0,
+				weight: 0,
+				port: 7911,
+				target: url
+			});
+		}
+	}
+	Ok(result)
+}
+
+#[tauri::command]
 async fn version(url: String, headers: Vec<(String, String)>) -> Result<String, String> {
 	let mut req: RequestBuilder<WithoutBody> = get(&url);
 	for (key, value) in headers {
@@ -249,6 +310,7 @@ pub fn run() {
 			read_zip,
 			read_pics,
 			read_db,
+			get_srv,
 			version,
 			download])
 		.run(tauri::generate_context!())
