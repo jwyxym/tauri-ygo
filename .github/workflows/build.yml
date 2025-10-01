@@ -6,6 +6,40 @@ on:
       - main
     
 jobs:
+  mirror:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Git Config
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Set SSH Key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan gitcode.com >> ~/.ssh/known_hosts
+
+      - name: Push to GitCode
+        run: |
+          git remote add gitcode git@gitcode.com:jwyxym/tauri-ygo.git
+          git checkout -b gitcode-main gitcode/main
+          git fetch gitcode
+          git checkout -b gitcode-main gitcode/main
+          git merge origin/main
+          git add .
+          git commit -m "GitHub Action Auto Merge"
+          git push gitcode gitcode-main:main
+
   build-android:
     runs-on: windows-latest
     
