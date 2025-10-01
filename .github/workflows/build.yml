@@ -35,8 +35,6 @@ jobs:
           git fetch gitcode
           git checkout -b gitcode-main gitcode/main
           git merge origin/main
-          git add .
-          git commit -m "GitHub Action Auto Merge"
           git push gitcode gitcode-main:main
 
   build-android:
