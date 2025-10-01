@@ -235,7 +235,7 @@ jobs:
           python .ci\update.py ${{ secrets.GITCODE_ACCESS_TOKEN }}
 
   upload-gitcode:
-    name: Upload File to GitCode
+    name: Upload Exe to GitCode
     needs: [update-gitcode]
     runs-on: windows-latest
     steps:
@@ -253,34 +253,41 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Upload to GitCode
-        shell: cmd
-        run: |
-          copy .ci\upload.py build\upload.py
-          pip install requests
-          python .ci\update.py ${{ secrets.GITCODE_ACCESS_TOKEN }}
-
-      - name: Upload Setup Msi
-        shell: cmd
-        run: |
-          cd build
-          pip install requests
-          python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-windows.msi/tauri-ygo-windows.msi
-
       - name: Upload Exe
         shell: cmd
         run: |
           cd build
+          pip install requests
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo.exe/tauri-ygo.exe
+
+  upload-gitcode-apk:
+    name: Upload Apk to GitCode
+    needs: [update-gitcode]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: build
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
 
       - name: Upload Apk
         shell: cmd
         run: |
           cd build
+          pip install requests
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo.apk/tauri-ygo.apk
 
   upload-gitcode-assets_zip:
-    name: Upload File to GitCode
+    name: Upload Assets to GitCode
     needs: [update-gitcode]
     runs-on: windows-latest
     steps:
@@ -305,8 +312,35 @@ jobs:
           pip install requests
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} assets.zip/assets.zip
 
+  upload-gitcode-windows_msi:
+    name: Upload Windows Msi to GitCode
+    needs: [update-gitcode]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: build
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Upload Setup Msi
+        shell: cmd
+        run: |
+          cd build
+          pip install requests
+          python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-windows.msi/tauri-ygo-windows.msi
+
+
   upload-gitcode-windows_exe:
-    name: Upload File to GitCode Exe
+    name: Upload Windows Exe to GitCode
     needs: [update-gitcode]
     runs-on: windows-latest
     steps:
