@@ -32,7 +32,6 @@ jobs:
       - name: Push to GitCode
         run: |
           git remote add gitcode git@gitcode.com:jwyxym/tauri-ygo.git
-          git checkout -b gitcode-main gitcode/main
           git fetch gitcode
           git checkout -b gitcode-main gitcode/main
           git merge origin/main
