@@ -213,9 +213,30 @@ jobs:
         name: tauri-ygo.exe
         path: .\src-tauri\target\release\tauri-ygo.exe
 
+  update-gitcode:
+    name: Delete GitCode Release
+    needs: [build-android, build-windows]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Upload to GitCode
+        shell: cmd
+        run: |
+          copy .ci\upload.py build\upload.py
+          pip install requests
+          python .ci\update.py ${{ secrets.GITCODE_ACCESS_TOKEN }}
+
   upload-gitcode:
     name: Upload File to GitCode
-    needs: [build-android, build-windows]
+    needs: [update-gitcode]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -243,6 +264,7 @@ jobs:
         shell: cmd
         run: |
           cd build
+          pip install requests
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-windows.msi/tauri-ygo-windows.msi
 
       - name: Upload Exe
@@ -257,9 +279,9 @@ jobs:
           cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo.apk/tauri-ygo.apk
 
-  upload-gitcode:
+  upload-gitcode-assets_zip:
     name: Upload File to GitCode
-    needs: [build-android, build-windows]
+    needs: [update-gitcode]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -275,23 +297,17 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.13'
-
-      - name: Upload to GitCode Assets
-        shell: cmd
-        run: |
-          copy .ci\upload.py build\upload.py
-          pip install requests
-          python .ci\update.py ${{ secrets.GITCODE_ACCESS_TOKEN }}
 
       - name: Upload Zip
         shell: cmd
         run: |
           cd build
+          pip install requests
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} assets.zip/assets.zip
 
-  upload-gitcode:
+  upload-gitcode-windows_exe:
     name: Upload File to GitCode Exe
-    needs: [build-android, build-windows]
+    needs: [update-gitcode]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -308,17 +324,11 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Upload to GitCode
-        shell: cmd
-        run: |
-          copy .ci\upload.py build\upload.py
-          pip install requests
-          python .ci\update.py ${{ secrets.GITCODE_ACCESS_TOKEN }}
-
       - name: Upload Setup Exe
         shell: cmd
         run: |
           cd build
+          pip install requests
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-windows.exe/tauri-ygo-windows.exe
 
   create-release:
