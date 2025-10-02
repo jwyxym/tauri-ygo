@@ -25,6 +25,12 @@
 						:content = 'mainGame.get.text().setting.resert'
 						:loading = 'setting.loading'
 					></Button>
+					<Button
+						@click = 'expansion.chk_version'
+						size = 'large'
+						:content = 'mainGame.get.text().setting.version'
+						:loading = 'setting.loading'
+					></Button>
 				</div>
 				<var-loading
 					:loading = 'setting.loading'
@@ -205,7 +211,7 @@
 		items_true : [] as Array<string>,
 		items : [] as Array<string>,
 		sound : {} as { [key: string]: number },
-		loading : false
+		loading : false,
 	})
 
 	const expansion = {
@@ -241,12 +247,24 @@
 			await mainGame.reload();
 			setting.loading = false;
 		},
-		resert : async () : Promise<void> => {
+		resert : async (chk : boolean = false) : Promise<void> => {
 			setting.loading = true;
-			if (await fs.init(true))
+			if (await fs.init(true, chk))
 				await mainGame.reload();
 			setting.loading = false;
-		}
+		},
+		chk_version : async () : Promise<void> => {
+			setting.loading = true;
+			const chk = await mainGame.chk.version()
+			if (!chk)
+				Dialog({
+					title : mainGame.get.text().setting.update,
+					onConfirm : async () : Promise<void> => {
+						await expansion.resert(true);
+					}
+				});
+			setting.loading = false;
+		},
 	};
 
 	const items = {
@@ -310,6 +328,12 @@
 					align-content: center;
 					align-items: center;
 					gap: 10px;
+					.var-button, .var-menu-select {
+						width: 100px;
+						.var-button {
+							width: 100%;
+						}
+					}
 				}
 				.var-loading {
 					height: 100%;

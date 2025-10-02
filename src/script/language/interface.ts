@@ -96,6 +96,8 @@ interface TEXT_Like {
 		system_setting : string;
 		reload : string;
 		resert : string;
+		version : string;
+		update : string;
 		download : {
 			url : string;
 			super_pre : string;

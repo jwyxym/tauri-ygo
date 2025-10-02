@@ -111,6 +111,8 @@ const Zh_CN : TEXT_Like = {
 		system_setting : '系统设置',
 		reload : '重新加载卡片',
 		resert : '重置卡片资源',
+		version : '检查版本',
+		update : '检查到新版本，是否更新？',
 		download : {
 			url : '下载自定义卡包',
 			super_pre : '下载先行卡',

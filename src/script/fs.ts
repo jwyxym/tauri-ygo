@@ -40,9 +40,9 @@ class Fs {
 		return false;
 	};
 
-	init = async (chk : boolean = false) : Promise<boolean> => {
+	init = async (chk : boolean = false, chk_download : boolean = false) : Promise<boolean> => {
 		try {
-			if (!await this.exists(constant.str.files.assets)) {
+			if (!await this.exists(constant.str.files.assets) || chk_download) {
 				toast.info(mainGame.get.text().toast.download.start);
 				if ((await this.write.from_url(constant.str.url.assets, constant.str.files.assets)).length === 0)
 					return false;
