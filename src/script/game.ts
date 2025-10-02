@@ -14,10 +14,10 @@ import Deck from '../pages/deck/deck';
 
 class Game {
 	strings : Map<string, Map<number, string>> = new Map([
-		[constant.str.string_conf.system, new Map],
-		[constant.str.string_conf.victory, new Map],
-		[constant.str.string_conf.counter, new Map],
-		[constant.str.string_conf.setcode, new Map],
+		[constant.str.strings_conf.system, new Map],
+		[constant.str.strings_conf.victory, new Map],
+		[constant.str.strings_conf.counter, new Map],
+		[constant.str.strings_conf.setcode, new Map],
 		[constant.str.info_conf.ot, new Map],
 		[constant.str.info_conf.attribute, new Map],
 		[constant.str.info_conf.category, new Map],
@@ -36,7 +36,7 @@ class Game {
 	]);
 	version = 0x1362;
 	max_card_id = 0x0fffffff;
-	select = 'Zh_CN';
+	i18n = 'Zh_CN';
 	interval = -1;
 	interval_ct = 0;
 	unknown : Card = new Card([...new Array(11).fill(0), ...new Array(19).fill('')]);
@@ -64,14 +64,19 @@ class Game {
 				}
 			}
 
-			//读取system.conf文件夹
-			const text : string | undefined = await fs.read.text(constant.str.files.system);
-			if (text !== undefined) {
-				const lines : Array<string> = text.split(constant.reg.line_feed);
-				for (const i of lines) {
-					const line : string = i.trim();
-					this.read.system_conf(line);
+			//读取system.conf文件
+			if (await fs.exists(constant.str.files.system)) {
+				const text : string | undefined = await fs.read.text(constant.str.files.system);
+				if (text !== undefined) {
+					const lines : Array<string> = text.split(constant.reg.line_feed);
+					for (const i of lines) {
+						const line : string = i.trim();
+						this.read.system_conf(line);
+					}
 				}
+			} else {
+				this.push.system(constant.str.system_conf.string.download_time, new Date().toISOString())
+				await fs.write.system();
 			}
 
 			//读取./sound文件夹
@@ -84,7 +89,7 @@ class Game {
 			}
 
 			this.unknown.update_pic(this.textures.get(constant.str.files.textures.unknown) ?? '');
-			await fs.write.system();
+			
 			await this.load.card();
 			await this.load.expansion();
 			const deck = Array.from(this.cards.keys()).filter(_ => Math.random() > 0.5);
@@ -106,7 +111,7 @@ class Game {
 
 	get = {
 		text : () : textLike => {
-			switch (this.select) {
+			switch (this.i18n) {
 				case constant.str.language.Zh_CN:
 					return Zh_CN;
 			}
@@ -169,7 +174,7 @@ class Game {
 		},
 		strings : {
 			system : (key : number, replace : Array<string | number> | string | number = []) : string => {
-				let value = this.strings.get(constant.str.string_conf.system)!.get(key) ?? this.get.text().unknow;
+				let value = this.strings.get(constant.str.strings_conf.system)!.get(key) ?? this.get.text().unknow;
 				replace = typeof replace === 'object' ? replace : [replace];
 				for (const str of replace) {
 					value = value.replace(constant.str.replace.strings[typeof str === 'string' ? 0 : 1], `${str}`);
@@ -192,7 +197,7 @@ class Game {
 					const lines : Array<string> = v.split(constant.reg.line_feed);
 					for (const [_, i] of lines.entries()) {
 						const line : string = i.trim();
-						this.read.string_conf(line);
+						this.read.strings_conf(line);
 					}
 				} else if (i.endsWith(constant.str.files.conf.servers)) {
 					const lines : Array<string> = v.split(constant.reg.line_feed);
@@ -267,26 +272,37 @@ class Game {
 						case constant.str.files.conf.servers:
 							this.read.servers_conf(line);
 							break;
-						case constant.str.files.conf.strings:
-							this.read.string_conf(line);
-							break;
 						case constant.str.files.conf.lflist:
 							this.read.lflist_conf(line);
 							if (v === (lines.length - 1))
 								this.lflist_now = '';
 							break;
-						case constant.str.files.conf.info:
-							this.read.info_conf(line);
-							break;
 					}
 				}
 			}
-			//读取目录下的cards.cdb
-			if (await fs.exists(constant.str.files.database)) {
-				const database : Array<Array<string | number>> | undefined = await fs.read.database(constant.str.files.database);
-				if (database !== undefined)
-					this.read.database(database);
+			//读取strings.conf
+			const strings : string | undefined = await fs.read.text(await join(constant.str.dirs.strings, constant.str.files.strings.get(this.i18n)!));
+			if (strings !== undefined) {
+				const lines : Array<string> = strings.split(constant.reg.line_feed);
+				for (const i of lines) {
+					const line : string = i.trim();
+					this.read.strings_conf(line);
+				}
 			}
+
+			//读取cardinfo.conf
+			const info : string | undefined = await fs.read.text(await join(constant.str.dirs.info, constant.str.files.info.get(this.i18n)!));
+			if (info !== undefined) {
+				const lines : Array<string> = info.split(constant.reg.line_feed);
+				for (const i of lines) {
+					const line : string = i.trim();
+					this.read.info_conf(line);
+				}
+			}
+			//读取cards.cdb
+			const database : Array<Array<string | number>> | undefined = await fs.read.database(await join(constant.str.dirs.database, constant.str.files.database.get(this.i18n)!));
+			if (database !== undefined)
+					this.read.database(database);
 		},
 		expansion : async () : Promise<void> => {
 			// 读取expnasions文件夹
@@ -307,7 +323,7 @@ class Game {
 					const lines : Array<string> = text.split(constant.reg.line_feed);
 					for (const [_, i] of lines.entries()) {
 						const line : string = i.trim();
-						this.read.string_conf(line);
+						this.read.strings_conf(line);
 					}
 				} else if (i.endsWith(constant.str.files.conf.servers)) {
 					const text : string | undefined = await fs.read.text(i);
@@ -358,10 +374,10 @@ class Game {
 		this.lflist = new Map();
 		this.servers = new Map();
 		this.strings = new Map([
-			[constant.str.string_conf.system, new Map],
-			[constant.str.string_conf.victory, new Map],
-			[constant.str.string_conf.counter, new Map],
-			[constant.str.string_conf.setcode, new Map],
+			[constant.str.strings_conf.system, new Map],
+			[constant.str.strings_conf.victory, new Map],
+			[constant.str.strings_conf.counter, new Map],
+			[constant.str.strings_conf.setcode, new Map],
 			[constant.str.info_conf.ot, new Map],
 			[constant.str.info_conf.attribute, new Map],
 			[constant.str.info_conf.category, new Map],
@@ -377,7 +393,7 @@ class Game {
 			if (key_value.length == 2)
 				this.servers.set(key_value[0], key_value[1])
 		},
-		string_conf : (line : string) : void => {
+		strings_conf : (line : string) : void => {
 			if (line.startsWith('#'))
 				return;
 			const key_value = line.split(' ');
@@ -385,33 +401,33 @@ class Game {
 				const key = parseInt(key_value[1]);
 				if (isNaN(key)) return;
 				switch (key_value[0]) {
-					case constant.str.string_conf.system:
+					case constant.str.strings_conf.system:
 						this.strings.get(
-							constant.str.string_conf.system
+							constant.str.strings_conf.system
 						)!.set(
 							key,
 							key_value[2]
 						);
 						break;
-					case constant.str.string_conf.victory:
+					case constant.str.strings_conf.victory:
 						this.strings.get(
-							constant.str.string_conf.victory
+							constant.str.strings_conf.victory
 						)!.set(
 							key,
 							key_value[2]
 						);
 						break;
-					case constant.str.string_conf.counter:
+					case constant.str.strings_conf.counter:
 						this.strings.get(
-							constant.str.string_conf.counter
+							constant.str.strings_conf.counter
 						)!.set(
 							key,
 							key_value[2]
 						);
 						break;
-					case constant.str.string_conf.setcode:
+					case constant.str.strings_conf.setcode:
 						this.strings.get(
-							constant.str.string_conf.setcode
+							constant.str.strings_conf.setcode
 						)!.set(
 							key,
 							key_value[2]
@@ -575,7 +591,6 @@ class Game {
 						return !isNaN(id);
 					})) {
 						const id = desc.map(i => Number(i)).sort((a, b) => { return a - b; });
-						console.log(card.id, card.alias)
 						if ((card.id < id[0] || card.id > id[1]) && (card.alias < id[0] || card.alias > id[1]))
 							return false;
 					}
@@ -659,8 +674,8 @@ class Game {
 		version :  async () : Promise<boolean> => {
 			const time = await invoke.version(constant.str.url.version, constant.str.url.headers.version);
 			const local = this.get.system(constant.str.system_conf.string.download_time);
-			if (typeof time === 'string' && typeof local === 'string') {
-				return new Date(time) <= new Date(local);
+			if (time.error === undefined && typeof local === 'string') {
+				return new Date(time.content!) <= new Date(local);
 			} else if (local === undefined)
 				return true;
 			return false;

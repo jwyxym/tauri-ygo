@@ -67,12 +67,14 @@ class Constant {
 			deck : 'deck',
 			cache : 'cache',
 			sound : 'sound',
+			strings : 'strings',
+			info : 'info',
+			database : 'database'
 		},
 		exdirs : {
 			pics : 'pics',
 		},
 		files : {
-			system : 'system.conf',
 			conf : {
 				info : 'cardinfo.conf',
 				strings : 'strings.conf',
@@ -89,11 +91,14 @@ class Constant {
 				back : 'Night View.wav',
 				battle : 'City of Night.wav'
 			},
-			database : 'cards.cdb',
+			system : 'system.conf',
 			pics : 'pics.zip',
 			assets : 'assets.zip',
+			strings : new Map([]) as Map<string, string>,
+			info : new Map([]) as Map<string, string>,
+			database : new Map([]) as Map<string, string>,
 		},
-		string_conf : {
+		strings_conf : {
 			system : '!system',
 			victory : '!victory',
 			counter : '!counter',
@@ -155,5 +160,11 @@ class Constant {
 	};
 
 	system = new System();
+
+	constructor () {
+		this.str.files.strings.set(this.str.language.Zh_CN, 'strings-Zh_CN.conf');
+		this.str.files.info.set(this.str.language.Zh_CN, 'cardinfo-Zh_CN.conf');
+		this.str.files.database.set(this.str.language.Zh_CN, 'cards-Zh_CN.cdb');
+	};
 }
 export default new Constant();
