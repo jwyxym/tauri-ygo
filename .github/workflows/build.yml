@@ -281,7 +281,7 @@ jobs:
           pip install requests
           python .ci\update.py ${{ secrets.GITCODE_ACCESS_TOKEN }}
 
-  upload-exe-to-gitcode:
+  upload-exe:
     needs: [update-gitcode]
     runs-on: windows-latest
     steps:
@@ -311,7 +311,7 @@ jobs:
           cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo.exe/tauri-ygo.exe
 
-  upload-apk-to-gitcode:
+  upload-apk:
     needs: [update-gitcode]
     runs-on: windows-latest
     steps:
@@ -341,7 +341,7 @@ jobs:
           cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo.apk/tauri-ygo.apk
 
-  upload-assets_zip-gitcode:
+  upload-assets_zip:
     needs: [update-gitcode]
     runs-on: windows-latest
     steps:
@@ -371,7 +371,7 @@ jobs:
           cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} assets.zip/assets.zip
 
-  upload-windows_msi-gitcode:
+  upload-windows_msi:
     needs: [update-gitcode]
     runs-on: windows-latest
     steps:
@@ -402,7 +402,7 @@ jobs:
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-windows.msi/tauri-ygo-windows.msi
 
 
-  upload-windows_exe-gitcode:
+  upload-windows_exe:
     needs: [update-gitcode]
     runs-on: windows-latest
     steps:
