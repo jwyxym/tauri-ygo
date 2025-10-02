@@ -164,7 +164,7 @@ jobs:
         wget https://github.com/Fluorohydride/ygopro/raw/refs/heads/master/lflist.conf
         wget https://github.com/jwyxym/card-pics/releases/download/pics/pics.zip
         unzip pics.zip
-        7z a -tzip -mx=9 -m0=BZip2 assets.zip strings info cdb sound textures pics lflist.conf
+        7z a -tzip -mx=9 assets.zip strings info cdb sound textures pics lflist.conf
         cd ..
         copy .ci\assets.zip src-tauri\assets.zip
 
@@ -459,6 +459,15 @@ jobs:
           git fetch --tags
           git tag -d release-latest || true
           git push origin :refs/tags/release-latest || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create tag
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git tag release-latest
+          git push origin release-latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
