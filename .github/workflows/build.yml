@@ -195,7 +195,7 @@ jobs:
         wget https://github.com/Fluorohydride/ygopro/raw/refs/heads/master/lflist.conf
         wget https://github.com/jwyxym/card-pics/releases/download/pics/pics.zip
         unzip pics.zip
-        7z a -tzip -mx=9 assets.zip strings info cdb sound textures pics lflist.conf
+        7z a -tzip -mx=9 -m0=BZip2 assets.zip strings info cdb sound textures pics lflist.conf
         cd ..
         copy .ci\assets.zip src-tauri\assets.zip
 
