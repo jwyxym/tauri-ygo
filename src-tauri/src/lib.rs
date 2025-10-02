@@ -1,9 +1,8 @@
+mod sql;
+mod file;
+
 use regex::Regex;
 use serde::Serialize;
-use rusqlite::{
-	Connection,
-	Result
-};
 use std::{
 	fs::{
 		create_dir_all,
@@ -40,7 +39,7 @@ use trust_dns_resolver::{
 	config::*
 };
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 struct Srv {
 	priority: u16,
 	weight: u16,
@@ -77,6 +76,28 @@ async fn unzip(path: String, file: String, chk: bool) -> Result<(), String> {
 	}
 
 	Ok(())
+}
+
+#[tauri::command]
+async fn read_texts(dirs: Vec<String>, file_type: String) -> Result<Vec<(String, FileContent)>, String> {
+	let mut entries: Vec<(String, FileContent)> = Vec::new();
+	let _ = file::walk(dirs, |ext, stem, path|{
+		if ext == file_type {
+			match File::open(path) {
+				Ok(mut file) => {
+					let mut content: String = String::new();
+					match file.read_to_string(&mut content) {
+						Ok(_) => {
+							entries.push((stem, FileContent::Text(content)));
+						},
+						Err(_) => ()
+					}
+				},
+				Err(_) => ()
+			};
+		}
+	});
+	Ok(entries)
 }
 
 #[tauri::command]
@@ -167,41 +188,28 @@ async fn read_zip(path: String, file_type: Vec<String>) -> Result<Vec<(String, F
 }
 
 #[tauri::command]
-async fn read_db(path: String) -> Result<Vec<(Vec<i64>, Vec<String>)>, String> {
-	let conn: Connection = Connection::open(&path)
-		.map_err(|e| e.to_string())?;
-
-	let mut stmt: rusqlite::Statement<'_> = conn
-		.prepare("SELECT * FROM datas, texts WHERE datas.id = texts.id")
-		.map_err(|e| e.to_string())?;
-
-	let rows_iter = stmt
-		.query_map([], |row| {
-			let int_values: Vec<i64> = (0..11)
-				.map(|i| row.get::<_, i64>(i))
-				.collect::<Result<Vec<i64>, _>>()?;
-
-			let string_values: Vec<String> = (12..30)
-				.map(|i| row.get::<_, String>(i))
-				.collect::<Result<Vec<String>, _>>()?;
-
-			Ok((int_values, string_values))
-		})
-		.map_err(|e| e.to_string())?;
-
-	let mut result: Vec<(Vec<i64>, Vec<String>)> = Vec::new();
-
-	for row_result in rows_iter {
-		let row_data: (Vec<i64>, Vec<String>) =
-			row_result.map_err(|e| e.to_string())?;
-		result.push(row_data);
-	}
-
-	Ok(result)
+async fn read_dbs(dirs: Vec<String>) -> Result<Vec<Vec<(Vec<i64>, Vec<String>)>>, String> {
+	let mut entries: Vec<Vec<(Vec<i64>, Vec<String>)>> = Vec::new();
+	let _ = file::walk(dirs, |ext, _stem, path|{
+		if ext == String::from("cdb") {
+			match sql::read(path) {
+				Ok(db) => {
+					entries.push(db);
+				},
+				Err(_) => ()
+			}
+		}
+	});
+	Ok(entries)
 }
 
 #[tauri::command]
-fn get_srv(url: String) -> Result<Vec<Srv>, String> {
+async fn read_db(path: String) -> Result<Vec<(Vec<i64>, Vec<String>)>, String> {
+	Ok(sql::read(path)?)
+}
+
+#[tauri::command]
+fn get_srv(url: String) -> Result<Srv, String> {
 	let mut result: Vec<Srv> = Vec::new();
 	let resolver: Resolver = Resolver::new(ResolverConfig::default(), ResolverOpts::default()).map_err(|e| e.to_string())?;
 
@@ -216,9 +224,12 @@ fn get_srv(url: String) -> Result<Vec<Srv>, String> {
 				});
 			}
 			result.sort_by_key(|srv| srv.priority);
+			if let Some(srv) = result.get(0) {
+				return Ok(srv.clone());
+			}
 		}
 		Err(_) => {
-			result.push(Srv{
+			return Ok(Srv{
 				priority: 0,
 				weight: 0,
 				port: 7911,
@@ -226,7 +237,7 @@ fn get_srv(url: String) -> Result<Vec<Srv>, String> {
 			});
 		}
 	}
-	Ok(result)
+	Err("No Data".to_string())
 }
 
 #[tauri::command]
@@ -308,8 +319,10 @@ pub fn run() {
 		.invoke_handler(tauri::generate_handler![
 			unzip,
 			read_zip,
+			read_texts,
 			read_pics,
 			read_db,
+			read_dbs,
 			get_srv,
 			version,
 			download])

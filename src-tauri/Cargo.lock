@@ -4461,6 +4461,7 @@ dependencies = [
  "tauri-plugin-tcp",
  "trust-dns-resolver",
  "ureq",
+ "walkdir",
  "zip",
 ]
 

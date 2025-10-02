@@ -1,10 +1,11 @@
-import { invoke, convertFileSrc } from '@tauri-apps/api/core';
+import { convertFileSrc } from '@tauri-apps/api/core';
 import * as fs from '@tauri-apps/plugin-fs';
 import * as path from '@tauri-apps/api/path';
 
 import constant from './constant';
 import toast from './toast';
 import mainGame from './game';
+import invoke from './invoke';
 
 import Deck from '../pages/deck/deck';
 
@@ -48,9 +49,7 @@ class Fs {
 				toast.info(mainGame.get.text().toast.download.complete);
 			}
 			const p = await this.path;
-			await invoke<void>('unzip', {
-				path : p, file : await path.join(p, constant.str.files.assets), chk : chk
-			});
+			await invoke.unzip(p, await path.join(p, constant.str.files.assets), chk);
 			return true;
 		} catch (error) {
 			this.write.log(error);
@@ -71,11 +70,9 @@ class Fs {
 	read = {
 		database : async (file : string) : Promise<Array<Array<string | number>> | undefined> => {
 			try {
-				const p = await path.join(await constant.system.base_path(), file);
-				const entries = await invoke<Array<[Array<number>, Array<string>]>>('read_db', {
-					path : p,
-				});
-				return entries.map(i => [...i[0], ...i[1]]);
+				const entries = await invoke.read_db(await path.join(await constant.system.base_path(), file));
+				if (entries.error === undefined)
+					return entries.content!.map(i => [...i[0], ...i[1]]);
 			} catch (error) {
 				this.write.log(error);
 			}
@@ -98,16 +95,16 @@ class Fs {
 		},
 		pics : async (codes : Array<number> = []) : Promise<Map<number, Blob>> => {
 			const p = await this.path;
-			const entries = await invoke<Array<[number, { content : Uint8Array}]>>('read_pics', {
-				dirs : [
+			const entries = await invoke.read_pics([
 					await path.join(p, constant.str.dirs.expansions, constant.str.exdirs.pics),
 					await path.join(p, constant.str.exdirs.pics)
-				], codes: codes
-			});
+				], codes);
+			
 			const result : Map<number, Blob> = new Map();
-			for (const [name, content] of entries) {
-				result.set(name, new Blob([new Uint8Array(content.content)], { type : 'image/jpeg' }));
-			}
+			if (entries.error === undefined)
+				for (const [name, content] of entries.content!) {
+					result.set(name, new Blob([new Uint8Array(content.content)], { type : 'image/jpeg' }));
+				}
 			return result;
 		},
 		zip : async (file : string, file_type : Array<string> = []) : Promise<Map<RegExp, Map<string, Blob | Uint8Array | string>>> => {
@@ -118,27 +115,25 @@ class Fs {
 				[constant.reg.ini, new Map]
 			]);
 			try {
-				const p = await path.join(await constant.system.base_path(), file);
-				const entries = await invoke<Array<[string, { content : string | Uint8Array}]>>('read_zip', {
-					path : p, fileType: file_type
-				});
-				for (const [name, content] of entries) {
-					if (name.match(constant.reg.picture)) {
-						const blob = new Blob([new Uint8Array(content.content as Uint8Array)], { type : name.endsWith('png') ? 'image/png' : 'image/jpeg' })
-						let filename = name.replace(/\\/g, '/').split('/').filter(part => part.trim() !== '').pop() || '';
-						if (!filename.startsWith('.')) {
-							const dotIndex = filename.lastIndexOf('.');
-  							filename = dotIndex > 0 ? filename.slice(0, dotIndex) : filename;
+				const entries = await invoke.read_zip(await path.join(await constant.system.base_path(), file), file_type);
+				if (entries.error === undefined)
+					for (const [name, content] of entries.content!) {
+						if (name.match(constant.reg.picture)) {
+							const blob = new Blob([new Uint8Array(content.content as Uint8Array)], { type : name.endsWith('png') ? 'image/png' : 'image/jpeg' })
+							let filename = name.replace(/\\/g, '/').split('/').filter(part => part.trim() !== '').pop() || '';
+							if (!filename.startsWith('.')) {
+								const dotIndex = filename.lastIndexOf('.');
+								filename = dotIndex > 0 ? filename.slice(0, dotIndex) : filename;
+							}
+							map.get(constant.reg.picture)!.set(filename, blob);
+						} else if (name.match(constant.reg.conf)) {
+							map.get(constant.reg.conf)!.set(name, content.content as string);
+						} else if (name.match(constant.reg.ini)) {
+							map.get(constant.reg.ini)!.set(name, content.content as string);
+						} else if (name.match(constant.reg.database)) {
+							map.get(constant.reg.database)!.set(name, content.content as Uint8Array);
 						}
-						map.get(constant.reg.picture)!.set(filename, blob);
-					} else if (name.match(constant.reg.conf)) {
-						map.get(constant.reg.conf)!.set(name, content.content as string);
-					} else if (name.match(constant.reg.ini)) {
-						map.get(constant.reg.ini)!.set(name, content.content as string);
-					} else if (name.match(constant.reg.database)) {
-						map.get(constant.reg.database)!.set(name, content.content as Uint8Array);
 					}
-				}
 			} catch (error) {
 				this.write.log(error);
 			}
@@ -154,8 +149,7 @@ class Fs {
 						)
 					return undefined;
 				}
-				return await read_to_blob();
-				// return mainGame.is_android() ? await read_to_blob() : convertFileSrc(await path.join(await this.path, file));
+				return mainGame.is_android() ? await read_to_blob() : convertFileSrc(await path.join(await this.path, file));
 			} catch (error) {
 				this.write.log(error);
 			}
@@ -177,17 +171,25 @@ class Fs {
 			}
 			return undefined;
 		},
-		ydk : async (file : string) : Promise<Deck | undefined> => {
+		ydk : async () : Promise<Array<Deck>> => {
 			try {
-				const deck = Deck.fromYdkString(await fs.readTextFile(file, this.dir));
-				deck.main = deck.main.filter(i => mainGame.cards.has(i));
-				deck.extra = deck.extra.filter(i => mainGame.cards.has(i));
-				deck.side = deck.side.filter(i => mainGame.cards.has(i));
-				return deck;
+				const decks : Array<Deck> = [];
+				const reader = await invoke.read_texts(await path.join(await this.path, constant.str.dirs.deck), 'ydk');
+				if (reader.error === undefined) {
+					reader.content!.forEach(i => {
+						const ydk = Deck.fromYdkString(i[1].content);
+						ydk.main = ydk.main.filter(i => mainGame.cards.has(i));
+						ydk.extra = ydk.extra.filter(i => mainGame.cards.has(i));
+						ydk.side = ydk.side.filter(i => mainGame.cards.has(i));
+						ydk.push_name(i[0]);
+						decks.push(ydk);
+					});
+				}
+				return decks;
 			} catch (error) {
 				this.write.log(error);
 			}
-			return undefined;
+			return [];
 		},
 		file : async (file : string) : Promise<Uint8Array<ArrayBuffer> | undefined> => {
 			try {
@@ -292,13 +294,9 @@ class Fs {
 		},
 		from_url : async (url : string,  file : string) : Promise<string> => {
 			try {
-				const download = await invoke<string>('download', {
-					url : url,
-					path : await this.path,
-					name : file,
-					exName : ''
-				});
-				return download;
+				const download = await invoke.download(url, await this.path, file);
+				if (typeof download === 'string')
+					return download;
 			} catch (error) {
 				this.write.log(error.message ?? error);
 			}
@@ -308,14 +306,11 @@ class Fs {
 			try {
 				if (file.length > 0 && !file.endsWith(constant.str.extends.ypk))
 					file += constant.str.extends.ypk;
-				const download = await invoke<string>('download', {
-					url : url,
-					path : await path.join(await this.path, constant.str.dirs.expansions),
-					name : file,
-					exName : constant.str.extends.ypk
-				});
-				const p = await path.join(constant.str.dirs.expansions, download);
-				return [p, download];
+				const download = await invoke.download(url, await path.join(await this.path, constant.str.dirs.expansions), file, constant.str.extends.ypk);
+				if (typeof download === 'string') {
+					const p = await path.join(constant.str.dirs.expansions, download);
+					return [p, download];
+				}
 			} catch (error) {
 				this.write.log(error.message ?? error);
 			}
