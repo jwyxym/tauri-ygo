@@ -223,7 +223,7 @@ class Fs {
 	write = {
 		log : async (text : string)  : Promise<boolean> => {
 			try {
-				console.error(text)
+				console.error(text);
 				toast.error(text);
 				const log = `[${new Date().toLocaleString()}] ${text}${constant.system.line_feed()}`
 				if (await fs.exists(constant.log.error, this.dir)) {

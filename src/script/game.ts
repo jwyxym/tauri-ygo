@@ -260,23 +260,25 @@ class Game {
 
 		},
 		card : async () : Promise<void> => {
-			//读取目录下的所有conf
-			for (const [_, conf] of Object.entries(constant.str.files.conf)) {
-				if (!fs.exists(conf)) continue;
-				const text : string | undefined = await fs.read.text(conf);
-				if (text === undefined) continue;
-				const lines : Array<string> = text.split(constant.reg.line_feed);
-				for (const [v, i] of lines.entries()) {
-					const line : string = i.trim();
-					switch (conf) {
-						case constant.str.files.conf.servers:
-							this.read.servers_conf(line);
-							break;
-						case constant.str.files.conf.lflist:
-							this.read.lflist_conf(line);
-							if (v === (lines.length - 1))
-								this.lflist_now = '';
-							break;
+			//读取lflist.conf
+			if (await fs.exists(constant.str.files.conf.servers)) {
+				const lflist : string | undefined = await fs.read.text(constant.str.files.conf.servers);
+				if (lflist !== undefined) {
+					const lines : Array<string> = lflist.split(constant.reg.line_feed);
+					for (const i of lines) {
+						const line : string = i.trim();
+						this.read.servers_conf(line);
+					}
+				}
+			}
+			//读取lflist.conf
+			if (await fs.exists(constant.str.files.conf.lflist)) {
+				const lflist : string | undefined = await fs.read.text(constant.str.files.conf.lflist);
+				if (lflist !== undefined) {
+					const lines : Array<string> = lflist.split(constant.reg.line_feed);
+					for (const i of lines) {
+						const line : string = i.trim();
+						this.read.lflist_conf(line);
 					}
 				}
 			}

@@ -69,7 +69,7 @@ class Constant {
 			sound : 'sound',
 			strings : 'strings',
 			info : 'info',
-			database : 'database'
+			database : 'cdb'
 		},
 		exdirs : {
 			pics : 'pics',

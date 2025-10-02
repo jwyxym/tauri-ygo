@@ -526,7 +526,7 @@
 		load : async () : Promise<void> => {
 			const length = search.list.length;
 			if (search.list.length < search.result.length) {
-				const cards = search.result.slice(length, length + 250 > search.result.length ? search.result.length : length + 250);
+				const cards = search.result.slice(length, length + 100 > search.result.length ? search.result.length : length + 100);
 				await mainGame.load.pic(cards.map(i => i.id));
 				search.list.push(...cards);
 			}
