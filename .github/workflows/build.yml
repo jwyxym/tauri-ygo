@@ -448,7 +448,7 @@ jobs:
       - name: Delete old Release
         run: |
           TAG_NAME=release-latest
-          gh release delete "$TAG_NAME" --yes
+          gh release delete "$TAG_NAME" --yes || true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
