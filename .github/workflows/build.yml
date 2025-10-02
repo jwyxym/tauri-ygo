@@ -167,7 +167,14 @@ jobs:
       run: |
         Set-ExecutionPolicy Bypass -Scope Process -Force
         [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-        choco install wget unzip zip -y
+        choco install wget unzip -y
+
+    - name: Install 7zip
+      shell: powershell
+      run: |
+        Set-ExecutionPolicy Bypass -Scope Process -Force
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+        choco install 7zip -y
 
     - name: Download Assets
       shell: cmd
@@ -188,7 +195,7 @@ jobs:
         wget https://github.com/Fluorohydride/ygopro/raw/refs/heads/master/lflist.conf
         wget https://github.com/jwyxym/card-pics/releases/download/pics/pics.zip
         unzip pics.zip
-        zip -9 -r assets.zip strings info cdb sound textures pics lflist.conf
+        7z a -tzip -mx=9 assets.zip strings info cdb sound textures pics lflist.conf
         cd ..
         copy .ci\assets.zip src-tauri\assets.zip
 
