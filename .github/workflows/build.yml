@@ -173,12 +173,22 @@ jobs:
       shell: cmd
       run: |
         cd .ci
-        wget https://github.com/mycard/ygopro-database/raw/refs/heads/master/locales/zh-CN/cards.cdb
-        wget https://github.com/mycard/ygopro-database/raw/refs/heads/master/locales/zh-CN/strings.conf
+        wget -O ygopro-database.zip https://github.com/mycard/ygopro-database/archive/refs/heads/master.zip
+        unzip ygopro-database.zip
+        mkdir cdb
+        mkdir strings
+        copy ygopro-database-master\locales\zh-CN\cards.cdb cdb\cards-zh-CN.cdb
+        copy ygopro-database-master\locales\ko-KR\cards.cdb cdb\cards-ko-KR.cdb
+        copy ygopro-database-master\locales\ja-JP\cards.cdb cdb\cards-ja-JP.cdb
+        copy ygopro-database-master\locales\en-US_mdpro3\cards.cdb cdb\cards-en-US.cdb
+        copy ygopro-database-master\locales\zh-CN\strings.conf strings\strings-zh-CN.conf
+        copy ygopro-database-master\locales\ko-KR\strings.conf strings\strings-ko-KR.conf
+        copy ygopro-database-master\locales\ja-JP\strings.conf strings\strings-ja-JP.conf
+        copy ygopro-database-master\locales\en-US_mdpro3\strings.conf strings\strings-en-US.conf
         wget https://github.com/Fluorohydride/ygopro/raw/refs/heads/master/lflist.conf
         wget https://github.com/jwyxym/card-pics/releases/download/pics/pics.zip
         unzip pics.zip
-        zip -9 -r assets.zip strings.conf cardinfo.conf cards.cdb lflist.conf sound textures pics
+        zip -9 -r assets.zip strings info cdb sound textures pics lflist.conf
         cd ..
         copy .ci\assets.zip src-tauri\assets.zip
 

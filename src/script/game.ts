@@ -36,7 +36,7 @@ class Game {
 	]);
 	version = 0x1362;
 	max_card_id = 0x0fffffff;
-	i18n = 'Zh_CN';
+	i18n = constant.str.language.Zh_CN;
 	interval = -1;
 	interval_ct = 0;
 	unknown : Card = new Card([...new Array(11).fill(0), ...new Array(19).fill('')]);

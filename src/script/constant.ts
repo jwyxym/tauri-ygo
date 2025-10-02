@@ -137,7 +137,7 @@ class Constant {
 			port : 'ServerPort',
 		},
 		language : {
-			Zh_CN : 'Zh_CN'
+			Zh_CN : 'zh-CN'
 		},
 		url : {
 			super_pre : 'https://cdn02.moecube.com:444/ygopro-super-pre/archive/ygopro-super-pre.ypk',
@@ -162,9 +162,9 @@ class Constant {
 	system = new System();
 
 	constructor () {
-		this.str.files.strings.set(this.str.language.Zh_CN, 'strings-Zh_CN.conf');
-		this.str.files.info.set(this.str.language.Zh_CN, 'cardinfo-Zh_CN.conf');
-		this.str.files.database.set(this.str.language.Zh_CN, 'cards-Zh_CN.cdb');
+		this.str.files.strings.set(this.str.language.Zh_CN, 'strings-zh-CN.conf');
+		this.str.files.info.set(this.str.language.Zh_CN, 'cardinfo-zh-CN.conf');
+		this.str.files.database.set(this.str.language.Zh_CN, 'cards-zh-CN.cdb');
 	};
 }
 export default new Constant();
