@@ -67,8 +67,11 @@
 		gsap.rps(self.value!, oppo.value!, () => {
 			if (n[0] === n[1])
 				page.show = true;
-			else
+			else {
+				if (n[0] === n[1] + 1 || n[0] === n[1] - 2)
+					props.connect.is_first.on();
 				props.connect.rps.off();
+			}
 		});
 	}, { deep : true });
 

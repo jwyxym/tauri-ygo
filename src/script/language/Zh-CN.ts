@@ -64,6 +64,7 @@ const Zh_CN : TEXT_Like = {
 		deck : '选择卡组',
 		rule : ['OCG', 'TCG', '简体中文', '自定义卡', '无独有卡', '所有卡片'],
 		mode : ['单局模式', '比赛模式', '双打模式'],
+		is_first : ['先攻', '后攻'],
 		to : {
 			duelist : '决斗者',
 			watcher : '观战者'
@@ -132,7 +133,8 @@ const Zh_CN : TEXT_Like = {
 			setting : {
 				download : 'url不可为空'
 			},
-			deck : '请选择卡组'
+			deck : '请选择卡组',
+			player : '似乎还有人没准备好哦'
 		},
 		download : {
 			start : '开始下载',

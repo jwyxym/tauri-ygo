@@ -35,9 +35,12 @@ class Invoke {
 	get_srv = async (url : string) : Promise<Result<Srv>> => {
 		const result : Result<Srv> = {};
 		try {
-			result.content = await invoke<Srv>('get_srv', {
-				url : url
+			const res = await invoke<Srv>('get_srv', {
+				url : `_ygopro._tcp.${url}`
 			});
+			if (res.target.endsWith('.'))
+				res.target = res.target.slice(0, -1);
+			result.content = res;
 		} catch (error) {
 			fs.write.log(error);
 			result.error = error;

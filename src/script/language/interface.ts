@@ -56,10 +56,11 @@ interface TEXT_Like {
 		deck : string;
 		rule : Array<string>;
 		mode : Array<string>;
+		is_first : Array<string>;
 		to : {
 			duelist : string;
 			watcher : string;
-		}
+		};
 		home : {
 			lflist : string;
 			rule : string;
@@ -69,7 +70,7 @@ interface TEXT_Like {
 			draw_count : string;
 			time_limit : string;
 			watch : string;
-		}
+		};
 	};
 	rule : {
 		search : string;
@@ -118,6 +119,7 @@ interface TEXT_Like {
 				download : string;
 			};
 			deck : string;
+			player : string;
 		};
 		download : {
 			start : string;

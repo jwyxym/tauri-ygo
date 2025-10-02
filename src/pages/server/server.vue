@@ -41,12 +41,12 @@
 					></Button>
 					<Button
 						@click = 'connect.to.duelist'
-						:content = mainGame.get.text().server.to.duelist
+						:content = 'mainGame.get.text().server.to.duelist'
 						:class = "{ 'readonly' : connect.self < 4 && connect.home.mode !== 2 }"
 					></Button>
 					<Button
 						@click = 'connect.to.watcher'
-						:content = mainGame.get.text().server.to.watcher
+						:content = 'mainGame.get.text().server.to.watcher'
 						:class = "{ 'readonly' : connect.self >= 4 }"
 					></Button>
 				</div>
@@ -115,10 +115,18 @@
 				v-if = 'page.duel && connect.rps.chk'
 				:connect = 'connect'
 			></RPS>
-			<RPS
-				v-if = 'page.duel && connect.tp.chk'
-				:connect = 'connect'
-			></RPS>
+			<var-popup v-model:show = 'connect.is_first.selecting'>
+				<div class = 'select_tp'>
+					<Button
+						@click = 'connect.is_first.select(1)'
+						:content = 'mainGame.get.text().server.is_first[0]'
+					></Button>
+					<Button
+						@click = 'connect.is_first.select(0)'
+						:content = 'mainGame.get.text().server.is_first[1]'
+					></Button>
+				</div>
+			</var-popup>
 		</TransitionGroup>
 		<var-popup v-model:show = 'page.chat' :overlay = 'false' position = 'right'>
 			<ConversationBlock
@@ -201,13 +209,14 @@
 			watch : 0
 		} as TCP.HostInfo,
 		start : async () : Promise<void> => {
-			if (connect.deck) {
+			if (connect.deck && connect.player.filter(i => i.ready).length === (connect.home.mode === 2 ? 4 : 2)) {
 				page.loading = true;
 				await tcp!.send.start();
 				await mainGame.load.pic(connect.deck);
-			} else {
+			} else if (!connect.deck)
 				toast.error(mainGame.get.text().toast.error.deck)
-			}
+			else
+				toast.error(mainGame.get.text().toast.error.player)
 		},
 		ready : async (deck : Deck | undefined) : Promise<void> => {
 			deck ? await tcp!.send.ready(deck) : await tcp!.send.un_ready();
@@ -249,16 +258,17 @@
 				connect.rps.chk = false;
 			},
 		},
-		tp : {
-			chk : false,
-			select : 0,
-			selected : async (tp : number) : Promise<void> => {
-				connect.tp.select = tp;
-				await tcp!.send.select_tp(tp);
+		is_first : {
+			chk : true,
+			selecting : false,
+			on : () => {
+				connect.is_first.selecting = true;
 			},
-			off : () : void => {
-				connect.tp.chk = false;
-			}
+			select : async (v : number) : Promise<void> => {
+				await tcp!.send.select_tp(v);
+				connect.is_first.chk = v === 1;
+				connect.is_first.selecting = false;
+			},
 		},
 		clear : () => {
 			connect.player = new Array(4).fill({ name : '' }) as Array<TCP.Player>;

@@ -3,6 +3,7 @@ import { Reactive } from 'vue';
 
 import mainGame from '../../../script/game';
 import fs from '../../../script/fs';
+import invoke from '../../../script/invoke';
 import Message from './message';
 import constant from '../../../script/constant';
 import toast from '../../../script/toast';
@@ -58,9 +59,15 @@ class Tcp {
 
 	connect = async (address : string, name : string, pass : string, connect : Reactive<any>) : Promise<boolean> => {
 		try {
+			const get_srv = async () : Promise<string> => {
+				const srv = await invoke.get_srv(address);
+				if (srv.error === undefined)
+					return `${srv.content!.target}:${srv.content!.port}`;
+				return address;
+			}
 			connect.state = -1;
-			this.address = address;
-			await tcp.connect(this.cid, address);
+			this.address = address.includes(':') ? address : await get_srv();
+			await tcp.connect(this.cid, this.address);
 			const message_address : CTOS_ExternalAddress = {
 				padding : new Message(0, 32),
 				name : new Message(address),
@@ -207,7 +214,9 @@ class Tcp {
 			],
 			[STOC.SELECT_TP,
 				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
-					connect.tp.chk = true;
+					if (connect.rps.chk)
+						connect.rps.chk = false;
+					connect.is_first.selecting = true;
 				}
 			],
 			[STOC.HAND_RESULT,
