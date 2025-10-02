@@ -6,37 +6,6 @@ on:
       - main
     
 jobs:
-  push-gitcode:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Git Config
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "github-actions@github.com"
-
-      - name: Set SSH Key
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan gitcode.com >> ~/.ssh/known_hosts
-
-      - name: Push to GitCode
-        run: |
-          git remote add gitcode git@gitcode.com:jwyxym/tauri-ygo.git
-          git fetch gitcode
-          git checkout -b gitcode-main gitcode/main
-          git merge origin/main
-          git push gitcode gitcode-main:main
-
   build-android:
     runs-on: windows-latest
     
@@ -261,8 +230,39 @@ jobs:
         name: tauri-ygo.exe
         path: .\src-tauri\target\release\tauri-ygo.exe
 
+  push-gitcode:
+    runs-on: ubuntu-latest
+    needs: [build-android, build-windows]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Git Config
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Set SSH Key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan gitcode.com >> ~/.ssh/known_hosts
+
+      - name: Push to GitCode
+        run: |
+          git remote add gitcode git@gitcode.com:jwyxym/tauri-ygo.git
+          git fetch gitcode
+          git checkout -b gitcode-main gitcode/main
+          git merge origin/main
+          git push gitcode gitcode-main:main
+
   update-gitcode:
-    name: Delete GitCode Release
     needs: [build-android, build-windows]
     runs-on: windows-latest
     steps:
@@ -281,8 +281,7 @@ jobs:
           pip install requests
           python .ci\update.py ${{ secrets.GITCODE_ACCESS_TOKEN }}
 
-  upload-gitcode:
-    name: Upload Exe to GitCode
+  upload-exe-to-gitcode:
     needs: [update-gitcode]
     runs-on: windows-latest
     steps:
@@ -312,8 +311,7 @@ jobs:
           cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo.exe/tauri-ygo.exe
 
-  upload-gitcode-apk:
-    name: Upload Apk to GitCode
+  upload-apk-to-gitcode:
     needs: [update-gitcode]
     runs-on: windows-latest
     steps:
@@ -343,8 +341,7 @@ jobs:
           cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo.apk/tauri-ygo.apk
 
-  upload-gitcode-assets_zip:
-    name: Upload Assets to GitCode
+  upload-assets_zip-gitcode:
     needs: [update-gitcode]
     runs-on: windows-latest
     steps:
@@ -374,8 +371,7 @@ jobs:
           cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} assets.zip/assets.zip
 
-  upload-gitcode-windows_msi:
-    name: Upload Windows Msi to GitCode
+  upload-windows_msi-gitcode:
     needs: [update-gitcode]
     runs-on: windows-latest
     steps:
@@ -406,8 +402,7 @@ jobs:
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-windows.msi/tauri-ygo-windows.msi
 
 
-  upload-gitcode-windows_exe:
-    name: Upload Windows Exe to GitCode
+  upload-windows_exe-gitcode:
     needs: [update-gitcode]
     runs-on: windows-latest
     steps:
@@ -438,7 +433,6 @@ jobs:
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo-windows.exe/tauri-ygo-windows.exe
 
   create-release:
-    name: Create Release with All Files
     needs: [build-android, build-windows]
     runs-on: ubuntu-latest
     permissions:
