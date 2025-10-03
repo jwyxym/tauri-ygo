@@ -25,6 +25,8 @@
 	import Download from'./svg/download.vue';
 	import Refresh from'./svg/refresh.vue';
 	import Socket from'./svg/socket.vue';
+	import Chat from'./svg/chat.vue';
+	import Flag from'./svg/flag.vue';
 	const props = defineProps(['icon_name', 'content']);
 	const svgs : Map<string, Component> = new Map ([
 		['deck', Deck],
@@ -41,6 +43,8 @@
 		['download', Download],
 		['refresh', Refresh],
 		['socket', Socket],
+		['chat', Chat],
+		['flag', Flag],
 	]);
 	const svg : null | Component = svgs.get(props.icon_name) ?? null;
 </script>

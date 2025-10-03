@@ -185,11 +185,6 @@
 			display: none;
 		}
 	}
-	.ConversationBlock {
-		.content-align-right {
-			color: black !important;
-		}
-	}
 	.readonly {
 		--checkbox-unchecked-color: #555 !important;
 		color: #555 !important;

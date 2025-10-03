@@ -207,7 +207,8 @@ class Tcp {
 									break;
 							}
 							connect.chk_deck = str;
-							toast.error(str);
+							toast.error(str, true);
+							connect.chat.list.push({ msg : str, contentType : 1 } as Chat);
 							break;
 					}
 				}
@@ -228,7 +229,7 @@ class Tcp {
 			[STOC.DECK_COUNT,
 				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					const pack = to_package(buffer, data, new Array(6).fill(16), pos);
-					console.log(pack)
+					connect.deck_count = pack;
 				}
 			],
 			[STOC.JOIN_GAME,
@@ -268,15 +269,17 @@ class Tcp {
 					const player = pack[0];
 					let str = '';
 					if (player < 4) {
-						str += connect.player[player].name;
+						if (connect.self !== player)
+							str += connect.player[player].name;
 					} else if ((player < 11 || player > 19) && player !== 8) {
 						str += mainGame.get.text().server.watcher
 					}
 					if (str.length > 0)
 						str += ' : '
 					str += pack[1];
-					toast.info(str, true);
-					connect.chat.push({ msg : str, contentType : 1 } as Chat);
+					if (connect.self !== player)
+						toast.info(str, true);
+					connect.chat.list.push({ msg : str, contentType : connect.self === player ? 0 : 1 } as Chat);
 				}
 			],
 			[STOC.HS_PLAYER_ENTER,
@@ -349,29 +352,35 @@ class Tcp {
 			for (const [v, i] of [...deck.main, ...deck.extra, ...deck.side].entries()) {
 				obj[v + 2] = new Message(i, 32);
 			}
-			this.send.on(CTOS.UPDATE_DECK, obj);
-			this.send.on(CTOS.HS_READY);
+			await this.send.on(CTOS.UPDATE_DECK, obj);
+			await this.send.on(CTOS.HS_READY);
 		},
 		un_ready : async () : Promise<void> => {
-			this.send.on(CTOS.HS_NOTREADY);
+			await this.send.on(CTOS.HS_NOTREADY);
 		},
 		kick : async (v : number) : Promise<void> => {
-			this.send.on(CTOS.HS_KICK, new Message(v, 8));
+			await this.send.on(CTOS.HS_KICK, new Message(v, 8));
 		},
 		to_duelist : async () : Promise<void> => {
-			this.send.on(CTOS.HS_TODUELIST);
+			await this.send.on(CTOS.HS_TODUELIST);
 		},
 		to_watcher : async () : Promise<void> => {
-			this.send.on(CTOS.HS_TOOBSERVER);
+			await this.send.on(CTOS.HS_TOOBSERVER);
 		},
 		start : async () : Promise<void> => {
-			this.send.on(CTOS.HS_START);
+			await this.send.on(CTOS.HS_START);
 		},
 		rps : async (v : number) : Promise<void> => {
-			this.send.on(CTOS.HAND_RESULT, new Message(v + 1, 8));
+			await this.send.on(CTOS.HAND_RESULT, new Message(v + 1, 8));
 		},
 		select_tp : async (tp : number) : Promise<void> => {
-			this.send.on(CTOS.TP_RESULT, new Message(tp, 8));
+			await this.send.on(CTOS.TP_RESULT, new Message(tp, 8));
+		},
+		chat : async (chat : string) : Promise<void> => {
+			await this.send.on(CTOS.CHAT, new Message(chat));
+		},
+		surrender : async () : Promise<void> => {
+			await this.send.on(CTOS.SURRENDER);
 		},
 	}
 

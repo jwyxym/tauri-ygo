@@ -54,6 +54,8 @@ interface TEXT_Like {
 		no_shuffle_deck : string;
 		watcher : string;
 		deck : string;
+		chat : string;
+		surrender : string;
 		rule : Array<string>;
 		mode : Array<string>;
 		is_first : Array<string>;

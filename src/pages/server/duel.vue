@@ -24,15 +24,65 @@
 		},
 		render : () => {
 			three.renderer.render(three.scene, three.camera);
+		},
+		create : {
+			size : {
+				width : 0,
+				height : 90
+			},
+			offset : 0,
+			card : (src : string = '') : CSS.CSS3DObject => {
+				const dom = document.createElement('div');
+				const child = document.createElement('img');
+				child.src = src;
+				child.style.width = `${three.create.size.width * 2}px`;
+				child.style.height = `${three.create.size.height}px`;
+				dom.appendChild(child);
+				return new CSS.CSS3DObject(dom);
+			},
+			position : (target : CSS.CSS3DObject, x : number, y : number, z : number, card : boolean = false) => {
+				if (x % 3 === 0 && x !== 0) {
+					if (x === -3)
+						target.position.set((three.create.size.height + 5) * x,
+							(three.create.size.height + 5) * y
+								+ (y >= 0 ? three.create.offset : -three.create.offset),
+							z
+						);
+					else
+						target.position.set((three.create.size.height + 5) * x,
+							(three.create.size.height + 5) * y
+								+ (y <= 0 ? -three.create.offset : three.create.offset),
+							z
+						);
+					// if (y === 0)
+					// 	target.position.set((three.create.size.height + 5)
+					// 			* (x + (x > 0 ? 1 : -1)),
+					// 		(three.create.size.height + 5)
+					// 			* (y + (x > 0 ? -1 : 1))
+					// 			+ (x > 0 ? three.create.offset : -three.create.offset),
+					// 		z
+					// 	);
+					// else if (y % 2 === 0)
+					// 	target.position.set((three.create.size.height + 5) * x,
+					// 		(three.create.size.height + 5) * y
+					// 			+ (y > 0 ? three.create.offset : -three.create.offset),
+					// 		z
+					// 	);
+					// else
+					// 	target.position.set((three.create.size.height + 5) * x,
+					// 		(three.create.size.height + 5) * y
+					// 			+ (y > 0 ? -three.create.offset : three.create.offset), z);
+				} else
+					target.position.set((three.create.size.height + 5) * x, (three.create.size.height + 5) * y, 0);
+				if (card && (y > 0 || (y === 0 && x === -3)))
+					target.rotation.set(0, 0, Math.PI);
+			}
 		}
 	}
 
 	onMounted(() => {
-		const card_size = {
-			width : 0,
-			height : 90
-		}
-		card_size.width = card_size.height / 2.9;
+		three.create.size.width = three.create.size.height / 2.9;
+		three.create.offset = three.create.size.height / 2;
 		three.renderer.setSize(window.innerWidth, window.innerHeight);
 		three.renderer.domElement.style.position = 'fixed';
   		three.renderer.domElement.style.top = '0';
@@ -45,38 +95,27 @@
 					continue;
 				const dom = document.createElement('div');
 				const child = document.createElement('div');
-				child.style.width = `${card_size.height}px`;
-				child.style.height = `${card_size.height}px`;
+				child.style.width = `${three.create.size.height}px`;
+				child.style.height = `${three.create.size.height}px`;
 				child.style.border = '1px solid #9ed3ff';
 				dom.appendChild(child);
 				const css = new CSS.CSS3DObject(dom);
-				css.position.set((card_size.height + 5) * x, (card_size.height + 5) * y, 0);
+				three.create.position(css, x, y, 0);
     			three.scene.add(css);
 			}
 
-		for (let z = 1; z < 61; z++) {
-			const dom = document.createElement('div');
-			const child = document.createElement('img');
-			child.src = mainGame.get.textures(constant.str.files.textures.pic[0]) ?? '';
-			child.style.width = `${card_size.width * 2}px`;
-			child.style.height = `${card_size.height}px`;
-			dom.appendChild(child);
-			const css = new CSS.CSS3DObject(dom);
-			css.position.set((card_size.height + 5) * -3, (card_size.height + 5) * 2, z * 0.2);
-			three.scene.add(css);
 			// gsap.turn(child, mainGame.get.textures(constant.str.files.textures.back));
 			// gsap.turn(child, mainGame.get.textures(constant.str.files.textures.pic[0]));
+
+		for (let z = 1; z < 61; z++) {
+			const card = three.create.card(mainGame.get.textures(constant.str.files.textures.pic[0]));
+			three.create.position(card, -3, 2, z * 0.2);
+			three.scene.add(card);
 		}
 		for (let z = 1; z < 61; z++) {
-			const dom = document.createElement('div');
-			const child = document.createElement('img');
-			child.style.width = `${card_size.width * 2}px`;
-			child.style.height = `${card_size.height}px`;
-			child.src = mainGame.get.textures(constant.str.files.textures.back) ?? '';
-			dom.appendChild(child);
-			const css = new CSS.CSS3DObject(dom);
-			css.position.set((card_size.height + 5) * 3, (card_size.height + 5) * -2, z * 0.2);
-			three.scene.add(css);
+			const card = three.create.card(mainGame.get.textures(constant.str.files.textures.back));
+			three.create.position(card, 3, -2, z * 0.2);
+			three.scene.add(card);
 		}
 		const ambientLight = new THREE.AmbientLight('white', 1);
 		three.scene.add(ambientLight);
@@ -102,6 +141,8 @@
 	onUnmounted(() => {
 		window.removeEventListener('resize', three.resize);
 	});
+
+	const props = defineProps(['connect']);
 
 </script>
 <style scoped lang = 'scss'>

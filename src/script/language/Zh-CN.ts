@@ -62,6 +62,8 @@ const Zh_CN : TEXT_Like = {
 		no_shuffle_deck : '*不切洗手卡',
 		watcher : '观战者',
 		deck : '选择卡组',
+		chat : '发送消息',
+		surrender : '确认要投降吗？',
 		rule : ['OCG', 'TCG', '简体中文', '自定义卡', '无独有卡', '所有卡片'],
 		mode : ['单局模式', '比赛模式', '双打模式'],
 		is_first : ['先攻', '后攻'],

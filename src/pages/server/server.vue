@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class = 'server over_ground'>
 		<var-popup v-model:show = 'page.server' :close-on-key-escape = 'false' :overlay = 'false'>
 			<var-form>
 				<div class = 'button_list'>
@@ -108,14 +108,14 @@
 		</var-popup>
 		<TransitionGroup tag = 'div' name = 'opacity'>
 			<Duel
-				v-if = 'page.duel'
+				v-if = 'page.duel && connect.deck_count.length > 0'
 				:connect = 'connect'
 			></Duel>
 			<RPS
 				v-if = 'page.duel && connect.rps.chk'
 				:connect = 'connect'
 			></RPS>
-			<var-popup v-model:show = 'connect.is_first.selecting'>
+			<var-popup v-model:show = 'connect.is_first.selecting' :overlay = 'false' :close-on-key-escape = 'false' :close-on-click-overlay = 'false'>
 				<div class = 'select_tp'>
 					<Button
 						@click = 'connect.is_first.select(1)'
@@ -129,13 +129,44 @@
 			</var-popup>
 		</TransitionGroup>
 		<var-popup v-model:show = 'page.chat' :overlay = 'false' position = 'right'>
-			<ConversationBlock
-				class = 'chat'
-				:list = 'connect.chat'
-				:userOptions = "{ position: 'left' }"
-				:answerOptions = "{ position: 'right' }"
-			/>
+			<div class = 'chat'>
+				<div class = 'exit_button'>
+					<Button
+						@click = 'page.chatting'
+						icon_name = 'exit'
+					></Button>
+				</div>
+				<ConversationBlock
+					class = 'message'
+					:list = 'connect.chat.list'
+					:userOptions = "{ position: 'left' }"
+					:answerOptions = "{ position: 'right' }"
+				/>
+				<div class = 'send'>
+					<Input
+						:placeholder = 'mainGame.get.text().server.chat'
+						v-model = 'server.chat'
+					/>
+					<Button
+						@click = 'connect.chat.send'
+						icon_name = 'chat'
+					></Button>
+				</div>
+			</div>
 		</var-popup>
+		<transition name = 'move_right'>
+			<div class = 'ui' v-show = '(page.wait || page.duel) && !page.chat'>
+				<Button
+					@click = 'page.chatting'
+					icon_name = 'chat'
+				></Button>
+				<Button
+					v-show = 'page.duel'
+					@click = 'connect.surrender'
+					icon_name = 'flag'
+				></Button>
+			</div>
+		</transition>
 	</div>
 </template>
 <script setup lang = 'ts'>
@@ -155,6 +186,7 @@
 	import Deck from '../deck/deck';
 	import Duel from './duel.vue';
 	import RPS from './rps.vue';
+	import Dialog from '../varlet/dialog';
 
 	let tcp : Tcp | null = null;
 	const deck = ref<HTMLElement | null>();
@@ -165,6 +197,9 @@
 		duel : false,
 		chat : false,
 		loading : false,
+		chatting : () => {
+			page.chat = !page.chat;
+		},
 		exit : async () : Promise<void> => {
 			page.server = false;
 			await (new Promise(resolve => setTimeout(resolve, 200)));
@@ -194,7 +229,14 @@
 		chk_deck : undefined as string | boolean | undefined,
 		deck : undefined as Deck | undefined,
 		player : new Array(4).fill({ name : '' }) as Array<TCP.Player>,
-		chat : [] as TCP.Chats,
+		deck_count : [] as Array<number>,
+		chat : {
+			list : [] as TCP.Chats,
+			send : async () : Promise<void> => {
+				await tcp!.send.chat(server.chat);
+				server.chat = '';
+			}
+		},
 		home : {
 			lflist : 0,
 			rule : 0,
@@ -270,6 +312,12 @@
 				connect.is_first.selecting = false;
 			},
 		},
+		surrender : async () : Promise<void> => {
+			Dialog({
+				title : mainGame.get.text().server.surrender,
+				onConfirm : tcp!.send.surrender
+			});
+		},
 		clear : () => {
 			connect.player = new Array(4).fill({ name : '' }) as Array<TCP.Player>;
 			connect.home = {
@@ -286,11 +334,13 @@
 				watch : 0
 			};
 			connect.deck = undefined;
-			connect.chat = [] as TCP.Chats;
+			connect.chat.list = [] as TCP.Chats;
+			connect.deck_count = [];
 		}
 	});
 
 	const server = reactive({
+		chat : '',
 		name : mainGame.get.system(constant.str.system_conf.string.server_name) as string,
 		address : mainGame.get.system(constant.str.system_conf.string.server_address) as string,
 		pass : mainGame.get.system(constant.str.system_conf.string.server_pass) as string,
@@ -334,6 +384,8 @@
 			page.server = true;
 			connect.clear();
 			page.loading = false;
+			page.chat = false;
+			server.chat = '';
 		};
 		await [off, on, start][n]();
 	});
