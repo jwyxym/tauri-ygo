@@ -237,7 +237,7 @@ fn get_srv(url: String) -> Result<Srv, String> {
 			});
 		}
 	}
-	Err("No Data".to_string())
+	Err(String::from("No Data"))
 }
 
 #[tauri::command]
@@ -267,7 +267,7 @@ async fn version(url: String, headers: Vec<(String, String)>) -> Result<String, 
 	} else {
 		return Err(format!("{}", response.status()));
 	}
-	Err("No Data".to_string())
+	Err(String::from("No Data"))
 }
 
 #[tauri::command]
