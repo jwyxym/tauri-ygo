@@ -40,6 +40,15 @@
 				dom.appendChild(child);
 				return new CSS.CSS3DObject(dom);
 			},
+			plaid : () : CSS.CSS3DObject => {
+				const dom = document.createElement('div');
+				const child = document.createElement('div');
+				child.style.width = `${three.create.size.height}px`;
+				child.style.height = `${three.create.size.height}px`;
+				child.style.border = '1px solid #9ed3ff';
+				dom.appendChild(child);
+				return new CSS.CSS3DObject(dom);
+			},
 			position : (target : CSS.CSS3DObject, x : number, y : number, z : number, card : boolean = false) => {
 				if (x % 3 === 0 && x !== 0) {
 					if (x === -3)
@@ -54,24 +63,6 @@
 								+ (y <= 0 ? -three.create.offset : three.create.offset),
 							z
 						);
-					// if (y === 0)
-					// 	target.position.set((three.create.size.height + 5)
-					// 			* (x + (x > 0 ? 1 : -1)),
-					// 		(three.create.size.height + 5)
-					// 			* (y + (x > 0 ? -1 : 1))
-					// 			+ (x > 0 ? three.create.offset : -three.create.offset),
-					// 		z
-					// 	);
-					// else if (y % 2 === 0)
-					// 	target.position.set((three.create.size.height + 5) * x,
-					// 		(three.create.size.height + 5) * y
-					// 			+ (y > 0 ? three.create.offset : -three.create.offset),
-					// 		z
-					// 	);
-					// else
-					// 	target.position.set((three.create.size.height + 5) * x,
-					// 		(three.create.size.height + 5) * y
-					// 			+ (y > 0 ? -three.create.offset : three.create.offset), z);
 				} else
 					target.position.set((three.create.size.height + 5) * x, (three.create.size.height + 5) * y, 0);
 				if (card && (y > 0 || (y === 0 && x === -3)))
@@ -93,28 +84,33 @@
 			for (let y = -2; y < 3; y++) {
 				if (y === 0 && x % 2 === 0)
 					continue;
-				const dom = document.createElement('div');
-				const child = document.createElement('div');
-				child.style.width = `${three.create.size.height}px`;
-				child.style.height = `${three.create.size.height}px`;
-				child.style.border = '1px solid #9ed3ff';
-				dom.appendChild(child);
-				const css = new CSS.CSS3DObject(dom);
-				three.create.position(css, x, y, 0);
-    			three.scene.add(css);
+				const dom = three.create.plaid();
+				three.create.position(dom, x, y, 0);
+    			three.scene.add(dom);
 			}
 
 			// gsap.turn(child, mainGame.get.textures(constant.str.files.textures.back));
 			// gsap.turn(child, mainGame.get.textures(constant.str.files.textures.pic[0]));
 
-		for (let z = 1; z < 61; z++) {
-			const card = three.create.card(mainGame.get.textures(constant.str.files.textures.pic[0]));
+			console.log(props.connect.deck_count)
+		for (let z = 1; z < props.connect.deck_count[0]; z++) {
+			const card = three.create.card(mainGame.get.textures(constant.str.files.textures.back));
+			three.create.position(card, 3, -2, z * 0.2);
+			three.scene.add(card);
+		}
+		for (let z = 1; z < props.connect.deck_count[1]; z++) {
+			const card = three.create.card(mainGame.get.textures(constant.str.files.textures.back));
+			three.create.position(card, -3, -2, z * 0.2);
+			three.scene.add(card);
+		}
+		for (let z = 1; z < props.connect.deck_count[3]; z++) {
+			const card = three.create.card(mainGame.get.textures(constant.str.files.textures.back));
 			three.create.position(card, -3, 2, z * 0.2);
 			three.scene.add(card);
 		}
-		for (let z = 1; z < 61; z++) {
+		for (let z = 1; z < props.connect.deck_count[4]; z++) {
 			const card = three.create.card(mainGame.get.textures(constant.str.files.textures.back));
-			three.create.position(card, 3, -2, z * 0.2);
+			three.create.position(card, 3, 2, z * 0.2);
 			three.scene.add(card);
 		}
 		const ambientLight = new THREE.AmbientLight('white', 1);

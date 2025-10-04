@@ -51,6 +51,7 @@ class Card {
 	desc : string;
 	hint : Array<string>;
 	pic : string;
+	pos ?: number;
   
 	constructor (row : Array<string | number>) {
 		this.pic = '';
@@ -118,7 +119,7 @@ class Card {
 					i.array.push(v);
 			}
 			
-		const setcode = this.setcode.map(i => i > 0 ? mainGame.strings.get(constant.str.string_conf.setcode)?.get(i) ?? `0x${i.toString(16)}` : '');
+		const setcode = this.setcode.map(i => i > 0 ? mainGame.strings.get(constant.str.strings_conf.setcode)?.get(i) ?? `0x${i.toString(16)}` : '');
 		return {
 			ot : to_srting(ot),
 			level : `${this.is_link() ? 'link-' : (this.is_xyz() ? '☆' : '★')}${this.level}`,

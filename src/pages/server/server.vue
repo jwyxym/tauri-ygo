@@ -146,6 +146,7 @@
 					<Input
 						:placeholder = 'mainGame.get.text().server.chat'
 						v-model = 'server.chat'
+						@keydown = 'connect.chat.press'
 					/>
 					<Button
 						@click = 'connect.chat.send'
@@ -160,11 +161,20 @@
 					@click = 'page.chatting'
 					icon_name = 'chat'
 				></Button>
-				<Button
-					v-show = 'page.duel'
-					@click = 'connect.surrender'
-					icon_name = 'flag'
-				></Button>
+				<transition name = 'scale'>
+					<Button
+						v-show = 'page.wait'
+						@click = 'connect.chat.robot'
+						icon_name = 'add_person'
+					></Button>
+				</transition>
+				<transition name = 'scale'>
+					<Button
+						v-show = 'page.duel'
+						@click = 'connect.surrender'
+						icon_name = 'flag'
+					></Button>
+				</transition>
 			</div>
 		</transition>
 	</div>
@@ -233,8 +243,16 @@
 		chat : {
 			list : [] as TCP.Chats,
 			send : async () : Promise<void> => {
+				if (server.chat === '') return;
 				await tcp!.send.chat(server.chat);
 				server.chat = '';
+			},
+			press : async (event : KeyboardEvent) : Promise<void> => {
+				if (event.key === 'Enter')
+					await connect.chat.send();
+			},
+			robot : async () : Promise<void> => {
+				await tcp!.send.chat('/ai');
 			}
 		},
 		home : {
@@ -301,7 +319,7 @@
 			},
 		},
 		is_first : {
-			chk : true,
+			chk : undefined as boolean | undefined,
 			selecting : false,
 			on : () => {
 				connect.is_first.selecting = true;
@@ -336,6 +354,7 @@
 			connect.deck = undefined;
 			connect.chat.list = [] as TCP.Chats;
 			connect.deck_count = [];
+			connect.is_first.chk = undefined;
 		}
 	});
 

@@ -269,8 +269,7 @@ class Tcp {
 					const player = pack[0];
 					let str = '';
 					if (player < 4) {
-						if (connect.self !== player)
-							str += connect.player[player].name;
+						str += connect.player[player].name;
 					} else if ((player < 11 || player > 19) && player !== 8) {
 						str += mainGame.get.text().server.watcher
 					}
@@ -279,7 +278,7 @@ class Tcp {
 					str += pack[1];
 					if (connect.self !== player)
 						toast.info(str, true);
-					connect.chat.list.push({ msg : str, contentType : connect.self === player ? 0 : 1 } as Chat);
+					connect.chat.list.push({ msg : str, contentType : 1 } as Chat);
 				}
 			],
 			[STOC.HS_PLAYER_ENTER,

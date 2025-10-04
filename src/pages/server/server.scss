@@ -127,7 +127,10 @@
 	.ui {
 		height: 44px;
 		position: absolute;
-		left: 90vw;
-		bottom: 10vh;
+		right: 20px;
+		bottom: 20px;
+		display: flex;
+		gap: 10px;
+		flex-direction: row-reverse;
 	}
 }

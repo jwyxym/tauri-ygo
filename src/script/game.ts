@@ -40,6 +40,7 @@ class Game {
 	interval = -1;
 	interval_ct = 0;
 	unknown : Card = new Card([...new Array(11).fill(0), ...new Array(19).fill('')]);
+	back : Card = new Card([...new Array(11).fill(0), ...new Array(19).fill('')]);
 
 	private lflist_now : string = '';
 
@@ -89,6 +90,7 @@ class Game {
 			}
 
 			this.unknown.update_pic(this.textures.get(constant.str.files.textures.unknown) ?? '');
+			this.back.update_pic(this.textures.get(constant.str.files.textures.back) ?? '');
 			
 			await this.load.card();
 			await this.load.expansion();
