@@ -90,7 +90,7 @@ class Game {
 			}
 
 			this.unknown.update_pic(this.textures.get(constant.str.files.textures.unknown) ?? '');
-			this.back.update_pic(this.textures.get(constant.str.files.textures.back) ?? '');
+			this.back.update_pic(this.textures.get(constant.str.files.textures.cover) ?? '');
 			
 			await this.load.card();
 			await this.load.expansion();
@@ -132,8 +132,8 @@ class Game {
 				return !!number;
 			}
 		},
-		textures : (key : string) : string | undefined => {
-			return this.textures.get(key);
+		textures : (key : string | Array<string>) : Array<string | undefined> | string | undefined => {
+			return typeof key === 'object' ? (key as Array<string>).map(i => this.textures.get(i)) : this.textures.get(key);
 		},
 		card : (key : string | number) : Card => {
 			key = typeof key == 'string' ? parseInt(key) : key;
@@ -257,7 +257,7 @@ class Game {
 			}
 			deck = deck.filter(filter);
 			for (const code of deck) {
-				this.cards.get(code)!.update_pic(this.get.textures(constant.str.files.textures.unknown) ?? '');
+				this.cards.get(code)!.update_pic(this.get.textures(constant.str.files.textures.unknown) as string | undefined ?? '');
 			}
 
 		},
