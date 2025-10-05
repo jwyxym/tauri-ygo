@@ -7,9 +7,8 @@ import invoke from '../../../script/invoke';
 import Message from './message';
 import constant from '../../../script/constant';
 import toast from '../../../script/toast';
-import STOC from './stoc';
-import CTOS from './ctos';
 import Deck from '../../deck/deck';
+import { CTOS, STOC, LOCATION, MSG, ERROR, PLAYERCHANGE, HINT } from './network';
 
 interface Player {
 	name : string;
@@ -110,7 +109,7 @@ class Tcp {
 				const len = data.getUint16(pos, true);
 				const proto = data.getUint8(pos + 2);
 				const func = funcs.get(proto);
-				console.log(len, proto.toString(16))
+				// console.log(len, proto.toString(16))
 				if (func)
 					func(buffer, data, len, connect, pos);
 				pos += len + 2;
@@ -171,36 +170,103 @@ class Tcp {
 		}
 
 		const funcs : Map<number, Function> = new Map([
+			[STOC.GAME_MSG,
+				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+					if (connect.state === 0)
+						return;
+					const msg_funcs : Map<number, Function> = new Map([
+						[MSG.RESET_TIME, () => {
+
+						}],
+						[MSG.RETRY, () => {
+
+						}],
+						[MSG.HINT, () => {
+							const [type, player, content] = to_package(buffer, data, [8, 8, 32], pos);
+							switch (type) {
+								case HINT.EVENT:
+									break;
+								case HINT.MESSAGE:
+									break;
+								case HINT.SELECTMSG:
+									break;
+								case HINT.OPSELECTED:
+									break;
+								case HINT.EFFECT:
+									break;
+								case HINT.RACE:
+									break;
+								case HINT.ATTRIB:
+									break;
+								case HINT.CODE:
+									break;
+								case HINT.NUMBER:
+									break;
+								case HINT.CARD:
+									break;
+								case HINT.ZONE:
+									break;
+								case HINT.DIALOG:
+									const dialog = {
+										code : (content >> 4) & 0x0fffffff,
+										offset : content & 0xf,
+										str : ''
+									};
+									dialog.str = mainGame.get.card(dialog.code).desc[dialog.offset];
+									if (dialog.str) {
+										toast.info(dialog.str, true);
+										connect.chat.list.push({ msg : dialog.str, contentType : 1 } as Chat);
+									}
+									break;
+
+							}
+						}],
+						[MSG.WIN, () => {
+
+						}],
+						[MSG.WAITING, () => {
+
+						}],
+					]);
+					const cur_msg : number = to_package(buffer, data, [8], pos)[0];
+					console.log(cur_msg)
+					if (msg_funcs.has(cur_msg))
+						msg_funcs.get(cur_msg)!();
+				}
+			],
 			[STOC.ERROR_MSG,
 				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					const pack = to_package(buffer, data, [8, -3, 32], pos);
 					const [msg, code] = pack;
 					switch (msg) {
-						case 2:
+						case ERROR.DECKERROR:
 							const flag = code >> 28;
 							const id = code & mainGame.max_card_id;
 							let str;
 							switch (flag) {
-								case 1:
+								case ERROR.LFLIST:
 									str = (mainGame.get.strings.system(1407, mainGame.get.card(id).name));
 									break;
-								case 2:
+								case ERROR.OCGONLY:
 									str = (mainGame.get.strings.system(1413, mainGame.get.card(id).name));
 									break;
-								case 3:
+								case ERROR.TCGONLY:
 									str = mainGame.get.strings.system(1414, mainGame.get.card(id).name);
 									break;
-								case 4:
+								case ERROR.UNKNOWNCARD:
 									str = mainGame.get.strings.system(1415, [mainGame.get.card(id).name, id]);
 									break;
-								case 5:
+								case ERROR.CARDCOUNT:
 									str = mainGame.get.strings.system(1416, mainGame.get.card(id).name);
 									break;
-								case 6:
+								case ERROR.MAINCOUNT:
 									str = mainGame.get.strings.system(1417, id);
 									break;
-								case 7:
+								case ERROR.EXTRACOUNT:
 									str = mainGame.get.strings.system(id > 0 ? 1418 : 1420, mainGame.get.card(id).name);
+									break;
+								case ERROR.SIDECOUNT:
+									str = mainGame.get.strings.system(1419, id);
 									break;
 								default:
 									str = mainGame.get.text().unknow;
@@ -293,18 +359,18 @@ class Tcp {
 					const state = pack[0] & 0xf;
 					const player = (pack[0] >> 4) & 0xf;
 					switch (state) {
-						case 8:
+						case PLAYERCHANGE.OBSERVE:
 							connect.player[player] = { name : '' };
 							connect.home.watch ++;
 							break;
-						case 9:
+						case PLAYERCHANGE.READY:
 							connect.player[player].ready = true;
 							connect.chk_deck = true;
 							break;
-						case 10:
+						case PLAYERCHANGE.NOTREADY:
 							connect.player[player].ready = false;
 							break;
-						case 11:
+						case PLAYERCHANGE.LEAVE:
 							connect.player[player] = { name : '' };
 							break;
 						default:
