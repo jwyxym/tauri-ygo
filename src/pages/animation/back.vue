@@ -29,7 +29,7 @@
 				return texture;
 			},
 			back : () => {
-				const texture = three.texture.this.load(mainGame.get.textures(constant.str.files.textures.back) ?? '');
+				const texture = three.texture.this.load(mainGame.get.textures(constant.str.files.textures.back) as string | undefined ?? '');
 				return texture;
 			}
 		}

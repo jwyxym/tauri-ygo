@@ -6,6 +6,8 @@ class Gsap {
 		return gsap.timeline(vars);
 	};
 
+	to = gsap.to
+
 	attack = (obj : {
 		distance : number;
 		attacker : HTMLElement;
@@ -30,14 +32,12 @@ class Gsap {
 		const angle = pos.angle(p1, p2);
 		const radians = angle * Math.PI / 180;
 		if (attacker_angle !== undefined)
-			tl.to(attacker, {
-				rotation : attacker_angle,
-				duration : 0
+			tl.set(attacker, {
+				rotation : attacker_angle
 			}, 0);
 		if (defender_angle !== undefined)
-			tl.to(defender, {
-				rotation : defender_angle,
-				duration : 0
+			tl.set(defender, {
+				rotation : defender_angle
 			}, 0);
 		tl.to(attacker, {
 			rotation : angle,

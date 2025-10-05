@@ -419,7 +419,7 @@
 	})
 
 	const cardinfo = reactive({
-		pic : mainGame.get.textures(constant.str.files.textures.unknown),
+		pic : mainGame.get.textures(constant.str.files.textures.unknown) as string,
 		name : mainGame.get.text().deck.info,
 		id : '',
 		description : '',

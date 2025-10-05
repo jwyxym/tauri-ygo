@@ -10,8 +10,19 @@
 	
 	import mainGame from '../../script/game';
 	import constant from '../../script/constant';
+	import { LOCATION } from './post/network';
 	import gsap from '../../script/gsap';
 	import position from '../../script/position';
+
+	interface Axis {
+		x : number,
+		y : number
+	};
+
+	interface Position {
+		loc : number,
+		owner : number
+	};
 
 	const canvas : Ref<HTMLElement | null> = ref(null);
 
@@ -24,6 +35,71 @@
 		},
 		render : () => {
 			three.renderer.render(three.scene, three.camera);
+		},
+		axis : new Map([
+			[LOCATION.HAND, [
+				{ x : -2, y : -3 },
+				{ x : 2, y : 3 }
+			]],
+			[LOCATION.DECK, [
+				{ x : 3, y : -2 },
+				{ x : -3, y : 2 }
+			]],
+			[LOCATION.EXTRA, [
+				{ x : -3, y : -2 },
+				{ x : 3, y : 2 }
+			]],
+			[LOCATION.FZONE, [
+				{ x : -3, y : -1 },
+				{ x : 3, y : 1 }
+			]],
+			[LOCATION.GRAVE, [
+				{ x : 3, y : -1 },
+				{ x : -3, y : 1 }
+			]],
+			[LOCATION.REMOVED, [
+				{ x : 3, y : 0 },
+				{ x : -3, y : 0 }
+			]],
+			[LOCATION.MZONE, [
+				[
+					{ x : -2, y : -1 },
+					{ x : -1, y : -1 },
+					{ x : 0, y : -1 },
+					{ x : 1, y : -1 },
+					{ x : 2, y : -1 },
+					{ x : -1, y : 0 },
+					{ x : 1, y : 0 }
+				],
+				[
+					{ x : 2, y : 1 },
+					{ x : 1, y : 1 },
+					{ x : 0, y : 1 },
+					{ x : -1, y : 1 },
+					{ x : -2, y : 1 },
+					{ x : 1, y : 0 },
+					{ x : -1, y : 0 }
+				]
+			]],
+			[LOCATION.SZONE, [
+				[
+					{ x : -2, y : -2 },
+					{ x : -1, y : -2 },
+					{ x : 0, y : -2 },
+					{ x : 1, y : -2 },
+					{ x : 2, y : -2 },
+				],
+				[
+					{ x : 2, y : 2 },
+					{ x : 1, y : 2 },
+					{ x : 0, y : 2 },
+					{ x : -1, y : 2 },
+					{ x : -2, y : 2 },
+				]
+			]],
+		]),
+		cards : {
+			hand : [[], []] as Array<Array<CSS.CSS3DObject>>
 		},
 		create : {
 			size : {
@@ -70,40 +146,73 @@
 				dom.appendChild(child);
 				return new CSS.CSS3DObject(dom);
 			},
-			position : (target : CSS.CSS3DObject, x : number, y : number, z : number, card : boolean = false) => {
-				if (x % 3 === 0 && x !== 0) {
-					if (x === -3)
-						target.position.set((three.create.size.height + three.create.gap) * x,
-							(three.create.size.height + three.create.gap) * y
-								+ (y >= 0 ? three.create.offset : -three.create.offset),
-							z
-						);
-					else
-						target.position.set((three.create.size.height + three.create.gap) * x,
-							(three.create.size.height + three.create.gap) * y
-								+ (y <= 0 ? -three.create.offset : three.create.offset),
-							z
-						);
-				} else
-					target.position.set((three.create.size.height + three.create.gap) * x, (three.create.size.height + three.create.gap) * y, 0);
-				if (card && (y > 0 || (y === 0 && x === -3)))
-					target.rotation.set(0, 0, Math.PI);
+			sendto : {
+				field : (target : CSS.CSS3DObject, x : number, y : number, z : number, owner : number = 0, from : boolean = false) => {
+					if (x % 3 === 0 && x !== 0) {
+						if (x === -3)
+							target.position.set((three.create.size.height + three.create.gap) * x,
+								(three.create.size.height + three.create.gap) * y
+									+ (y >= 0 ? three.create.offset : -three.create.offset),
+								z
+							);
+						else
+							target.position.set((three.create.size.height + three.create.gap) * x,
+								(three.create.size.height + three.create.gap) * y
+									+ (y <= 0 ? -three.create.offset : three.create.offset),
+								z
+							);
+					} else
+						target.position.set((three.create.size.height + three.create.gap) * x, (three.create.size.height + three.create.gap) * y, 0);
+					// if (card && ((y > 0 || (y === 0 && x === -3)) || rotation && y === 0 && (x === -1 || x === 1)))
+					if (owner === 1)
+						target.rotation.set(0, 0, Math.PI);
+				},
+				hand : (target : CSS.CSS3DObject, owner : number = 0, from : boolean = false) => {
+					const axis = three.axis.get(LOCATION.HAND)![owner] as Axis;
+					const ct = three.cards.hand[owner].length;
+					const gap = three.create.size.width * Math.min(ct, 6);
+					const width = three.create.size.width * 6;
+					if (ct > 6) {
+						three.cards.hand[owner].forEach((card, v) => {
+							console.log((three.create.size.height + three.create.gap) * axis.x + width / ct * v, width / ct, v)
+							if (v > 0)
+								gsap.to(card.position, {
+									x : (three.create.size.height + three.create.gap) * axis.x + width / ct * v,
+									duration : 0.2
+								})
+						})
+					}
+					const x = (three.create.size.height + three.create.gap) * axis.x + (owner === 0 ? gap : - gap);
+					const y = (three.create.size.height + three.create.gap * 2) * axis.y
+					from ? gsap.to(target.position, {
+						x : x,
+						y : y,
+						duration : 0.2
+					}) : target.position.set(x, y, 0);
+					if (owner === 1)
+						from ? gsap.to(target.rotation, {
+							z : Math.PI,
+							duration : 0.2
+						}) : target.rotation.set(0, 0, Math.PI);
+					three.cards.hand[owner].push(target);
+				}
 			}
 		},
 		add : {
-			card : (x : number, y : number, z : number, pic : string | undefined = mainGame.get.textures(constant.str.files.textures.cover) as string | undefined) : void => {
+			card : (x : number, y : number, z : number, position : Position, pic : string | undefined = mainGame.get.textures(constant.str.files.textures.cover) as string | undefined) : void => {
 				const card = three.create.card(pic);
-				three.create.position(card, x, y, z * three.create.size.top);
+				position.loc === LOCATION.HAND ? three.create.sendto.hand(card, position.owner)
+					: three.create.sendto.field(card, x, y, z * three.create.size.top, position.owner);
 				three.scene.add(card);
 			},
 			back : (pic : Array<string | undefined> = mainGame.get.textures(constant.str.files.textures.back) as Array<string>) : void => {
 				const card = three.create.back(pic.filter(i => i !== undefined));
-				three.create.position(card, 0, 0, 0 * three.create.size.top);
+				three.create.sendto.field(card, 0, 0, 0 * three.create.size.top);
 				three.scene.add(card);
 			},
 			plaid : (x : number, y : number) : void => {
 				const dom = three.create.plaid();
-				three.create.position(dom, x, y, 0);
+				three.create.sendto.field(dom, x, y, 0);
     			three.scene.add(dom);
 			}
 			
@@ -116,8 +225,8 @@
 		three.renderer.setSize(window.innerWidth, window.innerHeight);
 		three.renderer.domElement.style.position = 'fixed';
   		three.renderer.domElement.style.top = '0';
-		three.camera.position.set(0, -200, 630);
-		three.camera.lookAt(0, -30, 0);
+		three.camera.position.set(0, -300, 630);
+		three.camera.lookAt(0, -60, 0);
 
 		three.add.back();
 		for (let x = -3; x < 4; x++)
@@ -128,17 +237,19 @@
 			// gsap.turn(child, mainGame.get.textures(constant.str.files.textures.back) as string | undefined);
 			// gsap.turn(child, mainGame.get.textures(constant.str.files.textures.pic[0]) as string | undefined);
 
-		const pos = [
-			{ x : 3, y : -2 },
-			{ x : -3, y : -2 },
-			{ x : 0, y : 0 },
-			{ x : -3, y : 2 },
-			{ x : 3, y : 2 },
+		const deck_axis : Array<Position | undefined> = [
+			{ loc : LOCATION.DECK, owner : 0 },
+			{ loc : LOCATION.EXTRA, owner : 0 },
+			undefined,
+			{ loc : LOCATION.DECK, owner : 1 },
+			{ loc : LOCATION.EXTRA, owner : 1 }
 		];
 		for (const [v, ct] of props.connect.deck_count.entries())
-			if ([0, 1, 3, 4].includes(v))
-				for (let z = 1; z <= ct; z++)
-					three.add.card(pos[v].x, pos[v].y, z);
+			for (let z = 1; z <= ct; z++)
+				if (deck_axis[v] !== undefined) {
+					const axis : Axis = three.axis.get(deck_axis[v].loc)![deck_axis[v].owner] as Axis;
+					three.add.card(axis.x, axis.y, z, deck_axis[v]);
+				}
 
 		const ambientLight = new THREE.AmbientLight('white', 1);
 		three.scene.add(ambientLight);
