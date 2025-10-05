@@ -51,12 +51,8 @@ class Card {
 	desc : string;
 	hint : Array<string>;
 	pic : string;
-	sql : Array<string | number>;
-	uid ?: number;
-	pos ?: number;
   
 	constructor (row : Array<string | number>) {
-		this.sql = row;
 		this.pic = '';
 		this.id = row[0] as number;
 		this.ot = row[1] as number;
