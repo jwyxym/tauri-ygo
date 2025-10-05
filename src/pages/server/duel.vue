@@ -99,7 +99,8 @@
 			]],
 		]),
 		cards : {
-			hand : [[], []] as Array<Array<CSS.CSS3DObject>>
+			hand : [[], []] as Array<Array<CSS.CSS3DObject>>,
+			max_hand : 7,
 		},
 		create : {
 			size : {
@@ -118,7 +119,10 @@
 				child.style.height = `${three.create.size.height}px`;
 				dom.appendChild(child);
 				dom.addEventListener('click', () => {
-					
+					//<--DEBUG//
+					const axis : Axis = three.axis.get(LOCATION.HAND)![0] as Axis;
+					three.add.card(axis.x, axis.y, 1, { loc : LOCATION.HAND, owner : 0});
+					//DEBUG-->//
 				});
 				return new CSS.CSS3DObject(dom);
 			},
@@ -147,7 +151,7 @@
 				return new CSS.CSS3DObject(dom);
 			},
 			sendto : {
-				field : (target : CSS.CSS3DObject, x : number, y : number, z : number, owner : number = 0, from : boolean = false) => {
+				field : (target : CSS.CSS3DObject, x : number, y : number, z : number, owner : number = 0, from : number = 0) => {
 					let to_x : number = (three.create.size.height + three.create.gap) * x;
 					let to_y : number;
 					let to_z : number;
@@ -163,45 +167,14 @@
 						to_y = (three.create.size.height + three.create.gap) * y;
 						to_z = 0;
 					}
-					three.create.sendto.move(target, from, to_x, to_y, to_z);
-					three.create.sendto.oppo(target, from, owner);
+					three.move(target, from, owner, to_x, to_y, to_z);
+					three.rotate(target, from, owner);
 				},
-				hand : (target : CSS.CSS3DObject, owner : number = 0, from : boolean = false) => {
-					const axis = three.axis.get(LOCATION.HAND)![owner] as Axis;
-					const ct = three.cards.hand[owner].length;
-					const gap = three.create.size.width * Math.min(ct, 6);
-					const width = three.create.size.width * 6;
-					if (ct > 6) {
-						three.cards.hand[owner].forEach((card, v) => {
-							console.log((three.create.size.height + three.create.gap) * axis.x + width / ct * v, width / ct, v)
-							if (v > 0)
-								gsap.to(card.position, {
-									x : (three.create.size.height + three.create.gap) * axis.x + width / ct * v,
-									duration : 0.2
-								})
-						})
-					}
-					const x = (three.create.size.height + three.create.gap) * axis.x + (owner === 0 ? gap : - gap);
-					const y = (three.create.size.height + three.create.gap * 2) * axis.y
-					three.create.sendto.move(target, from, x, y);
-					three.create.sendto.oppo(target, from, owner);
+				hand : (target : CSS.CSS3DObject, owner : number = 0, from : number = 0) => {
 					three.cards.hand[owner].push(target);
-				},
-				oppo : (target : CSS.CSS3DObject, from : boolean, owner : number) => {
-					if (owner === 1)
-						from ? gsap.to(target.rotation, {
-							z : Math.PI,
-							duration : 0.2
-						}) : target.rotation.set(0, 0, Math.PI);
-				},
-				move : (target : CSS.CSS3DObject, from : boolean, x : number, y : number, z : number = 0) => {
-					from ? gsap.to(target.position, {
-						x : x,
-						y : y,
-						z : z,
-						duration : 0.2
-					}) : target.position.set(x, y, z);
-				},
+					three.rotate(target, from, owner);
+					three.sort(owner);
+				}
 			}
 		},
 		add : {
@@ -222,6 +195,38 @@
     			three.scene.add(dom);
 			}
 			
+		},
+		move : (target : CSS.CSS3DObject, from : number, owner : number, x : number, y : number, z : number) => {
+			from > 0 ? gsap.to(target.position, {
+				x : x,
+				y : y,
+				z : z,
+				duration : 0.2
+			}) : target.position.set(x, y, z);
+			if (from === LOCATION.HAND) {
+				three.cards.hand[owner].splice(three.cards.hand[owner].findIndex(i => i === target), 1);
+				three.sort(owner);
+			}
+		},
+		sort : (owner : number) => {
+			const width = three.create.size.width * three.cards.max_hand;
+			const axis = three.axis.get(LOCATION.HAND)![owner] as Axis;
+			const ct = three.cards.hand[owner].length;
+			const tl = gsap.timeline();
+			three.cards.hand[owner].forEach((card, v) => {
+				tl.to(card.position, {
+					x : (three.create.size.height + three.create.gap) * axis.x + Math.min(width / ct, three.create.size.width) * v,
+					y : (three.create.size.height + three.create.gap * 2) * axis.y,
+					duration : 0.2
+				}, 0);
+			})
+		},
+		rotate : (target : CSS.CSS3DObject, from : number, owner : number) => {
+			if (owner === 1)
+				from > 0 ? gsap.to(target.rotation, {
+					z : Math.PI,
+					duration : 0.2
+				}) : target.rotation.set(0, 0, Math.PI);
 		}
 	}
 
