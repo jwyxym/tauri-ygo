@@ -96,14 +96,12 @@ class Gsap {
 		return tl;
 	};
 
-	opacity = (el : HTMLElement, complete : Function = () => {}) : gsap.core.Timeline => {
-		const tl = this.timeline();
-		tl.to(el, {
-			opacity: 0,
-			duration : 0.5,
+	opacity = (el : HTMLElement, to : number, complete : Function = () => {}) : gsap.core.Tween => {
+		return gsap.to(el, {
+			opacity: to,
+			duration : 0.2,
 			onComplete: () => { complete(); }
 		});
-		return tl;
 	};
 
 	scale = (el : HTMLElement, complete : Function = () => {}) : gsap.core.Timeline => {

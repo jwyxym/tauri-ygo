@@ -693,6 +693,10 @@ class Game {
 	is_android = () : boolean => {
 		return constant.system.system == 'android';
 	};
+
+	sleep = async (time : number) : Promise<void> => {
+		return new Promise(resolve => setTimeout(resolve, time));
+	}
 };
 
 const mainGame = new Game();

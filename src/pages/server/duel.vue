@@ -16,7 +16,8 @@
 
 	interface Axis {
 		x : number,
-		y : number
+		y : number,
+		z ?: number
 	};
 
 	interface Position {
@@ -61,45 +62,76 @@
 				{ x : 3, y : 0 },
 				{ x : -3, y : 0 }
 			]],
-			[LOCATION.MZONE, [
-				[
-					{ x : -2, y : -1 },
-					{ x : -1, y : -1 },
-					{ x : 0, y : -1 },
-					{ x : 1, y : -1 },
-					{ x : 2, y : -1 },
-					{ x : -1, y : 0 },
-					{ x : 1, y : 0 }
-				],
-				[
-					{ x : 2, y : 1 },
-					{ x : 1, y : 1 },
-					{ x : 0, y : 1 },
-					{ x : -1, y : 1 },
-					{ x : -2, y : 1 },
-					{ x : 1, y : 0 },
-					{ x : -1, y : 0 }
-				]
+			[LOCATION.MZONE | 0 << 16, [
+				{ x : -2, y : -1 },
+				{ x : 2, y : 1 }
 			]],
-			[LOCATION.SZONE, [
-				[
-					{ x : -2, y : -2 },
-					{ x : -1, y : -2 },
-					{ x : 0, y : -2 },
-					{ x : 1, y : -2 },
-					{ x : 2, y : -2 },
-				],
-				[
-					{ x : 2, y : 2 },
-					{ x : 1, y : 2 },
-					{ x : 0, y : 2 },
-					{ x : -1, y : 2 },
-					{ x : -2, y : 2 },
-				]
+			[LOCATION.MZONE | 1 << 16, [
+				{ x : -1, y : -1 },
+				{ x : 1, y : 1 }
 			]],
-		]),
+			[LOCATION.MZONE | 2 << 16, [
+				{ x : 0, y : -1 },
+				{ x : 0, y : 1 }
+			]],
+			[LOCATION.MZONE | 3 << 16, [
+				{ x : 1, y : -1 },
+				{ x : -1, y : 1 }
+			]],
+			[LOCATION.MZONE | 4 << 16, [
+				{ x : 2, y : -1 },
+				{ x : -2, y : 1 }
+			]],
+			[LOCATION.MZONE | 5 << 16, [
+				{ x : -1, y : 0 },
+				{ x : 1, y : 0 }
+			]],
+			[LOCATION.MZONE | 6 << 16, [
+				{ x : 1, y : 0 },
+				{ x : -1, y : 0 }
+			]],
+			[LOCATION.SZONE | 0 << 16, [
+				{ x : -2, y : -2 },
+				{ x : 2, y : 2 }
+			]],
+			[LOCATION.SZONE | 1 << 16, [
+				{ x : -1, y : -2 },
+				{ x : 1, y : 2 }
+			]],
+			[LOCATION.SZONE | 2 << 16, [
+				{ x : 0, y : -2 },
+				{ x : 0, y : 2 }
+			]],
+			[LOCATION.SZONE | 3 << 16, [
+				{ x : 1, y : -2 },
+				{ x : -1, y : 2 }
+			]],
+			[LOCATION.SZONE | 4 << 16, [
+				{ x : 2, y : -2 },
+				{ x : -2, y : 2 }
+			]]
+		]) as Map<number, Array<Axis>>,
 		cards : {
-			hand : [[], []] as Array<Array<CSS.CSS3DObject>>,
+			map : new Map([
+				[LOCATION.HAND, [[], []]],
+				[LOCATION.DECK, [[], []]],
+				[LOCATION.EXTRA, [[], []]],
+				[LOCATION.FZONE, [[], []]],
+				[LOCATION.GRAVE, [[], []]],
+				[LOCATION.REMOVED, [[], []]],
+				[LOCATION.MZONE | 0 << 16, [[], []]],
+				[LOCATION.MZONE | 1 << 16, [[], []]],
+				[LOCATION.MZONE | 2 << 16, [[], []]],
+				[LOCATION.MZONE | 3 << 16, [[], []]],
+				[LOCATION.MZONE | 4 << 16, [[], []]],
+				[LOCATION.MZONE | 5 << 16, [[], []]],
+				[LOCATION.MZONE | 6 << 16, [[], []]],
+				[LOCATION.SZONE | 0 << 16, [[], []]],
+				[LOCATION.SZONE | 1 << 16, [[], []]],
+				[LOCATION.SZONE | 2 << 16, [[], []]],
+				[LOCATION.SZONE | 3 << 16, [[], []]],
+				[LOCATION.SZONE | 4 << 16, [[], []]]
+			]) as Map<number, Array<Array<CSS.CSS3DObject>>>,
 			max_hand : 7,
 		},
 		create : {
@@ -118,10 +150,12 @@
 				child.style.width = `${three.create.size.width}px`;
 				child.style.height = `${three.create.size.height}px`;
 				dom.appendChild(child);
-				dom.addEventListener('click', () => {
+				dom.style.opacity = '0';
+				dom.addEventListener('click', async () => {
 					//<--DEBUG//
-					const axis : Axis = three.axis.get(LOCATION.HAND)![0] as Axis;
-					three.add.card(axis.x, axis.y, 1, { loc : LOCATION.HAND, owner : 0});
+					const card = three.add.card(0, LOCATION.DECK, three.cards.map.get(LOCATION.DECK)![0].length);
+					await mainGame.sleep(200);
+					three.create.sendto.hand(card, 0, LOCATION.DECK)
 					//DEBUG-->//
 				});
 				return new CSS.CSS3DObject(dom);
@@ -129,6 +163,7 @@
 			back : (srcs : Array<string> = []) : CSS.CSS3DObject => {
 				const dom = document.createElement('div');
 				dom.style.width = `${three.create.size.width * 12}px`;
+				dom.style.opacity = '0';
 				for (const [v, src] of srcs.entries()) {
 					const child = document.createElement('img');
 					child.src = src;
@@ -151,47 +186,66 @@
 				return new CSS.CSS3DObject(dom);
 			},
 			sendto : {
-				field : (target : CSS.CSS3DObject, x : number, y : number, z : number, owner : number = 0, from : number = 0) => {
-					let to_x : number = (three.create.size.height + three.create.gap) * x;
-					let to_y : number;
-					let to_z : number;
-					if (x % 3 === 0 && x !== 0) {
-						to_z = z;
-						if (x === -3)
-							to_y = (three.create.size.height + three.create.gap) * y
-								+ (y >= 0 ? three.create.offset : -three.create.offset);
+				field : (target : CSS.CSS3DObject, location : number | Axis, owner : number = -1, from : number = 0, seq : number | undefined = undefined) => {
+					const axis : Axis = typeof location === 'number' ? three.axis.get(location)![owner] : location;
+					let x : number = (three.create.size.height + three.create.gap) * axis.x;
+					let y : number = axis.y;
+					let z : number | undefined = axis.z;
+					if (axis.x % 3 === 0 && axis.x !== 0) {
+						if (typeof location === 'number')
+							z = three.cards.map.get(location)![owner].length * three.create.size.top;
+						if (axis.x === -3)
+							y = (three.create.size.height + three.create.gap) * axis.y
+								+ (axis.y >= 0 ? three.create.offset : -three.create.offset);
 						else
-							to_y = (three.create.size.height + three.create.gap) * y
-									+ (y <= 0 ? -three.create.offset : three.create.offset);
+							y = (three.create.size.height + three.create.gap) * axis.y
+									+ (axis.y <= 0 ? -three.create.offset : three.create.offset);
 					} else {
-						to_y = (three.create.size.height + three.create.gap) * y;
-						to_z = 0;
+						y = (three.create.size.height + three.create.gap) * axis.y;
+						if (typeof location === 'number')
+							z = 0;
 					}
-					three.move(target, from, owner, to_x, to_y, to_z);
+					if (from > 0) {
+						const group = three.cards.map.get(from)![owner];
+						three.cards.map.get(from)![owner] = group.filter(i => i !== target);
+					}
+					if (typeof location === 'number' && owner >= 0)
+						seq === undefined ? three.cards.map.get(location)![owner].push(target) : three.cards.map.get(location)![owner].splice(seq, 0, target);
+					three.move(target, from, owner, x, y, z!);
 					three.rotate(target, from, owner);
 				},
-				hand : (target : CSS.CSS3DObject, owner : number = 0, from : number = 0) => {
-					three.cards.hand[owner].push(target);
+				hand : (target : CSS.CSS3DObject, owner : number, from : number = 0) => {
+					if (from > 0) {
+						const group = three.cards.map.get(from)![owner];
+						three.cards.map.get(from)![owner] = group.filter(i => i !== target);
+					}
+					three.cards.map.get(LOCATION.HAND)![owner].push(target);
 					three.rotate(target, from, owner);
 					three.sort(owner);
 				}
 			}
 		},
 		add : {
-			card : (x : number, y : number, z : number, position : Position, pic : string | undefined = mainGame.get.textures(constant.str.files.textures.cover) as string | undefined) : void => {
+			card : (owner : number, location : number, seq : number = 0, pic : string | undefined = mainGame.get.textures(constant.str.files.textures.cover) as string | undefined) : CSS.CSS3DObject => {
 				const card = three.create.card(pic);
-				position.loc === LOCATION.HAND ? three.create.sendto.hand(card, position.owner)
-					: three.create.sendto.field(card, x, y, z * three.create.size.top, position.owner);
+				if (location === LOCATION.MZONE || location === LOCATION.SZONE)
+					location |= seq << 16;
+				three.cards.map.get(location)![owner].splice(seq, 0, card);
+				location === LOCATION.HAND ? three.create.sendto.hand(card, owner)
+					: three.create.sendto.field(card, location, owner, 0);
 				three.scene.add(card);
+				gsap.opacity(card.element, 1)
+				return card;
 			},
 			back : (pic : Array<string | undefined> = mainGame.get.textures(constant.str.files.textures.back) as Array<string>) : void => {
-				const card = three.create.back(pic.filter(i => i !== undefined));
-				three.create.sendto.field(card, 0, 0, 0 * three.create.size.top);
-				three.scene.add(card);
+				const back = three.create.back(pic.filter(i => i !== undefined));
+				three.create.sendto.field(back, { x : 0, y : 0, z : 0 * three.create.size.top });
+				gsap.opacity(back.element, 1)
+				three.scene.add(back);
 			},
 			plaid : (x : number, y : number) : void => {
 				const dom = three.create.plaid();
-				three.create.sendto.field(dom, x, y, 0);
+				three.create.sendto.field(dom, { x : x, y : y, z : 0 });
     			three.scene.add(dom);
 			}
 			
@@ -204,19 +258,19 @@
 				duration : 0.2
 			}) : target.position.set(x, y, z);
 			if (from === LOCATION.HAND) {
-				three.cards.hand[owner].splice(three.cards.hand[owner].findIndex(i => i === target), 1);
 				three.sort(owner);
 			}
 		},
 		sort : (owner : number) => {
 			const width = three.create.size.width * three.cards.max_hand;
 			const axis = three.axis.get(LOCATION.HAND)![owner] as Axis;
-			const ct = three.cards.hand[owner].length;
+			const ct = three.cards.map.get(LOCATION.HAND)![owner].length;
 			const tl = gsap.timeline();
-			three.cards.hand[owner].forEach((card, v) => {
+			three.cards.map.get(LOCATION.HAND)![owner].forEach((card, v) => {
 				tl.to(card.position, {
 					x : (three.create.size.height + three.create.gap) * axis.x + Math.min(width / ct, three.create.size.width) * v,
 					y : (three.create.size.height + three.create.gap * 2) * axis.y,
+					z : v * 0.01,
 					duration : 0.2
 				}, 0);
 			})
@@ -256,11 +310,9 @@
 			{ loc : LOCATION.EXTRA, owner : 1 }
 		];
 		for (const [v, ct] of props.connect.deck_count.entries())
-			for (let z = 1; z <= ct; z++)
-				if (deck_axis[v] !== undefined) {
-					const axis : Axis = three.axis.get(deck_axis[v].loc)![deck_axis[v].owner] as Axis;
-					three.add.card(axis.x, axis.y, z, deck_axis[v]);
-				}
+			for (let z = 0; z < ct; z++)
+				if (deck_axis[v] !== undefined)
+					three.add.card(deck_axis[v].owner, deck_axis[v].loc, z);
 
 		const ambientLight = new THREE.AmbientLight('white', 1);
 		three.scene.add(ambientLight);
