@@ -27,6 +27,27 @@
 
 	const canvas : Ref<HTMLElement | null> = ref(null);
 
+	const hover = {
+		on : (card : Client_Card, owner : number) : void => {
+			if (three.cards.location(card, LOCATION.HAND, owner)) {
+				three.sort(owner, LOCATION.HAND);
+				if (hover.select[owner] === card) {
+					hover.select[owner] = undefined;
+				} else {
+					hover.select[owner] = card;
+					setTimeout(() => {
+						gsap.to(card.three.position, {
+							y : `${!!owner ? '-' : '+'}=20`,
+							z : '+=0.1',
+							duration : 0.1
+						})
+					}, 100);
+				}
+			}
+		},
+		select : [undefined, undefined] as Array<Client_Card | undefined>
+	};
+
 	const three = {
 		renderer : new CSS.CSS3DRenderer(),
 		scene : new THREE.Scene(),
@@ -139,7 +160,12 @@
 				}
 				seq === undefined ? three.cards.map.get(location)![owner].push(target) : three.cards.map.get(location)![owner].splice(seq, 0, target);
 			},
-			max_hand : 7,
+			location : (card : Client_Card, location : number, owner : number) : boolean => {
+				return three.cards.map.get(location)![owner].includes(card);
+			},
+			hand : {
+				max : 7
+			}
 		},
 		create : {
 			size : {
@@ -150,7 +176,7 @@
 			offset : 0,
 			gap : 8,
 			color : '#9ed3ff',
-			card : (src : string = '') : Client_Card => {
+			card : (owner : number, src : string = '') : Client_Card => {
 				const dom = document.createElement('div');
 				const child = document.createElement('img');
 				child.src = src;
@@ -159,7 +185,8 @@
 				dom.appendChild(child);
 				const atk = document.createElement('div');
 				atk.innerText = '';
-				// atk.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+				atk.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+				atk.style.opacity = '0';
 				atk.style.position = 'absolute';
 				atk.style.bottom = '0';
 				atk.style.left = '-10px';
@@ -170,16 +197,22 @@
 				atk.style.justifyContent = 'center';
 				dom.appendChild(atk);
 				dom.style.opacity = '0';
+				const client_card = new Client_Card(new CSS.CSS3DObject(dom));
 				dom.addEventListener('click', async () => {
 					//<--DEBUG//
-					for (let i = 0; i < 5; i ++) {
-						const card = three.add.card(0, LOCATION.DECK, three.cards.map.get(LOCATION.DECK)![0].length);
-						await mainGame.sleep(200);
-						three.create.sendto.field(card, 0, LOCATION.MZONE | i << 16, LOCATION.DECK)
-					}
+					if (three.cards.map.get(LOCATION.DECK)![owner].includes(client_card))
+						for (let i = 0; i < 5; i ++) {
+							const card = three.add.card(0, LOCATION.DECK, three.cards.map.get(LOCATION.DECK)![0].length);
+							const card_I = three.add.card(1, LOCATION.DECK, three.cards.map.get(LOCATION.DECK)![0].length);
+							await mainGame.sleep(200);
+							three.create.sendto.field(card, 0, LOCATION.MZONE | i << 16, LOCATION.DECK)
+							three.create.sendto.field(card_I, 1, LOCATION.MZONE | i << 16, LOCATION.DECK)
+						}
 					//DEBUG-->//
 				});
-				return new Client_Card(new CSS.CSS3DObject(dom));
+				dom.addEventListener('mousedown', hover.on.bind(null, client_card, owner));
+				dom.addEventListener('touchstart', hover.on.bind(null, client_card, owner));
+				return client_card;
 			},
 			back : (srcs : Array<string> = []) : CSS.CSS3DObject => {
 				const dom = document.createElement('div');
@@ -224,13 +257,12 @@
 					}
 					target.position.set(x, y, z);
 				},
-				field : (target : Client_Card, owner : number, location : number, from : number = 0, seq : number | undefined = undefined) : void => {
+				field : (target : Client_Card, owner : number, location : number, from : number = 0, seq : number = 0) : void => {
 					const axis : Axis = three.axis.get(location)![owner];
 					let x : number = (three.create.size.height + three.create.gap) * axis.x;
 					let y : number = axis.y;
-					let z : number;
+					let z : number  = three.cards.map.get(location)![owner].length * three.create.size.top;
 					if (axis.x % 3 === 0 && axis.x !== 0) {
-						z = three.cards.map.get(location)![owner].length * three.create.size.top;
 						if (axis.x === -3)
 							y = (three.create.size.height + three.create.gap) * axis.y
 								+ (axis.y >= 0 ? three.create.offset : -three.create.offset);
@@ -239,7 +271,8 @@
 									+ (axis.y <= 0 ? -three.create.offset : three.create.offset);
 					} else {
 						y = (three.create.size.height + three.create.gap) * axis.y;
-						z = 0;
+						if (seq > 0)
+							z -= seq * three.create.size.top;
 					}
 					three.cards.change(target, owner, from, location);
 					three.move(target.three, from, owner, x, y, z!);
@@ -248,13 +281,13 @@
 				hand : (target : Client_Card, owner : number, from : number = 0) : void => {
 					three.cards.change(target, owner, from, LOCATION.HAND);
 					three.rotate(target.three, from, owner);
-					three.sort(owner);
+					three.sort(owner, from);
 				}
 			}
 		},
 		add : {
 			card : (owner : number, location : number, seq : number = 0, pic : string | undefined = mainGame.get.textures(constant.str.files.textures.cover) as string | undefined) : Client_Card => {
-				const card = three.create.card(pic);
+				const card = three.create.card(owner, pic);
 				if (location === LOCATION.MZONE || location === LOCATION.SZONE)
 					location |= seq << 16;
 				location === LOCATION.HAND ? three.create.sendto.hand(card, owner)
@@ -277,33 +310,68 @@
 			
 		},
 		move : (target : CSS.CSS3DObject, from : number, owner : number, x : number, y : number, z : number) => {
-			from > 0 ? gsap.to(target.position, {
-				x : x,
-				y : y,
-				z : z,
-				duration : 0.2
-			}) : target.position.set(x, y, z);
+			const move = () => {
+				const tl = gsap.timeline();
+				if (target.position.z < z) {
+					tl.to(target.position, {
+						z : z,
+						duration : 0.05
+					})
+					tl.to(target.position, {
+						x : x,
+						y : y,
+						duration : 0.15
+					}, 0.05)
+				} else {
+					tl.to(target.position, {
+						x : x,
+						y : y,
+						duration : 0.15
+					})
+					tl.to(target.position, {
+						z : z,
+						duration : 0.05
+					}, 0.15)
+				}
+			}
+			!!from ? move() : target.position.set(x, y, z);
 			if (from === LOCATION.HAND) {
-				three.sort(owner);
+				three.sort(owner, from);
 			}
 		},
-		sort : (owner : number) => {
-			const width = three.create.size.width * three.cards.max_hand;
-			const axis = three.axis.get(LOCATION.HAND)![owner] as Axis;
-			const ct = three.cards.map.get(LOCATION.HAND)![owner].length;
-			const tl = gsap.timeline();
-			three.cards.map.get(LOCATION.HAND)![owner].forEach((card, v) => {
-				tl.to(card.three.position, {
-					x : (three.create.size.height + three.create.gap) * axis.x + Math.min(width / ct, three.create.size.width) * v,
-					y : (three.create.size.height + three.create.gap * 2) * axis.y,
-					z : v * 0.01,
-					duration : 0.2
-				}, 0);
-			});
+		sort : (owner : number, location : number) => {
+			if (location === LOCATION.HAND) {
+				const width = three.create.size.width * three.cards.hand.max;
+				const axis = three.axis.get(location)![owner] as Axis;
+				const ct = three.cards.map.get(location)![owner].length;
+				const tl = gsap.timeline();
+				three.cards.map.get(location)![owner].forEach((card, v) => {
+					const x = (three.create.size.height + three.create.gap) * axis.x + Math.min(width / ct, three.create.size.width) * v * (!!owner ? -1 : 1);
+					const y = (three.create.size.height + three.create.gap * 2) * axis.y;
+					const z = v * 0.02;
+					if (card.three.position.x !== x || card.three.position.y !== y || card.three.position.z !== z)
+						tl.to(card.three.position, {
+							x : x,
+							y : y,
+							z : z,
+							duration : 0.15
+						}, 0);
+				});
+			} else {
+				const tl = gsap.timeline();
+				three.cards.map.get(location)![owner].forEach((card, v) => {
+					const z = v * 0.02;
+					if (card.three.position.z !== z)
+						tl.to(card.three.position, {
+							z : z,
+							duration : 0.05
+						}, 0);
+				});
+			}
 		},
 		rotate : (target : CSS.CSS3DObject, from : number, owner : number) => {
 			if (owner === 1)
-				from > 0 ? gsap.to(target.rotation, {
+				!!from ? gsap.to(target.rotation, {
 					z : Math.PI,
 					duration : 0.2
 				}) : target.rotation.set(0, 0, Math.PI);
