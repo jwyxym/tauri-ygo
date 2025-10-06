@@ -147,22 +147,22 @@ class Gsap {
 		return tl;
 	};
 
-	turn = (el : HTMLImageElement, pic : string | undefined) => {
-		const tl = this.timeline();
+	turn = (el : HTMLImageElement, pic : string | undefined, tl : gsap.core.Timeline = this.timeline()) : gsap.core.Timeline => {
 		tl.set(el, {
 			rorationY : 0
 		})
 		tl.to(el, {
 			rotationY : 90,
-			duration : 0.4,
+			duration : 0.1,
 			onComplete: () => {
 				el.src = pic ?? '';
 			}
-		});
+		}, 0);
 		tl.to(el, {
 			rotationY : 180,
-			duration : 0.4
-		});
+			duration : 0.1
+		}, 0.125);
+		return tl;
 	}
 
 	rps = (el : HTMLImageElement, el_oppo : HTMLImageElement, complete : Function = () => {}) => {
@@ -175,8 +175,7 @@ class Gsap {
 			y : `+=${window.innerHeight * 1.5 - 180}`,
 			duration : 0.9
 		}, 0.1);
-		tl.call(() => {
-			complete();
+		tl.then(() => complete()).then(() => {
 			gsap.to(el, { 
 				y : `+=${window.innerHeight * 1.5}`, 
 				duration : 0.9
