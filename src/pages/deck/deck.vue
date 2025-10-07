@@ -1,25 +1,14 @@
 <template>
-	<div class = 'deck_body over_ground'>
-		<div class = 'cardinfo' ref = 'info'>
-			<var-card
-				:elevation = '0'
-				:src = 'cardinfo.pic'
-				image-height = '15.3vw'
-				image-width = '10.5vw'
-				ref = 'card'
+	<div class = 'deck_body'>
+		<transition name = 'move_left'>
+			<Card_Drawer
+				:card = 'cardinfo.card'
+				:cards = 'cards'
+				:unshow = 'cardinfo.unselect'
+				v-if = "cardinfo.card !== ''"
+				ref = 'info'
 			/>
-			<div class = 'description'>
-				<div class = 'title'>
-					<span class = 'name'>{{ cardinfo.name }}</span>
-					<span class = 'id'>{{ cardinfo.id }}</span>
-					<span>{{ cardinfo.subtitle.ot }}</span>
-					<span>{{ cardinfo.subtitle.type }}</span>
-					<span>{{ cardinfo.subtitle.level }}</span>
-					<span>{{ cardinfo.subtitle.link }}</span>
-				</div>
-				<span class = 'content'>{{ cardinfo.description }}</span>
-			</div>
-		</div>
+		</transition>
 		<div class = 'deck_show'>
 			<div class = 'head'>
 				<Input
@@ -44,6 +33,7 @@
 							v-for = '(i, v) in deck.main'
 							:data-swapy-slot = '`main_card:${v}:${i}`'
 							class = 'card'
+							ref = 'cards'
 							:key = 'i'
 							:id = 'i.toString()'
 							@dblclick = 'deck.dbl_click($event, i)'
@@ -70,6 +60,7 @@
 							v-for = '(i, v) in deck.extra'
 							:data-swapy-slot = '`extra_card:${v}:${i}`'
 							class = 'card'
+							ref = 'cards'
 							:key = 'i'
 							:id = 'i.toString()'
 							@dblclick = 'deck.dbl_click($event, i)'
@@ -96,6 +87,7 @@
 							v-for = '(i, v) in deck.side'
 							:data-swapy-slot = '`side_card:${v}:${i}`'
 							class = 'card'
+							ref = 'cards'
 							:key = 'i'
 							:id = 'i.toString()'
 							@dblclick = 'deck.dbl_click($event, i)'
@@ -136,7 +128,7 @@
 						ref = 'searcher'
 						class = 'searcher'
 					>
-						<div class = 'card search_card'>
+						<div class = 'card search_card' ref = 'cards'>
 							<div>
 								<img
 									:src = 'card.pic'
@@ -210,12 +202,13 @@
 	import Button from '../varlet/button.vue';
 	import Select from '../varlet/select.vue';
 	import Input from '../varlet/input.vue';
-	import Card, { CardInfo, Search } from '../../script/card';
+	import Card, { Search } from '../../script/card';
 	import toast from '../../script/toast';
 	import fs from '../../script/fs';
 	import gsap from '../../script/gsap';
 
 	import Dialog from '../varlet/dialog';
+	import Card_Drawer from "../varlet/card_drawer.vue";
 
 	import Deck from './deck';
 
@@ -419,29 +412,14 @@
 	})
 
 	const cardinfo = reactive({
-		pic : mainGame.get.textures(constant.str.files.textures.unknown) as string,
-		name : mainGame.get.text().deck.info,
-		id : '',
-		description : '',
-		subtitle : {
-			ot : '',
-			type : '',
-			level : '',
-			link : ''
-		},
+		card : '' as string | number,
 		select : (i : string | number, chk : boolean = true) : void => {
 			if (mainGame.is_android() && chk) return;
-			cardinfo.pic = deck.get_pic(i);
-			const card = mainGame.get.card(i);
-			cardinfo.name = card.name;
-			cardinfo.id = card.id.toString();
-			cardinfo.description = card.desc;
-			const info : CardInfo = card.get_info()
-			cardinfo.subtitle.ot = info.ot.length > 0 ? `【${info.ot}】` : '';
-			cardinfo.subtitle.type = `【${info.type}】${info.attribute} ${info.attribute !== '' ? '|' : ''} ${info.race}`;
-			cardinfo.subtitle.level = card.is_monster() ? `【${info.level}】${info.atk}/${info.def}` : '';
-			cardinfo.subtitle.link = info.link.length > 0 ? `【${info.link}】` : '';
-		}
+			cardinfo.card = i;
+		},
+		unselect : () : void => {
+			cardinfo.card = '';
+		},
 	});
 
 	const search = reactive({
@@ -549,7 +527,6 @@
 		}
 	}
 
-
 	interface SortableEvent {
 		dragged: HTMLElement;
 		draggedRect: DOMRect;
@@ -607,7 +584,7 @@
 	};
 
 	const info : Ref<HTMLElement | null> = ref(null);
-	const card : Ref<HTMLElement | null> = ref(null);
+	const cards : Ref<Array<HTMLElement> | null> = ref(null);
 	const main : Ref<HTMLElement | null> = ref(null);
 	const extra : Ref<HTMLElement | null> = ref(null);
 	const side : Ref<HTMLElement | null> = ref(null);

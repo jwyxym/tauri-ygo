@@ -144,6 +144,7 @@ class Constant {
 			super_pre : 'https://cdn02.moecube.com:444/ygopro-super-pre/archive/ygopro-super-pre.ypk',
 			assets : 'https://api.gitcode.com/api/v5/repos/jwyxym/tauri-ygo/releases/release-latest/attach_files/assets.zip/download',
 			version : 'https://web-api.gitcode.com/api/v2/projects/jwyxym%2Ftauri-ygo/releases?repoId=jwyxym%252Ftauri-ygo',
+			pics : 'https://cdn.233.momobako.com/ygopro/pics/{:?}.jpg!half',
 			headers : {
 				version : [['Referer', 'https://gitcode.com/']] as Array<[string, string]>
 			}

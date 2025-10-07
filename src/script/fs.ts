@@ -96,8 +96,7 @@ class Fs {
 		pics : async (codes : Array<number> = []) : Promise<Map<number, Blob>> => {
 			const p = await this.path;
 			const entries = await invoke.read_pics([
-					await path.join(p, constant.str.dirs.expansions, constant.str.exdirs.pics),
-					await path.join(p, constant.str.exdirs.pics)
+					await path.join(p, constant.str.dirs.expansions, constant.str.exdirs.pics)
 				], codes);
 			
 			const result : Map<number, Blob> = new Map();

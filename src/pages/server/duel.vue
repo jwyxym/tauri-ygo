@@ -206,7 +206,7 @@
 						const ct = three.cards.map.get(LOCATION.DECK)![0].length - 1;
 						for (let i = ct; i >= ct - 5; i --) {
 							const card = three.cards.map.get(LOCATION.DECK)![0][i]//three.add.card(0, LOCATION.DECK, three.cards.map.get(LOCATION.DECK)![0].length);
-							card.update.code(4511);
+							card.update.code(483);
 							await mainGame.sleep(200);
 							three.create.send.to(card, 0, LOCATION.HAND, LOCATION.DECK);
 						}
@@ -296,8 +296,7 @@
 				const card = three.create.card(owner, pic);
 				if (location === LOCATION.MZONE || location === LOCATION.SZONE)
 					location |= seq << 16;
-				location === LOCATION.HAND ? three.create.send.hand(card, owner)
-					: three.create.send.field(card, owner, location, 0);
+				three.create.send.to(card, owner, location, 0);
 				three.scene.add(card.three);
 				gsap.opacity(card.three.element, 1)
 				return card;

@@ -151,9 +151,9 @@
 <style lang = 'scss'>
 	@use './style/font.scss';
 	@use './style/toast.scss';
-    @use './style/ground.scss';
-    @use './style/transition.scss';
-    @use './style/card.scss';
+	@use './style/card.scss';
+	@use './style/ground.scss';
+	@use './style/transition.scss';
 	.var-icon {
 		&:hover {
 			cursor: pointer;
@@ -196,6 +196,7 @@
 		--tabs-background: transparent !important;
 		--select-scroller-background: rgba(0, 0, 0, 0.5) !important;
 		--menu-select-menu-background-color: rgba(0, 0, 0, 0.5) !important;
+		--card-background: rgba(0, 0, 0, 0.5) !important;
 		--dialog-message-color: white !important;
 		--dialog-title-color: white !important;
 		--list-loading-color: white !important;
@@ -208,6 +209,10 @@
 		--divider-color: white !important;
 		--checkbox-unchecked-color: white !important;
 		--cell-border-color: white !important;
+		--card-title-color: white !important;
+		--card-outline-color: white !important;
+		--card-subtitle-color: white !important;
+		--card-description-color: white !important;
 		--button-mini-padding: 4px 4px !important;
 		--button-small-padding: 4px 4px !important;
 		--button-normal-padding: 4px 4px !important;

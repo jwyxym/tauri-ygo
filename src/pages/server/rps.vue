@@ -4,10 +4,10 @@
 			:style = "{ '--y' : `${page.height}px`, '--x' : `${page.width}px` }"
 		>
 			<img
-				v-for = '(i, v) in constant.str.files.textures.rps'
+				v-for = '(i, v) in constant.str.files.textures.rps.map(i => mainGame.get.textures(i) as string | undefined )'
 				v-if = 'page.show'
 				:key = 'i'
-				:src = 'mainGame.get.textures(i)'
+				:src = 'i'
 				@click = 'page.on(v)'
 			/>
 		</TransitionGroup>
@@ -62,8 +62,8 @@
 	const props = defineProps(['connect']);
 
 	watch(() => { return props.connect.rps.result; }, (n) => {
-		self.value!.src = mainGame.get.textures(constant.str.files.textures.rps[n[0] - 1]) ?? '';
-		oppo.value!.src = mainGame.get.textures(constant.str.files.textures.rps[n[1] - 1]) ?? '';
+		self.value!.src = mainGame.get.textures(constant.str.files.textures.rps[n[0] - 1]) as string | undefined ?? '';
+		oppo.value!.src = mainGame.get.textures(constant.str.files.textures.rps[n[1] - 1]) as string | undefined ?? '';
 		gsap.rps(self.value!, oppo.value!, () => {
 			if (n[0] === n[1])
 				page.show = true;

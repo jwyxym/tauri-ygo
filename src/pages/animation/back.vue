@@ -3,17 +3,17 @@
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { ref, onMounted, Ref, watch, Reactive, reactive, onUnmounted } from 'vue';
+	import { ref, onMounted, Ref, onUnmounted } from 'vue';
 	import * as THREE from 'three';
+	import * as CSS from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 
 	import mainGame from '../../script/game';
-	import constant from '../../script/constant';
 	import { gsap } from 'gsap';
 
 	const canvas : Ref<HTMLElement | null> = ref(null);
 
 	const three = {
-		renderer : new THREE.WebGLRenderer({ alpha: true }),
+		renderer : new CSS.CSS3DRenderer(),
 		scene : new THREE.Scene(),
 		camera : new THREE.PerspectiveCamera(),
 		resize : () => {
@@ -21,97 +21,53 @@
 		},
 		render : () => {
 			three.renderer.render(three.scene, three.camera);
-		},
-		texture : {
-			this : new THREE.TextureLoader(),
-			front : (url : string) => {
-				const texture = three.texture.this.load(url);
-				return texture;
-			},
-			back : () => {
-				const texture = three.texture.this.load(mainGame.get.textures(constant.str.files.textures.back) as string | undefined ?? '');
-				return texture;
-			}
 		}
 	}
 
 	onMounted(() => {
 		const card_size = {
-			width : window.innerWidth / 80,
-			height : 0
+			width : 0,
+			height : 60
 		}
-		card_size.height = card_size.width * 2 / 0.684;
+		card_size.width = card_size.height / 1.45;
     	three.renderer.setSize(window.innerWidth, window.innerHeight);
-
 		three.camera.position.set(-50, 50, 200);
 		three.camera.lookAt(0, 0, 0);
-
-		const geometry = new THREE.PlaneGeometry(card_size.width, card_size.height);
-
-		const cards = new THREE.AnimationObjectGroup();
 		const pics = mainGame.get.pics();
-		const front_map = pics.map(i => three.texture.front(i));
-		const back_map = three.texture.back();
-		const back = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ 
-			map : back_map,
-			side : THREE.BackSide,
-			transparent: true,
-			opacity : 0
-		}));
-
-		const ct = {
-			x : 1,
-			y : 1,
-			z : 6
-		}
-		for (let z = 0; z < ct.z; z++) {
-			const front = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ 
-				map : front_map[Math.floor(Math.random() * front_map.length)],
-				side : THREE.FrontSide,
-				transparent: true,
-				opacity : 0
-			}));
-			const card = new THREE.Group();
-			card.add(front);
-			card.add(back);
+		const ct = 6
+		const tl = gsap.timeline();
+		for (let z = 0; z < ct; z++) {
+			const dom = document.createElement('div');
+			const child = document.createElement('img');
+			child.src = pics[Math.floor(Math.random() * pics.length)];
+			child.style.width = `${card_size.width}px`;
+			child.style.height = `${card_size.height}px`;
+			dom.appendChild(child);
+			dom.style.opacity = '0';
+			const card = new CSS.CSS3DObject(dom);
 			three.scene.add(card);
-			card.position.x = 0;
-			card.position.y = 0;
-			card.position.z = z * -300;
-			cards.add(card);
-			gsap.to(card.position, {
+			tl.fromTo(card.position, {
+				z : -1200
+			}, {
 				z : 200,
-				duration : z,
-				onComplete : () => {
+				duration : ct,
+				repeat : -1,
+				onRepeat : () => {
 					const pics = mainGame.get.pics();
-					((card.children[0] as THREE.Mesh).material as THREE.MeshBasicMaterial).map = three.texture.front(pics[Math.floor(Math.random() * pics.length)])
-					gsap.fromTo(card.position,{
-						z : ct.z * -300
-					}, {
-						z : 200,
-						duration : ct.z,
-						repeat : -1
-					});
-					card.children.forEach((el) => {
-						const tl = gsap.timeline({
-							repeat : -1
-						})
-						tl.fromTo((el as THREE.Mesh).material, {
-							opacity : 0
-						}, {
-							opacity : 1,
-							duration : 1,
-						});
-						tl.to({}, {duration : ct.z - 1});
-					});
+					child.src = pics[Math.floor(Math.random() * pics.length)];
 				}
-			});
-			(card.children as Array<any>).forEach((el) => {
-				gsap.to(el.material, {
-					opacity : 1,
-					duration : 1
-				});
-			});
+			}, z);
+			tl.to(card.element, {
+				opacity : 1,
+				duration : 1
+			}, z);
+			tl.fromTo(card.element, {
+				opacity : 0
+			}, {
+				opacity : ct,
+				duration : ct,
+				repeat : -1
+			}, ct + z);
 		}
 
 		three.render();

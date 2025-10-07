@@ -1,7 +1,5 @@
 import constant from './constant';
 import mainGame from './game';
-import fs from './fs'
-import * as path from '@tauri-apps/api/path';
 
 interface CardInfo {
 	ot : string;
@@ -72,28 +70,14 @@ class Card {
 		this.hint = row.slice(13, 29) as Array<string>;
 	};
 
-	update_pic = (url : string) : void => {
+	update_pic = () : void => {
+		this.pic = constant.str.url.pics.replace(constant.str.replace.tauri, this.id.toString());
+	}
+
+	update_local_pic = (url : string) : void => {
 		this.clear();
 		this.pic = url;
 	};
-
-	// find_pic = async () : Promise<void> => {
-	// 	const paths : Array<string> = [
-	// 		await path.join(constant.str.dirs.expansions, constant.str.exdirs.pics, `${this.id}.jpg`)
-	// 	]
-	// 	for (const file of paths) {
-	// 		if (await fs.exists(file)) {
-	// 			const i = await fs.read.picture(file);
-	// 			if (i !== undefined) {
-	// 				this.update_pic(i);
-	// 				return;
-	// 			}
-	// 		}
-	// 	}
-	// 	let url : string | undefined = mainGame.get.textures(constant.str.files.textures.unknown);
-	// 	if (url !== undefined)
-	// 		this.update_pic(url);
-	// };
 
 	get_info = () : CardInfo => {
 		const to_srting = (i : Array<string>) : string => {

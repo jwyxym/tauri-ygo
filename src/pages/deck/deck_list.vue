@@ -44,17 +44,17 @@
 							</div>
 							<div class = 'cards'>
 								<div class = 'card' v-for = 'card in list.decks[list.select].main'>
-									<img :src = "list.get_pic(card)">
+									<img v-lazy = "list.get_pic(card)">
 								</div>
 							</div>
 							<div class = 'cards'>
 								<div class = 'card' v-for = 'card in list.decks[list.select].extra'>
-									<img :src = "list.get_pic(card)">
+									<img v-lazy = "list.get_pic(card)">
 								</div>
 							</div>
 							<div class = 'cards'>
 								<div class = 'card' v-for = 'card in list.decks[list.select].side'>
-									<img :src = "list.get_pic(card)">
+									<img v-lazy = "list.get_pic(card)">
 								</div>
 							</div>
 						</div>

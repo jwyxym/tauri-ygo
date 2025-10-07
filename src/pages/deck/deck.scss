@@ -1,40 +1,20 @@
 .deck_body {
-	border-radius: 16px;
-	display: flex;
-	justify-content: center;
-	.cardinfo {
-		width: 20%;
-		.description {
-			color: white;
-			overflow-y: auto;
-			height: calc(100% - 15.3vw);
-			width: 100%;
-			white-space: pre-line;
-			display: flex;
-			flex-direction: column;
-			gap: 10px;
-			&::-webkit-scrollbar {
-				display: none;
-			}
-			font-size: max(2.5vh, var(--font-size-sm));
-			.title {
-				display: grid;
-				.name {
-					font-size: max(5vh, var(--font-size-md));
-				}
-			}
-			.content {
-				overflow-wrap: break-word;
-			}
-		}
-	}
+	position: relative;
 	.deck_show {
-		width: 60%;
-		max-height: 50vw;
+		position: absolute;
+		transform: translate(0, 20px);
+		width: calc(80vw - 20px);
+		height: calc(100vh - 20px);
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		justify-items: center;
 		.head {
+			align-self: center;
 			display: flex;
 			align-items: center;
-			height: 100px;
+			height: 50px;
+			width: 50%;
 			gap: 10px;
 			.button_list {
 				display: flex;
@@ -44,24 +24,28 @@
 		}
 		.deck {
 			width: 100%;
-			height: calc(100% - 100px);
+			height: calc(100% - 50px);
 			overflow-y: auto;
 			&::-webkit-scrollbar {
 				display: none;
 			}
 			.main {
 				width: 100%;
-				aspect-ratio: 5 / 2;
+				min-height: 5.1vw;
+				aspect-ratio: 5 / 1;
 			}
 			.side, .extra {
 				width: 100%;
+				min-height: 5.1vw;
 				aspect-ratio: 15 / 1;
 			}
 		}
 	}
 	.search {
-		width: 20%;
-		height: 100%;
+		position: absolute;
+		transform: translate(calc(80vw - 20px), 20px);
+		width: 20vw;
+		height: calc(100vh - 20px);
 		.button_list {
 			display: flex;
 			gap: 10px;
