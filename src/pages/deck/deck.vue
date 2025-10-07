@@ -635,14 +635,14 @@
 				})
 			}
 			document.addEventListener('dblclick', android.dbl_click);
-			document.addEventListener('mousedown', android.select);
+			document.addEventListener('click', android.select);
 		}
 	})
 
 	onUnmounted(() => {
 		if (mainGame.is_android()) {
 			document.removeEventListener('dblclick', android.dbl_click);
-			document.removeEventListener('mousedown', android.select);
+			document.removeEventListener('click', android.select);
 		}
 	});
 
