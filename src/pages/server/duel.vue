@@ -405,9 +405,6 @@
 				if (y !== 0 || x % 2 !== 0)
     				three.add.plaid(x, y);
 
-			// gsap.turn(child, mainGame.get.textures(constant.str.files.textures.back) as string | undefined);
-			// gsap.turn(child, mainGame.get.textures(constant.str.files.textures.pic[0]) as string | undefined);
-
 		const deck_axis : Array<Position | undefined> = [
 			{ loc : LOCATION.DECK, owner : 0 },
 			{ loc : LOCATION.EXTRA, owner : 0 },
