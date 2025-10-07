@@ -196,7 +196,6 @@
 		--tabs-background: transparent !important;
 		--select-scroller-background: rgba(0, 0, 0, 0.5) !important;
 		--menu-select-menu-background-color: rgba(0, 0, 0, 0.5) !important;
-		--card-background: rgba(0, 0, 0, 0.5) !important;
 		--dialog-message-color: white !important;
 		--dialog-title-color: white !important;
 		--list-loading-color: white !important;

@@ -63,11 +63,14 @@
 		position: fixed;
 		left: 0;
 		top: 0;
-		width: 20vw;
+		width: 40vw;
 		height: 100vh;
 		white-space: pre-line;
+		background-color: rgba(0, 0, 0, 0.5);
 		.var-card {
-			width: 100%;
+			position: absolute;
+			transform: translate(20px, 0);
+			width: calc(100% - 20px);
 			height: 100%;
 			.var-card__container {
 				overflow-y: auto;

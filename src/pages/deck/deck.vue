@@ -39,7 +39,7 @@
 							@dblclick = 'deck.dbl_click($event, i)'
 							@contextmenu = 'deck.right_click($event, i)'
 						>
-								<div :data-swapy-item = '`main_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
+								<div :data-swapy-item = '`main_card:${v}:${i}`' :id = 'i.toString()' @click = 'cardinfo.select(i)'>
 									<img :src = 'deck.get_pic(i)' ref = 'main_card' :alt = 'i.toString()'></img>
 									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
 										<template #value>
@@ -66,7 +66,7 @@
 							@dblclick = 'deck.dbl_click($event, i)'
 							@contextmenu = 'deck.right_click($event, i)'
 						>
-								<div :data-swapy-item = '`extra_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
+								<div :data-swapy-item = '`extra_card:${v}:${i}`' :id = 'i.toString()' @click = 'cardinfo.select(i)'>
 									<img :src = 'deck.get_pic(i)' ref = 'extra_card' :alt = 'i.toString()'></img>
 									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
 										<template #value>
@@ -93,7 +93,7 @@
 							@dblclick = 'deck.dbl_click($event, i)'
 							@contextmenu = 'deck.right_click($event, i)'
 						>
-								<div :data-swapy-item = '`side_card:${v}:${i}`' :id = 'i.toString()' @mousedown = 'cardinfo.select(i)'>
+								<div :data-swapy-item = '`side_card:${v}:${i}`' :id = 'i.toString()' @click = 'cardinfo.select(i)'>
 									<img :src = 'deck.get_pic(i)' ref = 'side_card' :alt = 'i.toString()'></img>
 									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
 										<template #value>
@@ -136,7 +136,7 @@
 									:alt = 'card.id.toString()'
 									@contextmenu = 'deck.right_click($event, card)'
 									@dblclick = 'deck.dbl_click($event, card)'
-									@mousedown = 'cardinfo.select(card.id)'
+									@click = 'cardinfo.select(card.id)'
 								/>
 								<var-badge type = 'primary' v-show = 'deck.get_ct(card.id) < 3'>
 									<template #value>
