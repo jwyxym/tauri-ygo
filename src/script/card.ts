@@ -70,11 +70,7 @@ class Card {
 		this.hint = row.slice(13, 29) as Array<string>;
 	};
 
-	update_pic = () : void => {
-		this.pic = constant.str.url.pics.replace(constant.str.replace.tauri, this.id.toString());
-	}
-
-	update_local_pic = (url : string) : void => {
+	update_pic = (url : string) : void => {
 		this.clear();
 		this.pic = url;
 	};

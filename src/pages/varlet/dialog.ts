@@ -16,7 +16,6 @@ const dialog = async (option : DialogOptions, need_confirm : boolean | number | 
 	option.onConfirm = chk ? confirm : cancel;
 	option.onCancel = chk ? cancel : confirm;
 	const quit = async () : Promise<void> => {
-		console.log(option.onConfirm)
 		if (confirm !== undefined)
 			await confirm();
 	};

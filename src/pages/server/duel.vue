@@ -195,6 +195,7 @@
 				atk.style.width = `${three.create.size.height}px`;
 				atk.style.color = 'white';
 				atk.style.fontSize = '14px';
+				atk.style.fontFamily = 'atkdef';
 				atk.style.display = 'flex';
 				atk.style.justifyContent = 'center';
 				dom.appendChild(atk);

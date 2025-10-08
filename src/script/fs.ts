@@ -106,7 +106,7 @@ class Fs {
 				}
 			return result;
 		},
-		zip : async (file : string, file_type : Array<string> = []) : Promise<Map<RegExp, Map<string, Blob | Uint8Array | string>>> => {
+		zip : async (file : string, file_type : Array<string | number> = []) : Promise<Map<RegExp, Map<string, Blob | Uint8Array | string>>> => {
 			let map = new Map([
 				[constant.reg.database, new Map],
 				[constant.reg.picture, new Map],
@@ -114,7 +114,7 @@ class Fs {
 				[constant.reg.ini, new Map]
 			]);
 			try {
-				const entries = await invoke.read_zip(await path.join(await constant.system.base_path(), file), file_type);
+				const entries = await invoke.read_zip(await path.join(await constant.system.base_path(), file), file_type.map(i => `${i}`));
 				if (entries.error === undefined)
 					for (const [name, content] of entries.content!) {
 						if (name.match(constant.reg.picture)) {

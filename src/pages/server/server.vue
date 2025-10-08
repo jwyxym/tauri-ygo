@@ -109,33 +109,29 @@
 		<TransitionGroup tag = 'div' name = 'opacity'>
 			<Duel
 				v-if = 'page.duel && connect.deck_count.length > 0'
+				key = 'Duel'
 				:connect = 'connect'
 			></Duel>
 			<RPS
 				v-if = 'page.duel && connect.rps.chk'
+				key = 'RPS'
 				:connect = 'connect'
 			></RPS>
-			<var-popup v-model:show = 'connect.is_first.selecting' :overlay = 'false' :close-on-key-escape = 'false' :close-on-click-overlay = 'false'>
-				<div class = 'select_tp'>
-					<Button
-						@click = 'connect.is_first.select(1)'
-						:content = 'mainGame.get.text().server.is_first[0]'
-					></Button>
-					<Button
-						@click = 'connect.is_first.select(0)'
-						:content = 'mainGame.get.text().server.is_first[1]'
-					></Button>
-				</div>
-			</var-popup>
 		</TransitionGroup>
+		<var-popup v-model:show = 'connect.is_first.selecting' :overlay = 'false' :close-on-key-escape = 'false' :close-on-click-overlay = 'false'>
+			<div class = 'select_tp'>
+				<Button
+					@click = 'connect.is_first.select(1)'
+					:content = 'mainGame.get.text().server.is_first[0]'
+				></Button>
+				<Button
+					@click = 'connect.is_first.select(0)'
+					:content = 'mainGame.get.text().server.is_first[1]'
+				></Button>
+			</div>
+		</var-popup>
 		<var-popup v-model:show = 'page.chat' :overlay = 'false' position = 'right'>
-			<div class = 'chat'>
-				<div class = 'exit_button'>
-					<Button
-						@click = 'page.chatting'
-						icon_name = 'exit'
-					></Button>
-				</div>
+			<div class = 'chat' ref = 'chat'>
 				<ConversationBlock
 					class = 'message'
 					:list = 'connect.chat.list'
@@ -156,7 +152,7 @@
 			</div>
 		</var-popup>
 		<transition name = 'move_right'>
-			<div class = 'ui' v-show = '(page.wait || page.duel) && !page.chat'>
+			<div class = 'ui' v-show = '(page.wait || page.duel) && !page.chat' ref = 'chat_button'>
 				<Button
 					@click = 'page.chatting'
 					icon_name = 'chat'
@@ -180,7 +176,7 @@
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { ref, reactive, onBeforeMount, onMounted, computed, watch, TransitionGroup } from 'vue';
+	import { ref, reactive, onBeforeMount, onMounted, computed, watch, TransitionGroup, onUnmounted } from 'vue';
 	import { ConversationBlock } from 'conversation-vue'
 
 	import mainGame from '../../script/game';
@@ -199,7 +195,9 @@
 	import Dialog from '../varlet/dialog';
 
 	let tcp : Tcp | null = null;
-	const deck = ref<HTMLElement | null>();
+	const deck = ref<HTMLElement | null>(null);
+	const chat = ref<HTMLElement | null>(null);
+	const chat_button = ref<HTMLElement | null>(null);
 
 	const page = reactive({
 		server : false,
@@ -209,6 +207,11 @@
 		loading : false,
 		chatting : () => {
 			page.chat = !page.chat;
+		},
+		chat_click : (e : MouseEvent) => {
+			console.log(chat.value, chat_button.value)
+			if (page.chat && chat.value && !chat.value.contains(e.target as HTMLElement) && chat_button.value && !chat_button.value.contains(e.target as HTMLElement))
+				page.chatting();
 		},
 		exit : async () : Promise<void> => {
 			page.server = false;
@@ -375,7 +378,12 @@
 
 	onMounted(() => {
 		page.server = true;
+		document.addEventListener('click', page.chat_click);
 	});
+
+	onUnmounted(() => {
+		document.removeEventListener('click', page.chat_click);
+	})
 
 	watch(() => {return page.chat}, (n) => {
 		n ? toast.off() : toast.on();

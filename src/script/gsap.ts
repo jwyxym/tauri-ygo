@@ -85,7 +85,7 @@ class Gsap {
 		const tl = this.timeline();
 		tl.to(el, {
 			x : '+=50vw',
-			y : '-=50vh',
+			y : '+=50vh',
 			duration : 0.5,
 		});
 		tl.to(el, {

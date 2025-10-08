@@ -44,7 +44,6 @@
 
 	const page = {
 		click : (e : MouseEvent) => {
-			console.log(info.value)
 			if (info.value && !info.value.contains(e.target as HTMLElement) && props.cards.findIndex((i : HTMLElement) => i!.contains(e.target as HTMLElement)) === -1)
 				props.unshow();
 		}

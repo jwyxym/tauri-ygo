@@ -23,10 +23,15 @@
 				</div>
 			</div>
 			<div class = 'deck'>
-				<var-divider :description = '`${mainGame.get.text().deck.main} : ${deck.ct.main}`'/>
+				<span>{{ `${mainGame.get.text().deck.main} : ${deck.ct.main}` }}</span>
 				<div
 					class = 'main'
 					ref = 'main'
+					:style = "{
+						'--height' : `${(Math.trunc(deck.ct.main / 20) + 1) * (deck.size.height + 5)}px`,
+						'--card_height' : `${deck.size.height}px`,
+						'--card_width' : `${deck.size.width}px`
+					}"
 				>
 					<TransitionGroup tag = 'div' name = 'scale' class = 'deck_main'>
 						<div
@@ -50,10 +55,15 @@
 						</div>
 					</TransitionGroup>
 				</div>
-				<var-divider :description = '`${mainGame.get.text().deck.extra} : ${deck.ct.extra}`'/>
+				<span>{{ `${mainGame.get.text().deck.extra} : ${deck.ct.extra}` }}</span>
 				<div
 					class = 'extra'
 					ref = 'extra'
+					:style = "{
+						'--height' : `${(Math.trunc(deck.ct.extra / 20) + 1) * (deck.size.height + 5)}px`,
+						'--card_height' : `${deck.size.height}px`,
+						'--card_width' : `${deck.size.width}px`
+					}"
 				>
 					<TransitionGroup tag = 'div' name = 'scale' class = 'deck_extra'>
 						<div
@@ -77,10 +87,15 @@
 						</div>
 					</TransitionGroup>
 				</div>
-				<var-divider :description = '`${mainGame.get.text().deck.side} : ${deck.ct.side}`'/>
+				<span>{{ `${mainGame.get.text().deck.side} : ${deck.ct.side}` }}</span>
 				<div
 					class = 'side'
 					ref = 'side'
+					:style = "{
+						'--height' : `${(Math.trunc(deck.ct.side / 20) + 1) * (deck.size.height + 5)}px`,
+						'--card_height' : `${deck.size.height}px`,
+						'--card_width' : `${deck.size.width}px`
+					}"
 				>
 					<TransitionGroup tag = 'div' name = 'scale' class = 'deck_side'>
 						<div
@@ -219,6 +234,14 @@
 		extra : [] as Array<number>,
 		side : [] as Array<number>,
 		name : '',
+		size : {
+			width : (window.innerWidth * 0.8 - 40) / 20,
+			height : (window.innerWidth * 0.8 - 40) / 20 * 1.45,
+			resize : () => {
+				deck.size.width = (window.innerWidth * 0.8 - 40) / 20;
+				deck.size.height = (window.innerWidth * 0.8 - 40) / 20 * 1.45;
+			}
+		},
 		ct : {
 			main : 0,
 			extra : 0,
@@ -368,6 +391,7 @@
 			const leave = () => {
 				gsap.leave(el, () : void => {
 					el.style.display = 'none';
+					el.remove();
 				});
 				deck.ct.remove(el);
 			};
@@ -377,7 +401,6 @@
 			}, mainGame.get.system(constant.str.system_conf.chk.deck_delete));
 		},
 		exit : async () : Promise<void> => {
-			console.log(mainGame.get.system(constant.str.system_conf.chk.deck_exit))
 			Dialog({
 				title : mainGame.get.text().deck.exit,
 				onConfirm : props.offdeck
@@ -637,6 +660,7 @@
 			document.addEventListener('dblclick', android.dbl_click);
 			document.addEventListener('click', android.select);
 		}
+		window.addEventListener("resize", deck.size.resize);
 	})
 
 	onUnmounted(() => {
@@ -644,6 +668,7 @@
 			document.removeEventListener('dblclick', android.dbl_click);
 			document.removeEventListener('click', android.select);
 		}
+		window.removeEventListener("resize", deck.size.resize);
 	});
 
 	watch(() => { return search.form.ot; }, (n) => {

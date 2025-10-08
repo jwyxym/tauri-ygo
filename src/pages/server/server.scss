@@ -80,11 +80,8 @@
 	width: 30vw;
 	height: 100%;
 	background-color: rgba(0, 0, 0, 0.2);
-	.exit_button {
-		height: 50px;
-	}
 	.message {
-		height: calc(100% - 150px) !important;
+		height: calc(100% - 100px) !important;
 		overflow-y: auto;
 		:deep(.content-align-right) {
 			color: black !important;

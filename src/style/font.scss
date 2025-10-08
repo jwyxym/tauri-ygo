@@ -7,11 +7,15 @@ $boder-color: #ACC927;
 $subtext-color: rgb(162, 162, 162);
 
 .font-title {
-	font-family: 'title';
+	font-family: 'title' !important;
 }
 
 .font-menu {
-	font-family: 'menu';
+	font-family: 'menu' !important;
+}
+
+.font-text {
+	font-family: 'text' !important;
 }
 
 @font-face {
@@ -24,6 +28,20 @@ $subtext-color: rgb(162, 162, 162);
 @font-face {
 	font-family: 'menu';
 	src: url('../font/menu.ttf');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'text';
+	src: url('../font/text.ttf');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'atkdef';
+	src: url('../font/AtkDef.ttf');
 	font-weight: normal;
 	font-style: normal;
 }

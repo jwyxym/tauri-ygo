@@ -89,11 +89,13 @@ class Game {
 				}
 			}
 
-			this.unknown.update_local_pic(this.textures.get(constant.str.files.textures.unknown) ?? '');
-			this.back.update_local_pic(this.textures.get(constant.str.files.textures.cover) ?? '');
+			this.unknown.update_pic(this.textures.get(constant.str.files.textures.unknown) ?? '');
+			this.back.update_pic(this.textures.get(constant.str.files.textures.cover) ?? '');
 			
 			await this.load.card();
 			await this.load.expansion();
+			const deck = Array.from(this.cards.keys()).filter(_ => Math.random() > 0.5);
+			await this.load.pic(deck.splice(0, deck.length > 100 ? 100 : deck.length));
 		} catch (error) {
 			fs.write.log(error);
 		}
@@ -238,11 +240,11 @@ class Game {
 			if (deck.length === 0) return;
 			const load = (await this.get.expansions()).loading;
 			for (const i of load.filter(i => i.match(constant.reg.zip))) {
-				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(i, deck.map(num => num.toString()));
+				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(i, deck);
 				for (const code of deck) {
 					const blob = ypk.get(constant.reg.picture)!.get(code.toString());
 					if (blob != undefined)
-						this.cards.get(code)!.update_local_pic(URL.createObjectURL(blob as Blob));
+						this.cards.get(code)!.update_pic(URL.createObjectURL(blob as Blob));
 				}
 				deck = deck.filter(filter);
 			}
@@ -251,13 +253,19 @@ class Game {
 			for (const code of deck) {
 				const blob = pics.get(code);
 				if (blob != undefined)
-					this.cards.get(code)!.update_local_pic(URL.createObjectURL(blob));
+					this.cards.get(code)!.update_pic(URL.createObjectURL(blob));
+			}
+			deck = deck.filter(filter);
+			const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(constant.str.files.pics, deck);
+			for (const code of deck) {
+				const blob = ypk.get(constant.reg.picture)!.get(code.toString());
+				if (blob != undefined)
+					this.cards.get(code)!.update_pic(URL.createObjectURL(blob as Blob));
 			}
 			deck = deck.filter(filter);
 			for (const code of deck) {
-				this.cards.get(code)!.update_local_pic(this.get.textures(constant.str.files.textures.unknown) as string | undefined ?? '');
+				this.cards.get(code)!.update_pic(this.get.textures(constant.str.files.textures.unknown) as string | undefined ?? '');
 			}
-
 		},
 		card : async () : Promise<void> => {
 			//读取lflist.conf
@@ -304,7 +312,7 @@ class Game {
 			//读取cards.cdb
 			const database : Array<Array<string | number>> | undefined = await fs.read.database(await join(constant.str.dirs.database, constant.str.files.database.get(this.i18n)!));
 			if (database !== undefined)
-				this.read.database(database, false);
+				this.read.database(database);
 		},
 		expansion : async () : Promise<void> => {
 			// 读取expnasions文件夹
@@ -463,14 +471,12 @@ class Game {
 				this.system.set(key_value[0].trim(), key_value[1].trim());
 			}
 		},
-		database : (db : Array<Array<string | number>>, local : boolean = true) : void => {
+		database : (db : Array<Array<string | number>>) : void => {
 			for (const i of db) {
 				const code : number = i[0] as number;
 				if (this.cards.has(code))
 					this.cards.get(code)!.clear()
 				const card = new Card(i);
-				if (!local)
-					card.update_pic();
 				this.cards.set(code, card);
 			}
 		},
