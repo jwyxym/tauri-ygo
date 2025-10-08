@@ -163,9 +163,12 @@ jobs:
         copy ygopro-database-master\locales\en-US_mdpro3\strings.conf strings\strings-en-US.conf
         wget https://github.com/Fluorohydride/ygopro/raw/refs/heads/master/lflist.conf
         wget https://github.com/jwyxym/card-pics/releases/download/pics/pics.zip
-        7z a -tzip -mx=9 assets.zip strings info cdb sound textures lflist.conf pics.zip
+        unzip pics.zip
+        7z a -tzip -mx=9 assets.zip strings info cdb sound textures lflist.conf pics
+        7z a -tzip -mx=9 assets_android.zip strings info cdb sound textures lflist.conf pics.zip
         cd ..
         copy .ci\assets.zip src-tauri\assets.zip
+        copy .ci\assets_android.zip src-tauri\assets_android.zip
 
     - name: Write Rust File
       shell: cmd
@@ -204,6 +207,12 @@ jobs:
                 set "found_exe=1"
             )
         )
+
+    - name: Upload File
+      uses: actions/upload-artifact@v4
+      with:
+        name: assets_android.zip
+        path: .\src-tauri\assets_android.zip
 
     - name: Upload File
       uses: actions/upload-artifact@v4
@@ -339,6 +348,36 @@ jobs:
         run: |
           cd build
           python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} tauri-ygo.apk/tauri-ygo.apk
+
+  upload-assets_android_zip:
+    needs: [update-gitcode]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: build
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: PrePare
+        shell: cmd
+        run: |
+          copy .ci\upload.py build\upload.py
+          pip install requests
+
+      - name: Upload Zip
+        shell: cmd
+        run: |
+          cd build
+          python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} assets_android.zip/assets_android.zip
 
   upload-assets_zip:
     needs: [update-gitcode]

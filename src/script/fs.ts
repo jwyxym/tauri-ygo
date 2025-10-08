@@ -95,9 +95,12 @@ class Fs {
 		},
 		pics : async (codes : Array<number> = []) : Promise<Map<number, Blob>> => {
 			const p = await this.path;
-			const entries = await invoke.read_pics([
-					await path.join(p, constant.str.dirs.expansions, constant.str.exdirs.pics)
-				], codes);
+			const folds = [
+				await path.join(p, constant.str.dirs.expansions, constant.str.exdirs.pics)
+			];
+			if (!mainGame.is_android())
+				folds.splice(0, 0, await path.join(p, constant.str.exdirs.pics));
+			const entries = await invoke.read_pics(folds, codes);
 			
 			const result : Map<number, Blob> = new Map();
 			if (entries.error === undefined)

@@ -142,7 +142,7 @@ class Constant {
 		},
 		url : {
 			super_pre : 'https://cdn02.moecube.com:444/ygopro-super-pre/archive/ygopro-super-pre.ypk',
-			assets : 'https://api.gitcode.com/api/v5/repos/jwyxym/tauri-ygo/releases/release-latest/attach_files/assets.zip/download',
+			assets : '',
 			version : 'https://web-api.gitcode.com/api/v2/projects/jwyxym%2Ftauri-ygo/releases?repoId=jwyxym%252Ftauri-ygo',
 			headers : {
 				version : [['Referer', 'https://gitcode.com/']] as Array<[string, string]>
@@ -166,6 +166,9 @@ class Constant {
 		this.str.files.strings.set(this.str.language.Zh_CN, 'strings-zh-CN.conf');
 		this.str.files.info.set(this.str.language.Zh_CN, 'cardinfo-zh-CN.conf');
 		this.str.files.database.set(this.str.language.Zh_CN, 'cards-zh-CN.cdb');
+		this.str.url.assets = this.system.system === 'android' ?
+			'https://api.gitcode.com/api/v5/repos/jwyxym/tauri-ygo/releases/release-latest/attach_files/assets.zip/download' :
+			'https://api.gitcode.com/api/v5/repos/jwyxym/tauri-ygo/releases/release-latest/attach_files/assets_android.zip/download';
 	};
 }
 export default new Constant();

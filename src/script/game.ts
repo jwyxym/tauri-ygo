@@ -255,12 +255,14 @@ class Game {
 				if (blob != undefined)
 					this.cards.get(code)!.update_pic(URL.createObjectURL(blob));
 			}
-			deck = deck.filter(filter);
-			const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(constant.str.files.pics, deck);
-			for (const code of deck) {
-				const blob = ypk.get(constant.reg.picture)!.get(code.toString());
-				if (blob != undefined)
-					this.cards.get(code)!.update_pic(URL.createObjectURL(blob as Blob));
+			if (this.is_android()) {
+				deck = deck.filter(filter);
+				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(constant.str.files.pics, deck);
+				for (const code of deck) {
+					const blob = ypk.get(constant.reg.picture)!.get(code.toString());
+					if (blob != undefined)
+						this.cards.get(code)!.update_pic(URL.createObjectURL(blob as Blob));
+				}
 			}
 			deck = deck.filter(filter);
 			for (const code of deck) {
