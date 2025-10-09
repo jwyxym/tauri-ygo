@@ -391,7 +391,11 @@
 		}
 	}
 
+	const duel = {
+	};
+
 	onMounted(() => {
+		emit('update:duel', duel);
 		three.create.size.width = three.create.size.height / 1.45;
 		three.create.offset = three.create.size.height / 1.5;
 		three.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -444,6 +448,7 @@
 	});
 
 	const props = defineProps(['connect']);
+	const emit = defineEmits(['update:duel']);
 
 </script>
 <style scoped lang = 'scss'>

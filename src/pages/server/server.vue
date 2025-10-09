@@ -111,6 +111,7 @@
 				v-if = 'page.duel && connect.deck_count.length > 0'
 				key = 'Duel'
 				:connect = 'connect'
+				v-model = 'connect.duel'
 			></Duel>
 			<RPS
 				v-if = 'page.duel && connect.rps.chk'
@@ -236,13 +237,13 @@
 
 	const connect = reactive({
 		state : 0,
-		duel : false,
 		is_host : false,
 		self : -1,
 		chk_deck : undefined as string | boolean | undefined,
 		deck : undefined as Deck | undefined,
 		player : new Array(4).fill({ name : '' }) as Array<TCP.Player>,
 		deck_count : [] as Array<number>,
+		duel : {},
 		chat : {
 			list : [] as TCP.Chats,
 			send : async () : Promise<void> => {
