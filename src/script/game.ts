@@ -182,7 +182,55 @@ class Game {
 					value = value.replace(constant.str.replace.strings[typeof str === 'string' ? 0 : 1], `${str}`);
 				}
 				return value;
+			},
+			race : (data : number) : string => {
+				return [...this.strings.get(constant.str.info_conf.race)!]
+					.filter(i => (i[0] & data) === i[0])
+					.map(i => i[1])
+					.join('|');
+			},
+			attribute : (data : number) : string => {
+				return [...this.strings.get(constant.str.info_conf.attribute)!]
+					.filter(i => (i[0] & data) === i[0])
+					.map(i => i[1])
+					.join('|');
+			},
+			ot : (data : number) : string => {
+				return [...this.strings.get(constant.str.info_conf.ot)!]
+					.filter(i => (i[0] & data) === i[0])
+					.map(i => i[1])
+					.join('|');
+			},
+			type : (data : number) : string => {
+				return [...this.strings.get(constant.str.info_conf.type)!]
+					.filter(i => (i[0] & data) === i[0])
+					.map(i => i[1])
+					.join('|');
+			},
+			category : (data : number) : string => {
+				return [...this.strings.get(constant.str.info_conf.category)!]
+					.filter(i => (i[0] & data) === i[0])
+					.map(i => i[1])
+					.join('|');
+			},
+			link : (data : number) : string => {
+				return [...this.strings.get(constant.str.info_conf.link)!]
+					.filter(i => (i[0] & data) === i[0])
+					.map(i => i[1])
+					.join('|');
 			}
+		},
+		desc : (data : number) : string => {
+			if (data < constant.MIN_CARD_ID)
+				return this.get.strings.system(data);
+			const code = (data >> 4) & 0x0fffffff;
+			const offset = data & 0xf;
+			const card =  mainGame.get.card(code);
+			return card === this.unknown ? this.get.text().unknow : card.desc[offset];
+		},
+		name : (id : number) : string => {
+			const card = mainGame.get.card(id);
+			return card === this.unknown ? this.get.text().unknow : card.name;
 		}
 	}
 

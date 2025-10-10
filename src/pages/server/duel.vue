@@ -202,16 +202,17 @@
 				dom.style.opacity = '0';
 				const client_card = new Client_Card(new CSS.CSS3DObject(dom));
 				dom.addEventListener('click', async () => {
+					console.log(1)
 					//<--DEBUG//
-					if (three.cards.map.get(LOCATION.DECK)![owner].includes(client_card)) {
-						const ct = three.cards.map.get(LOCATION.DECK)![0].length - 1;
-						for (let i = ct; i >= ct - 5; i --) {
-							const card = three.cards.map.get(LOCATION.DECK)![0][i]//three.add.card(0, LOCATION.DECK, three.cards.map.get(LOCATION.DECK)![0].length);
-							card.update.code(483);
-							await mainGame.sleep(200);
-							three.create.send.to(card, 0, LOCATION.HAND, LOCATION.DECK);
-						}
-					}
+					// if (three.cards.map.get(LOCATION.DECK)![owner].includes(client_card)) {
+					// 	const ct = three.cards.map.get(LOCATION.DECK)![0].length - 1;
+					// 	for (let i = ct; i >= ct - 5; i --) {
+					// 		const card = three.cards.map.get(LOCATION.DECK)![0][i]//three.add.card(0, LOCATION.DECK, three.cards.map.get(LOCATION.DECK)![0].length);
+					// 		card.update.code(483);
+					// 		await mainGame.sleep(200);
+					// 		three.create.send.to(card, 0, LOCATION.HAND, LOCATION.DECK);
+					// 	}
+					// }
 					//DEBUG-->//
 				});
 				dom.addEventListener('mousedown', hover.on.bind(null, client_card, owner));
@@ -392,13 +393,22 @@
 	}
 
 	const duel = {
+		draw : (tp : number, ct : number) => {
+			const len = three.cards.map.get(LOCATION.DECK)![tp].length - 1;
+			for (let i = len; i >= len - ct; i --) {
+				if (len - ct < 0)
+					break;
+				const card = three.cards.map.get(LOCATION.DECK)![tp][i];
+				three.create.send.to(card, tp, LOCATION.HAND, LOCATION.DECK);
+			}
+		}
 	};
 
 	onMounted(() => {
 		emit('update:duel', duel);
 		three.create.size.width = three.create.size.height / 1.45;
 		three.create.offset = three.create.size.height / 1.5;
-		three.renderer.setSize(window.innerWidth, window.innerHeight);
+		three.renderer.setSize(window.innerWidth * 0.9, window.innerHeight);
 		three.renderer.domElement.style.position = 'fixed';
   		three.renderer.domElement.style.top = '0';
 		three.camera.position.set(0, -300, 630);
@@ -458,6 +468,5 @@
 		left: 0;
 		height: 100%;
 		width: 100%;
-		z-index: -8;
 	}
 </style>

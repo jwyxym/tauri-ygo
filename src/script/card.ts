@@ -76,40 +76,17 @@ class Card {
 	};
 
 	get_info = () : CardInfo => {
-		const to_srting = (i : Array<string>) : string => {
-			return i.filter(i => i !== '').join('|')
-		}
-		let ot : Array<string> = [];
-		let link : Array<string> = [];
-		let type : Array<string> = [];
-		let race : Array<string> = [];
-		let attribute : Array<string> = [];
-		let category : Array<string> = [];
-		for (const i of [
-			{array : ot, key : constant.str.info_conf.ot, this : this.ot},
-			{array : link, key : constant.str.info_conf.link, this : this.def},
-			{array : type, key : constant.str.info_conf.type, this : this.type},
-			{array : race, key : constant.str.info_conf.race, this : this.race},
-			{array : attribute, key : constant.str.info_conf.attribute, this : this.attribute},
-			{array : category, key : constant.str.info_conf.category, this : this.category}
-		])
-			for (const [k, v] of mainGame.strings.get(i.key) ?? new Map) {
-				if ((i.this & k) == k)
-					i.array.push(v);
-			}
-			
-		const setcode = this.setcode.map(i => i > 0 ? mainGame.strings.get(constant.str.strings_conf.setcode)?.get(i) ?? `0x${i.toString(16)}` : '');
 		return {
-			ot : to_srting(ot),
+			ot :  mainGame.get.strings.ot(this.ot),
 			level : `${this.is_link() ? 'link-' : (this.is_xyz() ? '☆' : '★')}${this.level}`,
 			atk : this.atk >= 0 ? this.atk.toString() : '?',
 			def : this.is_link() ? '-' : this.def >= 0 ? this.def.toString() : '?',
-			link : this.is_link() ? to_srting(link) : '',
-			type : to_srting(type),
-			race : to_srting(race),
-			attribute : to_srting(attribute),
-			category : to_srting(category),
-			setcode : to_srting(setcode),
+			link : this.is_link() ? mainGame.get.strings.link(this.def) : '',
+			type : mainGame.get.strings.type(this.type),
+			race : mainGame.get.strings.race(this.race),
+			attribute : mainGame.get.strings.attribute(this.attribute),
+			category : mainGame.get.strings.category(this.category),
+			setcode : this.setcode.filter(i => i > 0).map(i => mainGame.strings.get(constant.str.strings_conf.setcode)?.get(i) ?? `0x${i.toString(16)}`).join('|'),
 		}
 	};
 

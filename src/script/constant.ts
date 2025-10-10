@@ -36,6 +36,7 @@ class System {
 }
 
 class Constant {
+	MIN_CARD_ID = 128 << 4;
 	reg = {
 		get_number_name : /[\\/](\d+)\./,
 		get_name : /[\\/]([^.]*)\./,

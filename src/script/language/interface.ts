@@ -112,6 +112,12 @@ interface TEXT_Like {
 		save : string;
 		delete : string;
 		copy : string;
+		rps : {
+			result : string;
+			win : string;
+			bye : string;
+			lose : string;
+		};
 		error : {
 			ydk : {
 				from_url : string;

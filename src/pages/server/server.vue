@@ -210,8 +210,11 @@
 			page.chat = !page.chat;
 		},
 		chat_click : (e : MouseEvent) => {
-			console.log(chat.value, chat_button.value)
-			if (page.chat && chat.value && !chat.value.contains(e.target as HTMLElement) && chat_button.value && !chat_button.value.contains(e.target as HTMLElement))
+			if (page.chat &&
+				chat.value && !chat.value.contains(e.target as HTMLElement)
+				&& chat_button.value && !chat_button.value.contains(e.target as HTMLElement)
+				&& !(e.target as HTMLElement).classList.contains('var-icon-close-circle')
+			)
 				page.chatting();
 		},
 		exit : async () : Promise<void> => {
@@ -379,6 +382,9 @@
 
 	onMounted(() => {
 		page.server = true;
+		// page.duel = true;
+		// connect.rps.chk = true;
+		// connect.deck_count = [1,2,3,4,5,6]
 		document.addEventListener('click', page.chat_click);
 	});
 

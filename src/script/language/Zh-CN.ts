@@ -127,6 +127,12 @@ const Zh_CN : TEXT_Like = {
 		save : '保存成功',
 		delete : '删除成功',
 		copy : '已复制到粘贴板',
+		rps : {
+			result : '猜拳结果：',
+			win : '胜',
+			bye : '平',
+			lose : '负'
+		},
 		error : {
 			ydk : {
 				from_url : '从url转换到卡组失败',

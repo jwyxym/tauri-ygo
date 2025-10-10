@@ -164,28 +164,6 @@ class Gsap {
 		}, 0.125);
 		return tl;
 	}
-
-	rps = (el : HTMLImageElement, el_oppo : HTMLImageElement, complete : Function = () => {}) => {
-		const tl = this.timeline();
-		tl.to(el, {
-			y : `-=${window.innerHeight * 1.5}`,
-			duration : 0.9
-		}, 0.1);
-		tl.to(el_oppo, {
-			y : `+=${window.innerHeight * 1.5 - 180}`,
-			duration : 0.9
-		}, 0.1);
-		tl.then(() => complete()).then(() => {
-			gsap.to(el, { 
-				y : `+=${window.innerHeight * 1.5}`, 
-				duration : 0.9
-			});
-			gsap.to(el_oppo, {
-				y : `-=${window.innerHeight * 1.5 - 180}`,
-				duration : 0.9
-			});
-		});
-	}
 };
 
 export default new Gsap();

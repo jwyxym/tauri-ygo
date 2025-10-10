@@ -1,7 +1,7 @@
 <template>
 	<div class = 'rps' ref = 'rps'>
 		<TransitionGroup tag = 'div' name = 'scale' class = 'pics'
-			:style = "{ '--y' : `${page.height}px`, '--x' : `${page.width}px` }"
+			:style = "{ '--y' : `${page.height}px` }"
 		>
 			<img
 				v-for = '(i, v) in constant.str.files.textures.rps.map(i => mainGame.get.textures(i) as string | undefined )'
@@ -11,16 +11,6 @@
 				@click = 'page.on(v)'
 			/>
 		</TransitionGroup>
-		<img
-			class = 'oppo'
-			:style = "{ '--x' : `${page.width}px` }"
-			ref = 'oppo'
-		/>
-		<img
-			class = 'self'
-			:style = "{ '--x' : `${page.width}px` }"
-			ref = 'self'
-		/>
 	</div>
 </template>
 <script setup lang = 'ts'>
@@ -29,16 +19,14 @@
 	import constant from '../../script/constant';
 	import mainGame from '../../script/game';
 	import gsap from '../../script/gsap';
-	const oppo = ref<HTMLImageElement | null>(null);
-	const self = ref<HTMLImageElement | null>(null);
+import toast from '../../script/toast';
 
 	const page = reactive({
 		height : 0,
 		width : 0,
 		show : false,
 		resize : () => {
-			page.height = window.innerHeight - 200;
-			page.width = window.innerWidth / 2 - 200;
+			page.height = window.innerHeight - window.innerHeight * 0.25;
 		},
 		on : async (v : number) : Promise<void> => {
 			page.show = false;
@@ -62,17 +50,17 @@
 	const props = defineProps(['connect']);
 
 	watch(() => { return props.connect.rps.result; }, (n) => {
-		self.value!.src = mainGame.get.textures(constant.str.files.textures.rps[n[0] - 1]) as string | undefined ?? '';
-		oppo.value!.src = mainGame.get.textures(constant.str.files.textures.rps[n[1] - 1]) as string | undefined ?? '';
-		gsap.rps(self.value!, oppo.value!, () => {
-			if (n[0] === n[1])
-				page.show = true;
-			else {
-				if (n[0] === n[1] + 1 || n[0] === n[1] - 2)
-					props.connect.is_first.on();
-				props.connect.rps.off();
-			}
-		});
+		if (n[0] === n[1]) {
+			page.show = true;
+			toast.info(mainGame.get.text().toast.rps.result + mainGame.get.text().toast.rps.bye);
+		} else {
+			if (n[0] === n[1] + 1 || n[0] === n[1] - 2) {
+				toast.info(mainGame.get.text().toast.rps.result + mainGame.get.text().toast.rps.win);
+				props.connect.is_first.on();
+			} else
+				toast.info(mainGame.get.text().toast.rps.result + mainGame.get.text().toast.rps.lose);
+			props.connect.rps.off();
+		}
 	}, { deep : true });
 
 </script>
@@ -84,25 +72,18 @@
 		height: 100%;
 		width: 100%;
 		.pics {
-			position: absolute;
 			display: flex;
 			gap: 30px;
-			transform: translate(var(--x), var(--y));
+			margin: 0 auto;
+			transform: translateY(var(--y));
+			width: calc(30vh + 90px);
 		}
-		img, .oppo, .self {
-			width: 100px;
-			height: 100px;
+		img {
+			width: 10vh;
+			height: 10vh;
 			&:hover {
 				cursor: pointer;
 			}
-		}
-		.oppo {
-			position: absolute;
-			transform: translate(var(--x), -100vh);
-		}
-		.self {
-			position: absolute;
-			transform: translate(var(--x), 200vh);
 		}
 	}
 </style>

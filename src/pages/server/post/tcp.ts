@@ -154,6 +154,11 @@ class Tcp {
 			return result;
 		}
 
+		const hint = (str : string) => {
+			toast.info(str, true);
+			connect.chat.list.push({ msg : str, contentType : 1 } as Chat);
+		}
+
 		const to_str = (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, offset : number = 3) : string => {
 			let str = '';
 			for (let i = 0; i < ((len - 1) / 2) - 1; i++) {
@@ -187,36 +192,33 @@ class Tcp {
 								case HINT.EVENT:
 									break;
 								case HINT.MESSAGE:
+									hint(mainGame.get.desc(content));
 									break;
 								case HINT.SELECTMSG:
 									break;
 								case HINT.OPSELECTED:
+									hint(mainGame.get.strings.system(1510, mainGame.get.desc(content)));
 									break;
 								case HINT.EFFECT:
 									break;
 								case HINT.RACE:
+									hint(mainGame.get.strings.system(1511, mainGame.get.strings.race(content)));
 									break;
 								case HINT.ATTRIB:
+									hint(mainGame.get.strings.system(1511, mainGame.get.strings.attribute(content)));
 									break;
 								case HINT.CODE:
+									hint(mainGame.get.strings.system(1511, mainGame.get.name(content)));
 									break;
 								case HINT.NUMBER:
+									hint(mainGame.get.strings.system(1512, content));
 									break;
 								case HINT.CARD:
 									break;
 								case HINT.ZONE:
 									break;
 								case HINT.DIALOG:
-									const dialog = {
-										code : (content >> 4) & 0x0fffffff,
-										offset : content & 0xf,
-										str : ''
-									};
-									dialog.str = mainGame.get.card(dialog.code).desc[dialog.offset];
-									if (dialog.str) {
-										toast.info(dialog.str, true);
-										connect.chat.list.push({ msg : dialog.str, contentType : 1 } as Chat);
-									}
+									hint(mainGame.get.desc(content));
 									break;
 
 							}
@@ -245,25 +247,25 @@ class Tcp {
 							let str;
 							switch (flag) {
 								case ERROR.LFLIST:
-									str = (mainGame.get.strings.system(1407, mainGame.get.card(id).name));
+									str = mainGame.get.strings.system(1407, mainGame.get.name(id));
 									break;
 								case ERROR.OCGONLY:
-									str = (mainGame.get.strings.system(1413, mainGame.get.card(id).name));
+									str = mainGame.get.strings.system(1413, mainGame.get.name(id));
 									break;
 								case ERROR.TCGONLY:
-									str = mainGame.get.strings.system(1414, mainGame.get.card(id).name);
+									str = mainGame.get.strings.system(1414, mainGame.get.name(id));
 									break;
 								case ERROR.UNKNOWNCARD:
-									str = mainGame.get.strings.system(1415, [mainGame.get.card(id).name, id]);
+									str = mainGame.get.strings.system(1415, [mainGame.get.name(id), id]);
 									break;
 								case ERROR.CARDCOUNT:
-									str = mainGame.get.strings.system(1416, mainGame.get.card(id).name);
+									str = mainGame.get.strings.system(1416,mainGame.get.name(id));
 									break;
 								case ERROR.MAINCOUNT:
 									str = mainGame.get.strings.system(1417, id);
 									break;
 								case ERROR.EXTRACOUNT:
-									str = mainGame.get.strings.system(id > 0 ? 1418 : 1420, mainGame.get.card(id).name);
+									str = mainGame.get.strings.system(id > 0 ? 1418 : 1420, mainGame.get.name(id));
 									break;
 								case ERROR.SIDECOUNT:
 									str = mainGame.get.strings.system(1419, id);
