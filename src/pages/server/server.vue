@@ -111,7 +111,7 @@
 				v-if = 'page.duel && connect.deck_count.length > 0'
 				key = 'Duel'
 				:connect = 'connect'
-				v-model = 'connect.duel'
+				@update:duel = 'connect.duel = $event'
 			></Duel>
 			<RPS
 				v-if = 'page.duel && connect.rps.chk'

@@ -158,8 +158,11 @@ class Gsap {
 				el.src = pic ?? '';
 			}
 		}, 0);
+		tl.set(el, {
+			rorationY : -90
+		}, 0.125)
 		tl.to(el, {
-			rotationY : 180,
+			rotationY : 0,
 			duration : 0.1
 		}, 0.125);
 		return tl;

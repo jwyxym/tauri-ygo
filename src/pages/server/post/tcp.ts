@@ -8,7 +8,8 @@ import Message from './message';
 import constant from '../../../script/constant';
 import toast from '../../../script/toast';
 import Deck from '../../deck/deck';
-import { CTOS, STOC, LOCATION, MSG, ERROR, PLAYERCHANGE, HINT } from './network';
+import { CTOS, STOC, LOCATION, MSG, ERROR, PLAYERCHANGE, HINT, QUERY } from './network';
+import Client_Card from './client_card';
 
 interface Player {
 	name : string;
@@ -154,10 +155,15 @@ class Tcp {
 			return result;
 		}
 
+		const error = (str : string) => {
+			toast.error(str, true);
+			connect.chat.list.push({ msg : str, contentType : 1 } as Chat);
+		};
+
 		const hint = (str : string) => {
 			toast.info(str, true);
 			connect.chat.list.push({ msg : str, contentType : 1 } as Chat);
-		}
+		};
 
 		const to_str = (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, offset : number = 3) : string => {
 			let str = '';
@@ -180,9 +186,6 @@ class Tcp {
 					if (connect.state === 0)
 						return;
 					const msg_funcs : Map<number, Function> = new Map([
-						[MSG.RESET_TIME, () => {
-
-						}],
 						[MSG.RETRY, () => {
 
 						}],
@@ -226,12 +229,77 @@ class Tcp {
 						[MSG.WIN, () => {
 
 						}],
-						[MSG.WAITING, () => {
-
+						[MSG.UPDATE_DATA, () => {
+							const pack = to_package(buffer, data, [8, 8], pos);
+							const player = pack[0] > 0 ? 1 : 0;
+							const location = pack[1];
+							const tp = connect.is_first.chk ? player : 1 - player;
+							const cards = connect.duel.cards.get(location);
+							if (cards === undefined)
+								return;
+							pos += 2;
+							for (const card of (cards(tp) as Array<Client_Card>)){
+								const [len] = to_package(buffer, data, [32], pos);
+								let p = pos + 4;
+								if(len !== undefined && len > 8) {
+									const [flag] : Array<number> = to_package(buffer, data, [32], p);
+									p += 4;
+									if (flag === 0) {
+										card.clear();
+									} else {
+										for (const i of [
+											[QUERY.CODE, card.update.code],
+											[QUERY.POSITION, () => {}],
+											[QUERY.ALIAS, card.update.alias],
+											[QUERY.TYPE, card.update.type],
+											[QUERY.LEVEL, card.update.level],
+											[QUERY.RANK, card.update.rank],
+											[QUERY.ATTRIBUTE, card.update.attribute],
+											[QUERY.RACE, card.update.race],
+											[QUERY.ATTACK, card.update.atk],
+											[QUERY.DEFENSE, card.update.def],
+											[QUERY.BASE_ATTACK, () => {}],
+											[QUERY.BASE_DEFENSE, () => {}],
+											[QUERY.REASON, () => {}],
+											[QUERY.REASON_CARD, () => {}],
+											[QUERY.EQUIP_CARD, () => {}],
+										] as Array<[number, Function]>) {
+											if ((flag & i[0]) === i[0]) {
+												const pack = to_package(buffer, data, [32], p);
+												i[1](pack[0]);
+												p += 4;
+											}
+										}
+									}
+									pos += len;
+								} else {
+									break;
+								}
+							}
+						}],
+						[MSG.DRAW, () => {
+							const pack = to_package(buffer, data, [8, 8], pos);
+							const player = pack[0] > 0 ? 1 : 0;
+							const ct = pack[1];
+							const tp = connect.is_first.chk ? player : 1 - player;
+							if (tp === 0) {
+								const cards : Array<Client_Card> = connect.duel.cards.get(LOCATION.DECK)!(tp);
+								const codes = to_package(buffer, data, new Array(ct).fill(32), pos + 2);
+								let i = 1;
+								for (const code of codes) {
+									const v = cards.length - i;
+									if (v < 0)
+										break;
+									cards[v].update.code(code);
+									i ++;
+								}
+							}
+							connect.duel.draw(tp, ct);
 						}],
 					]);
 					const cur_msg : number = to_package(buffer, data, [8], pos)[0];
-					console.log(cur_msg)
+					pos += 1;
+					// console.log(cur_msg)
 					if (msg_funcs.has(cur_msg))
 						msg_funcs.get(cur_msg)!();
 				}
@@ -275,8 +343,7 @@ class Tcp {
 									break;
 							}
 							connect.chk_deck = str;
-							toast.error(str, true);
-							connect.chat.list.push({ msg : str, contentType : 1 } as Chat);
+							error(str);
 							break;
 					}
 				}

@@ -28,22 +28,11 @@
 	const canvas : Ref<HTMLElement | null> = ref(null);
 
 	const hover = {
-		on : (card : Client_Card, owner : number) : void => {
-			if (three.cards.location(card, LOCATION.HAND, owner)) {
-				three.sort(owner, LOCATION.HAND);
-				if (hover.select[owner] === card) {
-					hover.select[owner] = undefined;
-				} else {
-					hover.select[owner] = card;
-					setTimeout(() => {
-						gsap.to(card.three.position, {
-							y : `${!!owner ? '-' : '+'}=20`,
-							z : '+=0.1',
-							duration : 0.1
-						})
-					}, 100);
-				}
-			}
+		on : (card : Client_Card) : void => {
+			(card.three.element.children[0] as HTMLElement).style.transform = `translateY(-20px)`;
+		},
+		end : (card : Client_Card) : void => {
+			(card.three.element.children[0] as HTMLElement).style.transform = `translateY(0)`;
 		},
 		select : [undefined, undefined] as Array<Client_Card | undefined>
 	};
@@ -83,51 +72,51 @@
 				{ x : 3, y : 0 },
 				{ x : -3, y : 0 }
 			]],
-			[LOCATION.MZONE | 0 << 16, [
+			[LOCATION.MZONE | (0 << 16), [
 				{ x : -2, y : -1 },
 				{ x : 2, y : 1 }
 			]],
-			[LOCATION.MZONE | 1 << 16, [
+			[LOCATION.MZONE | (1 << 16), [
 				{ x : -1, y : -1 },
 				{ x : 1, y : 1 }
 			]],
-			[LOCATION.MZONE | 2 << 16, [
+			[LOCATION.MZONE | (2 << 16), [
 				{ x : 0, y : -1 },
 				{ x : 0, y : 1 }
 			]],
-			[LOCATION.MZONE | 3 << 16, [
+			[LOCATION.MZONE | (3 << 16), [
 				{ x : 1, y : -1 },
 				{ x : -1, y : 1 }
 			]],
-			[LOCATION.MZONE | 4 << 16, [
+			[LOCATION.MZONE | (4 << 16), [
 				{ x : 2, y : -1 },
 				{ x : -2, y : 1 }
 			]],
-			[LOCATION.MZONE | 5 << 16, [
+			[LOCATION.MZONE | (5 << 16), [
 				{ x : -1, y : 0 },
 				{ x : 1, y : 0 }
 			]],
-			[LOCATION.MZONE | 6 << 16, [
+			[LOCATION.MZONE | (6 << 16), [
 				{ x : 1, y : 0 },
 				{ x : -1, y : 0 }
 			]],
-			[LOCATION.SZONE | 0 << 16, [
+			[LOCATION.SZONE | (0 << 16), [
 				{ x : -2, y : -2 },
 				{ x : 2, y : 2 }
 			]],
-			[LOCATION.SZONE | 1 << 16, [
+			[LOCATION.SZONE | (1 << 16), [
 				{ x : -1, y : -2 },
 				{ x : 1, y : 2 }
 			]],
-			[LOCATION.SZONE | 2 << 16, [
+			[LOCATION.SZONE | (2 << 16), [
 				{ x : 0, y : -2 },
 				{ x : 0, y : 2 }
 			]],
-			[LOCATION.SZONE | 3 << 16, [
+			[LOCATION.SZONE | (3 << 16), [
 				{ x : 1, y : -2 },
 				{ x : -1, y : 2 }
 			]],
-			[LOCATION.SZONE | 4 << 16, [
+			[LOCATION.SZONE | (4 << 16), [
 				{ x : 2, y : -2 },
 				{ x : -2, y : 2 }
 			]]
@@ -140,18 +129,18 @@
 				[LOCATION.FZONE, [[], []]],
 				[LOCATION.GRAVE, [[], []]],
 				[LOCATION.REMOVED, [[], []]],
-				[LOCATION.MZONE | 0 << 16, [[], []]],
-				[LOCATION.MZONE | 1 << 16, [[], []]],
-				[LOCATION.MZONE | 2 << 16, [[], []]],
-				[LOCATION.MZONE | 3 << 16, [[], []]],
-				[LOCATION.MZONE | 4 << 16, [[], []]],
-				[LOCATION.MZONE | 5 << 16, [[], []]],
-				[LOCATION.MZONE | 6 << 16, [[], []]],
-				[LOCATION.SZONE | 0 << 16, [[], []]],
-				[LOCATION.SZONE | 1 << 16, [[], []]],
-				[LOCATION.SZONE | 2 << 16, [[], []]],
-				[LOCATION.SZONE | 3 << 16, [[], []]],
-				[LOCATION.SZONE | 4 << 16, [[], []]]
+				[LOCATION.MZONE | (0 << 16), [[], []]],
+				[LOCATION.MZONE | (1 << 16), [[], []]],
+				[LOCATION.MZONE | (2 << 16), [[], []]],
+				[LOCATION.MZONE | (3 << 16), [[], []]],
+				[LOCATION.MZONE | (4 << 16), [[], []]],
+				[LOCATION.MZONE | (5 << 16), [[], []]],
+				[LOCATION.MZONE | (6 << 16), [[], []]],
+				[LOCATION.SZONE | (0 << 16), [[], []]],
+				[LOCATION.SZONE | (1 << 16), [[], []]],
+				[LOCATION.SZONE | (2 << 16), [[], []]],
+				[LOCATION.SZONE | (3 << 16), [[], []]],
+				[LOCATION.SZONE | (4 << 16), [[], []]]
 			]) as Map<number, Array<Array<Client_Card>>>,
 			change : (target : Client_Card, owner : number, from : number, location : number, seq : number | undefined = undefined) => {
 				if (from > 0) {
@@ -178,12 +167,14 @@
 			offset : 0,
 			gap : 8,
 			color : '#9ed3ff',
-			card : (owner : number, src : string = '') : Client_Card => {
+			card : (src : string = '') : Client_Card => {
 				const dom = document.createElement('div');
+				dom.style.opacity = '0';
 				const child = document.createElement('img');
 				child.src = src;
 				child.style.width = `${three.create.size.width}px`;
 				child.style.height = `${three.create.size.height}px`;
+				child.style.transition = 'all 0.2s ease';
 				dom.appendChild(child);
 				const atk = document.createElement('div');
 				atk.innerText = '';
@@ -199,24 +190,9 @@
 				atk.style.display = 'flex';
 				atk.style.justifyContent = 'center';
 				dom.appendChild(atk);
-				dom.style.opacity = '0';
 				const client_card = new Client_Card(new CSS.CSS3DObject(dom));
-				dom.addEventListener('click', async () => {
-					console.log(1)
-					//<--DEBUG//
-					// if (three.cards.map.get(LOCATION.DECK)![owner].includes(client_card)) {
-					// 	const ct = three.cards.map.get(LOCATION.DECK)![0].length - 1;
-					// 	for (let i = ct; i >= ct - 5; i --) {
-					// 		const card = three.cards.map.get(LOCATION.DECK)![0][i]//three.add.card(0, LOCATION.DECK, three.cards.map.get(LOCATION.DECK)![0].length);
-					// 		card.update.code(483);
-					// 		await mainGame.sleep(200);
-					// 		three.create.send.to(card, 0, LOCATION.HAND, LOCATION.DECK);
-					// 	}
-					// }
-					//DEBUG-->//
-				});
-				dom.addEventListener('mousedown', hover.on.bind(null, client_card, owner));
-				dom.addEventListener('touchstart', hover.on.bind(null, client_card, owner));
+				dom.addEventListener('mouseover', hover.on.bind(null, client_card));
+				dom.addEventListener('mouseout', hover.end.bind(null, client_card));
 				return client_card;
 			},
 			back : (srcs : Array<string> = []) : CSS.CSS3DObject => {
@@ -295,7 +271,7 @@
 		},
 		add : {
 			card : (owner : number, location : number, seq : number = 0, pic : string | undefined = mainGame.get.textures(constant.str.files.textures.cover) as string | undefined) : Client_Card => {
-				const card = three.create.card(owner, pic);
+				const card = three.create.card(pic);
 				if (location === LOCATION.MZONE || location === LOCATION.SZONE)
 					location |= seq << 16;
 				three.create.send.to(card, owner, location, 0);
@@ -393,13 +369,65 @@
 	}
 
 	const duel = {
-		draw : (tp : number, ct : number) => {
+		cards : new Map([
+			[LOCATION.HAND, (tp : number) : Array<Client_Card> => {
+				return three.cards.map.get(LOCATION.HAND)![tp];
+			}],
+			[LOCATION.DECK, (tp : number) : Array<Client_Card> => {
+				return three.cards.map.get(LOCATION.DECK)![tp];
+			}],
+			[LOCATION.EXTRA, (tp : number) : Array<Client_Card> => {
+				return three.cards.map.get(LOCATION.EXTRA)![tp];
+			}],
+			[LOCATION.FZONE, (tp : number) : Array<Client_Card> => {
+				return three.cards.map.get(LOCATION.FZONE)![tp];
+			}],
+			[LOCATION.GRAVE, (tp : number) : Array<Client_Card> => {
+				return three.cards.map.get(LOCATION.GRAVE)![tp];
+			}],
+			[LOCATION.REMOVED, (tp : number) : Array<Client_Card> => {
+				return three.cards.map.get(LOCATION.REMOVED)![tp];
+			}],
+			[LOCATION.MZONE, (tp : number) : Array<Client_Card> => {
+				const group : Array<Client_Card> = [];
+				for (let i = 0; i < 7; i ++) {
+					const len = three.cards.map.get(LOCATION.MZONE)![tp].length;
+					group.push(three.cards.map.get(LOCATION.MZONE | (i << 16))![tp][len - 1]);
+				}
+				return group.filter(i => i !== undefined);
+			}],
+			[LOCATION.OVERLAY, (tp : number, seq : number) : Array<Client_Card> => {
+				return three.cards.map.get(LOCATION.MZONE | (seq << 16))![tp].slice(0, -1);
+			}],
+			[LOCATION.SZONE, (tp : number) : Array<Client_Card> => {
+				const group : Array<Client_Card> = [];
+				for (let i = 0; i < 5; i ++) {
+					const len = three.cards.map.get(LOCATION.SZONE)![tp].length;
+					group.push(three.cards.map.get(LOCATION.SZONE | (i << 16))![tp][len - 1]);
+				}
+				group.push(...duel.cards.get(LOCATION.FZONE)!(tp));
+				return group.filter(i => i !== undefined);
+			}],
+			[LOCATION.PZONE, (tp : number) : Array<Client_Card> => {
+				const group : Array<Client_Card> = [];
+				for (const i of [0, 4]) {
+					const len = three.cards.map.get(LOCATION.SZONE)![tp].length;
+					group.push(three.cards.map.get(LOCATION.SZONE | (i << 16))![tp][len - 1]);
+				}
+				return group.filter(i => i !== undefined);
+			}],
+			[LOCATION.ONFIELD, (tp : number) : Array<Client_Card> => {
+				return [...duel.cards.get(LOCATION.MZONE)!(tp), ...duel.cards.get(LOCATION.SZONE)!(tp)];
+			}]
+		]) as Map<number, Function>,
+		draw : async (tp : number, ct : number) => {
 			const len = three.cards.map.get(LOCATION.DECK)![tp].length - 1;
-			for (let i = len; i >= len - ct; i --) {
+			for (let i = len; i > len - ct; i --) {
 				if (len - ct < 0)
 					break;
 				const card = three.cards.map.get(LOCATION.DECK)![tp][i];
 				three.create.send.to(card, tp, LOCATION.HAND, LOCATION.DECK);
+				await mainGame.sleep(150);
 			}
 		}
 	};
