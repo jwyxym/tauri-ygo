@@ -86,12 +86,22 @@ class Constant {
 				unknown : 'unknown.jpg',
 				cover : 'cover.jpg',
 				pic : ['cardI.jpg', 'cardII.jpg'],
-				rps : ['s.png', 'r.png', 'p.png'],
 				back : ['backI.jpg', 'backII.jpg']
 			},
 			sound : {
 				back : 'Night View.wav',
 				battle : 'City of Night.wav'
+			},
+			src : {
+				rps : ['./src/pics/s.png', './src/pics/r.png', './src/pics/p.png'],
+				card_info : {
+					tuner : './src/pics/tuner.png',
+					level : './src/pics/level.png',
+					rank : './src/pics/rank.png',
+					link : './src/pics/link.png',
+					scale : './src/pics/scale.png',
+					overlay : './src/overlay.png'
+				},
 			},
 			system : 'system.conf',
 			pics : 'pics.zip',

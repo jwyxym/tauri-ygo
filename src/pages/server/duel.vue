@@ -28,15 +28,48 @@
 	const canvas : Ref<HTMLElement | null> = ref(null);
 
 	const hover = {
-		on : (card : Client_Card, owner : number) : void => {
-			if (three.cards.location(card, LOCATION.HAND, owner))
-			(card.three.element.children[0] as HTMLElement).style.transform = `translateY(-20px)`;
+		on : (e : MouseEvent) : void => {
+			let v = three.cards.map.get(LOCATION.HAND)![0].findIndex(i => i.three.element.contains(e.target as HTMLElement));
+			let card : Client_Card | undefined = three.cards.map.get(LOCATION.HAND)![0][v];
+			if (card && hover.select !== card) {
+				(card.three.element.children[0] as HTMLElement).style.transform = 'translateY(-20px)';
+				card.three.position.z = v * 0.02 + 0.1;
+				return
+			}
+			v = three.cards.map.get(LOCATION.HAND)![1].findIndex(i => i.three.element.contains(e.target as HTMLElement));
+			card = three.cards.map.get(LOCATION.HAND)![1][v];
+			if (card) {
+				(card.three.element.children[0] as HTMLElement).style.transform = 'translateY(-20px)';
+				card.three.position.z = v * 0.02 + 0.1;
+				return
+			}
 		},
-		end : (card : Client_Card, owner : number) : void => {
-			if (three.cards.location(card, LOCATION.HAND, owner))
-			(card.three.element.children[0] as HTMLElement).style.transform = `translateY(0)`;
+		end : (e : MouseEvent) : void => {
+			let v = three.cards.map.get(LOCATION.HAND)![0].findIndex(i => i.three.element.contains(e.target as HTMLElement));
+			let card : Client_Card | undefined = three.cards.map.get(LOCATION.HAND)![0][v];
+			if (card && hover.select !== card) {
+				(card.three.element.children[0] as HTMLElement).style.transform = 'translateY(0)';
+				card.three.position.z = v * 0.02;
+				return
+			}
+			v = three.cards.map.get(LOCATION.HAND)![1].findIndex(i => i.three.element.contains(e.target as HTMLElement));
+			card = three.cards.map.get(LOCATION.HAND)![1][v];
+			if (card) {
+				(card.three.element.children[0] as HTMLElement).style.transform = 'translateY(0)';
+				card.three.position.z = v * 0.02;
+				return
+			}
 		},
-		select : [undefined, undefined] as Array<Client_Card | undefined>
+		click : (e : MouseEvent) : void => {
+			let card = three.cards.map.get(LOCATION.HAND)![0].find(i => i.three.element.contains(e.target as HTMLElement));
+			if (hover.select !== undefined) {
+				const v = three.cards.map.get(LOCATION.HAND)![0].findIndex(i => i === hover.select);
+				(hover.select.three.element.children[0] as HTMLElement).style.transform = 'translateY(0)';
+				hover.select.three.position.z = v * 0.02;
+			}
+			hover.select = card && hover.select !== card ? card : undefined;
+		},
+		select : undefined as Client_Card | undefined
 	};
 
 	const three = {
@@ -153,8 +186,10 @@
 				}
 				seq === undefined ? three.cards.map.get(location)![owner].push(target) : three.cards.map.get(location)![owner].splice(seq, 0, target);
 			},
-			location : (card : Client_Card, location : number, owner : number) : boolean => {
-				return three.cards.map.get(location)![owner].includes(card);
+			location : (card : Client_Card | HTMLElement, location : number, owner : number = 2) : boolean => {
+				if (card instanceof Client_Card)
+					return three.cards.map.get(location)![owner].includes(card);
+				else return three.cards.map.get(location)![owner].findIndex(i => i.three.element.contains(card)) > -1;
 			},
 			hand : {
 				max : 7
@@ -169,7 +204,7 @@
 			offset : 0,
 			gap : 8,
 			color : '#9ed3ff',
-			card : (src : string, owner : number) : Client_Card => {
+			card : (src : string) : Client_Card => {
 				const dom = document.createElement('div');
 				dom.style.opacity = '0';
 				const child = document.createElement('img');
@@ -197,9 +232,39 @@
 					transition : 'all 0.2s ease',
 				});
 				dom.appendChild(atk);
+				const info = document.createElement('div');
+				Object.assign(info.style, {
+					opacity : '0',
+					position : 'absolute',
+					bottom : '20px',
+					left : '-10px',
+					height : '16px',
+					width : `${three.create.size.height}px`,
+					color : 'white',
+					fontSize : '14px',
+					display : 'flex',
+					alignItems: 'center',
+					transition : 'all 0.2s ease',
+				});
+				for (const [key, src] of Object.entries(constant.str.files.src.card_info)) {
+					const div = document.createElement('div');
+					div.classList.add(key);
+					Object.assign(div.style, {
+						height : '100%',
+						width : '50%',
+						display : 'none'
+					});
+					const img = document.createElement('img');
+					img.src = src;
+					img.style.height = '100%';
+					div.appendChild(img);
+					const span = document.createElement('span');
+					span.innerText = '';
+					div.appendChild(span);
+					info.appendChild(div);
+				}
+				dom.appendChild(info);
 				const client_card = new Client_Card(new CSS.CSS3DObject(dom));
-				dom.addEventListener('mouseover', hover.on.bind(null, client_card, owner));
-				dom.addEventListener('mouseout', hover.end.bind(null, client_card, owner));
 				return client_card;
 			},
 			back : (srcs : Array<string> = []) : CSS.CSS3DObject => {
@@ -268,20 +333,22 @@
 					three.cards.change(target, owner, from, location);
 					three.move(target.three, from, owner, x, y, z!);
 					three.rotate(target.three, from, owner);
-					(target.three.element.children[1] as HTMLElement).style.opacity =
-						(location & LOCATION.MZONE) === LOCATION.MZONE ? '1' : '0';
+					for (const el of Array.from(target.three.element.children).slice(1))
+						(el as HTMLElement).style.opacity =
+							(location & LOCATION.MZONE) === LOCATION.MZONE ? '1' : '0';
 				},
 				hand : (target : Client_Card, owner : number, from : number = 0) : void => {
 					three.cards.change(target, owner, from, LOCATION.HAND);
 					three.rotate(target.three, from, owner);
 					three.sort(owner, LOCATION.HAND);
-					(target.three.element.children[1] as HTMLElement).style.opacity = '0';
+					for (const el of Array.from(target.three.element.children).slice(1))
+						(el as HTMLElement).style.opacity = '0';
 				}
 			}
 		},
 		add : {
 			card : (owner : number, location : number, seq : number = 0, pic : string | undefined = mainGame.get.textures(constant.str.files.textures.cover) as string | undefined) : Client_Card => {
-				const card = three.create.card(pic ?? '', owner);
+				const card = three.create.card(pic ?? '');
 				if (location === LOCATION.MZONE || location === LOCATION.SZONE)
 					location |= seq << 16;
 				three.create.send.to(card, owner, location, 0);
@@ -381,29 +448,42 @@
 	const duel = {
 		cards : new Map([
 			[LOCATION.HAND, (tp : number) : Array<Client_Card> => {
+				if (tp === 2)
+					return [...three.cards.map.get(LOCATION.HAND)![0], ...three.cards.map.get(LOCATION.HAND)![1]];
 				return three.cards.map.get(LOCATION.HAND)![tp];
 			}],
 			[LOCATION.DECK, (tp : number) : Array<Client_Card> => {
+				if (tp === 2)
+					return [...three.cards.map.get(LOCATION.DECK)![0], ...three.cards.map.get(LOCATION.DECK)![1]];
 				return three.cards.map.get(LOCATION.DECK)![tp];
 			}],
 			[LOCATION.EXTRA, (tp : number) : Array<Client_Card> => {
+				if (tp === 2)
+					return [...three.cards.map.get(LOCATION.EXTRA)![0], ...three.cards.map.get(LOCATION.EXTRA)![1]];
 				return three.cards.map.get(LOCATION.EXTRA)![tp];
 			}],
 			[LOCATION.FZONE, (tp : number) : Array<Client_Card> => {
+				if (tp === 2)
+					return [...three.cards.map.get(LOCATION.FZONE)![0], ...three.cards.map.get(LOCATION.FZONE)![1]];
 				return three.cards.map.get(LOCATION.FZONE)![tp];
 			}],
 			[LOCATION.GRAVE, (tp : number) : Array<Client_Card> => {
+				if (tp === 2)
+					return [...three.cards.map.get(LOCATION.GRAVE)![0], ...three.cards.map.get(LOCATION.GRAVE)![1]];
 				return three.cards.map.get(LOCATION.GRAVE)![tp];
 			}],
 			[LOCATION.REMOVED, (tp : number) : Array<Client_Card> => {
+				if (tp === 2)
+					return [...three.cards.map.get(LOCATION.REMOVED)![0], ...three.cards.map.get(LOCATION.REMOVED)![1]];
 				return three.cards.map.get(LOCATION.REMOVED)![tp];
 			}],
 			[LOCATION.MZONE, (tp : number) : Array<Client_Card> => {
 				const group : Array<Client_Card> = [];
-				for (let i = 0; i < 7; i ++) {
-					const len = three.cards.map.get(LOCATION.MZONE)![tp].length;
-					group.push(three.cards.map.get(LOCATION.MZONE | (i << 16))![tp][len - 1]);
-				}
+				for (const p of tp === 2 ? [0, 1] : [tp])
+					for (let i = 0; i < 7; i ++) {
+						const len = three.cards.map.get(LOCATION.MZONE)![tp].length;
+						group.push(three.cards.map.get(LOCATION.MZONE | (i << 16))![p][len - 1]);
+					}
 				return group.filter(i => i !== undefined);
 			}],
 			[LOCATION.OVERLAY, (tp : number, seq : number) : Array<Client_Card> => {
@@ -411,19 +491,21 @@
 			}],
 			[LOCATION.SZONE, (tp : number) : Array<Client_Card> => {
 				const group : Array<Client_Card> = [];
-				for (let i = 0; i < 5; i ++) {
-					const len = three.cards.map.get(LOCATION.SZONE)![tp].length;
-					group.push(three.cards.map.get(LOCATION.SZONE | (i << 16))![tp][len - 1]);
-				}
+				for (const p of tp === 2 ? [0, 1] : [tp])
+					for (let i = 0; i < 5; i ++) {
+						const len = three.cards.map.get(LOCATION.SZONE)![tp].length;
+						group.push(three.cards.map.get(LOCATION.SZONE | (i << 16))![p][len - 1]);
+					}
 				group.push(...duel.cards.get(LOCATION.FZONE)!(tp));
 				return group.filter(i => i !== undefined);
 			}],
 			[LOCATION.PZONE, (tp : number) : Array<Client_Card> => {
 				const group : Array<Client_Card> = [];
-				for (const i of [0, 4]) {
-					const len = three.cards.map.get(LOCATION.SZONE)![tp].length;
-					group.push(three.cards.map.get(LOCATION.SZONE | (i << 16))![tp][len - 1]);
-				}
+				for (const p of tp === 2 ? [0, 1] : [tp])
+					for (const i of [0, 4]) {
+						const len = three.cards.map.get(LOCATION.SZONE)![p].length;
+						group.push(three.cards.map.get(LOCATION.SZONE | (i << 16))![tp][len - 1]);
+					}
 				return group.filter(i => i !== undefined);
 			}],
 			[LOCATION.ONFIELD, (tp : number) : Array<Client_Card> => {
@@ -475,6 +557,8 @@
 
 		three.render();
 		canvas.value!.appendChild(three.renderer.domElement);
+		duel.draw(0, 15);
+		duel.draw(1, 1);
 		// const controls = new OrbitControls(three.camera, window.document.documentElement);
 		// controls.minPolarAngle = 0;
 		// controls.minDistance = 0;
@@ -489,10 +573,16 @@
 		animate();
 
 		window.addEventListener('resize', three.resize);
+		document.addEventListener('click', hover.click);
+		document.addEventListener('mouseout', hover.end);
+		document.addEventListener('mouseover', hover.on);
 	})
 
 	onUnmounted(() => {
 		window.removeEventListener('resize', three.resize);
+		document.removeEventListener('click', hover.click);
+		document.removeEventListener('mouseout', hover.end);
+		document.removeEventListener('mouseover', hover.on);
 	});
 
 	const props = defineProps(['connect']);

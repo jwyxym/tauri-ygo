@@ -4,7 +4,7 @@
 			:style = "{ '--y' : `${page.height}px` }"
 		>
 			<img
-				v-for = '(i, v) in constant.str.files.textures.rps.map(i => mainGame.get.textures(i) as string | undefined )'
+				v-for = '(i, v) in constant.str.files.src.rps'
 				v-if = 'page.show'
 				:key = 'i'
 				:src = 'i'
@@ -18,8 +18,7 @@
 
 	import constant from '../../script/constant';
 	import mainGame from '../../script/game';
-	import gsap from '../../script/gsap';
-import toast from '../../script/toast';
+	import toast from '../../script/toast';
 
 	const page = reactive({
 		height : 0,
