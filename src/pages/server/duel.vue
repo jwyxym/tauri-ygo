@@ -28,10 +28,12 @@
 	const canvas : Ref<HTMLElement | null> = ref(null);
 
 	const hover = {
-		on : (card : Client_Card) : void => {
+		on : (card : Client_Card, owner : number) : void => {
+			if (three.cards.location(card, LOCATION.HAND, owner))
 			(card.three.element.children[0] as HTMLElement).style.transform = `translateY(-20px)`;
 		},
-		end : (card : Client_Card) : void => {
+		end : (card : Client_Card, owner : number) : void => {
+			if (three.cards.location(card, LOCATION.HAND, owner))
 			(card.three.element.children[0] as HTMLElement).style.transform = `translateY(0)`;
 		},
 		select : [undefined, undefined] as Array<Client_Card | undefined>
@@ -167,7 +169,7 @@
 			offset : 0,
 			gap : 8,
 			color : '#9ed3ff',
-			card : (src : string = '') : Client_Card => {
+			card : (src : string, owner : number) : Client_Card => {
 				const dom = document.createElement('div');
 				dom.style.opacity = '0';
 				const child = document.createElement('img');
@@ -196,8 +198,8 @@
 				});
 				dom.appendChild(atk);
 				const client_card = new Client_Card(new CSS.CSS3DObject(dom));
-				dom.addEventListener('mouseover', hover.on.bind(null, client_card));
-				dom.addEventListener('mouseout', hover.end.bind(null, client_card));
+				dom.addEventListener('mouseover', hover.on.bind(null, client_card, owner));
+				dom.addEventListener('mouseout', hover.end.bind(null, client_card, owner));
 				return client_card;
 			},
 			back : (srcs : Array<string> = []) : CSS.CSS3DObject => {
@@ -279,7 +281,7 @@
 		},
 		add : {
 			card : (owner : number, location : number, seq : number = 0, pic : string | undefined = mainGame.get.textures(constant.str.files.textures.cover) as string | undefined) : Client_Card => {
-				const card = three.create.card(pic);
+				const card = three.create.card(pic ?? '', owner);
 				if (location === LOCATION.MZONE || location === LOCATION.SZONE)
 					location |= seq << 16;
 				three.create.send.to(card, owner, location, 0);
