@@ -168,8 +168,8 @@ class Constant {
 		this.str.files.info.set(this.str.language.Zh_CN, 'cardinfo-zh-CN.conf');
 		this.str.files.database.set(this.str.language.Zh_CN, 'cards-zh-CN.cdb');
 		this.str.url.assets = this.system.system === 'android' ?
-			'https://api.gitcode.com/api/v5/repos/jwyxym/tauri-ygo/releases/release-latest/attach_files/assets.zip/download' :
-			'https://api.gitcode.com/api/v5/repos/jwyxym/tauri-ygo/releases/release-latest/attach_files/assets_android.zip/download';
+			'https://api.gitcode.com/api/v5/repos/jwyxym/tauri-ygo/releases/release-latest/attach_files/assets_android.zip/download' :
+			'https://api.gitcode.com/api/v5/repos/jwyxym/tauri-ygo/releases/release-latest/attach_files/assets.zip/download';
 	};
 }
 export default new Constant();

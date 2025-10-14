@@ -1,24 +1,26 @@
 <template>
-	<audio
-		loop
-		v-for = '[i, v] in mainGame.bgm.get(constant.str.system_conf.sound.back)'
-		:key = 'i'
-		:id = 'i'
-		:class = 'constant.str.system_conf.sound.back'
-		ref = 'audio'
-	>
-		<source :src = 'v'>
-	</audio>
-	<audio
-		loop
-		v-for = '[i, v] in mainGame.bgm.get(constant.str.system_conf.sound.button)'
-		:key = 'i'
-		:id = 'i'
-		:class = 'constant.str.system_conf.sound.button'
-		ref = 'audio'
-	>
-		<source :src = 'v'>
-	</audio>
+	<div>
+		<audio
+			loop
+			v-for = '[i, v] in mainGame.bgm.get(constant.str.system_conf.sound.back)'
+			:key = 'i'
+			:id = 'i'
+			:class = 'constant.str.system_conf.sound.back'
+			ref = 'audio'
+		>
+			<source :src = 'v'>
+		</audio>
+		<audio
+			loop
+			v-for = '[i, v] in mainGame.bgm.get(constant.str.system_conf.sound.button)'
+			:key = 'i'
+			:id = 'i'
+			:class = 'constant.str.system_conf.sound.button'
+			ref = 'audio'
+		>
+			<source :src = 'v'>
+		</audio>
+	</div>
 </template>
 <script setup lang = 'ts'>
 	import { onMounted, ref, Ref } from 'vue';

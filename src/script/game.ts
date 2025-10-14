@@ -748,7 +748,7 @@ class Game {
 	};
 
 	is_android = () : boolean => {
-		return constant.system.system == 'android';
+		return constant.system.system === 'android';
 	};
 
 	sleep = async (time : number) : Promise<void> => {
