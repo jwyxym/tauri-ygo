@@ -172,23 +172,28 @@
 				dom.style.opacity = '0';
 				const child = document.createElement('img');
 				child.src = src;
-				child.style.width = `${three.create.size.width}px`;
-				child.style.height = `${three.create.size.height}px`;
-				child.style.transition = 'all 0.2s ease';
+				Object.assign(child.style, {
+					width : `${three.create.size.width}px`,
+					height : `${three.create.size.height}px`,
+					transition : 'all 0.2s ease'
+				});
 				dom.appendChild(child);
 				const atk = document.createElement('div');
 				atk.innerText = '';
-				atk.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-				atk.style.opacity = '0';
-				atk.style.position = 'absolute';
-				atk.style.bottom = '0';
-				atk.style.left = '-10px';
-				atk.style.width = `${three.create.size.height}px`;
-				atk.style.color = 'white';
-				atk.style.fontSize = '14px';
-				atk.style.fontFamily = 'atkdef';
-				atk.style.display = 'flex';
-				atk.style.justifyContent = 'center';
+				Object.assign(atk.style, {
+					backgroundColor : 'rgba(0, 0, 0, 0.5)',
+					opacity : '0',
+					position : 'absolute',
+					bottom : '0',
+					left : '-10px',
+					width : `${three.create.size.height}px`,
+					color : 'white',
+					fontSize : '14px',
+					fontFamily : 'atkdef',
+					display : 'flex',
+					justifyContent : 'center',
+					transition : 'all 0.2s ease',
+				});
 				dom.appendChild(atk);
 				const client_card = new Client_Card(new CSS.CSS3DObject(dom));
 				dom.addEventListener('mouseover', hover.on.bind(null, client_card));
@@ -261,11 +266,14 @@
 					three.cards.change(target, owner, from, location);
 					three.move(target.three, from, owner, x, y, z!);
 					three.rotate(target.three, from, owner);
+					(target.three.element.children[1] as HTMLElement).style.opacity =
+						(location & LOCATION.MZONE) === LOCATION.MZONE ? '1' : '0';
 				},
 				hand : (target : Client_Card, owner : number, from : number = 0) : void => {
 					three.cards.change(target, owner, from, LOCATION.HAND);
 					three.rotate(target.three, from, owner);
 					three.sort(owner, LOCATION.HAND);
+					(target.three.element.children[1] as HTMLElement).style.opacity = '0';
 				}
 			}
 		},

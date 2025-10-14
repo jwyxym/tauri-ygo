@@ -59,7 +59,7 @@ const LOCATION = {
 	ONFIELD : 0,
 	FZONE : 0x100,
 	PZONE : 0x200,
-}
+};
 
 LOCATION.ONFIELD = (LOCATION.MZONE | LOCATION.SZONE);
 
@@ -175,14 +175,14 @@ const ERROR = {
 	EXTRACOUNT : 0x7,
 	SIDECOUNT : 0x8,
 	NOTAVAIL : 0x9
-}
+};
 
 const  PLAYERCHANGE = {
 	OBSERVE : 0x8,
 	READY : 0x9,
 	NOTREADY : 0xa,
 	LEAVE : 0xb
-}
+};
 
 const HINT = {
     EVENT : 1,
@@ -209,7 +209,7 @@ const POS = {
 	FACEDOWN : 0xa,
 	ATTACK : 0x3,
 	DEFENSE : 0xc
-}
+};
 
 const QUERY = {
 	CODE : 0x1,
@@ -235,5 +235,19 @@ const QUERY = {
 	LSCALE : 0x200000,
 	RSCALE : 0x400000,
 	LINK : 0x800000
-}
-export { CTOS, STOC, LOCATION, MSG, ERROR, PLAYERCHANGE, HINT, POS, QUERY };
+};
+
+const PHASE = {
+	DRAW : 0x01,
+	STANDBY : 0x02,
+	MAIN1 : 0x04,
+	BATTLE_START : 0x08,
+	BATTLE_STEP : 0x10,
+	DAMAGE : 0x20,
+	DAMAGE_CAL : 0x40,
+	BATTLE : 0x80,
+	MAIN2 : 0x100,
+	END : 0x200
+};
+
+export { CTOS, STOC, LOCATION, MSG, ERROR, PLAYERCHANGE, HINT, POS, QUERY, PHASE };

@@ -8,7 +8,7 @@ import Message from './message';
 import constant from '../../../script/constant';
 import toast from '../../../script/toast';
 import Deck from '../../deck/deck';
-import { CTOS, STOC, LOCATION, MSG, ERROR, PLAYERCHANGE, HINT, QUERY } from './network';
+import { CTOS, STOC, LOCATION, MSG, ERROR, PLAYERCHANGE, HINT, QUERY, PHASE } from './network';
 import Client_Card from './client_card';
 
 interface Player {
@@ -180,6 +180,11 @@ class Tcp {
 			return str;
 		}
 
+		const to_palyer = (player : number) : number => {
+			player = player > 0 ? 1 : 0;
+			return connect.is_first.chk ? player : 1 - player;
+		}
+
 		const funcs : Map<number, Function> = new Map([
 			[STOC.GAME_MSG,
 				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
@@ -231,9 +236,8 @@ class Tcp {
 						}],
 						[MSG.UPDATE_DATA, () => {
 							const pack = to_package(buffer, data, [8, 8], pos);
-							const player = pack[0] > 0 ? 1 : 0;
+							const tp = to_palyer(pack[0]);
 							const location = pack[1];
-							const tp = connect.is_first.chk ? player : 1 - player;
 							const cards = connect.duel.cards.get(location);
 							if (cards === undefined)
 								return;
@@ -277,11 +281,19 @@ class Tcp {
 								}
 							}
 						}],
+						[MSG.NEW_TURN, () => {
+							const pack = to_package(buffer, data, [8], pos);
+							const tp = to_palyer(pack[0] & 0x1);
+
+						}],
+						[MSG.NEW_PHASE, () => {
+							const [phase] = to_package(buffer, data, [16], pos);
+
+						}],
 						[MSG.DRAW, () => {
 							const pack = to_package(buffer, data, [8, 8], pos);
-							const player = pack[0] > 0 ? 1 : 0;
+							const tp = to_palyer(pack[0]);
 							const ct = pack[1];
-							const tp = connect.is_first.chk ? player : 1 - player;
 							if (tp === 0) {
 								const cards : Array<Client_Card> = connect.duel.cards.get(LOCATION.DECK)!(tp);
 								const codes = to_package(buffer, data, new Array(ct).fill(32), pos + 2);
@@ -299,7 +311,7 @@ class Tcp {
 					]);
 					const cur_msg : number = to_package(buffer, data, [8], pos)[0];
 					pos += 1;
-					// console.log(cur_msg)
+					console.log(cur_msg)
 					if (msg_funcs.has(cur_msg))
 						msg_funcs.get(cur_msg)!();
 				}
