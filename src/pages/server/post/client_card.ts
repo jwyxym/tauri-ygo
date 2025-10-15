@@ -103,6 +103,60 @@ class Client_Card {
 	is_tuner = () : boolean => {
 		return this.type !== undefined && ((this.type & TYPE.TUNER) === TYPE.TUNER);
 	}
+	add = {
+		xyz : (len : number) : void => {
+			let el : HTMLElement = this.three.element.children[2].querySelector('.rank')!;
+			el.style.display = 'flex';
+			el.querySelector('span')!.innerHTML = this.rank?.toString() ?? '';
+			el = this.three.element.children[2].querySelector('.overlay')!;
+			el.style.display = 'flex';
+			el.querySelector('span')!.innerHTML = len.toString();
+		},
+		link : () : void => {
+			const el : HTMLElement = this.three.element.children[2].querySelector('.link')!;
+			el.style.display = 'flex';
+			el.querySelector('span')!.innerHTML = this.link?.toString() ?? '';
+		},
+		tuner : () : void => {
+			const el : HTMLElement = this.three.element.children[2].querySelector('.tuner')!;
+			el.style.display = 'flex';
+			(this.three.element.children[2] as HTMLElement).style.color = 'lightgreen';
+		},
+		level : () : void => {
+			const el : HTMLElement  = this.three.element.children[2].querySelector('.level')!;
+			el.style.display = 'flex';
+			el.querySelector('span')!.innerHTML = this.level?.toString() ?? '';
+		},
+		atk : () : void => {
+			this.three.element.children[1].innerHTML = this.is_link() ? this.atk?.toString() ?? '0' : `${this.atk ?? 0}/${this.def ?? 0}`;
+		}
+	};
+
+	show = {
+		on : () : void => {
+			for (const el of Array.from(this.three.element.children).slice(1))
+				(el as HTMLElement).style.opacity = '1';
+		},
+		off : () : void => {
+			for (const el of Array.from(this.three.element.children).slice(1))
+				(el as HTMLElement).style.opacity = '0';
+		}
+	}
+
+	change = {
+		xyz : (len : number) : void => {
+			const el : HTMLElement = this.three.element.children[2].querySelector('.overlay')!;
+			if (el.style.display === 'flex')
+				el.querySelector('span')!.innerHTML = len.toString();
+		}
+	}
+	remove = () : void => {
+		for (const el of Array.from(this.three.element.children[2].children) as Array<HTMLElement>) {
+			el.style.display = 'none';
+			el.querySelector('span')!.innerHTML = '';
+		}
+		(this.three.element.children[2] as HTMLElement).style.color = 'white';
+	}
 }
 
 export default Client_Card;

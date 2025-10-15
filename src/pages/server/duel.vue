@@ -5,7 +5,6 @@
 <script setup lang = 'ts'>
 	import { ref, onMounted, Ref, watch, Reactive, reactive, onUnmounted } from 'vue';
 	import * as THREE from 'three';
-	import { OrbitControls } from '@three-ts/orbit-controls';
 	import * as CSS from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 	
 	import mainGame from '../../script/game';
@@ -188,14 +187,18 @@
 				[LOCATION.SZONE | (3 << 16), [[], []]],
 				[LOCATION.SZONE | (4 << 16), [[], []]]
 			]) as Map<number, Array<Array<Client_Card>>>,
-			change : (target : Client_Card, owner : number, from : number, location : number, seq : number | undefined = undefined) => {
+			change : (target : Client_Card, owner : number, from : number, location : number, seq : number | undefined = undefined) : number => {
+				let result = 0;
 				if (from > 0) {
 					const ct = three.cards.map.get(from)![owner].findIndex(i => i === target);
 					three.cards.map.get(from)![owner].splice(ct, 1);
+					if (ct > 0 && (from & LOCATION.MZONE) === LOCATION.MZONE)
+						result = ct;
 					if (ct < three.cards.map.get(from)![owner].length)
 						three.sort(owner, from);
 				}
 				seq === undefined ? three.cards.map.get(location)![owner].push(target) : three.cards.map.get(location)![owner].splice(seq, 0, target);
+				return result;
 			},
 			location : (card : Client_Card | HTMLElement, location : number, owner : number = 2) : boolean => {
 				if (card instanceof Client_Card)
@@ -342,53 +345,42 @@
 					} else {
 						y = (three.create.size.height + three.create.gap) * axis.y;
 						if (seq > 0)
-							z -= seq * three.create.size.top;
+							z = (three.cards.map.get(from)![owner].length - seq - 1) * three.create.size.top;
 					}
-					three.cards.change(target, owner, from, location);
+					const ct = three.cards.change(target, owner, from, location, seq > 0 ? seq : undefined);
 					three.move(target.three, from, owner, x, y, z!);
 					three.rotate(target, from, owner, pos);
-					if ((location & LOCATION.MZONE) === LOCATION.MZONE) {
-						if (from !== LOCATION.MZONE) {
-							for (const el of Array.from(target.three.element.children[2].children) as Array<HTMLElement>) {
-								el.style.display = 'none';
-								el.querySelector('span')!.innerHTML = '';
-							}
-							(target.three.element.children[2] as HTMLElement).style.color = 'white';
+					if ((location & LOCATION.MZONE) === LOCATION.MZONE && seq === 0) {
+						if ((from & LOCATION.MZONE) === 0)
+							target.remove();
+						if (target.is_link())
+							target.add.link();
+						else if (target.is_xyz())
+							target.add.xyz(three.cards.map.get(location)![owner].length - 1);
+						else {
+							if (target.is_tuner())
+								target.add.tuner();
+							target.add.level();
 						}
-						if (target.is_link()) {
-							const el : HTMLElement = target.three.element.children[2].querySelector('.link')!;
-							el.style.display = 'flex';
-							el.querySelector('span')!.innerHTML = target.link?.toString() ?? '';
-						} else if (target.is_xyz()) {
-							let el : HTMLElement = target.three.element.children[2].querySelector('.rank')!;
-							el.style.display = 'flex';
-							el.querySelector('span')!.innerHTML = target.rank?.toString() ?? '';
-							el = target.three.element.children[2].querySelector('.overlay')!;
-							el.style.display = 'flex';
-							el.querySelector('span')!.innerHTML = (three.cards.map.get(location)![owner].length - 1).toString();
-						} else {
-							if (target.is_tuner()) {
-								const el : HTMLElement = target.three.element.children[2].querySelector('.tuner')!;
-								el.style.display = 'flex';
-								(target.three.element.children[2] as HTMLElement).style.color = 'lightgreen';
-							}
-							const el : HTMLElement  = target.three.element.children[2].querySelector('.level')!;
-							el.style.display = 'flex';
-							el.querySelector('span')!.innerHTML = target.level?.toString() ?? '';
-						}
-						target.three.element.children[1].innerHTML = target.is_link() ? target.atk?.toString() ?? '0' : `${target.atk ?? 0}/${target.def ?? 0}`;
-						for (const el of Array.from(target.three.element.children).slice(1))
-							(el as HTMLElement).style.opacity = '1';
+						target.add.atk();
+						target.show.on();
+					} else if ((location & LOCATION.MZONE) === LOCATION.MZONE && seq > 0) {
+						if ((from & LOCATION.MZONE) === LOCATION.MZONE)
+							target.clear();
+						if (ct > 0)
+							three.cards.map.get(from)![owner][0].change.xyz(three.cards.map.get(from)![owner].length - 1);
+						three.cards.map.get(location)![owner][0].change.xyz(three.cards.map.get(location)![owner].length - 1);
 					} else
-						for (const el of Array.from(target.three.element.children).slice(1))
-							(el as HTMLElement).style.opacity = '0';
+						target.show.off();
 				},
 				hand : (target : Client_Card, owner : number, from : number = 0) : void => {
-					three.cards.change(target, owner, from, LOCATION.HAND);
+					const ct = three.cards.change(target, owner, from, LOCATION.HAND);
 					three.rotate(target, from, owner);
 					three.sort(owner, LOCATION.HAND);
 					for (const el of Array.from(target.three.element.children).slice(1))
 						(el as HTMLElement).style.opacity = '0';
+					if (ct > 0)
+						three.cards.map.get(from)![owner][0].change.xyz(three.cards.map.get(from)![owner].length - 1);
 				}
 			}
 		},
@@ -656,14 +648,8 @@
 
 		three.render();
 		canvas.value!.appendChild(three.renderer.domElement);
-		// const controls = new OrbitControls(three.camera, window.document.documentElement);
-		// controls.minPolarAngle = 0;
-		// controls.minDistance = 0;
-		// controls.maxDistance = Infinity;
-
 		const animate = () => {
 			requestAnimationFrame(animate);
-			// controls.update();
 			three.render();
 		}
 
