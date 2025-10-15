@@ -4,7 +4,7 @@
 			:style = "{ '--y' : `${page.height}px` }"
 		>
 			<img
-				v-for = '(i, v) in constant.str.files.src.rps'
+				v-for = "(i, v) in constant.str.files.textures.rps.map(i => mainGame.get.textures(i) as string | undefined ?? '')"
 				v-if = 'page.show'
 				:key = 'i'
 				:src = 'i'

@@ -85,29 +85,27 @@ class Constant {
 				unknown : 'unknown.jpg',
 				cover : 'cover.jpg',
 				pic : ['cardI.jpg', 'cardII.jpg'],
-				back : ['backI.jpg', 'backII.jpg']
+				rps : ['s.png', 'r.png', 'p.png'],
+				back : ['backI.jpg', 'backII.jpg'],
+				card_info : {
+					tuner : 'tuner.png',
+					level : 'level.png',
+					rank : 'rank.png',
+					link : 'link.png',
+					scale : 'scale.png',
+					overlay : 'overlay.png'
+				},
+				menu : [
+					'I.jpg',
+					'II.jpg',
+					'III.jpg',
+					'IV.jpg',
+					'V.jpg'
+				]
 			},
 			sound : {
 				back : 'Night View.wav',
 				battle : 'City of Night.wav'
-			},
-			src : {
-				rps : ['./src/pics/rps/s.png', './src/pics/rps/r.png', './src/pics/rps/p.png'],
-				card_info : {
-					tuner : './src/pics/icon/tuner.png',
-					level : './src/pics/icon/level.png',
-					rank : './src/pics/icon/rank.png',
-					link : './src/pics/icon/link.png',
-					scale : './src/pics/icon/scale.png',
-					overlay : './src/pics/icon/overlay.png'
-				},
-				menu : [
-					'./src/pics/menu/I.jpg',
-					'./src/pics/menu/II.jpg',
-					'./src/pics/menu/III.jpg',
-					'./src/pics/menu/IV.jpg',
-					'./src/pics/menu/V.jpg'
-				]
 			},
 			system : 'system.conf',
 			pics : 'pics.zip',

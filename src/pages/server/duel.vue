@@ -232,13 +232,14 @@
 				const atk = document.createElement('div');
 				atk.innerText = '';
 				Object.assign(atk.style, {
-					backgroundColor : 'rgba(0, 0, 0, 0.5)',
+					backgroundColor : 'rgba(0, 0, 0, 0.3)',
 					opacity : '0',
 					position : 'absolute',
 					bottom : '0',
-					left : '-10px',
+					left : `-${(three.create.size.height - three.create.size.width) / 2}px`,
 					width : `${three.create.size.height}px`,
 					color : 'white',
+					textShadow : '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',
 					fontSize : '14px',
 					fontFamily : 'atkdef',
 					display : 'flex',
@@ -262,7 +263,7 @@
 					alignItems: 'center',
 					transition : 'all 0.2s ease',
 				});
-				for (const [key, src] of Object.entries(constant.str.files.src.card_info)) {
+				for (const [key, src] of Object.entries(constant.str.files.textures.card_info)) {
 					const div = document.createElement('div');
 					div.classList.add(key);
 					Object.assign(div.style, {
@@ -270,7 +271,7 @@
 						display : 'none'
 					});
 					const img = document.createElement('img');
-					img.src = src;
+					img.src = mainGame.get.textures(src) as string | undefined ?? '';
 					img.style.height = '100%';
 					div.appendChild(img);
 					const span = document.createElement('span');

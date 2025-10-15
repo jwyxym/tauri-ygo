@@ -1,6 +1,12 @@
 <template>
 	<div class = 'menu'>
-		<div v-for = '(i, v) in constant.str.files.src.menu' ref = 'item'>
+		<div
+			v-for = "
+				(i, v) in constant.str.files.textures.menu
+					.map(i => mainGame.get.textures(i) as string | undefined ?? '')
+			"
+			ref = 'item'
+		>
 			<div
 				class = 'menu-cards'
 				:style = "{ '--rotate' : `${page.rotate[v]}deg` }"

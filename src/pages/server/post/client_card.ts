@@ -118,9 +118,11 @@ class Client_Card {
 			el.querySelector('span')!.innerHTML = this.link?.toString() ?? '';
 		},
 		tuner : () : void => {
+			console.log(this.three.element);
 			const el : HTMLElement = this.three.element.children[2].querySelector('.tuner')!;
 			el.style.display = 'flex';
 			(this.three.element.children[2] as HTMLElement).style.color = 'lightgreen';
+			console.log(this.three.element)
 		},
 		level : () : void => {
 			const el : HTMLElement  = this.three.element.children[2].querySelector('.level')!;
