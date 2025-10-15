@@ -1,5 +1,6 @@
 import { gsap } from 'gsap';
 import pos from './position';
+import { POS } from '../pages/server/post/network';
 
 class Gsap {
 	timeline = (vars : gsap.TimelineVars = {}) : gsap.core.Timeline => {
@@ -114,9 +115,17 @@ class Gsap {
 		return tl;
 	};
 
+	pos = (el : HTMLImageElement, pos : number, tl : gsap.core.Timeline = this.timeline()) : gsap.core.Timeline => {
+		tl.to(el, {
+			rotationZ : (pos & POS.DEFENSE) > 0 ? -90 : 0,
+			duration : 0.1,
+		}, 0);
+		return tl;
+	}
+
 	turn = (el : HTMLImageElement, pic : string | undefined, tl : gsap.core.Timeline = this.timeline()) : gsap.core.Timeline => {
 		tl.set(el, {
-			rorationY : 0
+			rotationY : 0
 		})
 		tl.to(el, {
 			rotationY : 90,
@@ -126,7 +135,7 @@ class Gsap {
 			}
 		}, 0);
 		tl.set(el, {
-			rorationY : -90
+			rotationY : -90
 		}, 0.125)
 		tl.to(el, {
 			rotationY : 0,

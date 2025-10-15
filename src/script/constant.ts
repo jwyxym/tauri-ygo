@@ -99,7 +99,7 @@ class Constant {
 					rank : './src/pics/icon/rank.png',
 					link : './src/pics/icon/link.png',
 					scale : './src/pics/icon/scale.png',
-					overlay : './src/icon/overlay.png'
+					overlay : './src/pics/icon/overlay.png'
 				},
 				menu : [
 					'./src/pics/menu/I.jpg',

@@ -1,6 +1,34 @@
 import constant from './constant';
 import mainGame from './game';
 
+const TYPE = {
+	MONSTER : 0x1,
+	SPELL : 0x2,
+	TRAP : 0x4,
+	NORMAL : 0x10,
+	EFFECT : 0x20,
+	FUSION : 0x40,
+	RITUAL : 0x80,
+	TRAPMONSTER : 0x100,
+	SPIRIT : 0x200,
+	UNION : 0x400,
+	DUAL : 0x800,
+	TUNER : 0x1000,
+	SYNCHRO : 0x2000,
+	TOKEN : 0x4000,
+	QUICKPLAY : 0x10000,
+	CONTINUOUS : 0x20000,
+	EQUIP : 0x40000,
+	FIELD : 0x80000,
+	COUNTER : 0x100000,
+	FLIP : 0x200000,
+	TOON : 0x400000,
+	XYZ : 0x800000,
+	PENDULUM : 0x1000000,
+	SPSUMMON : 0x2000000,
+	LINK : 0x4000000
+}
+
 interface CardInfo {
 	ot : string;
 	level : string;
@@ -100,30 +128,31 @@ class Card {
 	};
 
 	is_link = () : boolean => {
-		return (this.type & 0x4000000) === 0x4000000;
+		return (this.type & TYPE.LINK) === TYPE.LINK;
 	};
 
 	is_pendulum = () : boolean => {
-		return (this.type & 0x1000000) === 0x1000000;
+		return (this.type & TYPE.PENDULUM) === TYPE.PENDULUM;
 	};
 
 	is_xyz = () : boolean => {
-		return (this.type & 0x800000) === 0x800000;
+		return (this.type & TYPE.XYZ) === TYPE.XYZ;
 	};
 
 	is_monster = () : boolean => {
-		return (this.type & 0x1) === 0x1;
+		return (this.type & TYPE.MONSTER) === TYPE.MONSTER;
 	};
 
 	is_ex = () : boolean => {
-		return (this.type & 0x4802040) > 0;
+		return (this.type & (TYPE.FUSION | TYPE.SYNCHRO | TYPE.XYZ | TYPE.LINK)) > 0;
 	};
 
 	is_token = () : boolean => {
-		return (this.type & 0x4000) === 0x4000;
+		return (this.type & TYPE.TOKEN) === TYPE.TOKEN;
 	};
 
 }
 
 export default Card;
+export { TYPE };
 export type { Search, CardInfo };

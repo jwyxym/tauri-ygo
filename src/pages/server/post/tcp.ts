@@ -53,7 +53,7 @@ class Tcp {
 	cid : string;
 	address : string;
 	constructor () {
-		this.cid = constant.str.title;
+		this.cid = 'xiaoye';
 		this.address = '';
 	}
 

@@ -1,4 +1,4 @@
-import Card from '../../../script/card';
+import Card, { TYPE } from '../../../script/card';
 import mainGame from '../../../script/game';
 import { POS } from './network';
 import * as CSS from 'three/examples/jsm/renderers/CSS3DRenderer.js'
@@ -29,21 +29,25 @@ class Client_Card {
 	};
 
 	update = {
-		code : (code : number) : void => {
+		code : async (code : number) : Promise<void> => {
 			if (code === 0) {
 				this.clear();
 				return;
 			}
 			const card : Card = mainGame.get.card(code);
+			if (card.pic === '')
+				await mainGame.load.pic([code]);
 			this.card = card;
 			this.code = code;
 			this.alias = card.alias;
 			this.pic = card.pic;
 			this.type = card.type;
-			this.level = card.is_xyz() || card.is_link() ? 0 : card.level;
+			this.level = (card.is_xyz() || card.is_link()) ? 0 : card.level;
 			this.rank = card.is_xyz() ? card.level : 0;
 			this.link = card.is_link() ? card.level : 0;
 			this.attribute = card.attribute;
+			this.atk = card.atk;
+			this.def = card.def;
 		},
 		alias : (code : number) : void => {
 			this.alias = code;
@@ -74,8 +78,7 @@ class Client_Card {
 		},
 		scale : (scale : number, seq : number) : void => {
 			this.scale[seq] = scale;
-		},
-
+		}
 	};
 	clear = () : void => {
 		this.card = undefined;
@@ -91,6 +94,15 @@ class Client_Card {
 		this.def = 0;
 		this.scale = [];
 	};
+	is_xyz = () : boolean => {
+		return this.rank !== undefined && this.rank > 0;
+	};
+	is_link = () : boolean => {
+		return this.link !== undefined && this.link > 0;
+	};
+	is_tuner = () : boolean => {
+		return this.type !== undefined && ((this.type & TYPE.TUNER) === TYPE.TUNER);
+	}
 }
 
 export default Client_Card;
