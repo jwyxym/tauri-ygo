@@ -1,0 +1,212 @@
+name: build assets
+
+on:
+  push:
+    tags:
+      - 'assets*'
+    
+jobs:
+  make-assets:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    - name: Install wget and unzip
+      shell: powershell
+      run: |
+        Set-ExecutionPolicy Bypass -Scope Process -Force
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+        choco install wget unzip -y
+
+    - name: Install 7zip
+      shell: powershell
+      run: |
+        Set-ExecutionPolicy Bypass -Scope Process -Force
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+        choco install 7zip -y
+
+    - name: Download Assets
+      shell: cmd
+      run: |
+        cd .ci
+        wget -O ygopro-database.zip https://github.com/mycard/ygopro-database/archive/refs/heads/master.zip
+        unzip ygopro-database.zip
+        mkdir cdb
+        mkdir strings
+        copy ygopro-database-master\locales\zh-CN\cards.cdb cdb\cards-zh-CN.cdb
+        copy ygopro-database-master\locales\ko-KR\cards.cdb cdb\cards-ko-KR.cdb
+        copy ygopro-database-master\locales\ja-JP\cards.cdb cdb\cards-ja-JP.cdb
+        copy ygopro-database-master\locales\en-US_mdpro3\cards.cdb cdb\cards-en-US.cdb
+        copy ygopro-database-master\locales\zh-CN\strings.conf strings\strings-zh-CN.conf
+        copy ygopro-database-master\locales\ko-KR\strings.conf strings\strings-ko-KR.conf
+        copy ygopro-database-master\locales\ja-JP\strings.conf strings\strings-ja-JP.conf
+        copy ygopro-database-master\locales\en-US_mdpro3\strings.conf strings\strings-en-US.conf
+        wget https://github.com/Fluorohydride/ygopro/raw/refs/heads/master/lflist.conf
+        wget https://github.com/jwyxym/card-pics/releases/download/pics/pics.zip
+        unzip pics.zip
+        7z a -tzip -mx=9 assets.zip strings info cdb sound textures lflist.conf pics
+        7z a -tzip -mx=9 assets_android.zip strings info cdb sound textures lflist.conf pics.zip
+
+    - name: Upload File
+      uses: actions/upload-artifact@v4
+      with:
+        name: assets_android.zip
+        path: .\.ci\assets_android.zip
+
+    - name: Upload File
+      uses: actions/upload-artifact@v4
+      with:
+        name: assets.zip
+        path: .\.ci\assets.zip
+
+  update-gitcode:
+    needs: [make-assets]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Upload to GitCode
+        shell: cmd
+        run: |
+          pip install requests
+          python .ci\update.py ${{ secrets.GITCODE_ACCESS_TOKEN }}
+
+  upload-assets_android_zip:
+    needs: [update-gitcode]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: build
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: PrePare
+        shell: cmd
+        run: |
+          copy .ci\upload.py build\upload.py
+          pip install requests
+
+      - name: Upload Zip
+        shell: cmd
+        run: |
+          cd build
+          python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} assets_android.zip/assets_android.zip
+
+  upload-assets_zip:
+    needs: [update-gitcode]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: build
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: PrePare
+        shell: cmd
+        run: |
+          copy .ci\upload.py build\upload.py
+          pip install requests
+
+      - name: Upload Zip
+        shell: cmd
+        run: |
+          cd build
+          python upload.py ${{ secrets.GITCODE_ACCESS_TOKEN }} assets.zip/assets.zip
+
+  create-release:
+    needs: [make-assets]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: build
+
+      - name: Delete old Release
+        run: |
+          TAG_NAME=assets-latest
+          gh release delete "$TAG_NAME" --yes || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Delete old tag
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git fetch --tags
+          git tag -d assets-latest || true
+          git push origin :refs/tags/assets-latest || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create tag
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git tag assets-latest
+          git push origin assets-latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: assets-latest
+          release_name: assets-latest
+          draft: false
+          prerelease: false
+
+      - name: Upload
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/assets.zip/assets.zip
+          asset_name: assets.zip
+          asset_content_type: application/octet-stream
+
+      - name: Upload
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/assets_android.zip/assets_android.zip
+          asset_name: assets_android.zip
+          asset_content_type: application/octet-stream
+
