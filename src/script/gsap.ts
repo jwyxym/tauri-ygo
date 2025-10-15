@@ -114,39 +114,6 @@ class Gsap {
 		return tl;
 	};
 
-	move_left = (array : Array<HTMLElement>, complete : Function = () => {}) : gsap.core.Timeline => {
-		const tl = this.timeline();
-		for (const [v, i] of array.entries()) {
-			tl.to(i, {
-				x : '-80vw',
-				duration : 0.5,
-				onComplete: () => {
-					if (v === array.length - 1) complete();
-				}
-			}, 0.2 * v);
-		}
-		return tl;
-	};
-
-	from_left = (array : Array<HTMLElement>, complete : Function = () => {}) : gsap.core.Timeline => {
-		const tl = this.timeline();
-		for (const [v, i] of array.entries()) {
-			tl.to(i, {
-				x : '-=80vw',
-				duration : 0.2,
-				onComplete: () => { i.style.display = 'block'; }
-			}, 0);
-			tl.to(i, {
-				x : '+=80vw',
-				duration : 0.5,
-				onComplete: () => {
-					if (v === array.length - 1) complete();
-				}
-			}, 0.2 * (v + 1));
-		}
-		return tl;
-	};
-
 	turn = (el : HTMLImageElement, pic : string | undefined, tl : gsap.core.Timeline = this.timeline()) : gsap.core.Timeline => {
 		tl.set(el, {
 			rorationY : 0

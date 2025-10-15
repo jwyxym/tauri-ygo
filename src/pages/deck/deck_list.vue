@@ -250,10 +250,6 @@
 		}
 	});
 
-	watch(() => { return list.select; }, (n) => {
-		props.select.canvas(n < 0);
-	});
-
 	const props = defineProps(['select']);
 
 	onBeforeMount(list.load)

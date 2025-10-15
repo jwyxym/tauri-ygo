@@ -1,46 +1,28 @@
 .menu {
-	transform: translateX(10%);
+	position: relative;
 	color: white;
+	margin: 0 auto;
+	width: 100%;
 	height: 100%;
-	width: 50%;
-	white-space: nowrap;
-	display: flex;
-	justify-content: left;
-	justify-items: center;
-	align-items: center;
-	z-index: 10;
-	.content {
-		height: 90%;
-		max-width: 20%;
-		display: flex;
-		flex-direction: column;
-		.list {
-			height: 70%;
-			display: grid;
-			gap: 10px;
-			.item_back {
-				width: 0;
-				font-style: italic;
-				height: 100%;
-				transition: all 0.4s ease;
-				border: 2px solid rgb(#ACC927, 0);
-				.item {
-					font-size: 7vh;
-				}
-				&:hover {
-					cursor: pointer;
-					width: 140%;
-					border: 2px solid #ACC927;
-					background-color: rgba(black, 0.2);
-				}
-			}
+	.menu-cards {
+		position: absolute;
+		top : 10vh;
+		left: calc(50% - (45vh / 1.45) / 2);
+		height: 45vh;
+		width: calc(45vh / 1.45);
+		transition: all 0.4s ease;
+		img {
+			width: 100%;
+			height: 100%;
+			transition: all 0.4s ease;
 		}
-		.title {
-			height: 20%;
-			font-size: 10vh;
-		}
-		.title, .item_back {
-			display: none;
-		}
+		transform: rotateZ(var(--rotate));
+		transform-origin: 50% 100%;
+	}
+	.var-button {
+		position: absolute;
+		right: 20px;
+		bottom: 10px;
+		width: max(70px, 8vw);
 	}
 }

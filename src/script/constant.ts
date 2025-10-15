@@ -56,7 +56,6 @@ class Constant {
 
 	str = {
 		blob : 'blob:http',
-		title : 'Tauri-YGO',
 		replace : {
 			tauri : '{:?}',
 			strings : ['%ls', '%d']
@@ -93,15 +92,22 @@ class Constant {
 				battle : 'City of Night.wav'
 			},
 			src : {
-				rps : ['./src/pics/s.png', './src/pics/r.png', './src/pics/p.png'],
+				rps : ['./src/pics/rps/s.png', './src/pics/rps/r.png', './src/pics/rps/p.png'],
 				card_info : {
-					tuner : './src/pics/tuner.png',
-					level : './src/pics/level.png',
-					rank : './src/pics/rank.png',
-					link : './src/pics/link.png',
-					scale : './src/pics/scale.png',
-					overlay : './src/overlay.png'
+					tuner : './src/pics/icon/tuner.png',
+					level : './src/pics/icon/level.png',
+					rank : './src/pics/icon/rank.png',
+					link : './src/pics/icon/link.png',
+					scale : './src/pics/icon/scale.png',
+					overlay : './src/icon/overlay.png'
 				},
+				menu : [
+					'./src/pics/menu/I.jpg',
+					'./src/pics/menu/II.jpg',
+					'./src/pics/menu/III.jpg',
+					'./src/pics/menu/IV.jpg',
+					'./src/pics/menu/V.jpg'
+				]
 			},
 			system : 'system.conf',
 			pics : 'pics.zip',
