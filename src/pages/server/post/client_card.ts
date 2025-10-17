@@ -1,7 +1,9 @@
 import Card, { TYPE } from '../../../script/card';
 import mainGame from '../../../script/game';
+import constant from '../../../script/constant';
 import { POS } from './network';
-import * as CSS from 'three/examples/jsm/renderers/CSS3DRenderer.js'
+import * as CSS from 'three/examples/jsm/renderers/CSS3DRenderer.js';
+import gsap from '../../../script/gsap';
 
 class Client_Card {
 	three : CSS.CSS3DObject;
@@ -9,7 +11,6 @@ class Client_Card {
 	alias : number;
 	card ?: Card;
 	pic ?: string;
-	pos : number;
 	type : number;
 	level : number;
 	rank : number;
@@ -37,7 +38,6 @@ class Client_Card {
 		this.def = 0;
 		this.scale = 0;
 		this.three = three;
-		this.pos = POS.NONE;
 	};
 
 	update = {
@@ -168,7 +168,7 @@ class Client_Card {
 				(this.three.element.children[1] as HTMLElement).style.opacity = '0';
 			}
 		}
-	}
+	};
 
 	change = {
 		xyz : (len : number) : void => {
@@ -176,13 +176,20 @@ class Client_Card {
 			if (el.style.display === 'flex')
 				el.querySelector('span')!.innerHTML = len.toString();
 		}
-	}
+	};
 	remove = () : void => {
 		for (const el of Array.from(this.three.element.children[2].children) as Array<HTMLElement>) {
 			el.style.display = 'none';
 			el.querySelector('span')!.innerHTML = '';
 		}
 		(this.three.element.children[2] as HTMLElement).style.color = 'white';
+	};
+
+	pos = () : number => {
+		const rotation = gsap.getProperty(this.three.element.children[0], "rotationZ") === 0;
+		const pos = (this.three.element.children[0] as HTMLImageElement).src === mainGame.get.textures(constant.str.files.textures.cover) ?
+			rotation ? POS.FACEDOWN_ATTACK : POS.FACEDOWN_DEFENSE : rotation ? POS.FACEUP_ATTACK : POS.FACEUP_DEFENSE;
+		return pos;
 	}
 }
 

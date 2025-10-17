@@ -7,6 +7,8 @@ class Gsap {
 		return gsap.timeline(vars);
 	};
 
+	getProperty = gsap.getProperty
+
 	to = gsap.to
 
 	attack = (obj : {

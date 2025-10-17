@@ -95,11 +95,11 @@ class Tcp {
 					connect.state = 0;
 					this.address = '';
 				} else if (x.payload.event.message) {
-					listen(new Uint8Array(x.payload.event.message.data));
+					await listen(new Uint8Array(x.payload.event.message.data));
 				}
 			}
 		});
-		const listen = (buffer : Uint8Array<ArrayBuffer>) : void => {
+		const listen = async (buffer : Uint8Array<ArrayBuffer>) : Promise<void> => {
 			const data = new DataView(buffer.buffer);
 			let pos = 0
 			while (pos < buffer.byteLength - 3) {
@@ -112,7 +112,7 @@ class Tcp {
 				const func = funcs.get(proto);
 				// console.log(len, proto.toString(16))
 				if (func)
-					func(buffer, data, len, connect, pos);
+					await func(buffer, data, len, connect, pos);
 				pos += len + 2;
 			}
 		};
@@ -187,14 +187,14 @@ class Tcp {
 
 		const funcs : Map<number, Function> = new Map([
 			[STOC.GAME_MSG,
-				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					if (connect.state === 0)
 						return;
 					const msg_funcs : Map<number, Function> = new Map([
-						[MSG.RETRY, () => {
+						[MSG.RETRY, async () => {
 
 						}],
-						[MSG.HINT, () => {
+						[MSG.HINT, async () => {
 							const [type, player, content] = to_package(buffer, data, [8, 8, 32], pos);
 							switch (type) {
 								case HINT.EVENT:
@@ -231,10 +231,10 @@ class Tcp {
 
 							}
 						}],
-						[MSG.WIN, () => {
+						[MSG.WIN, async () => {
 
 						}],
-						[MSG.UPDATE_DATA, () => {
+						[MSG.UPDATE_DATA, async () => {
 							const pack = to_package(buffer, data, [8, 8], pos);
 							const tp = to_palyer(pack[0]);
 							const location = pack[1];
@@ -270,7 +270,7 @@ class Tcp {
 										] as Array<[number, Function]>) {
 											if ((flag & i[0]) === i[0]) {
 												const pack = to_package(buffer, data, [32], p);
-												i[1](pack[0]);
+												await i[1](pack[0]);
 												p += 4;
 											}
 										}
@@ -281,16 +281,16 @@ class Tcp {
 								}
 							}
 						}],
-						[MSG.NEW_TURN, () => {
+						[MSG.NEW_TURN, async () => {
 							const pack = to_package(buffer, data, [8], pos);
 							const tp = to_palyer(pack[0] & 0x1);
 
 						}],
-						[MSG.NEW_PHASE, () => {
+						[MSG.NEW_PHASE, async () => {
 							const [phase] = to_package(buffer, data, [16], pos);
 
 						}],
-						[MSG.DRAW, () => {
+						[MSG.DRAW, async () => {
 							const pack = to_package(buffer, data, [8, 8], pos);
 							const tp = to_palyer(pack[0]);
 							const ct = pack[1];
@@ -302,7 +302,7 @@ class Tcp {
 									const v = cards.length - i;
 									if (v < 0)
 										break;
-									cards[v].update.code(code);
+									await cards[v].update.code(code);
 									i ++;
 								}
 							}
@@ -313,11 +313,11 @@ class Tcp {
 					pos += 1;
 					console.log(cur_msg)
 					if (msg_funcs.has(cur_msg))
-						msg_funcs.get(cur_msg)!();
+						await msg_funcs.get(cur_msg)!();
 				}
 			],
 			[STOC.ERROR_MSG,
-				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					const pack = to_package(buffer, data, [8, -3, 32], pos);
 					const [msg, code] = pack;
 					switch (msg) {
@@ -361,26 +361,26 @@ class Tcp {
 				}
 			],
 			[STOC.SELECT_TP,
-				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					if (connect.rps.chk)
 						connect.rps.chk = false;
 					connect.is_first.selecting = true;
 				}
 			],
 			[STOC.HAND_RESULT,
-				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					const pack = to_package(buffer, data, new Array(2).fill(8), pos);
 					connect.rps.result = pack;
 				}
 			],
 			[STOC.DECK_COUNT,
-				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					const pack = to_package(buffer, data, new Array(6).fill(16), pos);
 					connect.deck_count = pack;
 				}
 			],
 			[STOC.JOIN_GAME,
-				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					const pack = to_package(buffer, data, [32, ...new Array(5).fill(8), -3, 32, 8, 8, 16], pos);
 					connect.home.lflist = pack[0];
 					connect.home.rule = pack[1];
@@ -396,7 +396,7 @@ class Tcp {
 				}
 			],
 			[STOC.TYPE_CHANGE,
-				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					const pack = to_package(buffer, data, [8], pos);
 					const self = pack[0] & 0xf;
 					const is_host = ((pack[0] >> 4) & 0xf) != 0;
@@ -405,13 +405,13 @@ class Tcp {
 				}
 			],
 			[STOC.DUEL_START,
-				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					connect.state = 2;
 					connect.rps.chk = true;
 				}
 			],
 			[STOC.CHAT,
-				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					let pack = to_package(buffer, data, [16, (len - 2).toString()], pos);
 					const player = pack[0];
 					let str = '';
@@ -429,13 +429,13 @@ class Tcp {
 				}
 			],
 			[STOC.HS_PLAYER_ENTER,
-				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					const pack = to_package(buffer, data, [40, 8], pos);
 					connect.player[pack[1]] = { name : pack[0], ready : false };
 				}
 			],
 			[STOC.HS_PLAYER_CHANGE,
-				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					const pack = to_package(buffer, data, [8], pos);
 					const state = pack[0] & 0xf;
 					const player = (pack[0] >> 4) & 0xf;
@@ -464,7 +464,7 @@ class Tcp {
 				}
 			],
 			[STOC.HS_WATCH_CHANGE,
-				(buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					const pack = to_package(buffer, data, [16], pos);
 					connect.home.watch = pack[0];
 				}

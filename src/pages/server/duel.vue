@@ -67,28 +67,13 @@
 			}
 		},
 		click : (e : MouseEvent) : void => {
-			//debug
-			duel.to.pzone(0, {
-				location : LOCATION.DECK,
-				seq : 0,
-				zone : 0
-			})
-			duel.to.pzone(0, {
-				location : LOCATION.DECK,
-				seq : 2,
-				zone : 1
-			})
-			duel.to.mzone(0, {
-				location : LOCATION.DECK,
-				seq : 1,
-				zone : 0
-			})
-			let card = three.cards.map.get(LOCATION.HAND)![0].find(i => i.three.element.contains(e.target as HTMLElement));
+			let card : Client_Card | undefined;
 			if (hover.select !== undefined) {
 				const v = three.cards.map.get(LOCATION.HAND)![0].findIndex(i => i === hover.select);
 				(hover.select.three.element.children[0] as HTMLElement).style.transform = 'translateY(0)';
 				hover.select.three.position.z = v * 0.02;
 			}
+			card = three.cards.map.get(LOCATION.HAND)![0].find(i => i.three.element.contains(e.target as HTMLElement));
 			hover.select = card && hover.select !== card ? card : undefined;
 		},
 		select : undefined as Client_Card | undefined
@@ -108,80 +93,99 @@
 		render : () => {
 			three.renderer.render(three.scene, three.camera);
 		},
-		axis : new Map([
-			[LOCATION.HAND, [
-				{ x : -2, y : -3 },
-				{ x : 2, y : 3 }
-			]],
-			[LOCATION.DECK, [
-				{ x : 3, y : -2 },
-				{ x : -3, y : 2 }
-			]],
-			[LOCATION.EXTRA, [
-				{ x : -3, y : -2 },
-				{ x : 3, y : 2 }
-			]],
-			[LOCATION.FZONE, [
-				{ x : -3, y : -1 },
-				{ x : 3, y : 1 }
-			]],
-			[LOCATION.GRAVE, [
-				{ x : 3, y : -1 },
-				{ x : -3, y : 1 }
-			]],
-			[LOCATION.REMOVED, [
-				{ x : 3, y : 0 },
-				{ x : -3, y : 0 }
-			]],
-			[LOCATION.MZONE | (0 << 16), [
-				{ x : -2, y : -1 },
-				{ x : 2, y : 1 }
-			]],
-			[LOCATION.MZONE | (1 << 16), [
-				{ x : -1, y : -1 },
-				{ x : 1, y : 1 }
-			]],
-			[LOCATION.MZONE | (2 << 16), [
-				{ x : 0, y : -1 },
-				{ x : 0, y : 1 }
-			]],
-			[LOCATION.MZONE | (3 << 16), [
-				{ x : 1, y : -1 },
-				{ x : -1, y : 1 }
-			]],
-			[LOCATION.MZONE | (4 << 16), [
-				{ x : 2, y : -1 },
-				{ x : -2, y : 1 }
-			]],
-			[LOCATION.MZONE | (5 << 16), [
-				{ x : -1, y : 0 },
-				{ x : 1, y : 0 }
-			]],
-			[LOCATION.MZONE | (6 << 16), [
-				{ x : 1, y : 0 },
-				{ x : -1, y : 0 }
-			]],
-			[LOCATION.SZONE | (0 << 16), [
-				{ x : -2, y : -2 },
-				{ x : 2, y : 2 }
-			]],
-			[LOCATION.SZONE | (1 << 16), [
-				{ x : -1, y : -2 },
-				{ x : 1, y : 2 }
-			]],
-			[LOCATION.SZONE | (2 << 16), [
-				{ x : 0, y : -2 },
-				{ x : 0, y : 2 }
-			]],
-			[LOCATION.SZONE | (3 << 16), [
-				{ x : 1, y : -2 },
-				{ x : -1, y : 2 }
-			]],
-			[LOCATION.SZONE | (4 << 16), [
-				{ x : 2, y : -2 },
-				{ x : -2, y : 2 }
-			]]
-		]) as Map<number, Array<Axis>>,
+		axis : {
+			map : new Map([
+				[LOCATION.HAND, [
+					{ x : -2, y : -3 },
+					{ x : 2, y : 3 }
+				]],
+				[LOCATION.DECK, [
+					{ x : 3, y : -2 },
+					{ x : -3, y : 2 }
+				]],
+				[LOCATION.EXTRA, [
+					{ x : -3, y : -2 },
+					{ x : 3, y : 2 }
+				]],
+				[LOCATION.FZONE, [
+					{ x : -3, y : -1 },
+					{ x : 3, y : 1 }
+				]],
+				[LOCATION.GRAVE, [
+					{ x : 3, y : -1 },
+					{ x : -3, y : 1 }
+				]],
+				[LOCATION.REMOVED, [
+					{ x : 3, y : 0 },
+					{ x : -3, y : 0 }
+				]],
+				[LOCATION.MZONE | (0 << 16), [
+					{ x : -2, y : -1 },
+					{ x : 2, y : 1 }
+				]],
+				[LOCATION.MZONE | (1 << 16), [
+					{ x : -1, y : -1 },
+					{ x : 1, y : 1 }
+				]],
+				[LOCATION.MZONE | (2 << 16), [
+					{ x : 0, y : -1 },
+					{ x : 0, y : 1 }
+				]],
+				[LOCATION.MZONE | (3 << 16), [
+					{ x : 1, y : -1 },
+					{ x : -1, y : 1 }
+				]],
+				[LOCATION.MZONE | (4 << 16), [
+					{ x : 2, y : -1 },
+					{ x : -2, y : 1 }
+				]],
+				[LOCATION.MZONE | (5 << 16), [
+					{ x : -1, y : 0 },
+					{ x : 1, y : 0 }
+				]],
+				[LOCATION.MZONE | (6 << 16), [
+					{ x : 1, y : 0 },
+					{ x : -1, y : 0 }
+				]],
+				[LOCATION.SZONE | (0 << 16), [
+					{ x : -2, y : -2 },
+					{ x : 2, y : 2 }
+				]],
+				[LOCATION.SZONE | (1 << 16), [
+					{ x : -1, y : -2 },
+					{ x : 1, y : 2 }
+				]],
+				[LOCATION.SZONE | (2 << 16), [
+					{ x : 0, y : -2 },
+					{ x : 0, y : 2 }
+				]],
+				[LOCATION.SZONE | (3 << 16), [
+					{ x : 1, y : -2 },
+					{ x : -1, y : 2 }
+				]],
+				[LOCATION.SZONE | (4 << 16), [
+					{ x : 2, y : -2 },
+					{ x : -2, y : 2 }
+				]]
+			]) as Map<number, Array<Axis>>,
+			computed : (owner : number, location : number, seq : number) : Array<number> => {
+				const axis : Axis = three.axis.map.get(location)![owner];
+				const x : number = (three.create.size.height + three.create.gap) * axis.x;
+				let y : number;
+				const z : number  = seq * three.create.size.top;
+				if (axis.x % 3 === 0 && axis.x !== 0) {
+					if (axis.x === -3)
+						y = (three.create.size.height + three.create.gap) * axis.y
+							+ (axis.y >= 0 ? three.create.offset : -three.create.offset);
+					else
+						y = (three.create.size.height + three.create.gap) * axis.y
+							+ (axis.y <= 0 ? -three.create.offset : three.create.offset);
+				} else {
+					y = (three.create.size.height + three.create.gap) * axis.y;
+				}
+				return [x, y, z];
+			}
+		},
 		cards : {
 			map : new Map([
 				[LOCATION.HAND, [[], []]],
@@ -203,7 +207,7 @@
 				[LOCATION.SZONE | (3 << 16), [[], []]],
 				[LOCATION.SZONE | (4 << 16), [[], []]]
 			]) as Map<number, Array<Array<Client_Card>>>,
-			change : (target : Client_Card, owner : number, from : number, location : number, seq : number | undefined = undefined) : number => {
+			change : (target : Client_Card, owner : number, from : number, location : number, seq : number | undefined) : number => {
 				let result = 0;
 				if (from > 0) {
 					const ct = three.cards.map.get(from)![owner].findIndex(i => i === target);
@@ -296,12 +300,10 @@
 						span.style.display = 'none';
 					else if (key === 'scale') {
 						div.style.margin = `0 ${three.create.size.height / 2 - 16}px`;
-						console.log(div)
 					}
 					div.appendChild(span);
 					info.appendChild(div);
 				}
-				console.log(info)
 				dom.appendChild(info);
 				const client_card = new Client_Card(new CSS.CSS3DObject(dom));
 				return client_card;
@@ -352,29 +354,14 @@
 					}
 					target.position.set(x, y, z);
 				},
-				field : (target : Client_Card, owner : number, location : number, from : number = 0, seq : number = 0, pos : number = POS.NONE) : void => {
-					const axis : Axis = three.axis.get(location)![owner];
-					let x : number = (three.create.size.height + three.create.gap) * axis.x;
-					let y : number = axis.y;
-					let z : number  = three.cards.map.get(location)![owner].length * three.create.size.top;
-					if (axis.x % 3 === 0 && axis.x !== 0) {
-						if (axis.x === -3)
-							y = (three.create.size.height + three.create.gap) * axis.y
-								+ (axis.y >= 0 ? three.create.offset : -three.create.offset);
-						else
-							y = (three.create.size.height + three.create.gap) * axis.y
-									+ (axis.y <= 0 ? -three.create.offset : three.create.offset);
-					} else {
-						y = (three.create.size.height + three.create.gap) * axis.y;
-						if (seq > 0)
-							z = (three.cards.map.get(from)![owner].length - seq - 1) * three.create.size.top;
-					}
-					const ct = three.cards.change(target, owner, from, location, seq > 0 ? seq : undefined);
+				field : (target : Client_Card, owner : number, location : number, from : number, seq : number, pos : number = POS.NONE) : void => {
+					const [x, y, z] = three.axis.computed(owner, location, seq);
+					const ct = three.cards.change(target, owner, from, location, seq);
 					three.move(target.three, from, owner, x, y, z!);
 					three.rotate(target, from, owner, pos);
 					if (ct > 0)
 						three.cards.map.get(from)![owner][0].change.xyz(three.cards.map.get(from)![owner].length - 1);
-					if ((location & LOCATION.MZONE) === LOCATION.MZONE && seq === 0) {
+					if ((location & LOCATION.MZONE) === LOCATION.MZONE && seq >= three.cards.map.get(location)![owner].length - 1) {
 						if ((from & LOCATION.MZONE) === 0)
 							target.remove();
 						if (target.is_link())
@@ -389,22 +376,33 @@
 						target.add.atk();
 						target.show.on.info();
 						target.show.on.atk();
-					} else if ((location & LOCATION.MZONE) === LOCATION.MZONE && seq > 0) {
+						three.cards.map.get(location)![owner].slice(0, -1).forEach(card => {
+							card.show.off.info();
+							card.show.off.atk();
+							three.rotate(card, location, owner, (pos & POS.ATTACK) > 0 ? POS.FACEUP_DEFENSE : POS.FACEUP_ATTACK);
+						});
+					} else if ((location & LOCATION.MZONE) === LOCATION.MZONE) {
 						if ((from & LOCATION.MZONE) === LOCATION.MZONE)
 							target.remove();
-						three.cards.map.get(location)![owner][0].change.xyz(three.cards.map.get(location)![owner].length - 1);
+						const len = three.cards.map.get(location)![owner].length - 1;
+						three.cards.map.get(location)![owner][len].change.xyz(len);
 					} else if ((location & LOCATION.PZONE) === LOCATION.PZONE) {
-						if ((from & LOCATION.MZONE) === LOCATION.MZONE)
+						if ((from & LOCATION.MZONE) === LOCATION.MZONE) {
+							target.show.off.atk();
+							target.show.off.info();
 							target.remove();
+						}
 						target.add.pendulum();
 						target.show.on.info();
 					} else {
 						target.show.off.info();
 						target.show.off.atk();
 					}
+					three.sort(owner, from);
+					three.sort(owner, location);
 				},
 				hand : (target : Client_Card, owner : number, from : number = 0) : void => {
-					const ct = three.cards.change(target, owner, from, LOCATION.HAND);
+					const ct = three.cards.change(target, owner, from, LOCATION.HAND, undefined);
 					three.rotate(target, from, owner, POS.FACEUP_ATTACK);
 					three.sort(owner, LOCATION.HAND);
 					target.show.off.info();
@@ -419,7 +417,7 @@
 				const card = three.create.card(pic ?? three.src.cover ?? three.src.unknown);
 				if (location === LOCATION.MZONE || location === LOCATION.SZONE)
 					location |= seq << 16;
-				three.create.send.to(card, owner, location, 0);
+				three.create.send.to(card, owner, location, 0, three.cards.map.get(location)![owner].length);
 				three.scene.add(card.three);
 				gsap.opacity(card.three.element, 1)
 				return card;
@@ -469,11 +467,14 @@
 				three.sort(owner, from);
 			}
 		},
-		sort : (owner : number, location : number) => {
+		sort : (owner : number, location : number, animation : boolean = false) : number => {
+			if (location === 0)
+				return 0;
 			const tl = gsap.timeline();
+			let result = 0;
 			if (location === LOCATION.HAND) {
 				const width = three.create.size.width * three.cards.hand.max;
-				const axis = three.axis.get(location)![owner] as Axis;
+				const axis = three.axis.map.get(location)![owner] as Axis;
 				const ct = three.cards.map.get(location)![owner].length;
 				three.cards.map.get(location)![owner].forEach((card, v) => {
 					const x = (three.create.size.height + three.create.gap) * axis.x + Math.min(width / ct, three.create.size.width) * v * (!!owner ? -1 : 1);
@@ -487,6 +488,33 @@
 							duration : 0.15
 						}, 0);
 				});
+				result += 150;
+			} else if (location === LOCATION.DECK && animation) {
+				const len = three.cards.map.get(location)![owner].length - 1
+				if (len > 0) {
+					const ct = Math.max(Math.floor(len / -2), -4);
+					for (let v = 0; v < 4; v ++) {
+						const card = three.cards.map.get(location)![owner][len];
+						tl.to(card.three.position, {
+							x : `${!!owner ? '+' : '-'}=${three.create.size.width}px`,
+							duration : 0.05
+						}, 0 + v * 0.2);
+						const z = Math.floor(len / 2) * three.create.size.top;
+						tl.to(card.three.position, {
+							z : z,
+							duration : 0.05
+						}, 0.05 + v * 0.2);
+						tl.to(card.three.position, {
+							x : `${!!owner ? '-' : '+'}=${three.create.size.width}px`,
+							duration : 0.05
+						}, 0.1 + v * 0.2);
+						tl.to(card.three.position, {
+							z : len * three.create.size.top,
+							duration : 0.05
+						}, 0.15 + v * 0.2);
+					}
+					result += ct * 200;
+				}
 			} else {
 				three.cards.map.get(location)![owner].forEach((card, v) => {
 					const z = v * three.create.size.top;
@@ -496,10 +524,12 @@
 							duration : 0.05
 						}, 0);
 				});
+				result += 50;
 			}
 			tl.then(() => {
 				tl.kill();
 			});
+			return result;
 		},
 		rotate : (target : Client_Card, from : number, owner : number, pos : number = POS.NONE) => {
 			const move = () => {
@@ -638,23 +668,26 @@
 			mzone : async (tp : number, from_to : Array<Card_From> | Card_From, to_tp : number = tp) => {
 				for (const i of 'length' in from_to ? from_to as Array<Card_From>  : [from_to as Card_From]) {
 					const card = three.cards.map.get(i.location)![tp][i.seq];
-					three.create.send.to(card, to_tp, LOCATION.MZONE | (i.zone << 16), i.location, 0, i.pos);
+					const loc = LOCATION.MZONE | (i.zone << 16);
+					card.update.code(359563)
+					three.create.send.to(card, to_tp, loc, i.location, three.cards.map.get(loc)![tp].length, i.pos);
 					await mainGame.sleep(150);
 				}
 			},
 			szone : async (tp : number, from_to : Array<Card_From> | Card_From, to_tp : number = tp) => {
 				for (const i of 'length' in from_to ? from_to as Array<Card_From>  : [from_to as Card_From]) {
 					const card = three.cards.map.get(i.location)![tp][i.seq];
-					three.create.send.to(card, to_tp, LOCATION.SZONE | (i.zone << 16), i.location, 0, i.pos);
+					const loc = LOCATION.SZONE | (i.zone << 16);
+					three.create.send.to(card, to_tp, loc, i.location, three.cards.map.get(loc)![tp].length, i.pos);
 					await mainGame.sleep(150);
 				}
 			},
 			fzone : async (tp : number, i : Card_From, to_tp : number = tp) => {
 				const card = three.cards.map.get(i.location)![tp][i.seq];
-				three.create.send.to(card, to_tp, LOCATION.FZONE, i.location, 0, (i.pos ?? 0 & POS.FACEDOWN) === POS.FACEDOWN ? POS.FACEDOWN_ATTACK : POS.FACEUP_ATTACK);
+				three.create.send.to(card, to_tp, LOCATION.FZONE, i.location, three.cards.map.get(LOCATION.FZONE)![tp].length, (i.pos ?? 0 & POS.FACEDOWN) > 0 ? POS.FACEDOWN_ATTACK : POS.FACEUP_ATTACK);
 				await mainGame.sleep(150);
 			},
-			grave : async (tp : number, from_to : Array<Card_From> | Card_From, seq : number = 0, to_tp : number = tp) => {
+			grave : async (tp : number, from_to : Array<Card_From> | Card_From, seq : number, to_tp : number = tp) => {
 				for (const i of 'length' in from_to ? from_to as Array<Card_From>  : [from_to as Card_From]) {
 					const card = three.cards.map.get(i.location)![tp][i.seq];
 					three.create.send.to(card, to_tp, LOCATION.GRAVE, i.location, seq, POS.FACEUP_ATTACK);
@@ -664,31 +697,48 @@
 			pzone : async (tp : number, from_to : Array<Card_From> | Card_From, to_tp : number = tp) => {
 				for (const i of 'length' in from_to ? from_to as Array<Card_From>  : [from_to as Card_From]) {
 					const card = three.cards.map.get(i.location)![tp][i.seq];
-					three.create.send.to(card, to_tp, LOCATION.PZONE | (i.zone << 16), i.location, 0, POS.FACEUP_ATTACK);
+					const loc = LOCATION.PZONE | (i.zone << 16)
+					three.create.send.to(card, to_tp, loc, i.location, three.cards.map.get(loc)![tp].length, POS.FACEUP_ATTACK);
 					await mainGame.sleep(150);
 				}
 			},
-			deck : async (tp : number, from_to : Array<Card_From> | Card_From, seq : number = 0, to_tp : number = tp) => {
+			deck : async (tp : number, from_to : Array<Card_From> | Card_From, seq : number, to_tp : number = tp) => {
 				for (const i of 'length' in from_to ? from_to as Array<Card_From>  : [from_to as Card_From]) {
 					const card = three.cards.map.get(i.location)![tp][i.seq];
 					three.create.send.to(card, to_tp, LOCATION.DECK, i.location, seq, POS.FACEDOWN_ATTACK);
 					await mainGame.sleep(150);
 				}
 			},
-			extra : async (tp : number, from_to : Array<Card_From> | Card_From, seq : number = 0, to_tp : number = tp) => {
+			extra : async (tp : number, from_to : Array<Card_From> | Card_From, seq : number, to_tp : number = tp) => {
 				for (const i of 'length' in from_to ? from_to as Array<Card_From>  : [from_to as Card_From]) {
 					const card = three.cards.map.get(i.location)![tp][i.seq];
-					three.create.send.to(card, to_tp, LOCATION.DECK, i.location, seq, (i.pos ?? POS.FACEDOWN & POS.FACEDOWN) === POS.FACEDOWN ? POS.FACEDOWN_ATTACK : POS.FACEUP_ATTACK);
+					three.create.send.to(card, to_tp, LOCATION.DECK, i.location, seq, (i.pos ?? POS.FACEDOWN & POS.FACEDOWN) > 0 ? POS.FACEDOWN_ATTACK : POS.FACEUP_ATTACK);
 					await mainGame.sleep(150);
 				}
 			},
+			overlay : async (tp : number, from_to : Array<Card_From> | Card_From, to_tp : number = tp) => {
+				for (const i of 'length' in from_to ? from_to as Array<Card_From>  : [from_to as Card_From]) {
+					const card = three.cards.map.get(i.location)![tp][i.seq];
+					const loc = LOCATION.MZONE | (i.zone << 16)
+					card.update.code(483)
+					const len = three.cards.map.get(loc)![tp].length - 1;
+					three.create.send.to(card, to_tp, loc, i.location, len, (three.cards.map.get(loc)![tp][len].pos() & POS.ATTACK) > 0 ? POS.FACEUP_DEFENSE : POS.FACEUP_ATTACK);
+					await mainGame.sleep(150);
+				}
+			},
+		},
+		sort : {
+			deck : async (tp : number) : Promise<void> => {
+				const ct = three.sort(tp, LOCATION.DECK, true);
+				await mainGame.sleep(ct);
+			}
 		}
 	};
 
 	onMounted(async () => {
 		emit('update:duel', duel);
-		three.axis.set(LOCATION.PZONE | (0 << 16), three.axis.get(LOCATION.SZONE | (0 << 16))!);
-		three.axis.set(LOCATION.PZONE | (1 << 16), three.axis.get(LOCATION.SZONE | (4 << 16))!);
+		three.axis.map.set(LOCATION.PZONE | (0 << 16), three.axis.map.get(LOCATION.SZONE | (0 << 16))!);
+		three.axis.map.set(LOCATION.PZONE | (1 << 16), three.axis.map.get(LOCATION.SZONE | (4 << 16))!);
 		three.cards.map.set(LOCATION.PZONE | (0 << 16), three.cards.map.get(LOCATION.SZONE | (0 << 16))!);
 		three.cards.map.set(LOCATION.PZONE | (1 << 16), three.cards.map.get(LOCATION.SZONE | (4 << 16))!);
 		three.create.size.width = three.create.size.height / 1.45;
