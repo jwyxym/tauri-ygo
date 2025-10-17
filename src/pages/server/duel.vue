@@ -657,7 +657,7 @@
 			grave : async (tp : number, from_to : Array<Card_From> | Card_From, seq : number = 0, to_tp : number = tp) => {
 				for (const i of 'length' in from_to ? from_to as Array<Card_From>  : [from_to as Card_From]) {
 					const card = three.cards.map.get(i.location)![tp][i.seq];
-					three.create.send.to(card, to_tp, LOCATION.GRAVE, i.location, seq);
+					three.create.send.to(card, to_tp, LOCATION.GRAVE, i.location, seq, POS.FACEUP_ATTACK);
 					await mainGame.sleep(150);
 				}
 			},
@@ -668,7 +668,20 @@
 					await mainGame.sleep(150);
 				}
 			},
-			
+			deck : async (tp : number, from_to : Array<Card_From> | Card_From, seq : number = 0, to_tp : number = tp) => {
+				for (const i of 'length' in from_to ? from_to as Array<Card_From>  : [from_to as Card_From]) {
+					const card = three.cards.map.get(i.location)![tp][i.seq];
+					three.create.send.to(card, to_tp, LOCATION.DECK, i.location, seq, POS.FACEDOWN_ATTACK);
+					await mainGame.sleep(150);
+				}
+			},
+			extra : async (tp : number, from_to : Array<Card_From> | Card_From, seq : number = 0, to_tp : number = tp) => {
+				for (const i of 'length' in from_to ? from_to as Array<Card_From>  : [from_to as Card_From]) {
+					const card = three.cards.map.get(i.location)![tp][i.seq];
+					three.create.send.to(card, to_tp, LOCATION.DECK, i.location, seq, (i.pos ?? POS.FACEDOWN & POS.FACEDOWN) === POS.FACEDOWN ? POS.FACEDOWN_ATTACK : POS.FACEUP_ATTACK);
+					await mainGame.sleep(150);
+				}
+			},
 		}
 	};
 
