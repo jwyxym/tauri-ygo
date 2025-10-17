@@ -28,7 +28,7 @@
 		location : number;
 		seq : number;
 		zone : number;
-		pos : number;
+		pos ?: number;
 	};
 
 	const canvas : Ref<HTMLElement | null> = ref(null);
@@ -67,6 +67,22 @@
 			}
 		},
 		click : (e : MouseEvent) : void => {
+			//debug
+			duel.to.pzone(0, {
+				location : LOCATION.DECK,
+				seq : 0,
+				zone : 0
+			})
+			duel.to.pzone(0, {
+				location : LOCATION.DECK,
+				seq : 2,
+				zone : 1
+			})
+			duel.to.mzone(0, {
+				location : LOCATION.DECK,
+				seq : 1,
+				zone : 0
+			})
 			let card = three.cards.map.get(LOCATION.HAND)![0].find(i => i.three.element.contains(e.target as HTMLElement));
 			if (hover.select !== undefined) {
 				const v = three.cards.map.get(LOCATION.HAND)![0].findIndex(i => i === hover.select);
@@ -278,9 +294,14 @@
 					span.innerText = '';
 					if (key === 'tuner')
 						span.style.display = 'none';
+					else if (key === 'scale') {
+						div.style.margin = `0 ${three.create.size.height / 2 - 16}px`;
+						console.log(div)
+					}
 					div.appendChild(span);
 					info.appendChild(div);
 				}
+				console.log(info)
 				dom.appendChild(info);
 				const client_card = new Client_Card(new CSS.CSS3DObject(dom));
 				return client_card;
@@ -351,6 +372,8 @@
 					const ct = three.cards.change(target, owner, from, location, seq > 0 ? seq : undefined);
 					three.move(target.three, from, owner, x, y, z!);
 					three.rotate(target, from, owner, pos);
+					if (ct > 0)
+						three.cards.map.get(from)![owner][0].change.xyz(three.cards.map.get(from)![owner].length - 1);
 					if ((location & LOCATION.MZONE) === LOCATION.MZONE && seq === 0) {
 						if ((from & LOCATION.MZONE) === 0)
 							target.remove();
@@ -364,22 +387,28 @@
 							target.add.level();
 						}
 						target.add.atk();
-						target.show.on();
+						target.show.on.info();
+						target.show.on.atk();
 					} else if ((location & LOCATION.MZONE) === LOCATION.MZONE && seq > 0) {
 						if ((from & LOCATION.MZONE) === LOCATION.MZONE)
-							target.clear();
-						if (ct > 0)
-							three.cards.map.get(from)![owner][0].change.xyz(three.cards.map.get(from)![owner].length - 1);
+							target.remove();
 						three.cards.map.get(location)![owner][0].change.xyz(three.cards.map.get(location)![owner].length - 1);
-					} else
-						target.show.off();
+					} else if ((location & LOCATION.PZONE) === LOCATION.PZONE) {
+						if ((from & LOCATION.MZONE) === LOCATION.MZONE)
+							target.remove();
+						target.add.pendulum();
+						target.show.on.info();
+					} else {
+						target.show.off.info();
+						target.show.off.atk();
+					}
 				},
 				hand : (target : Client_Card, owner : number, from : number = 0) : void => {
 					const ct = three.cards.change(target, owner, from, LOCATION.HAND);
-					three.rotate(target, from, owner);
+					three.rotate(target, from, owner, POS.FACEUP_ATTACK);
 					three.sort(owner, LOCATION.HAND);
-					for (const el of Array.from(target.three.element.children).slice(1))
-						(el as HTMLElement).style.opacity = '0';
+					target.show.off.info();
+					target.show.off.atk();
 					if (ct > 0)
 						three.cards.map.get(from)![owner][0].change.xyz(three.cards.map.get(from)![owner].length - 1);
 				}
@@ -457,8 +486,6 @@
 							z : z,
 							duration : 0.15
 						}, 0);
-					if (owner === 0 && card.pic && card.pic !== (card.three.element.children[0] as HTMLImageElement).src)
-						gsap.turn(card.three.element.children[0] as HTMLImageElement, card.pic, tl);
 				});
 			} else {
 				three.cards.map.get(location)![owner].forEach((card, v) => {
@@ -482,19 +509,24 @@
 						z : Math.PI,
 						duration : 0.2
 					})
+				const pic = target.pic ?? three.src.unknown;
 				switch (pos) {
 					case POS.FACEDOWN_ATTACK:
-						gsap.turn(target.three.element.children[0] as HTMLImageElement, three.src.cover, tl);
+						if ((target.three.element.children[0] as HTMLImageElement).src !== three.src.cover)
+							gsap.turn(target.three.element.children[0] as HTMLImageElement, three.src.cover, tl);
 						break;
 					case POS.FACEDOWN_DEFENSE:
-						gsap.turn(target.three.element.children[0] as HTMLImageElement, three.src.cover, tl);
+						if ((target.three.element.children[0] as HTMLImageElement).src !== three.src.cover)
+							gsap.turn(target.three.element.children[0] as HTMLImageElement, three.src.cover, tl);
 						gsap.pos(target.three.element.children[0] as HTMLImageElement, pos, tl);
 						break;
 					case POS.FACEUP_ATTACK:
-						gsap.turn(target.three.element.children[0] as HTMLImageElement, target.pic ?? three.src.unknown, tl);
+						if ((target.three.element.children[0] as HTMLImageElement).src !== pic)
+							gsap.turn(target.three.element.children[0] as HTMLImageElement, pic, tl);
 						break;
 					case POS.FACEUP_DEFENSE:
-						gsap.turn(target.three.element.children[0] as HTMLImageElement, target.pic ?? three.src.unknown, tl);
+						if ((target.three.element.children[0] as HTMLImageElement).src !== pic)
+							gsap.turn(target.three.element.children[0] as HTMLImageElement, pic, tl);
 						gsap.pos(target.three.element.children[0] as HTMLImageElement, pos, tl);
 						break;
 				}
@@ -602,22 +634,50 @@
 				await mainGame.sleep(150);
 			}
 		},
-		to_mzone : async (tp : number, from_to : Array<Card_From> | Card_From, to_tp : number = tp) => {
-			for (const i of 'length' in from_to ? from_to as Array<Card_From>  : [from_to as Card_From]) {
+		to : {
+			mzone : async (tp : number, from_to : Array<Card_From> | Card_From, to_tp : number = tp) => {
+				for (const i of 'length' in from_to ? from_to as Array<Card_From>  : [from_to as Card_From]) {
+					const card = three.cards.map.get(i.location)![tp][i.seq];
+					three.create.send.to(card, to_tp, LOCATION.MZONE | (i.zone << 16), i.location, 0, i.pos);
+					await mainGame.sleep(150);
+				}
+			},
+			szone : async (tp : number, from_to : Array<Card_From> | Card_From, to_tp : number = tp) => {
+				for (const i of 'length' in from_to ? from_to as Array<Card_From>  : [from_to as Card_From]) {
+					const card = three.cards.map.get(i.location)![tp][i.seq];
+					three.create.send.to(card, to_tp, LOCATION.SZONE | (i.zone << 16), i.location, 0, i.pos);
+					await mainGame.sleep(150);
+				}
+			},
+			fzone : async (tp : number, i : Card_From, to_tp : number = tp) => {
 				const card = three.cards.map.get(i.location)![tp][i.seq];
-				three.create.send.to(card, to_tp, LOCATION.MZONE | (i.zone << 16), i.location, 0, i.pos);
-			}
-		},
-		to_szone : async (tp : number, from_to : Array<Card_From> | Card_From, to_tp : number = tp) => {
-			for (const i of 'length' in from_to ? from_to as Array<Card_From>  : [from_to as Card_From]) {
-				const card = three.cards.map.get(i.location)![tp][i.seq];
-				three.create.send.to(card, to_tp, LOCATION.SZONE | (i.zone << 16), i.location);
-			}
-		},
+				three.create.send.to(card, to_tp, LOCATION.FZONE, i.location, 0, (i.pos ?? 0 & POS.FACEDOWN) === POS.FACEDOWN ? POS.FACEDOWN_ATTACK : POS.FACEUP_ATTACK);
+				await mainGame.sleep(150);
+			},
+			grave : async (tp : number, from_to : Array<Card_From> | Card_From, seq : number = 0, to_tp : number = tp) => {
+				for (const i of 'length' in from_to ? from_to as Array<Card_From>  : [from_to as Card_From]) {
+					const card = three.cards.map.get(i.location)![tp][i.seq];
+					three.create.send.to(card, to_tp, LOCATION.GRAVE, i.location, seq);
+					await mainGame.sleep(150);
+				}
+			},
+			pzone : async (tp : number, from_to : Array<Card_From> | Card_From, to_tp : number = tp) => {
+				for (const i of 'length' in from_to ? from_to as Array<Card_From>  : [from_to as Card_From]) {
+					const card = three.cards.map.get(i.location)![tp][i.seq];
+					three.create.send.to(card, to_tp, LOCATION.PZONE | (i.zone << 16), i.location, 0, POS.FACEUP_ATTACK);
+					await mainGame.sleep(150);
+				}
+			},
+			
+		}
 	};
 
 	onMounted(async () => {
 		emit('update:duel', duel);
+		three.axis.set(LOCATION.PZONE | (0 << 16), three.axis.get(LOCATION.SZONE | (0 << 16))!);
+		three.axis.set(LOCATION.PZONE | (1 << 16), three.axis.get(LOCATION.SZONE | (4 << 16))!);
+		three.cards.map.set(LOCATION.PZONE | (0 << 16), three.cards.map.get(LOCATION.SZONE | (0 << 16))!);
+		three.cards.map.set(LOCATION.PZONE | (1 << 16), three.cards.map.get(LOCATION.SZONE | (4 << 16))!);
 		three.create.size.width = three.create.size.height / 1.45;
 		three.create.offset = three.create.size.height / 1.5;
 		three.renderer.setSize(window.innerWidth * 0.9, window.innerHeight);

@@ -9,23 +9,35 @@ class Client_Card {
 	alias : number;
 	card ?: Card;
 	pic ?: string;
-	pos ?: number;
-	type ?: number;
-	level ?: number;
-	rank ?: number;
-	link ?: number;
-	attribute ?: number;
-	race ?: number;
-	atk ?: number;
-	def ?: number;
-	scale : Array<number>;
+	pos : number;
+	type : number;
+	level : number;
+	rank : number;
+	link : number;
+	attribute : number;
+	race : number;
+	atk : number;
+	def : number;
+	scale : number;
 
 	constructor(three : CSS.CSS3DObject) {
 		this.code = 0;
 		this.alias = 0;
+		this.card = undefined;
+		this.pic = undefined;
+		this.code = 0;
+		this.alias = 0;
+		this.type = 0;
+		this.level = 0;
+		this.rank = 0;
+		this.link = 0;
+		this.attribute = 0;
+		this.race = 0;
+		this.atk = 0;
+		this.def = 0;
+		this.scale = 0;
 		this.three = three;
 		this.pos = POS.NONE;
-		this.scale = [];
 	};
 
 	update = {
@@ -48,6 +60,7 @@ class Client_Card {
 			this.attribute = card.attribute;
 			this.atk = card.atk;
 			this.def = card.def;
+			this.scale = card.scale;
 		},
 		alias : (code : number) : void => {
 			this.alias = code;
@@ -76,8 +89,8 @@ class Client_Card {
 		def : (def : number) : void => {
 			this.def = def;
 		},
-		scale : (scale : number, seq : number) : void => {
-			this.scale[seq] = scale;
+		scale : (scale : number) : void => {
+			this.scale = scale;
 		}
 	};
 	clear = () : void => {
@@ -90,9 +103,10 @@ class Client_Card {
 		this.rank = 0;
 		this.link = 0;
 		this.attribute = 0;
+		this.race = 0;
 		this.atk = 0;
 		this.def = 0;
-		this.scale = [];
+		this.scale = 0;
 	};
 	is_xyz = () : boolean => {
 		return this.rank !== undefined && this.rank > 0;
@@ -107,7 +121,7 @@ class Client_Card {
 		xyz : (len : number) : void => {
 			let el : HTMLElement = this.three.element.children[2].querySelector('.rank')!;
 			el.style.display = 'flex';
-			el.querySelector('span')!.innerHTML = this.rank?.toString() ?? '';
+			el.querySelector('span')!.innerHTML = this.rank.toString();
 			el = this.three.element.children[2].querySelector('.overlay')!;
 			el.style.display = 'flex';
 			el.querySelector('span')!.innerHTML = len.toString();
@@ -115,33 +129,44 @@ class Client_Card {
 		link : () : void => {
 			const el : HTMLElement = this.three.element.children[2].querySelector('.link')!;
 			el.style.display = 'flex';
-			el.querySelector('span')!.innerHTML = this.link?.toString() ?? '';
+			el.querySelector('span')!.innerHTML = this.link.toString();
 		},
 		tuner : () : void => {
-			console.log(this.three.element);
 			const el : HTMLElement = this.three.element.children[2].querySelector('.tuner')!;
 			el.style.display = 'flex';
 			(this.three.element.children[2] as HTMLElement).style.color = 'lightgreen';
-			console.log(this.three.element)
 		},
 		level : () : void => {
 			const el : HTMLElement  = this.three.element.children[2].querySelector('.level')!;
 			el.style.display = 'flex';
-			el.querySelector('span')!.innerHTML = this.level?.toString() ?? '';
+			el.querySelector('span')!.innerHTML = this.level.toString();
+		},
+		pendulum : () : void => {
+			const el : HTMLElement  = this.three.element.children[2].querySelector('.scale')!;
+			el.style.display = 'flex';
+			el.querySelector('span')!.innerHTML = this.scale.toString();
 		},
 		atk : () : void => {
-			this.three.element.children[1].innerHTML = this.is_link() ? this.atk?.toString() ?? '0' : `${this.atk ?? 0}/${this.def ?? 0}`;
+			this.three.element.children[1].innerHTML = this.is_link() ? this.atk.toString() : `${this.atk ?? 0}/${this.def ?? 0}`;
 		}
 	};
 
 	show = {
-		on : () : void => {
-			for (const el of Array.from(this.three.element.children).slice(1))
-				(el as HTMLElement).style.opacity = '1';
+		on : {
+			info : () : void => {
+				(this.three.element.children[2] as HTMLElement).style.opacity = '1';
+			},
+			atk : () : void => {
+				(this.three.element.children[1] as HTMLElement).style.opacity = '1';
+			}
 		},
-		off : () : void => {
-			for (const el of Array.from(this.three.element.children).slice(1))
-				(el as HTMLElement).style.opacity = '0';
+		off : {
+			info : () : void => {
+				(this.three.element.children[2] as HTMLElement).style.opacity = '0';
+			},
+			atk : () : void => {
+				(this.three.element.children[1] as HTMLElement).style.opacity = '0';
+			}
 		}
 	}
 

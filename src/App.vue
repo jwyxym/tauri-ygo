@@ -1,6 +1,7 @@
 <template>
 	<div class = 'main' @contextmenu = 'page.contextmenu'>
 		<starry-sky :stars-count = '1500' :distance = '800' id = 'back'/>
+		<Voice v-if = 'page.show.voice'></Voice>
 		<div class = 'body'>
 			<transition name = 'opacity'>
 				<Deck
@@ -27,7 +28,6 @@
 				></Menu>
 			</transition>
 		</div>
-		<Voice v-if = 'page.show.voice'></Voice>
 	</div>
 </template>
 <script setup lang = 'ts'>
@@ -120,12 +120,11 @@
 </script>
 <style scoped lang = 'scss'> 
 	.main {
-		overflow: hidden;
 		position: relative;
 		.body {
+			overflow: hidden;
 			height: 97vh;
-			width: 100vw;
-
+			width: 97vw;
 			display: flex;
 			gap: 10%;
 			justify-content: flex-start;
@@ -138,8 +137,6 @@
 <style lang = 'scss'>
 	@use './style/font.scss';
 	@use './style/toast.scss';
-	@use './style/card.scss';
-	@use './style/ground.scss';
 	@use './style/transition.scss';
 	.var-icon {
 		&:hover {

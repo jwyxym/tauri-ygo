@@ -1,5 +1,5 @@
 <template>
-	<div class = 'server over_ground'>
+	<div class = 'server'>
 		<var-popup v-model:show = 'page.server' :close-on-key-escape = 'false' :overlay = 'false'>
 			<var-form>
 				<div class = 'button_list'>

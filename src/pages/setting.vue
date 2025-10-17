@@ -1,5 +1,5 @@
 <template>
-	<div class = 'setting_body over_ground'>
+	<div class = 'setting_body'>
 		<div class = 'button_list'>
 			<Button @click = 'select.menu' icon_name = 'exit'></Button>
 		</div>
@@ -305,6 +305,8 @@
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
+		width: 100%;
+		height: 100%;
 		.button_list {
 			display: flex;
 			height: 30px;

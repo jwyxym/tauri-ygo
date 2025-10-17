@@ -1,7 +1,7 @@
 <template>
 	<div class = 'body'>
 		<transition name = 'opacity'>
-			<div class = 'deck_list over_ground' v-if = 'page.list'>
+			<div class = 'deck_list' v-if = 'page.list'>
 				<div class = 'list'>
 					<div class = 'button_list'>
 						<Button @click = 'select.menu' icon_name = 'exit'></Button>
