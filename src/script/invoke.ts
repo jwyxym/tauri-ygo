@@ -74,11 +74,26 @@ class Invoke {
 		return result;
 	};
 
-	read_texts = async (dirs : string | Array<string>, file_type : string) : Promise<Result<StringFile<string>>> => {
+	read_texts = async (dirs : string | Array<string>, file_type : string | Array<string>) : Promise<Result<StringFile<string>>> => {
 		const result : Result<StringFile<string>> = {};
 		try {
 			result.content = await invoke<StringFile<string>>('read_texts', {
-				dirs : typeof dirs === 'string' ? [dirs] : dirs , fileType : file_type
+				dirs : typeof dirs === 'string' ? [dirs] : dirs,
+				fileType : typeof file_type === 'string' ? [file_type] : file_type
+			});
+		} catch (error) {
+			fs.write.log(error);
+			result.error = error;
+		}
+		return result;
+	};
+
+	read_files = async (dir : string, file_type : string | Array<string>) : Promise<Result<BufferFile<string>>> => {
+		const result : Result<BufferFile<string>> = {};
+		try {
+			result.content = await invoke<BufferFile<string>>('read_files', {
+				dirs : dir,
+				fileType : typeof file_type === 'string' ? [file_type] : file_type
 			});
 		} catch (error) {
 			fs.write.log(error);

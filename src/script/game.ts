@@ -57,13 +57,14 @@ class Game {
 				await fs.init();
 
 			//读取./textures文件夹
-			for (const i of await fs.read.dir(constant.str.dirs.textures, false)) {
-				if (i.name.match(constant.reg.picture)) {
-					const url : string | undefined = await fs.read.picture(await join(constant.str.dirs.textures, i.name));
-					if (url)
-						this.textures.set(i.name, url);
-				}
-			}
+			(await fs.read.files(constant.str.dirs.textures, ['.png', '.jpg'])).forEach(i => {
+				this.textures.set(i.name, i.url);
+			});
+
+			//读取./sound文件夹
+			(await fs.read.files(constant.str.dirs.sound, '.wav')).forEach(i => {
+				this.bgm.get(constant.str.system_conf.sound.back)!.set(i.name, i.url);
+			});
 
 			//读取system.conf文件
 			if (await fs.exists(constant.str.files.system)) {
@@ -78,15 +79,6 @@ class Game {
 			} else {
 				this.push.system(constant.str.system_conf.string.download_time, new Date().toISOString())
 				await fs.write.system();
-			}
-
-			//读取./sound文件夹
-			for (const i of await fs.read.dir(constant.str.dirs.sound, false)) {
-				if (i.name.match(constant.reg.bgm)) {
-					const url : string | undefined = await fs.read.bgm(await join(constant.str.dirs.sound, i.name));
-					if (url)
-						this.bgm.get(constant.str.system_conf.sound.back)!.set(i.name, url);
-				}
 			}
 
 			this.unknown.update_pic(this.textures.get(constant.str.files.textures.unknown) ?? '');

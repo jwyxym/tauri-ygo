@@ -9,6 +9,11 @@ import invoke from './invoke';
 
 import Deck from '../pages/deck/deck';
 
+interface File {
+	name : string;
+	url : string;
+}
+
 class Fs {
 	dir : fs.ReadFileOptions;
 	path : Promise<string>;
@@ -141,30 +146,6 @@ class Fs {
 			}
 			return map;
 		},
-		bgm : async (file : string) : Promise<string | undefined> => {
-			try {
-				const read_to_blob = async () => {
-					const bgm = await this.read.file(file);
-					if (bgm)
-						return URL.createObjectURL(
-							new Blob([new Uint8Array(bgm)], { type : 'audio/wav' })
-						)
-					return undefined;
-				}
-				return mainGame.is_android() ? await read_to_blob() : convertFileSrc(await path.join(await this.path, file));
-			} catch (error) {
-				this.write.log(error);
-			}
-			return undefined;
-		},
-		picture : async (file : string) : Promise<string | undefined> => {
-			try {
-				return convertFileSrc(await path.join(await this.path, file));
-			} catch (error) {
-				this.write.log(error);
-			}
-			return undefined;
-		},
 		text : async (file : string) : Promise<string | undefined> => {
 			try {
 				return await fs.readTextFile(file, this.dir);
@@ -193,9 +174,31 @@ class Fs {
 			}
 			return [];
 		},
-		file : async (file : string) : Promise<Uint8Array<ArrayBuffer> | undefined> => {
+		files : async (dir : string, type : Array<string> | string) : Promise<Array<File>> => {
 			try {
-				return await fs.readFile(file, this.dir);
+				const p = await this.path;
+				const entries = await invoke.read_files(await path.join(p, dir), type);
+
+				const result : Array<File> = [];
+				if (entries.error === undefined)
+					for (const [name, content] of entries.content!) {
+						result.push({
+							name : name,
+							url : URL.createObjectURL(new Blob([new Uint8Array(content.content)], { type : 'image/jpeg' }))
+						});
+					}
+				return result;
+			} catch (error) {
+				this.write.log(error);
+			}
+			return [];
+		},
+		file : async (name : string) : Promise<File | undefined> => {
+			try {
+				return {
+					name : name,
+					url : convertFileSrc(await path.join(await this.path, name))
+				}
 			} catch (error) {
 				this.write.log(error);
 			}

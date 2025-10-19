@@ -79,21 +79,31 @@ async fn unzip(path: String, file: String, chk: bool) -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn read_texts(dirs: Vec<String>, file_type: String) -> Result<Vec<(String, FileContent)>, String> {
+async fn read_texts(dirs: Vec<String>, file_type: Vec<String>) -> Result<Vec<(String, FileContent)>, String> {
 	let mut entries: Vec<(String, FileContent)> = Vec::new();
 	let _ = file::walk(dirs, |ext, stem, path|{
-		if ext == file_type {
-			match File::open(path) {
-				Ok(mut file) => {
-					let mut content: String = String::new();
-					match file.read_to_string(&mut content) {
-						Ok(_) => {
-							entries.push((stem, FileContent::Text(content)));
-						},
-						Err(_) => ()
-					}
-				},
-				Err(_) => ()
+		if file_type.contains(&ext) {
+			if let Ok(mut file) = File::open(path) {
+				let mut content: String = String::new();
+				if let Ok(_) = file.read_to_string(&mut content) {
+					entries.push((stem, FileContent::Text(content)));
+				}
+			};
+		}
+	});
+	Ok(entries)
+}
+
+#[tauri::command]
+async fn read_files(dirs: Vec<String>, file_type: Vec<String>) -> Result<Vec<(String, FileContent)>, String> {
+	let mut entries: Vec<(String, FileContent)> = Vec::new();
+	let _ = file::walk(dirs, |ext, stem, path|{
+		if file_type.contains(&ext) {
+			if let Ok(mut file) = File::open(path) {
+				let mut content: Vec<u8> = Vec::new();
+				if let Ok(_) = file.read_to_end(&mut content) {
+					entries.push((stem, FileContent::Binary(content)));
+				}
 			};
 		}
 	});
@@ -111,14 +121,11 @@ async fn read_pics(dirs: Vec<String>, codes: Vec<i64>) -> Result<Vec<(i64, FileC
 				|| entries.iter().any(|(x, _)| x == code) {
 				continue;
 			}
-			match File::open(&file_path) {
-				Ok(mut file) => {
-					let mut content: Vec<u8> = Vec::new();
-					file.read_to_end(&mut content)
-						.map_err(|e| e.to_string())?;
-					entries.push((*code, FileContent::Binary(content)));
-				}
-				Err(_) => ()
+			if let Ok(mut file) = File::open(&file_path) {
+				let mut content: Vec<u8> = Vec::new();
+				file.read_to_end(&mut content)
+					.map_err(|e| e.to_string())?;
+				entries.push((*code, FileContent::Binary(content)));
 			}
 		}
 	}
@@ -149,32 +156,29 @@ async fn read_zip(path: String, file_type: Vec<String>) -> Result<Vec<(String, F
 			continue;
 		}
 
-		match file_type.len() {
-			0 => {
-				if db_regex.is_match(&name) {
-					let mut content: Vec<u8> = Vec::new();
-					file.read_to_end(&mut content)
-						.map_err(|e| e.to_string())?;
-					entries.push((name, FileContent::Binary(content)));
-				} else if conf_regex.is_match(&name) {
-					let mut content: String = String::new();
-					file.read_to_string(&mut content)
-						.map_err(|e| e.to_string())?;
-					entries.push((name, FileContent::Text(content)));
-				}
+		if file_type.len() == 0 {
+			if db_regex.is_match(&name) {
+				let mut content: Vec<u8> = Vec::new();
+				file.read_to_end(&mut content)
+					.map_err(|e| e.to_string())?;
+				entries.push((name, FileContent::Binary(content)));
+			} else if conf_regex.is_match(&name) {
+				let mut content: String = String::new();
+				file.read_to_string(&mut content)
+					.map_err(|e| e.to_string())?;
+				entries.push((name, FileContent::Text(content)));
 			}
-			_ => {
-				if let Some(caps) = pic_regex.captures(&name) {
-					if let Some(file_match) = caps.get(1) {
-						let file_name: String = file_match.as_str().to_string();
-						if file_type.contains(&file_name)
-							&& !entries.iter().any(|(x, _)| x.to_string() == file_name)
-						{
-							let mut content: Vec<u8> = Vec::new();
-							file.read_to_end(&mut content)
-								.map_err(|e| e.to_string())?;
-							entries.push((name, FileContent::Binary(content)));
-						}
+		} else {
+			if let Some(caps) = pic_regex.captures(&name) {
+				if let Some(file_match) = caps.get(1) {
+					let file_name: String = file_match.as_str().to_string();
+					if file_type.contains(&file_name)
+						&& !entries.iter().any(|(x, _)| x.to_string() == file_name)
+					{
+						let mut content: Vec<u8> = Vec::new();
+						file.read_to_end(&mut content)
+							.map_err(|e| e.to_string())?;
+						entries.push((name, FileContent::Binary(content)));
 					}
 				}
 			}
@@ -192,11 +196,8 @@ async fn read_dbs(dirs: Vec<String>) -> Result<Vec<Vec<(Vec<i64>, Vec<String>)>>
 	let mut entries: Vec<Vec<(Vec<i64>, Vec<String>)>> = Vec::new();
 	let _ = file::walk(dirs, |ext, _stem, path|{
 		if ext == String::from("cdb") {
-			match sql::read(path) {
-				Ok(db) => {
-					entries.push(db);
-				},
-				Err(_) => ()
+			if let Ok(db) = sql::read(path) {
+				entries.push(db);
 			}
 		}
 	});
@@ -237,7 +238,7 @@ fn get_srv(url: String) -> Result<Srv, String> {
 			});
 		}
 	}
-	Err(String::from("No Data"))
+	Err(String::from(""))
 }
 
 #[tauri::command]
@@ -267,7 +268,7 @@ async fn version(url: String, headers: Vec<(String, String)>) -> Result<String, 
 	} else {
 		return Err(format!("{}", response.status()));
 	}
-	Err(String::from("No Data"))
+	Err(String::from(""))
 }
 
 #[tauri::command]
@@ -320,6 +321,7 @@ pub fn run() {
 			unzip,
 			read_zip,
 			read_texts,
+			read_files,
 			read_pics,
 			read_db,
 			read_dbs,
