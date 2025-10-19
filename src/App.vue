@@ -7,25 +7,25 @@
 				<Deck
 					v-if = 'page.show.deck'
 					:select = 'page.select'
-				></Deck>
+				/>
 			</transition>
 			<transition name = 'opacity'>
 				<Server
 					v-if = 'page.show.server'
 					:select = 'page.select'
-				></Server>
+				/>
 			</transition>
 			<transition name = 'opacity'>
 				<Setting
 					v-if = 'page.show.setting'
 					:select = 'page.select'
-				></Setting>
+				/>
 			</transition>
 			<transition name = 'opacity'>
-				<Menu
+				<YGOMenu
 					v-if = 'page.show.menu'
 					:select = 'page.select'
-				></Menu>
+				/>
 			</transition>
 		</div>
 	</div>
@@ -34,7 +34,7 @@
 	import { reactive, onBeforeMount, onMounted } from "vue";
 	import { LoadingBar } from '@varlet/ui';
 
-	import Menu from './pages/menu/menu.vue';
+	import YGOMenu from './pages/menu/menu.vue';
 	import Deck from './pages/deck/deck_list.vue';
 	import Server from './pages/server/server.vue';
 	import Setting from './pages/setting.vue';
@@ -60,25 +60,25 @@
 				page.show.setting = false;
 				setTimeout(() => {
 					page.show.menu = true;
-				}, 500);
+				}, 600);
 			},
 			server : () : void => {
 				page.show.menu = false;
 				setTimeout(() => {
 					page.show.server = true;
-				}, 500);
+				}, 600);
 			},
 			deck : () : void => {
 				page.show.menu = false;
 				setTimeout(() => {
 					page.show.deck = true;
-				}, 500);
+				}, 600);
 			},
 			setting : () : void => {
 				page.show.menu = false;
 				setTimeout(() => {
 					page.show.setting = true;
-				}, 500);
+				}, 600);
 			}
 		},
 		contextmenu : (event : MouseEvent) : void => {
