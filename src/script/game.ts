@@ -57,12 +57,12 @@ class Game {
 				await fs.init();
 
 			//读取./textures文件夹
-			(await fs.read.files(constant.str.dirs.textures, ['.png', '.jpg'])).forEach(i => {
+			(await fs.read.files(constant.str.dirs.textures, ['png', 'jpg'])).forEach(i => {
 				this.textures.set(i.name, i.url);
 			});
 
 			//读取./sound文件夹
-			(await fs.read.files(constant.str.dirs.sound, '.wav')).forEach(i => {
+			(await fs.read.files(constant.str.dirs.sound, 'wav')).forEach(i => {
 				this.bgm.get(constant.str.system_conf.sound.back)!.set(i.name, i.url);
 			});
 
