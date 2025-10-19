@@ -92,7 +92,7 @@ class Invoke {
 		const result : Result<BufferFile<string>> = {};
 		try {
 			result.content = await invoke<BufferFile<string>>('read_files', {
-				dirs : dir,
+				dirs : [dir],
 				fileType : typeof file_type === 'string' ? [file_type] : file_type
 			});
 		} catch (error) {
