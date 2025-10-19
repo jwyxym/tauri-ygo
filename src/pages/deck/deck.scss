@@ -1,10 +1,11 @@
 .deck_body {
 	position: relative;
+	width: 100%;
 	.deck_show {
 		position: absolute;
 		transform: translate(20px, 20px);
-		width: calc(80vw - 40px);
-		height: calc(100vh - 40px);
+		width: calc(70vw - 30px);
+		height: calc(100vh - 30px);
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
@@ -48,15 +49,18 @@
 	}
 	.search {
 		position: absolute;
-		transform: translate(calc(80vw - 20px), 20px);
-		width: 20vw;
+		transform: translate(calc(70vw + 10px), 20px);
+		width: calc(100% - 70vw + 10px);
 		height: calc(100vh - 20px);
 		.button_list {
 			display: flex;
 			gap: 10px;
 		}
+		.var-input {
+			width: 90%;
+		}
 		.var-list {
-			color: white !important;
+			color: white;
 			width: 100%;
 			height: 90%;
 			overflow-y: auto;
@@ -85,6 +89,10 @@
 					width: 30%;
 					.card {
 						width: 100%;
+						img {
+							width: 100%;
+							height: 100%;
+						}
 					}
 				}
 			}

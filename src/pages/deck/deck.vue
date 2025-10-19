@@ -235,11 +235,11 @@
 		side : [] as Array<number>,
 		name : '',
 		size : {
-			width : (window.innerWidth * 0.8 - 40) / 20,
-			height : (window.innerWidth * 0.8 - 40) / 20 * 1.45,
+			width : (window.innerWidth * 0.7 - 40) / 15,
+			height : (window.innerWidth * 0.7 - 40) / 15 * 1.45,
 			resize : () => {
-				deck.size.width = (window.innerWidth * 0.8 - 40) / 20;
-				deck.size.height = (window.innerWidth * 0.8 - 40) / 20 * 1.45;
+				deck.size.width = (window.innerWidth * 0.7 - 40) / 15;
+				deck.size.height = (window.innerWidth * 0.7 - 40) / 15 * 1.45;
 			}
 		},
 		ct : {

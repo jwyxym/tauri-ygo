@@ -1,24 +1,31 @@
 <template>
 	<div class = 'menu'>
 		<div
-			v-for = "
-				(i, v) in constant.str.files.textures.menu
-					.map(i => mainGame.get.textures(i) as string | undefined ?? '')
-			"
-			ref = 'item'
+			class = 'menu-cards'
 		>
 			<div
-				class = 'menu-cards'
+				v-for = "(i, v) in constant.str.files.textures.menu
+					.map(i => mainGame.get.textures(i) as string | undefined ?? '')"
 				:style = "{ '--rotate' : `${page.rotate[v]}deg` }"
+				class = 'cards'
+				ref = 'cards'
+				@click = 'page.click(v)'
 			>
 				<img :src = 'i'/>
 			</div>
 		</div>
-		<div ref = 'button'>
-			<Button
-				:content = 'page.button'
-				@click = 'page.to'
-			></Button>
+		<div class = 'menu-items font-menu'>
+			<span
+				v-for = '(i, v) in mainGame.get.text().menu'
+				:style = "{ '--shadow' : `${page.items[v]}` }"
+				ref = 'items'
+				@click = 'page.click(v, true)'
+			>{{ i }}</span>
+		</div>
+		<div class = 'menu-pointer'
+			:style = "{ '--x' : `${page.pointer[0]}px`, '--y' : `${page.pointer[1]}px` }"
+		>
+			<span>&lt;</span>
 		</div>
 	</div>
 </template>
@@ -28,40 +35,58 @@
 	import constant from '../../script/constant';
 	import mainGame from '../../script/game';
 
-	import Button from '../varlet/button.vue';
+	import position from "../../script/position";
 
 	const props = defineProps(['select']);
 
-	const button : Ref<HTMLElement | null> = ref(null);
-	const item : Ref<Array<HTMLElement> | null> = ref(null);
+	const cards : Ref<Array<HTMLElement> | null> = ref(null);
+	const items : Ref<Array<HTMLElement> | null> = ref(null);
 
 	const page = reactive({
-		button : '',
-		select : null as HTMLImageElement | null,
+		select : 0,
 		rotate : new Array(mainGame.get.text().menu.length).fill(0),
-		click : (e : MouseEvent) : void => {
-			if (button.value!.contains(e.target as HTMLElement))
+		items : new Array(mainGame.get.text().menu.length).fill(''),
+		pointer : new Array(2).fill(-100),
+		click : (v : number, item : boolean = false) : void => {
+			if (item && page.select === v) {
+				page.to();
 				return;
-			const v = item.value!.findIndex(i => i.contains(e.target as HTMLElement));
-			if (v > -1 && (e.target as HTMLElement).tagName === 'IMG') {
-				const img = item.value![v].querySelector('img');
-				page.select = page.select === img ? null : img;
-			} else page.select = null;
+			}
+			page.select = v;
+		},
+		pointer_size : () : void => {
+			if (items.value) {
+				const pos = position.get(items.value[page.select]);
+				page.pointer[0] = pos.right;
+				page.pointer[1] = pos.top - pos.height / 7;
+			}
+		},
+		resize : () : void => {
+			page.pointer_size();
+		},
+		keydown : (event : KeyboardEvent) : void => {
+			const len = mainGame.get.text().menu.length - 1;
+			if (['PageDown', 'ArrowDown'].includes(event.key))
+				page.select >= len ? page.select = 0 : page.select ++;
+			else if (['PageUp', 'ArrowUp'].includes(event.key))
+				page.select <= 0 ? page.select = len : page.select --;
+			else if (event.key === 'Enter')
+				page.click(page.select, true);
 		},
 		to : async () : Promise<void> => {
-			switch (item.value!.find(i => i.contains(page.select))) {
-				case item.value![0]:
+			switch (page.select) {
+				case 0:
 					break;
-				case item.value![1]:
+				case 1:
 					await props.select.server();
 					break;
-				case item.value![2]:
+				case 2:
 					await props.select.deck();
 					break;
-				case item.value![3]:
+				case 3:
 					await props.select.setting();
 					break;
-				case item.value![4]:
+				case 4:
 					await mainGame.exit();
 					break;
 			}
@@ -69,36 +94,46 @@
 	});
 
 	onMounted(async () : Promise<void>=> {
-		page.button = mainGame.get.text().menu[0];
-		document.addEventListener('click', page.click);
+		window.addEventListener('resize', page.resize);
+		window.addEventListener('keydown', page.keydown);
 	});
 
 	onUnmounted(() => {
-		document.removeEventListener('click', page.click);
+		window.removeEventListener('resize', page.resize);
+		window.removeEventListener('keydown', page.keydown);
 	});
 
-	watch(item, () => {
+	watch(cards, () => {
 		setTimeout(() => {
 			for (let i = 0; i < page.rotate.length; i ++) {
 				page.rotate[i] += i * (360 / page.rotate.length);
 			}
 		}, 400);
 	});
-
-	watch(() => { return page.select; }, (n, o) => {
-		if (o)
-			o.style.transform = 'translateY(0)';
-		if (n) {
-			n.style.transform = 'translateY(-10vh)';
-			const v = item.value!.findIndex(i => i.contains(n));
-			while (page.rotate[v] % 360 !== 0) {
-				for (let i = 0; i < page.rotate.length; i ++) {
-					page.rotate[i] -= (360 / page.rotate.length);
-				}
-			}
-			page.button = mainGame.get.text().menu[v];
-		} else page.button = '';
+	watch(items, (n) => {
+		const pos = position.get(n![0]);
+		page.pointer[0] = pos.right;
+		setTimeout(() => {
+			page.pointer[1] = pos.top - pos.height / 7;
+		}, 400);
 	});
+
+	watch(() => { return page.select; }, (v) => {
+		while (page.rotate[v] % 360 !== 0) {
+			for (let i = 0; i < page.rotate.length; i ++) {
+				page.rotate[i] -= (360 / page.rotate.length);
+			}
+		}
+		page.items.forEach((_, vaule) => {
+			page.items[vaule] = vaule === v ? `
+					0 0 5px #00ffff,
+					0 0 10px #00ffff,
+					0 0 20px #00ffff,
+					0 0 40px #00ffff
+			` : '';
+		});
+		page.pointer_size();
+	}, { immediate : true });
 
 </script>
 <style scoped lang = 'scss'>
