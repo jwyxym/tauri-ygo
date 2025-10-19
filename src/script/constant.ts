@@ -82,30 +82,30 @@ class Constant {
 				servers : 'servers.conf',
 			},
 			textures : {
-				unknown : 'unknown.jpg',
-				cover : 'cover.jpg',
-				pic : ['cardI.jpg', 'cardII.jpg'],
-				rps : ['s.png', 'r.png', 'p.png'],
-				back : ['backI.jpg', 'backII.jpg'],
+				unknown : 'unknown',
+				cover : 'cover',
+				pic : ['cardI', 'cardII'],
+				rps : ['s', 'r', 'p'],
+				back : ['backI', 'backII'],
 				card_info : {
-					tuner : 'tuner.png',
-					level : 'level.png',
-					rank : 'rank.png',
-					link : 'link.png',
-					scale : 'scale.png',
-					overlay : 'overlay.png'
+					tuner : 'tuner',
+					level : 'level',
+					rank : 'rank',
+					link : 'link',
+					scale : 'scale',
+					overlay : 'overlay'
 				},
 				menu : [
-					'I.jpg',
-					'II.jpg',
-					'III.jpg',
-					'IV.jpg',
-					'V.jpg'
+					'I',
+					'II',
+					'III',
+					'IV',
+					'V'
 				]
 			},
 			sound : {
-				back : 'Night View.wav',
-				battle : 'City of Night.wav'
+				back : 'Night View',
+				battle : 'City of Night'
 			},
 			system : 'system.conf',
 			pics : 'pics.zip',
