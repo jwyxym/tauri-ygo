@@ -89,7 +89,10 @@ interface TEXT_Like {
 		};
 		deck : {
 			deck_count : string;
-			card_count : string;
+			card_count : {
+				max : string;
+				less : string;
+			}
 		};
 	};
 	setting : {

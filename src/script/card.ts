@@ -29,17 +29,21 @@ const TYPE = {
 	LINK : 0x4000000
 }
 
+interface Info {
+	icon : string;
+	content : string | number;
+}
+
 interface CardInfo {
 	ot : string;
-	level : string;
 	atk : string;
 	def : string;
-	link : string;
 	type : string;
 	race : string;
 	attribute : string;
 	category : string;
 	setcode : string;
+	info : Array<Info>;
 }
 
 interface Search {
@@ -77,13 +81,15 @@ class Card {
 	desc : string;
 	hint : Array<string>;
 	pic : string;
+	row : Array<string | number>
   
 	constructor (row : Array<string | number>) {
+		this.row = row;
 		this.pic = '';
 		this.id = row[0] as number;
 		this.ot = row[1] as number;
 		this.alias = row[2] as number;
-		this.setcode = row[3].toString(16).padStart(16, '0').match(/.{1,4}/g)!.map(str => parseInt(str));
+		this.setcode = row[3].toString(16).padStart(16, '0').match(/.{1,4}/g)!.map(str => parseInt(str, 16));
 		this.type = row[4] as number;
 		this.atk = row[5] as number;
 		this.def = row[6] as number;
@@ -98,24 +104,65 @@ class Card {
 		this.hint = row.slice(13, 29) as Array<string>;
 	};
 
+	clone = () : Card => {
+		return new Card(this.row);
+	};
+
 	update_pic = (url : string) : void => {
 		this.clear();
 		this.pic = url;
 	};
 
 	get_info = () : CardInfo => {
-		return {
+		const result = {
 			ot :  mainGame.get.strings.ot(this.ot),
-			level : `${this.is_link() ? 'link-' : (this.is_xyz() ? '☆' : '★')}${this.level}`,
 			atk : this.atk >= 0 ? this.atk.toString() : '?',
 			def : this.is_link() ? '-' : this.def >= 0 ? this.def.toString() : '?',
-			link : this.is_link() ? mainGame.get.strings.link(this.def) : '',
 			type : mainGame.get.strings.type(this.type),
-			race : mainGame.get.strings.race(this.race),
-			attribute : mainGame.get.strings.attribute(this.attribute),
+			race : '',
+			attribute : '',
 			category : mainGame.get.strings.category(this.category),
-			setcode : this.setcode.filter(i => i > 0).map(i => mainGame.strings.get(constant.str.strings_conf.setcode)?.get(i) ?? `0x${i.toString(16)}`).join('|'),
+			setcode : this.setcode.filter(i => i > 0).map(i => mainGame.get.strings.setcode(i)).join('|'),
+			info : []
+		} as CardInfo
+		if (this.is_monster()) {
+			const attr = mainGame.icons.get(constant.str.info_conf.attribute)!.get(this.attribute)
+			if (attr)
+				result.attribute = mainGame.get.textures(attr + '.png') as string | undefined ?? ''
+			const race = mainGame.icons.get(constant.str.info_conf.race)!.get(this.race)
+			if (race)
+				result.race = mainGame.get.textures(race + '.png') as string | undefined ?? ''
+			result.info.push({
+				icon : mainGame.get.textures((() : string => {
+					return this.is_link() ? constant.str.files.textures.card_info.link
+						: this.is_xyz() ? constant.str.files.textures.card_info.rank
+							: this.is_tuner() ? constant.str.files.textures.card_info.tuner
+								: constant.str.files.textures.card_info.level
+					;
+				})()) as string | undefined ?? '',
+				content : this.level
+			});
+			result.info.push({
+				icon : mainGame.get.textures( constant.str.files.textures.atk) as string | undefined ?? '',
+				content : this.atk >= 0 ? this.atk : '?'
+			});
+			if (!this.is_link())
+				result.info.push({
+					icon : mainGame.get.textures( constant.str.files.textures.def) as string | undefined ?? '',
+					content : this.def >= 0 ? this.def : '?'
+				});
+			if (this.is_pendulum())
+				result.info.push({
+					icon : mainGame.get.textures( constant.str.files.textures.card_info.scale) as string | undefined ?? '',
+					content : this.scale
+				});
+		} else if (this.is_spell()) {
+			result.race = mainGame.get.textures(constant.str.files.textures.spell) as string | undefined ?? ''
+		} else if (this.is_trap()) {
+			result.race = mainGame.get.textures(constant.str.files.textures.trap) as string | undefined ?? ''
 		}
+		
+		return result;
 	};
 
 	clear = () : void => {
@@ -143,6 +190,14 @@ class Card {
 		return (this.type & TYPE.MONSTER) === TYPE.MONSTER;
 	};
 
+	is_spell = () : boolean => {
+		return (this.type & TYPE.SPELL) === TYPE.SPELL;
+	};
+
+	is_trap = () : boolean => {
+		return (this.type & TYPE.TRAP) === TYPE.TRAP;
+	};
+
 	is_ex = () : boolean => {
 		return (this.type & (TYPE.FUSION | TYPE.SYNCHRO | TYPE.XYZ | TYPE.LINK)) > 0;
 	};
@@ -151,8 +206,12 @@ class Card {
 		return (this.type & TYPE.TOKEN) === TYPE.TOKEN;
 	};
 
+	is_tuner = () : boolean => {
+		return (this.type & TYPE.TUNER) === TYPE.TUNER;
+	};
+
 }
 
 export default Card;
 export { TYPE };
-export type { Search, CardInfo };
+export type { Search, CardInfo, Info };

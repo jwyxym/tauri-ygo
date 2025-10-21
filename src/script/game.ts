@@ -25,6 +25,14 @@ class Game {
 		[constant.str.info_conf.race, new Map],
 		[constant.str.info_conf.type, new Map]
 	]);
+	icons : Map<string, Map<number, string>> = new Map([
+		[constant.str.info_conf.ot, new Map],
+		[constant.str.info_conf.attribute, new Map],
+		[constant.str.info_conf.category, new Map],
+		[constant.str.info_conf.link, new Map],
+		[constant.str.info_conf.race, new Map],
+		[constant.str.info_conf.type, new Map]
+	]);
 	lflist : Map<string, {hash : number, map : Map<number, number>}> = new Map;
 	system : Map<string, string> = new Map;
 	servers : Map<string, string> = new Map;
@@ -46,6 +54,7 @@ class Game {
 
     init = async (chk : boolean = true) : Promise<void> => {
 		try {
+			await fs.init_path();
 			//新建所需要的文件夹
 			for (const [_, i] of Object.entries(constant.str.dirs)) {
 				if (!await fs.exists(i))
@@ -57,14 +66,22 @@ class Game {
 				await fs.init();
 
 			//读取./textures文件夹
-			(await fs.read.files(constant.str.dirs.textures, ['png', 'jpg'])).forEach(i => {
-				this.textures.set(i.name, i.url);
-			});
+			for (const i of await fs.read.dir(constant.str.dirs.textures, false)) {
+				if (i.name.match(constant.reg.picture)) {
+					const url : string | undefined = await fs.read.file.as_url(await join(constant.str.dirs.textures, i.name));
+					if (url)
+						this.textures.set(i.name, url);
+				}
+			}
 
 			//读取./sound文件夹
-			(await fs.read.files(constant.str.dirs.sound, 'wav')).forEach(i => {
-				this.bgm.get(constant.str.system_conf.sound.back)!.set(i.name, i.url);
-			});
+			for (const i of await fs.read.dir(constant.str.dirs.sound, false)) {
+				if (i.name.match(constant.reg.bgm)) {
+					const url : string | undefined = await fs.read.bgm(await join(constant.str.dirs.sound, i.name));
+					if (url)
+						this.bgm.get(constant.str.system_conf.sound.back)!.set(i.name, url);
+				}
+			}
 
 			//读取system.conf文件
 			if (await fs.exists(constant.str.files.system)) {
@@ -86,8 +103,6 @@ class Game {
 			
 			await this.load.card();
 			await this.load.expansion();
-			const deck = Array.from(this.cards.keys()).filter(_ => Math.random() > 0.5);
-			await this.load.pic(deck.splice(0, deck.length > 100 ? 100 : deck.length));
 		} catch (error) {
 			fs.write.log(error);
 		}
@@ -210,6 +225,9 @@ class Game {
 					.filter(i => (i[0] & data) === i[0])
 					.map(i => i[1])
 					.join('|');
+			},
+			setcode : (i : number) : string => {
+				return this.strings.get(constant.str.strings_conf.setcode)?.get(i) ?? `0x${i.toString(16)}`;
 			}
 		},
 		desc : (data : number) : string => {
@@ -271,6 +289,7 @@ class Game {
 			return await fs.read.ydk();
 		},
 		pic : async (deck : Array<number> | Deck) : Promise<void> => {
+			
 			deck = deck instanceof Deck ? [...deck.main, ...deck.side, ...deck.extra] : deck;
 			const filter = (i : number, v : number, a : Array<number>) => {
 				const card = this.cards.get(i);
@@ -288,13 +307,6 @@ class Game {
 				}
 				deck = deck.filter(filter);
 			}
-			deck = deck.filter(filter);
-			const pics : Map<number, Blob> = await fs.read.pics(deck);
-			for (const code of deck) {
-				const blob = pics.get(code);
-				if (blob != undefined)
-					this.cards.get(code)!.update_pic(URL.createObjectURL(blob));
-			}
 			if (this.is_android()) {
 				deck = deck.filter(filter);
 				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(constant.str.files.pics, deck);
@@ -305,16 +317,21 @@ class Game {
 				}
 			}
 			deck = deck.filter(filter);
-			for (const code of deck) {
+			if (deck.length === 0) return;
+			const [pics, unknow] = await fs.read.pics(deck);
+			for (const i of pics) {
+				this.cards.get(i.code)!.update_pic(i.url!);
+			}
+			for (const code of unknow) {
 				this.cards.get(code)!.update_pic(this.get.textures(constant.str.files.textures.unknown) as string | undefined ?? '');
 			}
 		},
 		card : async () : Promise<void> => {
-			//读取lflist.conf
+			//读取servers.conf
 			if (await fs.exists(constant.str.files.conf.servers)) {
-				const lflist : string | undefined = await fs.read.text(constant.str.files.conf.servers);
-				if (lflist !== undefined) {
-					const lines : Array<string> = lflist.split(constant.reg.line_feed);
+				const servers : string | undefined = await fs.read.text(constant.str.files.conf.servers);
+				if (servers !== undefined) {
+					const lines : Array<string> = servers.split(constant.reg.line_feed);
 					for (const i of lines) {
 						const line : string = i.trim();
 						this.read.servers_conf(line);
@@ -550,7 +567,7 @@ class Game {
 			if (line.startsWith('#'))
 				return;
 			const key_value = line.split(' ');
-			if (key_value.length == 3) {
+			if (key_value.length >= 3) {
 				const key = parseInt(key_value[1]);
 				if (isNaN(key)) return;
 				switch (key_value[0]) {
@@ -561,6 +578,14 @@ class Game {
 							key,
 							key_value[2]
 						);
+						if (key_value[3]) {
+							this.icons.get(
+								constant.str.info_conf.ot
+							)!.set(
+								key,
+								key_value[3]
+							);
+						}
 						break;
 					case constant.str.info_conf.attribute:
 						this.strings.get(
@@ -569,6 +594,14 @@ class Game {
 							key,
 							key_value[2]
 						);
+						if (key_value[3]) {
+							this.icons.get(
+								constant.str.info_conf.attribute
+							)!.set(
+								key,
+								key_value[3]
+							);
+						}
 						break;
 					case constant.str.info_conf.link:
 						this.strings.get(
@@ -577,6 +610,14 @@ class Game {
 							key,
 							key_value[2]
 						);
+						if (key_value[3]) {
+							this.icons.get(
+								constant.str.info_conf.link
+							)!.set(
+								key,
+								key_value[3]
+							);
+						}
 						break;
 					case constant.str.info_conf.category:
 						this.strings.get(
@@ -593,6 +634,14 @@ class Game {
 							key,
 							key_value[2]
 						);
+						if (key_value[3]) {
+							this.icons.get(
+								constant.str.info_conf.race
+							)!.set(
+								key,
+								key_value[3]
+							);
+						}
 						break;
 					case constant.str.info_conf.type:
 						this.strings.get(
@@ -601,6 +650,14 @@ class Game {
 							key,
 							key_value[2]
 						);
+						if (key_value[3]) {
+							this.icons.get(
+								constant.str.info_conf.type
+							)!.set(
+								key,
+								key_value[3]
+							);
+						}
 						break;
 				}
 			}
@@ -725,7 +782,7 @@ class Game {
 			return await fs.exists(constant.str.files.assets);
 		},
 		version :  async () : Promise<boolean> => {
-			const time = await invoke.version(constant.str.url.version, constant.str.url.headers.version);
+			const time = await invoke.version(constant.str.url.version.url, constant.str.url.version.headers);
 			const local = this.get.system(constant.str.system_conf.string.download_time);
 			if (time.error === undefined && typeof local === 'string') {
 				return new Date(time.content!) <= new Date(local);
@@ -741,6 +798,10 @@ class Game {
 
 	is_android = () : boolean => {
 		return constant.system.system === 'android';
+	};
+
+	is_windows = () : boolean => {
+		return constant.system.system === 'windows';
 	};
 
 	sleep = async (time : number) : Promise<void> => {

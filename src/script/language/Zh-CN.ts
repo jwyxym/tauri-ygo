@@ -97,7 +97,10 @@ const Zh_CN : TEXT_Like = {
 		},
 		deck : {
 			deck_count : '卡组已达最大数量 {:?}',
-			card_count : '卡片已达最大数量 {:?}',
+			card_count : {
+				max : '卡片已达最大数量 {:?}',
+				less : '卡片当前数量 0'
+			}
 		}
 	},
 	setting : {

@@ -152,32 +152,29 @@
 				</div>
 			</div>
 		</var-popup>
-		<transition name = 'move_right'>
-			<div class = 'ui' v-show = '(page.wait || page.duel) && !page.chat' ref = 'chat_button'>
-				<Button
-					@click = 'page.chatting'
-					icon_name = 'chat'
-				></Button>
-				<transition name = 'scale'>
-					<Button
-						v-show = 'page.wait'
-						@click = 'connect.chat.robot'
-						icon_name = 'add_person'
-					></Button>
-				</transition>
-				<transition name = 'scale'>
-					<Button
-						v-show = 'page.duel'
-						@click = 'connect.surrender'
-						icon_name = 'flag'
-					></Button>
-				</transition>
-			</div>
-		</transition>
+		<Float_Buttons
+			ref = 'float_buttons'
+			:show = '(page.wait || page.duel) && !page.chat'
+			:list = "[
+				{
+					click : page.chatting,
+					icon : 'chat',
+					show : true
+				}, {
+					click : connect.chat.robot,
+					icon : 'add_person',
+					show : page.wait
+				}, {
+					click : connect.surrender,
+					icon : 'flag',
+					show : page.duel
+				}
+			]"
+		/>
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { ref, reactive, onBeforeMount, onMounted, computed, watch, TransitionGroup, onUnmounted } from 'vue';
+	import { ref, Ref, reactive, onBeforeMount, onMounted, computed, watch, TransitionGroup, onUnmounted } from 'vue';
 	import { ConversationBlock } from 'conversation-vue'
 
 	import mainGame from '../../script/game';
@@ -194,11 +191,12 @@
 	import Duel from './duel.vue';
 	import RPS from './rps.vue';
 	import Dialog from '../varlet/dialog';
+	import Float_Buttons from '../varlet/float_buttons.vue';
 
 	let tcp : Tcp | null = null;
 	const deck = ref<HTMLElement | null>(null);
 	const chat = ref<HTMLElement | null>(null);
-	const chat_button = ref<HTMLElement | null>(null);
+	const float_buttons : Ref<{ dom: HTMLElement } | null> = ref(null);
 
 	const page = reactive({
 		server : false,
@@ -212,7 +210,7 @@
 		chat_click : (e : MouseEvent) => {
 			if (page.chat &&
 				chat.value && !chat.value.contains(e.target as HTMLElement)
-				&& chat_button.value && !chat_button.value.contains(e.target as HTMLElement)
+				&& float_buttons.value && !float_buttons.value!.dom.contains(e.target as HTMLElement)
 				&& !(e.target as HTMLElement).classList.contains('var-icon-close-circle')
 			)
 				page.chatting();

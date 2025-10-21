@@ -110,12 +110,14 @@
 			}
 		}, 400);
 	});
-	watch(items, (n) => {
-		const pos = position.get(n![0]);
-		page.pointer[0] = pos.right;
-		setTimeout(() => {
-			page.pointer[1] = pos.top - pos.height / 7;
-		}, 400);
+	watch(items, async (n) => {
+		if (n) {
+			const pos = position.get(n[0]);
+			page.pointer[0] = pos.right;
+			setTimeout(() => {
+				page.pointer[1] = pos.top - pos.height / 7;
+			}, 400);
+		}
 	});
 
 	watch(() => { return page.select; }, (v) => {

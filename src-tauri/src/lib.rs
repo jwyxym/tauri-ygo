@@ -40,6 +40,12 @@ use trust_dns_resolver::{
 };
 
 #[derive(Serialize, Clone)]
+struct Pic {
+	code: i64,
+	path: String
+}
+
+#[derive(Serialize, Clone)]
 struct Srv {
 	priority: u16,
 	weight: u16,
@@ -111,25 +117,30 @@ async fn read_files(dirs: Vec<String>, file_type: Vec<String>) -> Result<Vec<(St
 }
 
 #[tauri::command]
-async fn read_pics(dirs: Vec<String>, codes: Vec<i64>) -> Result<Vec<(i64, FileContent)>, String> {
-	let mut entries: Vec<(i64, FileContent)> = Vec::new();
-	for path in dirs {
-		for code in &codes {
+async fn read_pics(dirs: Vec<String>, codes: Vec<i64>) -> Result<(Vec<Pic>, Vec<i64>), String> {
+	let mut entries: Vec<Pic> = Vec::new();
+	let mut unknows: Vec<i64> = Vec::new();
+	for code in &codes {
+		let mut path_chk = false;
+		for path in &dirs {
 			let full_name: String = format!("{}.jpg", code);
 			let file_path: PathBuf = Path::new(&path).join(full_name);
-			if !exists(&file_path).map_err(|e| e.to_string())?
-				|| entries.iter().any(|(x, _)| x == code) {
-				continue;
-			}
-			if let Ok(mut file) = File::open(&file_path) {
-				let mut content: Vec<u8> = Vec::new();
-				file.read_to_end(&mut content)
-					.map_err(|e| e.to_string())?;
-				entries.push((*code, FileContent::Binary(content)));
+			if exists(&file_path).map_err(|e| e.to_string())? {
+				if let Some(p) = file_path.to_str() {
+					entries.push(Pic {
+						code: *code,
+						path: p.to_string()
+					});
+					path_chk = true;
+					break;
+				}
 			}
 		}
+		if !path_chk {
+			unknows.push(*code);
+		}
 	}
-	Ok(entries)
+	Ok((entries, unknows))
 }
 
 #[tauri::command]
@@ -217,7 +228,7 @@ fn get_srv(url: String) -> Result<Srv, String> {
 	match resolver.srv_lookup(&url) {
 		Ok(response) => {
 			for ip in response.iter() {
-				result.push(Srv{
+				result.push(Srv {
 					priority: ip.priority(),
 					weight: ip.weight(),
 					port: ip.port(),
@@ -230,7 +241,7 @@ fn get_srv(url: String) -> Result<Srv, String> {
 			}
 		}
 		Err(_) => {
-			return Ok(Srv{
+			return Ok(Srv {
 				priority: 0,
 				weight: 0,
 				port: 7911,

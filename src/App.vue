@@ -203,6 +203,8 @@
 		--cell-min-height: 5vh !important;
 		--cell-padding: 1vh 20px !important;
 		--field-decorator-line-size: 0.5px !important;
+		--card-title-font-size: max(2.5vh, 10px);
+		--card-subtitle-font-size: max(1.5vh, 6px);
 		user-select: none;
 	}
 </style>

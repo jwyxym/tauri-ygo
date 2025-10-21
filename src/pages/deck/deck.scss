@@ -1,31 +1,16 @@
 .deck_body {
 	position: relative;
 	width: 100%;
+	height: 100%;
 	.deck_show {
 		position: absolute;
-		transform: translate(20px, 20px);
-		width: calc(70vw - 30px);
-		height: calc(100vh - 30px);
+		transform: translateY(10px);
+		width: 100%;
+		height: 100%;
 		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		justify-items: center;
-		.head {
-			align-self: center;
-			display: flex;
-			align-items: center;
-			height: 50px;
-			width: 50%;
-			gap: 10px;
-			.button_list {
-				display: flex;
-				align-items: center;
-				gap: 10px;
-			}
-		}
 		.deck {
-			width: 100%;
-			height: calc(100% - 80px);
+			width: 90%;
+			height: 100%;
 			overflow-y: auto;
 			color: white;
 			&::-webkit-scrollbar {
@@ -47,57 +32,6 @@
 			}
 		}
 	}
-	.search {
-		position: absolute;
-		transform: translate(calc(70vw + 10px), 20px);
-		width: calc(100% - 70vw + 10px);
-		height: calc(100vh - 20px);
-		.button_list {
-			display: flex;
-			gap: 10px;
-		}
-		.var-input {
-			width: 90%;
-		}
-		.var-list {
-			color: white;
-			width: 100%;
-			height: 90%;
-			overflow-y: auto;
-			&::-webkit-scrollbar {
-				display: none;
-			}
-			.list {
-				width: 100%;
-				display: flex;
-				gap: 10px;
-				.card_name {
-					display: grid;
-					color: white;
-					width: 100%;
-					overflow: hidden;
-					white-space: nowrap;
-					.title {
-						font-size: max(3vh, var(--font-size-md));
-					}
-					.description {
-						color: rgb(162, 162, 162);
-						font-size: max(2vh, var(--font-size-sm));
-					}
-				}
-				.searcher {
-					width: 30%;
-					.card {
-						width: 100%;
-						img {
-							width: 100%;
-							height: 100%;
-						}
-					}
-				}
-			}
-		}
-	}
 	.card {
 		div {
 			position: relative;
@@ -105,19 +39,6 @@
 				position: absolute;
 				right: 0;
 			}
-		}
-	}
-}
-.var-popup {
-	.var-form {
-		width: 50vw;
-		height: 90%;
-		overflow-y: auto;
-		.var-select, .var-input {
-			width: 50%;
-		}
-		&::-webkit-scrollbar {
-			display: none;
 		}
 	}
 }

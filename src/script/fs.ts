@@ -5,7 +5,7 @@ import * as path from '@tauri-apps/api/path';
 import constant from './constant';
 import toast from './toast';
 import mainGame from './game';
-import invoke from './invoke';
+import invoke, { Pic } from './invoke';
 
 import Deck from '../pages/deck/deck';
 
@@ -16,7 +16,7 @@ interface File {
 
 class Fs {
 	dir : fs.ReadFileOptions;
-	path : Promise<string>;
+	path ?: string;
 	base_dir : number;
 	rename_dir : fs.RenameOptions;
 	copy_dir : fs.CopyFileOptions;
@@ -24,7 +24,6 @@ class Fs {
 	constructor () {
 		const base_dir = constant.system.base_dir() 
 		this.dir = { baseDir: base_dir };
-		this.path = constant.system.base_path();
 		this.rename_dir = {
 			oldPathBaseDir : base_dir,
 			newPathBaseDir : base_dir
@@ -35,6 +34,10 @@ class Fs {
 		}
 		this.base_dir = base_dir
 	};
+
+	init_path = async () : Promise<void> => {
+		this.path = await constant.system.base_path();
+	}
 
 	exists = async (file : string) : Promise<boolean> => {
 		try {
@@ -53,8 +56,7 @@ class Fs {
 					return false;
 				toast.info(mainGame.get.text().toast.download.complete);
 			}
-			const p = await this.path;
-			await invoke.unzip(p, await path.join(p, constant.str.files.assets), chk);
+			await invoke.unzip(this.path!, await path.join(this.path!, constant.str.files.assets), chk);
 			return true;
 		} catch (error) {
 			this.write.log(error);
@@ -98,21 +100,21 @@ class Fs {
 			}
 			return result;
 		},
-		pics : async (codes : Array<number> = []) : Promise<Map<number, Blob>> => {
-			const p = await this.path;
+		pics : async (codes : Array<number> = []) : Promise<[Array<Pic>, Array<number>]> => {
 			const folds = [
-				await path.join(p, constant.str.dirs.expansions, constant.str.exdirs.pics)
+				await path.join(this.path!, constant.str.dirs.expansions, constant.str.exdirs.pics)
 			];
 			if (!mainGame.is_android())
-				folds.splice(0, 0, await path.join(p, constant.str.exdirs.pics));
+				folds.splice(0, 0, await path.join(this.path!, constant.str.exdirs.pics));
 			const entries = await invoke.read_pics(folds, codes);
-			
-			const result : Map<number, Blob> = new Map();
-			if (entries.error === undefined)
-				for (const [name, content] of entries.content!) {
-					result.set(name, new Blob([new Uint8Array(content.content)], { type : 'image/jpeg' }));
-				}
-			return result;
+			if (entries.error === undefined) {
+				entries.content![0].forEach((_, v) => {
+					const i = entries.content![0][v]
+					i.url = convertFileSrc(i.path)
+				});
+				return entries.content!;
+			}
+			return [[], []];
 		},
 		zip : async (file : string, file_type : Array<string | number> = []) : Promise<Map<RegExp, Map<string, Blob | Uint8Array | string>>> => {
 			let map = new Map([
@@ -157,7 +159,7 @@ class Fs {
 		ydk : async () : Promise<Array<Deck>> => {
 			try {
 				const decks : Array<Deck> = [];
-				const reader = await invoke.read_texts(await path.join(await this.path, constant.str.dirs.deck), 'ydk');
+				const reader = await invoke.read_texts(await path.join(this.path!, constant.str.dirs.deck), 'ydk');
 				if (reader.error === undefined) {
 					reader.content!.forEach(i => {
 						const ydk = Deck.fromYdkString(i[1].content);
@@ -176,8 +178,7 @@ class Fs {
 		},
 		files : async (dir : string, type : Array<string> | string) : Promise<Array<File>> => {
 			try {
-				const p = await this.path;
-				const entries = await invoke.read_files(await path.join(p, dir), type);
+				const entries = await invoke.read_files(await path.join(this.path!, dir), type);
 
 				const result : Array<File> = [];
 				if (entries.error === undefined)
@@ -193,16 +194,23 @@ class Fs {
 			}
 			return [];
 		},
-		file : async (name : string) : Promise<File | undefined> => {
-			try {
-				return {
-					name : name,
-					url : convertFileSrc(await path.join(await this.path, name))
+		file : {
+			as_url : async (name : string) : Promise<string | undefined> => {
+				try {
+					return convertFileSrc(await path.join(this.path!, name));
+				} catch (error) {
+					this.write.log(error);
 				}
-			} catch (error) {
-				this.write.log(error);
-			}
-			return undefined;
+				return undefined;
+			},
+			as_u8 : async (name : string) : Promise<Uint8Array<ArrayBuffer> | undefined> => {
+				try {
+					return await fs.readFile(name, this.dir);
+				} catch (error) {
+					this.write.log(error);
+				}
+				return undefined;
+			},
 		},
 		dir : async (dir : string, full_path : boolean = true, extension : boolean = true, this_dir : fs.ReadFileOptions = this.dir) : Promise<Array<fs.DirEntry>> => {
 			try {
@@ -221,8 +229,23 @@ class Fs {
 				this.write.log(error);
 			}
 			return [];
+		},
+		bgm : async (file : string) : Promise<string | undefined> => {
+			try {
+				const read_to_blob = async () => {
+					const bgm = await this.read.file.as_u8(file);
+					if (bgm)
+						return URL.createObjectURL(
+							new Blob([new Uint8Array(bgm)], { type : 'audio/wav' })
+						)
+					return undefined;
+				}
+				return mainGame.is_android() ? await read_to_blob() : convertFileSrc(await path.join(this.path!, file));
+			} catch (error) {
+				this.write.log(error);
+			}
+			return undefined;
 		}
-
 	};
 
 	write = {
@@ -299,7 +322,7 @@ class Fs {
 		},
 		from_url : async (url : string,  file : string) : Promise<string> => {
 			try {
-				const download = await invoke.download(url, await this.path, file);
+				const download = await invoke.download(url, this.path!, file);
 				if (typeof download === 'string')
 					return download;
 			} catch (error) {
@@ -311,7 +334,7 @@ class Fs {
 			try {
 				if (file.length > 0 && !file.endsWith(constant.str.extends.ypk))
 					file += constant.str.extends.ypk;
-				const download = await invoke.download(url, await path.join(await this.path, constant.str.dirs.expansions), file, constant.str.extends.ypk);
+				const download = await invoke.download(url, await path.join(this.path!, constant.str.dirs.expansions), file, constant.str.extends.ypk);
 				if (typeof download === 'string') {
 					const p = await path.join(constant.str.dirs.expansions, download);
 					return [p, download];
@@ -375,3 +398,4 @@ class Fs {
 }
 
 export default new Fs();
+export type { File };

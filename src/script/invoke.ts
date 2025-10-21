@@ -8,6 +8,12 @@ interface Srv {
 	target : string;
 };
 
+interface Pic {
+	path : string;
+	code : number;
+	url ?: string;
+}
+
 interface Result<T> {
 	content ?: T;
 	error ?: string;
@@ -102,10 +108,10 @@ class Invoke {
 		return result;
 	};
 	
-	read_pics = async (dirs : Array<string>, codes : Array<number>) : Promise<Result<BufferFile<number>>> => {
-		const result : Result<BufferFile<number>> = {};
+	read_pics = async (dirs : Array<string>, codes : Array<number>) : Promise<Result<[Array<Pic>, Array<number>]>> => {
+		const result : Result<[Array<Pic>, Array<number>]> = {};
 		try {
-			result.content = await invoke<BufferFile<number>>('read_pics', {
+			result.content = await invoke<[Array<Pic>, Array<number>]>('read_pics', {
 				dirs : dirs, codes: codes
 			});
 		} catch (error) {
@@ -146,4 +152,4 @@ class Invoke {
 };
 
 export default new Invoke();
-export type { Result, DataBase, File, StringFile, BufferFile, Srv };
+export type { Result, DataBase, File, StringFile, BufferFile, Srv, Pic };

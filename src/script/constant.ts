@@ -82,30 +82,35 @@ class Constant {
 				servers : 'servers.conf',
 			},
 			textures : {
-				unknown : 'unknown',
-				cover : 'cover',
-				pic : ['cardI', 'cardII'],
-				rps : ['s', 'r', 'p'],
-				back : ['backI', 'backII'],
+				unknown : 'unknown.jpg',
+				cover : 'cover.jpg',
+				pic : ['cardI.jpg', 'cardII.jpg'],
+				rps : ['s.png', 'r.png', 'p.png'],
+				back : ['backI.jpg', 'backII.jpg'],
+				atk : 'atk.png',
+				def : 'def.png',
+				spell : 'attr_spell.png',
+				trap : 'attr_trap.png',
+				deck : ['deck.png', 'deck_ex.png'],
 				card_info : {
-					tuner : 'tuner',
-					level : 'level',
-					rank : 'rank',
-					link : 'link',
-					scale : 'scale',
-					overlay : 'overlay'
+					tuner : 'type_tuner.png',
+					level : 'type_level.png',
+					rank : 'type_rank.png',
+					link : 'type_link.png',
+					scale : 'type_scale.png',
+					overlay : 'type_overlay.png'
 				},
 				menu : [
-					'I',
-					'II',
-					'III',
-					'IV',
-					'V'
+					'menu_I.jpg',
+					'menu_II.jpg',
+					'menu_III.jpg',
+					'menu_IV.jpg',
+					'menu_V.jpg'
 				]
 			},
 			sound : {
-				back : 'Night View',
-				battle : 'City of Night'
+				back : 'Night View.wav',
+				battle : 'City of Night.wav'
 			},
 			system : 'system.conf',
 			pics : 'pics.zip',
@@ -158,9 +163,9 @@ class Constant {
 		url : {
 			super_pre : 'https://cdn02.moecube.com:444/ygopro-super-pre/archive/ygopro-super-pre.ypk',
 			assets : '',
-			version : 'https://web-api.gitcode.com/api/v2/projects/jwyxym%2Ftauri-ygo/releases?repoId=jwyxym%252Ftauri-ygo',
-			headers : {
-				version : [['Referer', 'https://gitcode.com/']] as Array<[string, string]>
+			version : {
+				url : 'https://web-api.gitcode.com/api/v2/projects/jwyxym%2Ftauri-ygo/releases?repoId=jwyxym%252Ftauri-ygo',
+				headers : [['Referer', 'https://gitcode.com/']] as Array<[string, string]>
 			}
 		},
 		extends : {
