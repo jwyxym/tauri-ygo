@@ -297,7 +297,6 @@
 
 </script>
 <style scoped lang = 'scss'>
-	@use '../style/font.scss';
 	.setting_body {
 		display: flex;
 		flex-direction: column;

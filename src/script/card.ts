@@ -134,32 +134,32 @@ class Card {
 				result.race = mainGame.get.textures(race + '.png') as string | undefined ?? ''
 			result.info.push({
 				icon : mainGame.get.textures((() : string => {
-					return this.is_link() ? constant.str.files.textures.card_info.link
-						: this.is_xyz() ? constant.str.files.textures.card_info.rank
-							: this.is_tuner() ? constant.str.files.textures.card_info.tuner
-								: constant.str.files.textures.card_info.level
+					return this.is_link() ? CONSTANT.FILES.TEXTURE_TYPE_LINK
+						: this.is_xyz() ? CONSTANT.FILES.TEXTURE_TYPE_RANK
+							: this.is_tuner() ? CONSTANT.FILES.TEXTURE_TYPE_TUNER
+								: CONSTANT.FILES.TEXTURE_TYPE_LV
 					;
 				})()) as string | undefined ?? '',
 				content : this.level
 			});
 			result.info.push({
-				icon : mainGame.get.textures( constant.str.files.textures.atk) as string | undefined ?? '',
+				icon : mainGame.get.textures(CONSTANT.FILES.TEXTURE_ATK) as string | undefined ?? '',
 				content : this.atk >= 0 ? this.atk : '?'
 			});
 			if (!this.is_link())
 				result.info.push({
-					icon : mainGame.get.textures( constant.str.files.textures.def) as string | undefined ?? '',
+					icon : mainGame.get.textures(CONSTANT.FILES.TEXTURE_DEF) as string | undefined ?? '',
 					content : this.def >= 0 ? this.def : '?'
 				});
 			if (this.is_pendulum())
 				result.info.push({
-					icon : mainGame.get.textures( constant.str.files.textures.card_info.scale) as string | undefined ?? '',
+					icon : mainGame.get.textures(CONSTANT.FILES.TEXTURE_TYPE_SCALE) as string | undefined ?? '',
 					content : this.scale
 				});
 		} else if (this.is_spell()) {
-			result.race = mainGame.get.textures(constant.str.files.textures.spell) as string | undefined ?? ''
+			result.race = mainGame.get.textures(CONSTANT.FILES.TEXTURE_SPELL) as string | undefined ?? ''
 		} else if (this.is_trap()) {
-			result.race = mainGame.get.textures(constant.str.files.textures.trap) as string | undefined ?? ''
+			result.race = mainGame.get.textures(CONSTANT.FILES.TEXTURE_TRAP) as string | undefined ?? ''
 		}
 		
 		return result;
@@ -171,7 +171,7 @@ class Card {
 	};
 
 	has_pic = () : boolean => {
-		return this.pic !== '' && this.pic !== mainGame.get.textures(constant.str.files.textures.unknown);
+		return this.pic !== '' && this.pic !== mainGame.get.textures(CONSTANT.FILES.TEXTURE_UNKNOW);
 	};
 
 	is_link = () : boolean => {

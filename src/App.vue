@@ -9,12 +9,12 @@
 					:select = 'page.select'
 				/>
 			</transition>
-			<!-- <transition name = 'opacity'>
+			<transition name = 'opacity'>
 				<Server
 					v-if = 'page.show.server'
 					:select = 'page.select'
 				/>
-			</transition> -->
+			</transition>
 			<transition name = 'opacity'>
 				<Setting
 					v-if = 'page.show.setting'
@@ -37,7 +37,7 @@
 	import YGOMenu from './pages/menu/menu.vue';
 	import Deck from './pages/deck/deck_list.vue';
 	import Server from './pages/server/server.vue';
-	// import Setting from './pages/setting.vue';
+	import Setting from './pages/setting.vue';
 	import Voice from './pages/voice/voice.vue';
 
 	import mainGame from './script/game';

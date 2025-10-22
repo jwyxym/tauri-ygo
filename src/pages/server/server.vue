@@ -392,7 +392,9 @@
 	});
 
 	onMounted(() => {
+		console.log(0)
 		page.server = true;
+		console.log(1)
 		document.addEventListener('click', page.chat_click);
 	});
 
