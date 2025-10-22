@@ -1,23 +1,22 @@
 import mainGame from '../../script/game';
-import constant from '../../script/constant';
+import * as CONSTANT from '../../script/constant';
 
 class Voice {
 	audio : Array<HTMLAudioElement> = [];
 
 	update = (key : string) : void => {
 		this.audio.forEach(i => {
-			if (i.classList.contains(key))
-				i.volume = mainGame.get.system(key) as number;
+			i.volume = mainGame.get.system(key) as number;
 		});
 	};
 
 	back = {
 		play : () : void => {
-			this.update(constant.str.system_conf.sound.back);
-			this.get.music(constant.str.files.sound.back)?.play();
+			this.update(CONSTANT.KEYS.SETTING_VOICE_BACK_BGM);
+			this.get.music(CONSTANT.FILES.BACK_BGM)?.play();
 		},
 		stop : () : void => {
-			const audio = this.get.music(constant.str.files.sound.back);
+			const audio = this.get.music(CONSTANT.FILES.BACK_BGM);
 			if (audio) {
 				audio.pause();
 				audio.currentTime = 0;
@@ -27,11 +26,11 @@ class Voice {
 
 	battle = {
 		play : () : void => {
-			this.update(constant.str.system_conf.sound.back);
-			this.get.music(constant.str.files.sound.battle)?.play();
+			this.update(CONSTANT.KEYS.SETTING_VOICE_BACK_BGM);
+			this.get.music(CONSTANT.FILES.BATTLE_BGM)?.play();
 		},
 		stop : () : void => {
-			const audio = this.get.music(constant.str.files.sound.battle);
+			const audio = this.get.music(CONSTANT.FILES.BATTLE_BGM);
 			if (audio) {
 				audio.pause();
 				audio.currentTime = 0;

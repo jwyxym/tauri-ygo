@@ -9,12 +9,12 @@
 					:select = 'page.select'
 				/>
 			</transition>
-			<transition name = 'opacity'>
+			<!-- <transition name = 'opacity'>
 				<Server
 					v-if = 'page.show.server'
 					:select = 'page.select'
 				/>
-			</transition>
+			</transition> -->
 			<transition name = 'opacity'>
 				<Setting
 					v-if = 'page.show.setting'
@@ -37,11 +37,12 @@
 	import YGOMenu from './pages/menu/menu.vue';
 	import Deck from './pages/deck/deck_list.vue';
 	import Server from './pages/server/server.vue';
-	import Setting from './pages/setting.vue';
+	// import Setting from './pages/setting.vue';
 	import Voice from './pages/voice/voice.vue';
 
 	import mainGame from './script/game';
 	import fs from './script/fs';
+	import { I18N_KEYS } from "./script/language/i18n";
 	import Dialog from './pages//varlet/dialog';
 
 	const page = reactive({
@@ -104,8 +105,8 @@
 		}
 		const dialog = async () : Promise<void> => {
 			await Dialog({
-				title : mainGame.get.text().start.title,
-				message : mainGame.get.text().start.message,
+				title : mainGame.get.text(I18N_KEYS.START_TITLE),
+				message : mainGame.get.text(I18N_KEYS.START_MESSAGR),
 				onConfirm : download,
 				onCancel : mainGame.exit,
 				closeOnClickOverlay : false
@@ -135,7 +136,6 @@
 	}
 </style>
 <style lang = 'scss'>
-	@use './style/font.scss';
 	@use './style/toast.scss';
 	@use './style/transition.scss';
 	.var-icon {
@@ -172,6 +172,9 @@
 	.readonly {
 		--checkbox-unchecked-color: #555 !important;
 		color: #555 !important;
+	}
+	.font-menu {
+		font-family: 'menu' !important;
 	}
 	:root {
 		--card-background: transparent !important;

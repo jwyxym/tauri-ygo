@@ -7,28 +7,28 @@
 			<div class = 'expansion_list'>
 				<div class = 'head'>
 					<var-menu-select @select = 'download.popup.on'>
-						<Button size = 'large' :loading = 'setting.loading' :content = 'mainGame.get.text().setting.download.ex'></Button>
+						<Button size = 'large' :loading = 'setting.loading' :content = 'mainGame.get.text(I18N_KEYS.SETTING_EX_CARDS)'></Button>
 						<template #options>
-							<var-menu-option :label = 'mainGame.get.text().setting.download.url'/>
-							<var-menu-option :label = 'mainGame.get.text().setting.download.super_pre' />
+							<var-menu-option :label = 'mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_CUSTOM)'/>
+							<var-menu-option :label = 'mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_SUPER_PRE)' />
 						</template>
 					</var-menu-select>
 					<Button
 						@click = 'expansion.reload'
 						size = 'large'
-						:content = 'mainGame.get.text().setting.reload'
+						:content = 'mainGame.get.text(I18N_KEYS.SETTING_RELOAD)'
 						:loading = 'setting.loading'
 					></Button>
 					<Button
 						@click = 'expansion.resert'
 						size = 'large'
-						:content = 'mainGame.get.text().setting.resert'
+						:content = 'mainGame.get.text(I18N_KEYS.SETTING_RESERT)'
 						:loading = 'setting.loading'
 					></Button>
 					<Button
 						@click = 'expansion.chk_version'
 						size = 'large'
-						:content = 'mainGame.get.text().setting.version'
+						:content = 'mainGame.get.text(I18N_KEYS.SETTING_VERSION)'
 						:loading = 'setting.loading'
 					></Button>
 				</div>
@@ -66,50 +66,46 @@
 				color = 'white'
 				class = 'items'
 			>
-				<var-list>
-					<var-cell
-						v-for = 'i in Object.entries(constant.str.system_conf.sound).map(i => i[1])'
-						:key = 'i'
-						:border = 'true'
-					>
-						<template #default>
-							<div>
-								{{ `${mainGame.get.text().setting.setting_items.get(i)} : ${setting.sound[i] ? setting.sound[i].toFixed(2) : 0}` }}
-								<var-slider
-									v-if = 'mainGame.is_android()'
-									v-model = 'setting.sound[i]'
-									label-visible = 'never'
-									:step = '0.01'
-									:max = '1'
-									:min = '0'
-									@end = 'items.sound_change_over'
-								/>
-								<slider
-									v-if = '!mainGame.is_android()'
-									v-model = 'setting.sound[i]'
-									color = '#397bfe'
-									track-color = 'white'
-									:step = '0.01'
-									:max = '1'
-									:min = '0'
-									@drag-end = 'items.sound_change_over'
-								/>
-							</div>
-						</template>
-					</var-cell>
-				</var-list>
+				<var-cell
+					:border = 'true'
+				>
+					<template #default>
+						<div>
+							{{ `${mainGame.get.text(I18N_KEYS.SETTING_VOICE_BACK_BGM)} : ${setting.sound.toFixed(2)}` }}
+							<var-slider
+								v-if = 'mainGame.is_android()'
+								v-model = 'setting.sound'
+								label-visible = 'never'
+								:step = '0.01'
+								:max = '1'
+								:min = '0'
+								@end = 'items.sound_change_over'
+							/>
+							<slider
+								v-if = '!mainGame.is_android()'
+								v-model = 'setting.sound'
+								color = '#397bfe'
+								track-color = 'white'
+								:step = '0.01'
+								:max = '1'
+								:min = '0'
+								@drag-end = 'items.sound_change_over'
+							/>
+						</div>
+					</template>
+				</var-cell>
 				<var-checkbox-group v-model = 'setting.items_true'>
 					<var-list>
 						<var-cell
-							v-for = 'i in Object.entries(constant.str.system_conf.chk).map(i => i[1])'
+							v-for = 'i in setting.items'
 							:key = 'i'
-							:title = 'mainGame.get.text().setting.setting_items.get(i)'
+							:title = 'mainGame.get.text(I18N_KEYS[i[0]])'
 							:border = 'true'
 						>
 							<template #extra>
 								<var-checkbox
 									:checked-value = 'i'
-									@change = 'items.change($event, i)'
+									@change = 'items.change($event, i[1])'
 								></var-checkbox>
 							</template>
 						</var-cell>
@@ -120,11 +116,11 @@
 		<var-popup :close-on-key-escape = 'false' v-model:show = 'download.popup.url' position = 'center' :close-on-click-overlay = 'false'>
 			<var-form>
 				<Input
-					:placeholder = 'mainGame.get.text().setting.download.url'
+					:placeholder = 'mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_CUSTOM)'
 					v-model = 'download.url'
 				/>
 				<Input
-					:placeholder = 'mainGame.get.text().setting.download.name'
+					:placeholder = 'mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_NAME)'
 					:rules = 'download.name_rule'
 					v-model = 'download.name'
 				/>
@@ -141,7 +137,8 @@
 	import mainGame from '../script/game';
 	import fs from '../script/fs';
 	import toast from '../script/toast';
-	import constant from '../script/constant';
+	import * as CONSTANT from '../script/constant';
+	import { I18N_KEYS } from '../script/language/i18n';
 
 	import Button_List from './varlet/button_list.vue';
 	import Button from './varlet/button.vue';
@@ -152,40 +149,40 @@
 		url : '',
 		name : '',
 		name_rule : (name : string | undefined) : string | boolean => {
-			if (name !== undefined && name.length > 0 && name.match(constant.reg.name))
-				return mainGame.get.text().rule.name.unlawful;
+			if (name !== undefined && name.length > 0 && name.match(CONSTANT.REG.NAME))
+				return mainGame.get.text(I18N_KEYS.SETTING_RULE_NAME_UNLAWFUL);
 			return true;
 		},
 		popup : {
 			url : false,
 			on : async (value : string) : Promise<void> => {
 				switch (value) {
-					case mainGame.get.text().setting.download.url:
+					case mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_CUSTOM):
 						download.popup.url = true;
 						break;
-					case mainGame.get.text().setting.download.super_pre:
-						await download.on(constant.str.url.super_pre);
+					case mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_SUPER_PRE):
+						await download.on(CONSTANT.URL.SUPER_PRE);
 						break;
 				}
 			}
 		},
 		on : async (url : string, name : string = '') : Promise<void> => {
 			if (!url) {
-				toast.error(mainGame.get.text().toast.error.setting.download);
+				toast.error(mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_LEN));
 				return;
 			}
 			setting.loading = true;
-			toast.info(mainGame.get.text().toast.download.start);
+			toast.info(mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_START));
 			const path = await fs.write.ypk(url, name);
 			if (path.length == 2) {
-				mainGame.push.system(constant.str.system_conf.string.expansion, path[1]);
+				mainGame.push.system(CONSTANT.KEYS.SETTING_LOADING_EXPANSION, path[1]);
 				const load = await mainGame.get.expansions();
 				setting.expansion = load.ypk.map(i => i.name);
 				if (!setting.load.includes(path[1]) && setting.expansion.includes(path[1]))
 					setting.load.push(path[1]);
 				await mainGame.load.ypk(path[0]);
 				await fs.write.system();
-				toast.info(mainGame.get.text().toast.download.complete);
+				toast.info(mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_COMPELETE));
 			}
 			setting.loading = false;
 		},
@@ -209,34 +206,34 @@
 		load : [] as Array<string>,
 		expansion : [] as Array<string>,
 		items_true : [] as Array<string>,
-		items : [] as Array<string>,
-		sound : {} as { [key: string]: number },
+		items : [] as Array<[string, string]>,
+		sound : 0,
 		loading : false,
 	})
 
 	const expansion = {
 		delete : (v : number) : void => {
 			Dialog({
-				title : mainGame.get.text().setting.delete,
+				title : mainGame.get.text(I18N_KEYS.SETTING_DELETE_YPK),
 				onConfirm : async () : Promise<void> => {
 					if (await fs.delete.ypk(setting.expansion[v])) {
 						const load = await mainGame.get.expansions();
 						setting.expansion = load.ypk.map(i => i.name);
-						toast.info(mainGame.get.text().toast.delete)
+						toast.info(mainGame.get.text(I18N_KEYS.SETTING_DELETE_YPK))
 					}
 				}
-			}, mainGame.get.system(constant.str.system_conf.chk.ypk_delete));
+			}, mainGame.get.system(CONSTANT.KEYS.SETTING_CHK_DELETE_YPK));
 		},
 		change : async (value : string | boolean, v : number) : Promise<void> => {
 			setting.loading = true;
 			const load = await mainGame.get.expansions();
 			setting.expansion = load.ypk.map(i => i.name);
 			if (typeof value === 'string') {
-				mainGame.push.system(constant.str.system_conf.string.expansion, value);
-				await mainGame.load.ypk(await join(constant.str.dirs.expansions, value));
+				mainGame.push.system(CONSTANT.KEYS.SETTING_LOADING_EXPANSION, value);
+				await mainGame.load.ypk(await join(CONSTANT.DIRS.EXPANSION, value));
 				await fs.write.system();
 			} else {
-				mainGame.remove.system(constant.str.system_conf.string.expansion, setting.expansion[v]);
+				mainGame.remove.system(CONSTANT.KEYS.SETTING_LOADING_EXPANSION, setting.expansion[v]);
 				await fs.write.system();
 				await mainGame.reload();
 			}
@@ -258,7 +255,7 @@
 			const chk = await mainGame.chk.version()
 			if (!chk)
 				Dialog({
-					title : mainGame.get.text().setting.update,
+					title : mainGame.get.text(I18N_KEYS.SETTING_UPDATE),
 					onConfirm : async () : Promise<void> => {
 						await expansion.resert(true);
 					}
@@ -285,11 +282,11 @@
 	onBeforeMount(async () : Promise<void> => {
 		const load = await mainGame.get.expansions();
 		setting.expansion = load.ypk.map(i => i.name);
-		setting.load = (mainGame.get.system(constant.str.system_conf.string.expansion) as Array<string> | undefined) ?? [];
-		const items = Object.entries(constant.str.system_conf.chk);
-		setting.items = items.map(i => i[1]);
-		setting.items_true = setting.items.filter(i => mainGame.get.system(i));
-		Object.entries(constant.str.system_conf.sound).forEach(i => setting.sound[i[1]] = mainGame.get.system(i[1]) as number);
+		setting.load = (mainGame.get.system(CONSTANT.KEYS.SETTING_LOADING_EXPANSION) as Array<string> | undefined) ?? [];
+		const items = Object.entries(CONSTANT.KEYS).filter(i => i[0].startsWith('SETTING_CHK'));
+		setting.items = items;
+		setting.items_true = setting.items.map(i => i[1]).filter(i => mainGame.get.system(i));
+		setting.sound = mainGame.get.system(CONSTANT.KEYS.SETTING_VOICE_BACK_BGM) as number;
 	});
 
 	watch(() => { return setting.sound; }, async (n) => {

@@ -1,7 +1,7 @@
 <template>
 	<div class = 'search' ref = 'dom'>
 		<Input
-			:placeholder = 'mainGame.get.text().deck.search.name'
+			:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_SEARCH_NAME)'
 			:variant = 'true'
 			v-model = 'search.info.desc'
 			@keydown = 'page.press'
@@ -110,22 +110,22 @@
 				</TransitionGroup>
 				<div class = 'input'>
 					<Input
-						:placeholder = 'mainGame.get.text().deck.search.atk'
+						:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_SEARCH_ATK)'
 						:rules = 'search.rule.atk'
 						v-model = 'search.info.atk'
 					/>
 					<Input
-						:placeholder = 'mainGame.get.text().deck.search.def'
+						:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_SEARCH_DEF)'
 						:rules = 'search.rule.atk'
 						v-model = 'search.info.def'
 					/>
 					<Input
-						:placeholder = 'mainGame.get.text().deck.search.level'
+						:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_SEARCH_LV)'
 						:rules = 'search.rule.level'
 						v-model = 'search.info.level'
 					/>
 					<Input
-						:placeholder = 'mainGame.get.text().deck.search.scale'
+						:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_SEARCH_SCALE)'
 						:rules = 'search.rule.level'
 						v-model = 'search.info.scale'
 					/>
@@ -141,6 +141,7 @@
 <script setup lang = 'ts'>
 	import { ref, onUnmounted, onMounted, reactive, watch } from 'vue';
 	import mainGame from '../../script/game';
+	import { I18N_KEYS } from '../../script/language/i18n';
 	import Input from '../varlet/input.vue';
 	import Button from '../varlet/button.vue';
 	import Select from '../varlet/select.vue';
@@ -187,7 +188,7 @@
 				|| typeof props.search.rule.atk(props.search.info.def ?? '') !== 'boolean'
 			) {
 				page.setting.on();
-				toast.error(mainGame.get.text().rule.search)
+				toast.error(mainGame.get.text(I18N_KEYS.DECK_RULE_SEARCH_INFO))
 				return;
 			}
 			page.list = [];

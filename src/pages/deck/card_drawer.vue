@@ -39,7 +39,7 @@
 <script setup lang = 'ts'>
 	import { reactive, watch, ref, onUnmounted, onMounted } from 'vue';
 	import mainGame from '../../script/game';
-	import constant from '../../script/constant';
+	import * as CONSTANT from '../../script/constant';
 	import { CardInfo, Info } from '../../script/card';
 	const dom = ref<HTMLElement | null>(null);
 	const cardinfo = reactive({
@@ -84,7 +84,7 @@
 			if (e.key === 'Escape')
 				props.unshow();
 		},
-		buttons : (mainGame.get.textures(constant.str.files.textures.deck) as Array<string | undefined>)?.filter(i => i !== undefined) ?? []
+		buttons : (mainGame.get.textures(CONSTANT.FILES.TEXTURE_DECK) as Array<string | undefined>)?.filter(i => i !== undefined) ?? []
 	};
 
 	defineExpose({

@@ -1,6 +1,6 @@
 import Card, { TYPE } from '../../../script/card';
 import mainGame from '../../../script/game';
-import constant from '../../../script/constant';
+import * as CONSTANT from '../../../script/constant';
 import { POS } from './network';
 import * as CSS from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import gsap from '../../../script/gsap';
@@ -187,7 +187,7 @@ class Client_Card {
 
 	pos = () : number => {
 		const rotation = gsap.getProperty(this.three.element.children[0], "rotationZ") === 0;
-		const pos = (this.three.element.children[0] as HTMLImageElement).src === mainGame.get.textures(constant.str.files.textures.cover) ?
+		const pos = (this.three.element.children[0] as HTMLImageElement).src === mainGame.get.textures(CONSTANT.FILES.TEXTURE_COVER) ?
 			rotation ? POS.FACEDOWN_ATTACK : POS.FACEDOWN_DEFENSE : rotation ? POS.FACEUP_ATTACK : POS.FACEUP_DEFENSE;
 		return pos;
 	}

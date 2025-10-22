@@ -2,12 +2,13 @@ import { convertFileSrc } from '@tauri-apps/api/core';
 import * as fs from '@tauri-apps/plugin-fs';
 import * as path from '@tauri-apps/api/path';
 
-import constant from './constant';
+import * as CONSTANT from './constant';
 import toast from './toast';
 import mainGame from './game';
 import invoke, { Pic } from './invoke';
 
 import Deck from '../pages/deck/deck';
+import { I18N_KEYS } from './language/i18n';
 
 interface File {
 	name : string;
@@ -22,7 +23,7 @@ class Fs {
 	copy_dir : fs.CopyFileOptions;
 
 	constructor () {
-		const base_dir = constant.system.base_dir() 
+		const base_dir = CONSTANT.BASE_DIR
 		this.dir = { baseDir: base_dir };
 		this.rename_dir = {
 			oldPathBaseDir : base_dir,
@@ -36,7 +37,7 @@ class Fs {
 	};
 
 	init_path = async () : Promise<void> => {
-		this.path = await constant.system.base_path();
+		this.path = await CONSTANT.BASE_PATH();
 	}
 
 	exists = async (file : string) : Promise<boolean> => {
@@ -50,13 +51,13 @@ class Fs {
 
 	init = async (chk : boolean = false, chk_download : boolean = false) : Promise<boolean> => {
 		try {
-			if (!await this.exists(constant.str.files.assets) || chk_download) {
-				toast.info(mainGame.get.text().toast.download.start);
-				if ((await this.write.from_url(constant.str.url.assets, constant.str.files.assets)).length === 0)
+			if (!await this.exists(CONSTANT.FILES.ASSETS_ZIP) || chk_download) {
+				toast.info(mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_START));
+				if ((await this.write.from_url(CONSTANT.URL.ASSETS, CONSTANT.FILES.ASSETS_ZIP)).length === 0)
 					return false;
-				toast.info(mainGame.get.text().toast.download.complete);
+				toast.info(mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_COMPELETE));
 			}
-			await invoke.unzip(this.path!, await path.join(this.path!, constant.str.files.assets), chk);
+			await invoke.unzip(this.path!, await path.join(this.path!, CONSTANT.FILES.ASSETS_ZIP), chk);
 			return true;
 		} catch (error) {
 			this.write.log(error);
@@ -77,7 +78,7 @@ class Fs {
 	read = {
 		database : async (file : string) : Promise<Array<Array<string | number>> | undefined> => {
 			try {
-				const entries = await invoke.read_db(await path.join(await constant.system.base_path(), file));
+				const entries = await invoke.read_db(await path.join(this.path!, file));
 				if (entries.error === undefined)
 					return entries.content!.map(i => [...i[0], ...i[1]]);
 			} catch (error) {
@@ -89,7 +90,7 @@ class Fs {
 			let p = '';
 			let result : Array<Array<string | number>> | undefined = undefined;
 			try {
-				p = await path.join(constant.str.dirs.cache, `${Math.random().toString().slice(2)}${constant.str.extends.cdb}`)
+				p = await path.join(CONSTANT.DIRS.CACHE, `${Math.random().toString().slice(2)}.cdb`)
 				if (await(this.write.file(p, file)))
 					result = await this.read.database(p);
 			} catch (error) {
@@ -102,10 +103,10 @@ class Fs {
 		},
 		pics : async (codes : Array<number> = []) : Promise<[Array<Pic>, Array<number>]> => {
 			const folds = [
-				await path.join(this.path!, constant.str.dirs.expansions, constant.str.exdirs.pics)
+				await path.join(this.path!, CONSTANT.DIRS.EXPANSION, CONSTANT.DIRS.PIC)
 			];
 			if (!mainGame.is_android())
-				folds.splice(0, 0, await path.join(this.path!, constant.str.exdirs.pics));
+				folds.splice(0, 0, await path.join(this.path!, CONSTANT.DIRS.PIC));
 			const entries = await invoke.read_pics(folds, codes);
 			if (entries.error === undefined) {
 				entries.content![0].forEach((_, v) => {
@@ -118,29 +119,29 @@ class Fs {
 		},
 		zip : async (file : string, file_type : Array<string | number> = []) : Promise<Map<RegExp, Map<string, Blob | Uint8Array | string>>> => {
 			let map = new Map([
-				[constant.reg.database, new Map],
-				[constant.reg.picture, new Map],
-				[constant.reg.conf, new Map],
-				[constant.reg.ini, new Map]
+				[CONSTANT.REG.DATABASE, new Map],
+				[CONSTANT.REG.PICTURE, new Map],
+				[CONSTANT.REG.CONF, new Map],
+				[CONSTANT.REG.INI, new Map]
 			]);
 			try {
-				const entries = await invoke.read_zip(await path.join(await constant.system.base_path(), file), file_type.map(i => `${i}`));
+				const entries = await invoke.read_zip(await path.join(this.path!, file), file_type.map(i => `${i}`));
 				if (entries.error === undefined)
 					for (const [name, content] of entries.content!) {
-						if (name.match(constant.reg.picture)) {
+						if (name.match(CONSTANT.REG.PICTURE)) {
 							const blob = new Blob([new Uint8Array(content.content as Uint8Array)], { type : name.endsWith('png') ? 'image/png' : 'image/jpeg' })
 							let filename = name.replace(/\\/g, '/').split('/').filter(part => part.trim() !== '').pop() || '';
 							if (!filename.startsWith('.')) {
 								const dotIndex = filename.lastIndexOf('.');
 								filename = dotIndex > 0 ? filename.slice(0, dotIndex) : filename;
 							}
-							map.get(constant.reg.picture)!.set(filename, blob);
-						} else if (name.match(constant.reg.conf)) {
-							map.get(constant.reg.conf)!.set(name, content.content as string);
-						} else if (name.match(constant.reg.ini)) {
-							map.get(constant.reg.ini)!.set(name, content.content as string);
-						} else if (name.match(constant.reg.database)) {
-							map.get(constant.reg.database)!.set(name, content.content as Uint8Array);
+							map.get(CONSTANT.REG.PICTURE)!.set(filename, blob);
+						} else if (name.match(CONSTANT.REG.CONF)) {
+							map.get(CONSTANT.REG.CONF)!.set(name, content.content as string);
+						} else if (name.match(CONSTANT.REG.INI)) {
+							map.get(CONSTANT.REG.INI)!.set(name, content.content as string);
+						} else if (name.match(CONSTANT.REG.DATABASE)) {
+							map.get(CONSTANT.REG.DATABASE)!.set(name, content.content as Uint8Array);
 						}
 					}
 			} catch (error) {
@@ -159,7 +160,7 @@ class Fs {
 		ydk : async () : Promise<Array<Deck>> => {
 			try {
 				const decks : Array<Deck> = [];
-				const reader = await invoke.read_texts(await path.join(this.path!, constant.str.dirs.deck), 'ydk');
+				const reader = await invoke.read_texts(await path.join(this.path!, CONSTANT.DIRS.DECK), 'ydk');
 				if (reader.error === undefined) {
 					reader.content!.forEach(i => {
 						const ydk = Deck.fromYdkString(i[1].content);
@@ -251,15 +252,16 @@ class Fs {
 	write = {
 		log : async (text : string)  : Promise<boolean> => {
 			try {
+				const ERROR_LOG = 'error.log';
 				console.error(text);
 				toast.error(text);
-				const log = `[${new Date().toLocaleString()}] ${text}${constant.system.line_feed()}`
-				if (await fs.exists(constant.log.error, this.dir)) {
-					const file = await fs.open(constant.log.error, { append: true, baseDir : this.dir.baseDir });
+				const log = `[${new Date().toLocaleString()}] ${text}${CONSTANT.LINE_FEED}`
+				if (await fs.exists(ERROR_LOG, this.dir)) {
+					const file = await fs.open(ERROR_LOG, { append: true, baseDir : this.dir.baseDir });
 					await file.write(new TextEncoder().encode(log));
 					await file.close();
 				} else {
-					const file = await fs.create(constant.log.error, this.dir)
+					const file = await fs.create(ERROR_LOG, this.dir)
 					await file.write(new TextEncoder().encode(log));
 					await file.close();
 				}
@@ -273,9 +275,9 @@ class Fs {
 			try {
 				let system = '';
 				for (const [k, i] of mainGame.system) {
-					system += `${k} = ${i}${constant.system.line_feed()}`
+					system += `${k} = ${i}${CONSTANT.LINE_FEED}`
 				}
-				await fs.writeTextFile(constant.str.files.system, system, this.dir);
+				await fs.writeTextFile(CONSTANT.FILES.SYSTEM_CONF, system, this.dir);
 				return true;
 			} catch (error) {
 				this.write.log(error);
@@ -284,7 +286,7 @@ class Fs {
 		},
 		ydk : async (file : string, ydk : Deck) : Promise<boolean> => {
 			try {
-				await fs.writeTextFile(await path.join(constant.str.dirs.deck, `${file}.ydk`), ydk.toYdkString(), this.dir);
+				await fs.writeTextFile(await path.join(CONSTANT.DIRS.DECK, `${file}.ydk`), ydk.toYdkString(), this.dir);
 				return true;
 			} catch (error) {
 				this.write.log(error);
@@ -332,11 +334,11 @@ class Fs {
 		},
 		ypk : async (url : string, file : string = '') : Promise<Array<string>> => {
 			try {
-				if (file.length > 0 && !file.endsWith(constant.str.extends.ypk))
-					file += constant.str.extends.ypk;
-				const download = await invoke.download(url, await path.join(this.path!, constant.str.dirs.expansions), file, constant.str.extends.ypk);
+				if (file.length > 0 && !file.endsWith('.ypk'))
+					file += '.ypk';
+				const download = await invoke.download(url, await path.join(this.path!, CONSTANT.DIRS.EXPANSION), file, '.ypk');
 				if (typeof download === 'string') {
-					const p = await path.join(constant.str.dirs.expansions, download);
+					const p = await path.join(CONSTANT.DIRS.EXPANSION, download);
 					return [p, download];
 				}
 			} catch (error) {
@@ -357,7 +359,7 @@ class Fs {
 		},
 		ydk : async (file : string) : Promise<boolean> => {
 			try {
-				return this.delete.file(await path.join(constant.str.dirs.deck, `${file}${file.endsWith('.ydk') ? '' : '.ydk'}`));
+				return this.delete.file(await path.join(CONSTANT.DIRS.DECK, `${file}${file.endsWith('.ydk') ? '' : '.ydk'}`));
 			} catch (error) {
 				this.write.log(error);
 			}
@@ -365,7 +367,7 @@ class Fs {
 		},
 		ypk : async (file : string) : Promise<boolean> => {
 			try {
-				return await this.delete.file(await path.join(constant.str.dirs.expansions, `${file}${file.endsWith('.ypk') ? '' : '.ypk'}`));
+				return await this.delete.file(await path.join(CONSTANT.DIRS.EXPANSION, `${file}${file.endsWith('.ypk') ? '' : '.ypk'}`));
 			} catch (error) {
 				this.write.log(error);
 			}
@@ -385,8 +387,8 @@ class Fs {
 		ydk : async (old_path : string, new_path : string) : Promise<boolean> => {
 			try {
 				await this.rename.file(
-					await path.join(constant.str.dirs.deck, `${old_path}.ydk`),
-					await path.join(constant.str.dirs.deck, `${new_path}.ydk`)
+					await path.join(CONSTANT.DIRS.DECK, `${old_path}.ydk`),
+					await path.join(CONSTANT.DIRS.DECK, `${new_path}.ydk`)
 				);
 				return true;
 			} catch (error) {

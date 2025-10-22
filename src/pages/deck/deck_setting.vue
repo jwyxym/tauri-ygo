@@ -1,7 +1,7 @@
 <template>
 	<div class = 'deck_setting' ref = 'dom'>
 		<Input
-			:placeholder = 'mainGame.get.text().deck.name'
+			:placeholder = 'mainGame.get.text(I18N_KEYS.DECK_NAME)'
 			:rules = 'deck.name_rule'
 			:variant = 'true'
 			v-model = 'deck.name'
@@ -11,6 +11,7 @@
 <script setup lang = 'ts'>
 	import { ref, onUnmounted, onMounted } from 'vue';
 	import mainGame from '../../script/game';
+	import { I18N_KEYS } from '../../script/language/i18n';
 	import Input from '../varlet/input.vue';
 
 	const dom = ref<HTMLElement | null>(null);

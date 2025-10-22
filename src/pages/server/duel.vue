@@ -8,7 +8,7 @@
 	import * as CSS from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 	
 	import mainGame from '../../script/game';
-	import constant from '../../script/constant';
+	import * as CONSTANT from '../../script/constant';
 	import { LOCATION, POS } from './post/network';
 	import Client_Card from './post/client_card';
 	import gsap from '../../script/gsap';
@@ -84,8 +84,8 @@
 		scene : new THREE.Scene(),
 		camera : new THREE.PerspectiveCamera(),
 		src : {
-			unknown : mainGame.get.textures(constant.str.files.textures.unknown) as string | undefined ?? '',
-			cover : mainGame.get.textures(constant.str.files.textures.cover) as string | undefined ?? ''
+			unknown : mainGame.get.textures(CONSTANT.FILES.TEXTURE_UNKNOW) as string | undefined ?? '',
+			cover : mainGame.get.textures(CONSTANT.FILES.TEXTURE_COVER) as string | undefined ?? ''
 		},
 		resize : () => {
 			three.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -283,7 +283,14 @@
 					alignItems: 'center',
 					transition : 'all 0.2s ease',
 				});
-				for (const [key, src] of Object.entries(constant.str.files.textures.card_info)) {
+				for (const [key, src] of [
+					['link', CONSTANT.FILES.TEXTURE_TYPE_LINK],
+					['rank', CONSTANT.FILES.TEXTURE_TYPE_RANK],
+					['overlay', CONSTANT.FILES.TEXTURE_TYPE_OVERLAY],
+					['scale', CONSTANT.FILES.TEXTURE_TYPE_SCALE],
+					['tuner', CONSTANT.FILES.TEXTURE_TYPE_TUNER],
+					['level', CONSTANT.FILES.TEXTURE_TYPE_LV],
+				]) {
 					const div = document.createElement('div');
 					div.classList.add(key);
 					Object.assign(div.style, {
@@ -422,7 +429,7 @@
 				gsap.opacity(card.three.element, 1)
 				return card;
 			},
-			back : (pic : Array<string | undefined> = mainGame.get.textures(constant.str.files.textures.back) as Array<string>) : void => {
+			back : (pic : Array<string | undefined> = mainGame.get.textures(CONSTANT.FILES.TEXTURE_BACK) as Array<string>) : void => {
 				const back = three.create.back(pic.filter(i => i !== undefined));
 				three.create.send.back(back, { x : 0, y : 0, z : 0 * three.create.size.top });
 				gsap.opacity(back.element, 1)

@@ -1,157 +1,114 @@
-import TEXT_Like from './interface';
+import { I18N, I18N_KEYS } from './i18n';
 
-const Zh_CN : TEXT_Like = {
-	unknow : '???',
-	menu : [
-		'人机模式',
-		'联机模式',
-		'编辑卡组',
-		'系统设置',
-		'退出游戏'
-	],
-	start : {
-		title : '需要下载游戏数据',
-		message : '此过程需要流量（约300MB）'
-	},
-	dialog : {
-		confirm : '确认',
-		cancel : '取消'
-	},
-	deck : {
-		main : '主卡组',
-		extra : '额外卡组',
-		side : '副卡组',
-		new : '新建卡组',
-		from_url : '从url导入',
-		from_code : '从卡组码导入',
-		name : '卡组名称',
-		info : 'Tauri-YGO',
-		exit : '确认要退出吗？',
-		remove : '删除卡片 {:?}？',
-		search : {
-			name : '卡片搜索',
-			link : '连接标记',
-			type : '类型',
-			category : '效果分类',
-			race : '种族',
-			ot : 'O/T',
-			attribute : '属性',
-			atk : '攻击力',
-			def : '守备力',
-			level : '等级/阶级/连接数',
-			scale : '灵摆刻度',
-			forbidden : '禁限',
-			lflist : '禁卡表'
-		},
-		lflist : {
-			forbidden : '禁止',
-			limit : '限制',
-			semi_limit : '准限制',
-			unlimit : '无限制'
-		},
-		delete : {
-			title : '确定要删除卡组吗',
-			message : '[{:?}]将会永久消失！（真的很久！）'
-		}
-	},
-	server : {
-		address : '服务器地址',
-		name : '名称',
-		password : '房间密码',
-		no_check_deck : '*不检查卡组',
-		no_shuffle_deck : '*不切洗手卡',
-		watcher : '观战者',
-		deck : '选择卡组',
-		chat : '发送消息',
-		surrender : '确认要投降吗？',
-		rule : ['OCG', 'TCG', '简体中文', '自定义卡', '无独有卡', '所有卡片'],
-		mode : ['单局模式', '比赛模式', '双打模式'],
-		is_first : ['先攻', '后攻'],
-		to : {
-			duelist : '决斗者',
-			watcher : '观战者'
-		},
-		home : {
-			lflist : '禁限卡表',
-			rule : '卡片允许',
-			mode : '决斗模式',
-			start_lp : '基本分',
-			start_hand : '初始手牌',
-			draw_count : '每轮抽卡',
-			time_limit : '回合时间',
-			watch : '观战人数'
-		}
-	},
-	rule : {
-		search : '搜索词不合规',
-		name : {
-			exist : '卡组已存在',
-			unlawful : '文件名非法',
-			length : '文件名不可为空'
-		},
-		atk : {
-			unlawful : '只允许包含数字和?'
-		},
-		level : {
-			unlawful : '只允许包含数字'
-		},
-		deck : {
-			deck_count : '卡组已达最大数量 {:?}',
-			card_count : {
-				max : '卡片已达最大数量 {:?}',
-				less : '卡片当前数量 0'
-			}
-		}
-	},
-	setting : {
-		setting_items : new Map([
-			['delete_ypk', '删除补丁时询问'],
-			['delete', '删除卡片时询问'],
-			['exit', '退出卡组时询问'],
-			['button', '确认按钮至于左侧'],
-			['back_sound', '背景音量'],
-			['button_sound', '按钮音量'],
-		]),
-		delete : '确认要删除吗？',
-		ex_cards : '拓展卡包',
-		system_setting : '系统设置',
-		reload : '重新加载卡片',
-		resert : '重置卡片资源',
-		version : '检查版本',
-		update : '检查到新版本，是否更新？',
-		download : {
-			url : '下载自定义卡包',
-			super_pre : '下载先行卡',
-			ex : '下载卡片补丁',
-			name : '补丁文件名称（选填）'
-		}
-	},
-	toast : {
-		save : '保存成功',
-		delete : '删除成功',
-		copy : '已复制到粘贴板',
-		rps : {
-			result : '猜拳结果：',
-			win : '胜',
-			bye : '平',
-			lose : '负'
-		},
-		error : {
-			ydk : {
-				from_url : '从url转换到卡组失败',
-				from_code : '从卡组码转换到卡组失败'
-			},
-			setting : {
-				download : 'url不可为空'
-			},
-			deck : '请选择卡组',
-			player : '似乎还有人没准备好哦'
-		},
-		download : {
-			start : '开始下载',
-			complete : '下载完成'
-		}
-	}
-}
+const Zh_CN : I18N = {}
+Zh_CN[I18N_KEYS.UNKNOW] = '???';
+Zh_CN[I18N_KEYS.MENU_SINGLE] = '人机模式';
+Zh_CN[I18N_KEYS.MENU_CONENCT] = '联机模式';
+Zh_CN[I18N_KEYS.MENU_DECK] = '编辑卡组';
+Zh_CN[I18N_KEYS.MENU_SETTING] = '系统设置';
+Zh_CN[I18N_KEYS.MENU_EXIT] = '退出游戏';
+Zh_CN[I18N_KEYS.START_TITLE] = '需要下载游戏数据';
+Zh_CN[I18N_KEYS.START_MESSAGR] = '此过程需要流量（约300MB）';
+Zh_CN[I18N_KEYS.DIALOG_CONFIRM] = '确认';
+Zh_CN[I18N_KEYS.DIALOG_CANCLE] = '取消';
+Zh_CN[I18N_KEYS.DECK_MAIN] = '主卡组';
+Zh_CN[I18N_KEYS.DECK_EXTRA] = '额外卡组';
+Zh_CN[I18N_KEYS.DECK_SIDE] = '副卡组';
+Zh_CN[I18N_KEYS.DECK_NEW] = '新建卡组';
+Zh_CN[I18N_KEYS.DECK_FROM_URL] = '从url导入';
+Zh_CN[I18N_KEYS.DECK_NAME] = '卡组名称';
+Zh_CN[I18N_KEYS.DECK_INFO] = 'Tauri-YGO';
+Zh_CN[I18N_KEYS.DECK_EXIT] = '确认要退出吗？';
+Zh_CN[I18N_KEYS.CARD_REMOVE] = '删除卡片 {:?}？';
+Zh_CN[I18N_KEYS.CARD_SEARCH_NAME] = '卡片搜索';
+Zh_CN[I18N_KEYS.CARD_SEARCH_LINK] = '连接标记';
+Zh_CN[I18N_KEYS.CARD_SEARCH_TYPE] = '类型';
+Zh_CN[I18N_KEYS.CARD_SEARCH_CATEGORY] = '效果分类';
+Zh_CN[I18N_KEYS.CARD_SEARCH_RACE] = '种族';
+Zh_CN[I18N_KEYS.CARD_SEARCH_OT] = 'O/T';
+Zh_CN[I18N_KEYS.CARD_SEARCH_ATTRIBUTE] = '属性';
+Zh_CN[I18N_KEYS.CARD_SEARCH_ATK] = '攻击力';
+Zh_CN[I18N_KEYS.CARD_SEARCH_DEF] = '守备力';
+Zh_CN[I18N_KEYS.CARD_SEARCH_LV] = '等级/阶级/连接数';
+Zh_CN[I18N_KEYS.CARD_SEARCH_SCALE] = '灵摆刻度';
+Zh_CN[I18N_KEYS.CARD_SEARCH_LFLIST] = '禁卡表';
+Zh_CN[I18N_KEYS.CARD_SEARCH_FORBIDDEN] = '禁限';
+Zh_CN[I18N_KEYS.DECK_LFLIST_FORBIDDEN] = '禁止';
+Zh_CN[I18N_KEYS.DECK_LFLIST_LIMIT] = '限制';
+Zh_CN[I18N_KEYS.DECK_LFLIST_SEMI_LIMIT] = '准限制';
+Zh_CN[I18N_KEYS.DECK_LFLIST_UNLIMIT] = '无限制';
+Zh_CN[I18N_KEYS.DECK_DELETE_TITLE] = '确定要删除卡组吗';
+Zh_CN[I18N_KEYS.DECK_DELETE_MESSAGR] = '[{:?}]将会永久消失！（真的很久！）';
+Zh_CN[I18N_KEYS.DECK_RULE_NAME_EXIST] = '卡组已存在';
+Zh_CN[I18N_KEYS.DECK_RULE_NAME_UNLAWFUL] = '文件名非法';
+Zh_CN[I18N_KEYS.DECK_RULE_NAME_LEN] = '文件名不可为空';
+Zh_CN[I18N_KEYS.DECK_RULE_SEARCH_INFO] = '搜索词不合规';
+Zh_CN[I18N_KEYS.DECK_RULE_SEARCH_ATK] = '只允许包含数字和?';
+Zh_CN[I18N_KEYS.DECK_RULE_SEARCH_LV] = '只允许包含数字';
+Zh_CN[I18N_KEYS.DECK_RULE_DECK_MAX] = '卡组已达最大数量 {:?}';
+Zh_CN[I18N_KEYS.DECK_RULE_CARD_MAX] = '卡片已达最大数量 {:?}';
+Zh_CN[I18N_KEYS.DECK_RULE_CARD_LESS] = '卡片当前数量 0';
+Zh_CN[I18N_KEYS.DECK_SAVE_COMPELETE] = '保存成功';
+Zh_CN[I18N_KEYS.DECK_DELETE_COMPELETE] = '删除成功';
+Zh_CN[I18N_KEYS.DECK_COPY_COMPELETE] = '已复制到粘贴板';
+Zh_CN[I18N_KEYS.DECK_FROM_URL_ERROR] = '从url转换到卡组失败';
+Zh_CN[I18N_KEYS.DECK_FROM_CODE_ERROR] = '从卡组码转换到卡组失败';
+
+Zh_CN[I18N_KEYS.SERVER_ADDRESS] = '服务器地址';
+Zh_CN[I18N_KEYS.SERVER_NAME] = '名称';
+Zh_CN[I18N_KEYS.SERVER_PASSWORD] = '房间密码';
+Zh_CN[I18N_KEYS.SERVER_NO_CHECK_DECK] = '*不检查卡组';
+Zh_CN[I18N_KEYS.SERVER_NO_SHUFFLE_DECK] = '*不切洗手卡';
+Zh_CN[I18N_KEYS.SERVER_WATCHER] = '观战者';
+Zh_CN[I18N_KEYS.SERVER_DECK] = '选择卡组';
+Zh_CN[I18N_KEYS.SERVER_CHAT] = '发送消息';
+Zh_CN[I18N_KEYS.SERVER_SURRENDER] = '确认要投降吗？';
+Zh_CN[I18N_KEYS.SERVER_RULE_OCG] = 'OCG';
+Zh_CN[I18N_KEYS.SERVER_RULE_TCG] = 'TCG';
+Zh_CN[I18N_KEYS.SERVER_RULE_SC] = '简体中文';
+Zh_CN[I18N_KEYS.SERVER_RULE_CUSTOM] = '自定义卡';
+Zh_CN[I18N_KEYS.SERVER_RULE_NO_EXCLUSIVE] = '无独有卡';
+Zh_CN[I18N_KEYS.SERVER_RULE_ALL] = '所有卡片';
+Zh_CN[I18N_KEYS.SERVER_MODE_SINGLE] = '单局模式';
+Zh_CN[I18N_KEYS.SERVER_MODE_MATCH] = '比赛模式';
+Zh_CN[I18N_KEYS.SERVER_MODE_TAG] = '双打模式';
+Zh_CN[I18N_KEYS.SERVER_PLAYER_FIRST] = '先攻';
+Zh_CN[I18N_KEYS.SERVER_PLAYER_NEXT] = '后攻';
+Zh_CN[I18N_KEYS.SERVER_TO_DUELIST] = '决斗者';
+Zh_CN[I18N_KEYS.SERVER_TO_WATCHER] = '观战者';
+Zh_CN[I18N_KEYS.SERVER_HOME_LFLIST] = '禁限卡表';
+Zh_CN[I18N_KEYS.SERVER_HOME_RULE] = '卡片允许';
+Zh_CN[I18N_KEYS.SERVER_HOME_MODE] = '决斗模式';
+Zh_CN[I18N_KEYS.SERVER_HOME_START_LP] = '基本分';
+Zh_CN[I18N_KEYS.SERVER_HOME_START_HAND] = '初始手牌';
+Zh_CN[I18N_KEYS.SERVER_HOME_DRAW_COUNT] = '每轮抽卡';
+Zh_CN[I18N_KEYS.SERVER_HOME_TIME_LIMIT] = '回合时间';
+Zh_CN[I18N_KEYS.SERVER_HOME_WATCH] = '观战人数';
+Zh_CN[I18N_KEYS.SERVER_RPS_WIN] = '猜拳结果：胜';
+Zh_CN[I18N_KEYS.SERVER_RPS_BYE] = '猜拳结果：平';
+Zh_CN[I18N_KEYS.SERVER_RPS_LOSE] = '猜拳结果：负';
+Zh_CN[I18N_KEYS.SERVER_DECK_ERROR] = '请选择卡组';
+Zh_CN[I18N_KEYS.SERVER_PLAYER_ERROR] = '似乎还有人没准备好哦';
+
+Zh_CN[I18N_KEYS.SETTING_CHK_DELETE_YPK] = '删除补丁时询问';
+Zh_CN[I18N_KEYS.SETTING_CHK_DELETE_DECK] = '删除卡片时询问';
+Zh_CN[I18N_KEYS.SETTING_CHK_EXIT_DECK] = '退出卡组时询问';
+Zh_CN[I18N_KEYS.SETTING_CHK_SWAP_BUTTON] = '确认按钮至于左侧';
+Zh_CN[I18N_KEYS.SETTING_VOICE_BACK_BGM] = '背景音量';
+Zh_CN[I18N_KEYS.SETTING_DELETE_YPK] = '确认要删除吗？';
+Zh_CN[I18N_KEYS.SETTING_EX_CARDS] = '拓展卡包';
+Zh_CN[I18N_KEYS.SETTING_SYSTEM] = '系统设置';
+Zh_CN[I18N_KEYS.SETTING_RELOAD] = '重新加载卡片';
+Zh_CN[I18N_KEYS.SETTING_RESERT] = '重置资源';
+Zh_CN[I18N_KEYS.SETTING_VERSION] = '检查版本';
+Zh_CN[I18N_KEYS.SETTING_UPDATE] = '检查到新版本，是否更新？';
+Zh_CN[I18N_KEYS.SETTING_DOWNLOAD_EX_CARDS] = '下载卡片补丁';
+Zh_CN[I18N_KEYS.SETTING_DOWNLOAD_SUPER_PRE] = '下载先行卡';
+Zh_CN[I18N_KEYS.SETTING_DOWNLOAD_CUSTOM] = '下载自定义卡包';
+Zh_CN[I18N_KEYS.SETTING_DOWNLOAD_NAME] = '补丁文件名称（选填）';
+Zh_CN[I18N_KEYS.SETTING_DOWNLOAD_START] = '开始下载';
+Zh_CN[I18N_KEYS.SETTING_DOWNLOAD_COMPELETE] = '下载完成';
+Zh_CN[I18N_KEYS.SETTING_DOWNLOAD_LEN] = 'url不可为空';
+Zh_CN[I18N_KEYS.SETTING_RULE_NAME_UNLAWFUL] = '文件名非法';
 
 export default Zh_CN;

@@ -1,194 +1,125 @@
 import * as fs from '@tauri-apps/plugin-fs';
 import * as path from '@tauri-apps/api/path';
 import { platform } from '@tauri-apps/plugin-os';
-import { server } from 'typescript';
 
-class System {
-	system : string
-	constructor () {
-		this.system = platform();
-	};
+const SYSTEM = platform();
 
-	base_dir = () : number => {
-		return this.system == 'android' ? fs.BaseDirectory.Public : fs.BaseDirectory.Resource;
-	};
+const BASE_DIR = SYSTEM == 'android' ? fs.BaseDirectory.Public : fs.BaseDirectory.Resource;
+const BASE_PATH = SYSTEM == 'android' ? path.publicDir : path.resourceDir;
+const LINE_FEED = SYSTEM == 'windows' ? '\r\n' : '\n';
 
-	base_path = async () : Promise<string> => {
-		return this.system == 'android' ? await path.publicDir() : await path.resourceDir();
-	};
+const REG = {
+	NAME : /[\\/]([^.]*)\./,
+	FULL_NAME : /[\\/:*?"<>|]/,
+	NUMBER_NAME : /[\\/](\d+)\./,
+	DATABASE : /\.(cdb)$/i,
+	PICTURE : /\.(jpg|png|jpeg)$/i,
+	BGM : /\.(mp4|wav)$/i,
+	CONF : /\.(conf)$/i,
+	INI : /\.(ini)$/i,
+	ZIP : /\.(ypk|zip)$/i,
+	FONT : /\.(ttf)$/i,
+	JSON : /\.(json)$/i,
+	DECK : /\.(ydk)$/i,
+	ATK : /^[0-9?\s]*$/,
+	LV : /^[0-9 ]*$/,
+	LINE_FEED : /\r?\n/
+};
 
-	line_feed = () : string => {
-		const map = new Map<string, string>([
-			['linux', '\n'],
-			['macos', '\n'],
-			['ios', '\n'],
-			['freebsd', '\n'],
-			['dragonfly', '\n'],
-			['netbsd', '\n'],
-			['openbsd', '\n'],
-			['solaris', '\n'],
-			['android', '\n'],
-			['windows', '\r\n']
-		]);
-		const lf = map.get(this.system);
-		return lf ?? '\n';
-	};
+const DIRS = {
+	TEXTURE : 'textures',
+	EXPANSION : 'expansions',
+	LUA : 'lua',
+	DECK : 'deck',
+	CACHE : 'cache',
+	SOUND : 'sound',
+	STRING : 'strings',
+	INFO : 'info',
+	DB : 'cdb',
+	PIC : 'pics',
+	FONT : 'font'
+};
+
+const LANGUAGE = {
+	Zh_CN : 'zh-CN'
+};
+
+const FILES = {
+	LFLIST_CONF : 'lflist.conf',
+	SERVER_CONF : 'servers.conf',
+	SYSTEM_CONF : 'system.conf',
+	BACK_BGM : 'Night View.wav',
+	BATTLE_BGM : 'City of Night.wav',
+	PIC_ZIP : 'pics.zip',
+	ASSETS_ZIP : 'assets.zip',
+	TEXTURE_UNKNOW : 'unknown.jpg',
+	TEXTURE_COVER : 'cover.jpg',
+	TEXTURE_SPELL : 'attr_spell.png',
+	TEXTURE_TRAP : 'attr_trap.png',
+	TEXTURE_ATK : 'atk.png',
+	TEXTURE_DEF : 'def.png',
+	TEXTURE_RPS : ['s.png', 'r.png', 'p.png'],
+	TEXTURE_TYPE_TUNER : 'type_tuner.png',
+	TEXTURE_TYPE_LV : 'type_level.png',
+	TEXTURE_TYPE_RANK : 'type_rank.png',
+	TEXTURE_TYPE_LINK : 'type_link.png',
+	TEXTURE_TYPE_SCALE : 'type_scale.png',
+	TEXTURE_TYPE_OVERLAY : 'type_overlay.png',
+	TEXTURE_BACK : ['backI.jpg', 'backII.jpg'],
+	TEXTURE_DECK : ['deck.png', 'deck_ex.png'],
+	TEXTURE_MENU : [
+		'menu_I.jpg',
+		'menu_II.jpg',
+		'menu_III.jpg',
+		'menu_IV.jpg',
+		'menu_V.jpg'
+	],
+	STRING_CONF : new Map([
+		['', 'strings.conf'],
+		[LANGUAGE.Zh_CN, 'strings-zh-CN.conf']
+	]) as Map<string, string>,
+	INFO_CONF : new Map([
+		['', 'info.conf'],
+		[LANGUAGE.Zh_CN, 'cardinfo-zh-CN.conf']
+	]) as Map<string, string>,
+	DB : new Map([
+		[LANGUAGE.Zh_CN, 'cards-zh-CN.cdb']
+	]) as Map<string, string>,
+};
+
+const URL = {
+	SUPER_PRE : 'https://cdn02.moecube.com:444/ygopro-super-pre/archive/ygopro-super-pre.ypk',
+	ASSETS : SYSTEM === 'android' ?
+		'https://api.gitcode.com/api/v5/repos/jwyxym/tauri-ygo/releases/release-latest/attach_files/assets_android.zip/download' :
+		'https://api.gitcode.com/api/v5/repos/jwyxym/tauri-ygo/releases/release-latest/attach_files/assets.zip/download',
+	VERSION : 'https://web-api.gitcode.com/api/v2/projects/jwyxym%2Ftauri-ygo/releases?repoId=jwyxym%252Ftauri-ygo',
+	VERSION_HEAD : [['Referer', 'https://gitcode.com/']] as Array<[string, string]>
 }
 
-class Constant {
-	MIN_CARD_ID = 128 << 4;
-	reg = {
-		get_number_name : /[\\/](\d+)\./,
-		get_name : /[\\/]([^.]*)\./,
-		database : /\.(cdb)$/i,
-		picture : /\.(jpg|png|jpeg)$/i,
-		bgm : /\.(mp4|wav)$/i,
-		conf : /\.(conf)$/i,
-		ini : /\.(ini)$/i,
-		zip : /\.(ypk|zip)$/i,
-		json : /\.(json)$/i,
-		deck : /\.(ydk)$/i,
-		name : /[\\/:*?"<>|]/,
-		atk : /^[0-9?\s]*$/,
-		level : /^[0-9 ]*$/,
-		line_feed : /\r?\n/
-	};
+const KEYS = {
+	SYSTEM : '!system',
+	VICTORY : '!victory',
+	COUNTER : '!counter',
+	SETCODE : '!setname',
+	OT : '!ot',
+	ATTRIBUTE : '!attribute',
+	LINK : '!link',
+	CATEGORY : '!category',
+	RACE : '!race',
+	TYPE : '!type',
+	SERVER_NAME : 'ServerName',
+	SERVER_HOST : 'ServerHost',
+	SERVER_PORT : 'ServerPort',
+	SETTING_CHK_DELETE_YPK : 'DELETE_YPK',
+	SETTING_CHK_DELETE_DECK : 'DELETE_DECK',
+	SETTING_CHK_EXIT_DECK : 'EXIT_DECK',
+	SETTING_CHK_SWAP_BUTTON : 'SWAP_BUTTON',
+	SETTING_VOICE_BACK_BGM : 'BACK_BGM',
+	SETTING_LOADING_EXPANSION : 'LOADING_EXPANSION',
+	SETTING_SERVER_ADDRESS : 'SERVER_ADDRESS',
+	SETTING_SERVER_PLAYER_NAME : 'SERVER_PLAYER_NAME',
+	SETTING_SERVER_PASS : 'SERVER_PASS',
+	SETTING_DOWMLOAD_TIME : 'DOWMLOAD_TIME',
+};
 
-	str = {
-		blob : 'blob:http',
-		replace : {
-			tauri : '{:?}',
-			strings : ['%ls', '%d']
-		},
-		dirs : {
-			textures : 'textures',
-			expansions : 'expansions',
-			script : 'script',
-			deck : 'deck',
-			cache : 'cache',
-			sound : 'sound',
-			strings : 'strings',
-			info : 'info',
-			database : 'cdb'
-		},
-		exdirs : {
-			pics : 'pics',
-		},
-		files : {
-			conf : {
-				info : 'cardinfo.conf',
-				strings : 'strings.conf',
-				lflist : 'lflist.conf',
-				servers : 'servers.conf',
-			},
-			textures : {
-				unknown : 'unknown.jpg',
-				cover : 'cover.jpg',
-				pic : ['cardI.jpg', 'cardII.jpg'],
-				rps : ['s.png', 'r.png', 'p.png'],
-				back : ['backI.jpg', 'backII.jpg'],
-				atk : 'atk.png',
-				def : 'def.png',
-				spell : 'attr_spell.png',
-				trap : 'attr_trap.png',
-				deck : ['deck.png', 'deck_ex.png'],
-				card_info : {
-					tuner : 'type_tuner.png',
-					level : 'type_level.png',
-					rank : 'type_rank.png',
-					link : 'type_link.png',
-					scale : 'type_scale.png',
-					overlay : 'type_overlay.png'
-				},
-				menu : [
-					'menu_I.jpg',
-					'menu_II.jpg',
-					'menu_III.jpg',
-					'menu_IV.jpg',
-					'menu_V.jpg'
-				]
-			},
-			sound : {
-				back : 'Night View.wav',
-				battle : 'City of Night.wav'
-			},
-			system : 'system.conf',
-			pics : 'pics.zip',
-			assets : 'assets.zip',
-			strings : new Map([]) as Map<string, string>,
-			info : new Map([]) as Map<string, string>,
-			database : new Map([]) as Map<string, string>,
-		},
-		strings_conf : {
-			system : '!system',
-			victory : '!victory',
-			counter : '!counter',
-			setcode : '!setname',
-		},
-		info_conf : {
-			ot : '!ot',
-			attribute : '!attribute',
-			link : '!link',
-			category : '!category',
-			race : '!race',
-			type : '!type'
-		},
-		system_conf : {
-			chk : {
-				ypk_delete : 'delete_ypk',
-				deck_delete : 'delete',
-				deck_exit : 'exit',
-				button : 'button'
-			},
-			string : {
-				expansion : 'load',
-				server_address : 'server_address',
-				server_name : 'server_name',
-				server_pass : 'server_pass',
-				download_time : 'download_time'
-			},
-			sound : {
-				back : 'back_sound',
-				button : 'button_sound'
-			}
-		},
-		ini : {
-			name : 'ServerName',
-			host : 'ServerHost',
-			port : 'ServerPort',
-		},
-		language : {
-			Zh_CN : 'zh-CN'
-		},
-		url : {
-			super_pre : 'https://cdn02.moecube.com:444/ygopro-super-pre/archive/ygopro-super-pre.ypk',
-			assets : '',
-			version : {
-				url : 'https://web-api.gitcode.com/api/v2/projects/jwyxym%2Ftauri-ygo/releases?repoId=jwyxym%252Ftauri-ygo',
-				headers : [['Referer', 'https://gitcode.com/']] as Array<[string, string]>
-			}
-		},
-		extends : {
-			ypk : '.ypk',
-			cdb : '.cdb',
-			jpg : '.jpg',
-			wav : '.wav'
-		}
-	}
-
-	log = {
-		error : 'error.log'
-	};
-
-	system = new System();
-
-	constructor () {
-		this.str.files.strings.set(this.str.language.Zh_CN, 'strings-zh-CN.conf');
-		this.str.files.info.set(this.str.language.Zh_CN, 'cardinfo-zh-CN.conf');
-		this.str.files.database.set(this.str.language.Zh_CN, 'cards-zh-CN.cdb');
-		this.str.url.assets = this.system.system === 'android' ?
-			'https://api.gitcode.com/api/v5/repos/jwyxym/tauri-ygo/releases/release-latest/attach_files/assets_android.zip/download' :
-			'https://api.gitcode.com/api/v5/repos/jwyxym/tauri-ygo/releases/release-latest/attach_files/assets.zip/download';
-	};
-}
-export default new Constant();
+export { REG, DIRS, FILES, LANGUAGE, URL, KEYS, BASE_DIR, BASE_PATH, LINE_FEED, SYSTEM };

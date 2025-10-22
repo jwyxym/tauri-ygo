@@ -8,9 +8,9 @@
 						<var-menu-select @select = 'list.add'>
 							<Button icon_name = 'add'></Button>
 							<template #options>
-								<var-menu-option :label = 'mainGame.get.text().deck.new'/>
-								<var-menu-option :label = 'mainGame.get.text().deck.from_code' />
-								<var-menu-option :label = 'mainGame.get.text().deck.from_url' />
+								<var-menu-option :label = 'mainGame.get.text(I18N_KEYS.DECK_NEW)'/>
+								<var-menu-option :label = 'mainGame.get.text(I18N_KEYS.DECK_FROM_CODE)' />
+								<var-menu-option :label = 'mainGame.get.text(I18N_KEYS.DECK_FROM_URL)' />
 							</template>
 						</var-menu-select>
 					</div>
@@ -78,7 +78,7 @@
 		<var-popup v-model:show = 'page.popup.code.show' position = 'center' :close-on-click-overlay = 'false'>
 			<var-form>
 				<Input
-					:placeholder = 'mainGame.get.text().deck.from_code'
+					:placeholder = 'mainGame.get.text(I18N_KEYS.DECK_FROM_CODE)'
 					v-model = 'page.popup.code.input'
 				/>
 				<Button_List :confirm = 'page.popup.code.confirm' :cancel = 'page.popup.code.cancel'></Button_List>
@@ -87,7 +87,7 @@
 		<var-popup v-model:show = 'page.popup.url.show' position = 'center' :close-on-click-overlay = 'false'>
 			<var-form>
 				<Input
-					:placeholder = 'mainGame.get.text().deck.from_url'
+					:placeholder = 'mainGame.get.text(I18N_KEYS.DECK_FROM_URL)'
 					v-model = 'page.popup.url.input'
 				/>
 				<Button_List :confirm = 'page.popup.url.confirm' :cancel = 'page.popup.url.cancel'></Button_List>
@@ -100,7 +100,8 @@
 	import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 
 	import mainGame from '../../script/game';
-	import constant from '../../script/constant';
+	import * as CONSTANT from '../../script/constant';
+	import { I18N_KEYS } from '../../script/language/i18n';
 	import toast from '../../script/toast';
 	import fs from '../../script/fs';
 
@@ -211,26 +212,26 @@
 			if (list.select <= -1) return;
 			const text = list.decks[list.select].toYGOMobileDeckURL();
 			await writeText(text);
-			toast.info(mainGame.get.text().toast.copy)
+			toast.info(mainGame.get.text(I18N_KEYS.DECK_COPY_COMPELETE))
 		},
 		delete : async () : Promise<void> => {
 			if (list.select <= -1) return;
 			const confirm = async () : Promise<void> => {
 				if (await fs.delete.ydk(list.decks[list.select].name!)) {
-					toast.info(mainGame.get.text().toast.delete);
+					toast.info(mainGame.get.text(I18N_KEYS.DECK_DELETE_COMPELETE));
 					list.decks.splice(list.select, 1);
 					list.select = -1;
 				}
 			}
 			Dialog({
-				title : mainGame.get.text().deck.delete.title,
-				message : mainGame.get.text().deck.delete.message.replace(constant.str.replace.tauri, list.decks[list.select].name ?? ''),
+				title : mainGame.get.text(I18N_KEYS.DECK_DELETE_TITLE),
+				message : mainGame.get.text(I18N_KEYS.DECK_DELETE_MESSAGR, list.decks[list.select].name ?? ''),
 				onConfirm : confirm
 			});
 		},
 		add : (value : string) => {
 			switch (value) {
-				case mainGame.get.text().deck.new:
+				case mainGame.get.text(I18N_KEYS.DECK_NEW):
 					const deck = new Deck({
 						main : [],
 						side : [],
@@ -240,10 +241,10 @@
 					deck.is_new();
 					page.indeck(deck);
 					break;
-				case mainGame.get.text().deck.from_code:
+				case mainGame.get.text(I18N_KEYS.DECK_FROM_CODE):
 					page.popup.code.show = true;
 					break;
-				case mainGame.get.text().deck.from_url:
+				case mainGame.get.text(I18N_KEYS.DECK_FROM_URL):
 					page.popup.url.show = true;
 					break;
 			}

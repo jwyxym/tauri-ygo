@@ -5,7 +5,8 @@ import mainGame from '../../../script/game';
 import fs from '../../../script/fs';
 import invoke from '../../../script/invoke';
 import Message from './message';
-import constant from '../../../script/constant';
+import * as CONSTANT from '../../../script/constant';
+import { I18N_KEYS } from '../../../script/language/i18n';
 import toast from '../../../script/toast';
 import Deck from '../../deck/deck';
 import { CTOS, STOC, LOCATION, MSG, ERROR, PLAYERCHANGE, HINT, QUERY, PHASE } from './network';
@@ -351,7 +352,7 @@ class Tcp {
 									str = mainGame.get.strings.system(1419, id);
 									break;
 								default:
-									str = mainGame.get.text().unknow;
+									str = mainGame.get.text(I18N_KEYS.UNKNOW);
 									break;
 							}
 							connect.chk_deck = str;
@@ -418,7 +419,7 @@ class Tcp {
 					if (player < 4) {
 						str += connect.player[player].name;
 					} else if ((player < 11 || player > 19) && player !== 8) {
-						str += mainGame.get.text().server.watcher
+						str += mainGame.get.text(I18N_KEYS.SERVER_WATCHER)
 					}
 					if (str.length > 0)
 						str += ' : '

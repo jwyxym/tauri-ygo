@@ -4,7 +4,7 @@
 			class = 'menu-cards'
 		>
 			<div
-				v-for = "(i, v) in constant.str.files.textures.menu
+				v-for = "(i, v) in CONSTANT.FILES.TEXTURE_MENU
 					.map(i => mainGame.get.textures(i) as string | undefined ?? '')"
 				:style = "{ '--rotate' : `${page.rotate[v]}deg` }"
 				class = 'cards'
@@ -16,7 +16,8 @@
 		</div>
 		<div class = 'menu-items font-menu'>
 			<span
-				v-for = '(i, v) in mainGame.get.text().menu'
+				v-for = "(i, v) in [I18N_KEYS.MENU_SINGLE, I18N_KEYS.MENU_CONENCT, I18N_KEYS.MENU_DECK, I18N_KEYS.MENU_SETTING, I18N_KEYS.MENU_EXIT]
+					.map(i => mainGame.get.text(i))"
 				:style = "{ '--shadow' : `${page.items[v]}` }"
 				ref = 'items'
 				@click = 'page.click(v, true)'
@@ -32,8 +33,9 @@
 <script setup lang = 'ts'>
 	import { ref, Ref, onMounted, reactive, watch, onUnmounted } from "vue";
 
-	import constant from '../../script/constant';
+	import * as CONSTANT from '../../script/constant';
 	import mainGame from '../../script/game';
+	import { I18N_KEYS } from "../../script/language/i18n";
 
 	import position from "../../script/position";
 
@@ -44,8 +46,8 @@
 
 	const page = reactive({
 		select : 0,
-		rotate : new Array(mainGame.get.text().menu.length).fill(0),
-		items : new Array(mainGame.get.text().menu.length).fill(''),
+		rotate : new Array(CONSTANT.FILES.TEXTURE_MENU.length).fill(0),
+		items : new Array(CONSTANT.FILES.TEXTURE_MENU.length).fill(''),
 		pointer : new Array(2).fill(-100),
 		click : (v : number, item : boolean = false) : void => {
 			if (item && page.select === v) {
@@ -65,7 +67,7 @@
 			page.pointer_size();
 		},
 		keydown : (event : KeyboardEvent) : void => {
-			const len = mainGame.get.text().menu.length - 1;
+			const len = CONSTANT.FILES.TEXTURE_MENU.length - 1;
 			if (['PageDown', 'ArrowDown'].includes(event.key))
 				page.select >= len ? page.select = 0 : page.select ++;
 			else if (['PageUp', 'ArrowUp'].includes(event.key))

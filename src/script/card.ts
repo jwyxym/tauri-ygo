@@ -1,4 +1,4 @@
-import constant from './constant';
+import * as CONSTANT from './constant';
 import mainGame from './game';
 
 const TYPE = {
@@ -126,10 +126,10 @@ class Card {
 			info : []
 		} as CardInfo
 		if (this.is_monster()) {
-			const attr = mainGame.icons.get(constant.str.info_conf.attribute)!.get(this.attribute)
+			const attr = mainGame.icons.get(CONSTANT.KEYS.ATTRIBUTE)!.get(this.attribute)
 			if (attr)
 				result.attribute = mainGame.get.textures(attr + '.png') as string | undefined ?? ''
-			const race = mainGame.icons.get(constant.str.info_conf.race)!.get(this.race)
+			const race = mainGame.icons.get(CONSTANT.KEYS.RACE)!.get(this.race)
 			if (race)
 				result.race = mainGame.get.textures(race + '.png') as string | undefined ?? ''
 			result.info.push({
@@ -166,7 +166,7 @@ class Card {
 	};
 
 	clear = () : void => {
-		if (this.pic.startsWith(constant.str.blob))
+		if (this.pic.startsWith('blob:http'))
 			URL.revokeObjectURL(this.pic);
 	};
 

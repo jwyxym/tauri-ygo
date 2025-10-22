@@ -22,7 +22,8 @@
 <script setup lang = 'ts'>
 	import { reactive, Reactive, onBeforeMount } from 'vue'
 	import mainGame from '../../script/game';
-	import constant from '../../script/constant';
+	import * as CONSTANT from '../../script/constant';
+	import { I18N_KEYS } from '../../script/language/i18n';
 	const props = defineProps(['name']);
 
 	interface items {
@@ -39,45 +40,45 @@
 	onBeforeMount(async () => {
 		switch (props.name) {
 			case 'category':
-				select.placeholder = mainGame.get.text().deck.search.category;
-				select.map = mainGame.strings.get(constant.str.info_conf.category) ?? new Map;
+				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_SEARCH_CATEGORY);
+				select.map = mainGame.strings.get(CONSTANT.KEYS.CATEGORY) ?? new Map;
 				break;
 			case 'race':
-				select.placeholder = mainGame.get.text().deck.search.race;
-				select.map = mainGame.strings.get(constant.str.info_conf.race) ?? new Map;
+				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_SEARCH_RACE);
+				select.map = mainGame.strings.get(CONSTANT.KEYS.RACE) ?? new Map;
 				break;
 			case 'attribute':
-				select.placeholder = mainGame.get.text().deck.search.attribute;
-				select.map = mainGame.strings.get(constant.str.info_conf.attribute) ?? new Map;
+				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_SEARCH_ATTRIBUTE);
+				select.map = mainGame.strings.get(CONSTANT.KEYS.ATTRIBUTE) ?? new Map;
 				break;
 			case 'ot':
-				select.placeholder = mainGame.get.text().deck.search.ot;
-				select.map = mainGame.strings.get(constant.str.info_conf.ot) ?? new Map;
+				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_SEARCH_OT);
+				select.map = mainGame.strings.get(CONSTANT.KEYS.OT) ?? new Map;
 				break;
 			case 'type':
-				select.placeholder = mainGame.get.text().deck.search.type;
-				select.map = mainGame.strings.get(constant.str.info_conf.type) ?? new Map;
+				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_SEARCH_TYPE);
+				select.map = mainGame.strings.get(CONSTANT.KEYS.TYPE) ?? new Map;
 				break;
 			case 'link':
-				select.placeholder = mainGame.get.text().deck.search.link;
-				select.map = mainGame.strings.get(constant.str.info_conf.link) ?? new Map;
+				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_SEARCH_LINK);
+				select.map = mainGame.strings.get(CONSTANT.KEYS.LINK) ?? new Map;
 				break;
 			case 'forbidden':
-				select.placeholder = mainGame.get.text().deck.search.forbidden;
+				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_SEARCH_FORBIDDEN);
 				select.map = new Map([
-					[0, mainGame.get.text().deck.lflist.forbidden],
-					[1, mainGame.get.text().deck.lflist.limit],
-					[2, mainGame.get.text().deck.lflist.semi_limit],
-					[3, mainGame.get.text().deck.lflist.unlimit]
+					[0, mainGame.get.text(I18N_KEYS.DECK_LFLIST_FORBIDDEN)],
+					[1, mainGame.get.text(I18N_KEYS.DECK_LFLIST_LIMIT)],
+					[2, mainGame.get.text(I18N_KEYS.DECK_LFLIST_SEMI_LIMIT)],
+					[3, mainGame.get.text(I18N_KEYS.DECK_LFLIST_UNLIMIT)]
 				]);
 				break;
 			case 'lflist':
-				select.placeholder = mainGame.get.text().deck.search.lflist;
+				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_SEARCH_LFLIST);
 				select.map = mainGame.lflist ?? new Map;
 				select.label = true;
 				break;
 			case 'deck':
-				select.placeholder = mainGame.get.text().server.deck;
+				select.placeholder = mainGame.get.text(I18N_KEYS.SERVER_DECK);
 				select.array = (await mainGame.load.deck()).map(i => [i, i.name]);
 				break;
 		}

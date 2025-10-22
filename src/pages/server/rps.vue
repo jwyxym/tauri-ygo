@@ -4,7 +4,7 @@
 			:style = "{ '--y' : `${page.height}px` }"
 		>
 			<img
-				v-for = "(i, v) in constant.str.files.textures.rps.map(i => mainGame.get.textures(i) as string | undefined ?? '')"
+				v-for = "(i, v) in CONSTANT.FILES.TEXTURE_RPS.map(i => mainGame.get.textures(i) as string | undefined ?? '')"
 				v-if = 'page.show'
 				:key = 'i'
 				:src = 'i'
@@ -16,8 +16,9 @@
 <script setup lang = 'ts'>
 	import { onBeforeMount, onMounted, onUnmounted, reactive, TransitionGroup, ref, watch } from 'vue';
 
-	import constant from '../../script/constant';
+	import * as CONSTANT from '../../script/constant';
 	import mainGame from '../../script/game';
+	import { I18N_KEYS } from '../../script/language/i18n';
 	import toast from '../../script/toast';
 
 	const page = reactive({
@@ -51,13 +52,13 @@
 	watch(() => { return props.connect.rps.result; }, (n) => {
 		if (n[0] === n[1]) {
 			page.show = true;
-			toast.info(mainGame.get.text().toast.rps.result + mainGame.get.text().toast.rps.bye);
+			toast.info(mainGame.get.text(I18N_KEYS.SERVER_RPS_BYE));
 		} else {
 			if (n[0] === n[1] + 1 || n[0] === n[1] - 2) {
-				toast.info(mainGame.get.text().toast.rps.result + mainGame.get.text().toast.rps.win);
+				toast.info(mainGame.get.text(I18N_KEYS.SERVER_RPS_WIN));
 				props.connect.is_first.on();
 			} else
-				toast.info(mainGame.get.text().toast.rps.result + mainGame.get.text().toast.rps.lose);
+				toast.info(mainGame.get.text(I18N_KEYS.SERVER_RPS_LOSE));
 			props.connect.rps.off();
 		}
 	}, { deep : true });

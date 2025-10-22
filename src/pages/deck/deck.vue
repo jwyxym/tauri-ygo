@@ -68,7 +68,7 @@
 		</transition>
 		<div class = 'deck_show'>
 			<div class = 'deck'>
-				<span>{{ `${mainGame.get.text().deck.main} : ${deck.ct.main}` }}</span>
+				<span>{{ `${mainGame.get.text(I18N_KEYS.DECK_MAIN)} : ${deck.ct.main}` }}</span>
 				<div
 					class = 'main'
 					ref = 'main'
@@ -98,7 +98,7 @@
 						</div>
 					</TransitionGroup>
 				</div>
-				<span>{{ `${mainGame.get.text().deck.extra} : ${deck.ct.extra}` }}</span>
+				<span>{{ `${mainGame.get.text(I18N_KEYS.DECK_EXTRA)} : ${deck.ct.extra}` }}</span>
 				<div
 					class = 'extra'
 					ref = 'extra'
@@ -128,7 +128,7 @@
 						</div>
 					</TransitionGroup>
 				</div>
-				<span>{{ `${mainGame.get.text().deck.side} : ${deck.ct.side}` }}</span>
+				<span>{{ `${mainGame.get.text(I18N_KEYS.DECK_SIDE)} : ${deck.ct.side}` }}</span>
 				<div
 					class = 'side'
 					ref = 'side'
@@ -167,11 +167,11 @@
 	import Sortable from 'sortablejs';
 
 	import mainGame from '../../script/game';
-	import constant from '../../script/constant';
+	import * as CONSTANT from '../../script/constant';
+	import { I18N_KEYS } from "../../script/language/i18n";
 	import Card, { Search } from '../../script/card';
 	import toast from '../../script/toast';
 	import fs from '../../script/fs';
-	import gsap from '../../script/gsap';
 
 	import Dialog from '../varlet/dialog';
 	import Card_Drawer from './/card_drawer.vue';
@@ -247,11 +247,11 @@
 		},
 		name_rule : async (name : string | undefined) : Promise<string | boolean> => {
 			if (name === undefined || name.length === 0)
-				return mainGame.get.text().rule.name.length;
-			if (name.match(constant.reg.name))
-				return mainGame.get.text().rule.name.unlawful;
+				return mainGame.get.text(I18N_KEYS.DECK_RULE_NAME_LEN);
+			if (name.match(CONSTANT.REG.NAME))
+				return mainGame.get.text(I18N_KEYS.DECK_RULE_NAME_UNLAWFUL);
 			if ((await mainGame.load.deck()).filter(i => i.name === name).length > (props.this_deck.new || (props.this_deck.name.length > 0 && props.this_deck.name !== name) ? 0 : 1))
-				return mainGame.get.text().rule.name.exist;
+				return mainGame.get.text(I18N_KEYS.DECK_RULE_NAME_EXIST);
 			return true;
 		},
 		save : async () : Promise<void> => {
@@ -269,7 +269,7 @@
 					rename = await fs.rename.ydk(props.this_deck.name, deck.name);
 				}
 				if (write && rename)
-					toast.info(mainGame.get.text().toast.save);
+					toast.info(mainGame.get.text(I18N_KEYS.DECK_SAVE_COMPELETE));
 				if (props.this_deck.new)
 					props.update(deck.name);
 			} else {
@@ -285,16 +285,16 @@
 				const cards = [...deck.main, ...deck.extra, ...deck.side];
 				const ct = search.info.lflist ? mainGame.get.lflist(search.info.lflist, card.id) as number : 3;
 				if (cards.filter(i => i === code).length >= ct) {
-					toast.error(mainGame.get.text().rule.deck.card_count.max.replace(constant.str.replace.tauri,ct.toString()));
+					toast.error(mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_MAX, ct.toString()));
 					return;
 				}
 				if (card.is_ex()) {
 					if (deck.extra.length >= 15)
-						toast.error(mainGame.get.text().rule.deck.deck_count.replace(constant.str.replace.tauri, '15'))
+						toast.error(mainGame.get.text(I18N_KEYS.DECK_RULE_DECK_MAX, '15'));
 					else deck.extra.push(code);
 				} else {
 					if (deck.main.length >= 60)
-						toast.error(mainGame.get.text().rule.deck.deck_count.replace(constant.str.replace.tauri, '60'))
+						toast.error(mainGame.get.text(I18N_KEYS.DECK_RULE_DECK_MAX, '60'));
 					else deck.main.push(code);
 				}
 			},
@@ -305,11 +305,11 @@
 				const cards = [...deck.main, ...deck.extra, ...deck.side];
 				const ct = search.info.lflist ? mainGame.get.lflist(search.info.lflist, card.id) as number : 3;
 				if (cards.filter(i => i === code).length >= ct) {
-					toast.error(mainGame.get.text().rule.deck.card_count.max.replace(constant.str.replace.tauri,ct.toString()));
+					toast.error(mainGame.get.text(I18N_KEYS.DECK_RULE_DECK_MAX, ct.toString()));
 					return;
 				}
 				if (deck.side.length >= 15)
-					toast.error(mainGame.get.text().rule.deck.deck_count.replace(constant.str.replace.tauri, '60'))
+					toast.error(mainGame.get.text(I18N_KEYS.DECK_RULE_DECK_MAX, '60'));
 				else deck.side.push(code);
 			}
 		},
@@ -318,40 +318,40 @@
 				Dialog({
 					title : title,
 					onConfirm : func
-				}, mainGame.get.system(constant.str.system_conf.chk.deck_delete));
+				}, mainGame.get.system(CONSTANT.KEYS.SETTING_CHK_DELETE_DECK));
 			},
 			main : (code : string | number) : void => {
 				const card : Card = mainGame.get.card(code);
-				const title = mainGame.get.text().deck.remove.replace(constant.str.replace.tauri, card.name);
+				const title = mainGame.get.text(I18N_KEYS.CARD_REMOVE, card.name);
 				const leave = () => {
 					const d = card.is_ex() ? deck.extra : deck.main;
 					const ct = d.findIndex(i => i == code);
 					if (ct > -1)
 						d.splice(ct, 1);
 					else
-						toast.error(mainGame.get.text().rule.deck.card_count.less);
+						toast.error(mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_LESS));
 				};
 				deck.remove.on(leave, title);
 			},
 			side : (code : string | number) : void => {
 				const card : Card = mainGame.get.card(code);
-				const title = mainGame.get.text().deck.remove.replace(constant.str.replace.tauri, card.name);
+				const title = mainGame.get.text(I18N_KEYS.CARD_REMOVE, card.name);
 				const leave = () => {
 					const d = deck.side;
 					const ct = d.findIndex(i => i == code);
 					if (ct > -1)
 						d.splice(ct, 1);
 					else
-						toast.error(mainGame.get.text().rule.deck.card_count.less);
+						toast.error(mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_LESS));
 				};
 				deck.remove.on(leave, title);
 			}
 		},
 		exit : async () : Promise<void> => {
 			Dialog({
-				title : mainGame.get.text().deck.exit,
+				title : mainGame.get.text(I18N_KEYS.DECK_EXIT),
 				onConfirm : props.offdeck
-			}, mainGame.get.system(constant.str.system_conf.chk.deck_exit));
+			}, mainGame.get.system(CONSTANT.KEYS.SETTING_CHK_EXIT_DECK));
 		}
 	})
 
@@ -378,13 +378,13 @@
 		},
 		rule : {
 			atk : (atk : string) : string | boolean => {
-				if (!atk.match(constant.reg.atk))
-					return mainGame.get.text().rule.atk.unlawful;
+				if (!atk.match(CONSTANT.REG.ATK))
+					return mainGame.get.text(I18N_KEYS.DECK_RULE_SEARCH_ATK);
 				return true;
 			},
 			level : (lv : string) : string | boolean => {
-				if (!lv.match(constant.reg.level))
-					return mainGame.get.text().rule.level.unlawful;
+				if (!lv.match(CONSTANT.REG.LV))
+					return mainGame.get.text(I18N_KEYS.DECK_RULE_SEARCH_LV);
 				return true;
 			},
 			forbidden : () : boolean => {

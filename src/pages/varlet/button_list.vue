@@ -1,5 +1,5 @@
 <template>
-	<div class = 'button_list' :class = "mainGame.get.system(constant.str.system_conf.chk.button) ? 'reverse' : ''">
+	<div class = 'button_list' :class = "mainGame.get.system(CONSTANT.KEYS.SETTING_CHK_SWAP_BUTTON) ? 'reverse' : ''">
 		<Button @click = 'confirm' icon_name = 'confirm' :loading = 'loading' id = 'confirm'></Button>
 		<Button @click = 'cancel' icon_name = 'cancel' :loading = 'loading' id = 'cancel'></Button>
 	</div>
@@ -7,7 +7,7 @@
 <script setup lang = 'ts'>
 	import Button from'./button.vue';
 	import mainGame from '../../script/game';
-	import constant from '../../script/constant';
+	import * as CONSTANT from '../../script/constant';
 
 	defineProps(['confirm', 'cancel', 'loading']);
 </script>

@@ -28,7 +28,7 @@
 	import pos, { POS_Like } from '../../script/position';
 	import gsap from '../../script/gsap';
 	import mainGame from '../../script/game';
-	import constant from '../../script/constant';
+	import * as CONSTANT from '../../script/constant';
 
 	const picI : Ref<HTMLElement | null> = ref(null);
 	const picII : Ref<HTMLElement | null> = ref(null);

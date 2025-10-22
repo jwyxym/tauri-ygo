@@ -10,17 +10,17 @@
 				</div>
 				<div class = 'content'>
 					<Input
-						:placeholder = 'mainGame.get.text().server.name'
+						:placeholder = 'mainGame.get.text(I18N_KEYS.SERVER_NAME)'
 						v-model = 'server.name'
 					/>
 					<AutoInput
-						:placeholder = 'mainGame.get.text().server.address'
+						:placeholder = 'mainGame.get.text(I18N_KEYS.SERVER_ADDRESS)'
 						:options = server.options
 						v-model = 'server.address'
 					/>
 					<div class = 'pass'>
 						<Input
-							:placeholder = 'mainGame.get.text().server.password'
+							:placeholder = 'mainGame.get.text(I18N_KEYS.SERVER_PASSWORD)'
 							v-model = 'server.pass'
 						/>
 						<Button
@@ -41,12 +41,12 @@
 					></Button>
 					<Button
 						@click = 'connect.to.duelist'
-						:content = 'mainGame.get.text().server.to.duelist'
+						:content = 'mainGame.get.text(I18N_KEYS.SERVER_TO_DUELIST)'
 						:class = "{ 'readonly' : connect.self < 4 && connect.home.mode !== 2 }"
 					></Button>
 					<Button
 						@click = 'connect.to.watcher'
-						:content = 'mainGame.get.text().server.to.watcher'
+						:content = 'mainGame.get.text(I18N_KEYS.SERVER_TO_WATCHER)'
 						:class = "{ 'readonly' : connect.self >= 4 }"
 					></Button>
 				</div>
@@ -77,18 +77,30 @@
 							</var-cell>
 						</var-list>
 						<div class = 'info'>
-							<span>{{ `${mainGame.get.text().server.home.lflist} : ${mainGame.get.lflist(connect.home.lflist)}` }}</span>
-							<span>{{ `${mainGame.get.text().server.home.rule} : ${mainGame.get.text().server.rule[connect.home.rule] ?? mainGame.get.text().unknow}` }}</span>
-							<span>{{ `${mainGame.get.text().server.home.mode} : ${mainGame.get.text().server.mode[connect.home.mode] ?? mainGame.get.text().unknow}` }}</span>
-							<span>{{ `${mainGame.get.text().server.home.time_limit} : ${connect.home.time_limit}` }}</span>
-							<span>{{ `${mainGame.get.text().server.home.start_lp} : ${connect.home.start_lp}` }}</span>
-							<span>{{ `${mainGame.get.text().server.home.start_hand} : ${connect.home.start_hand}` }}</span>
-							<span v-show = 'connect.home.no_check_deck'>{{ mainGame.get.text().server.no_check_deck }}</span>
-							<span v-show = 'connect.home.no_shuffle_deck'>{{ mainGame.get.text().server.no_shuffle_deck }}</span>
+							<span>{{ `${mainGame.get.text(I18N_KEYS.SERVER_HOME_LFLIST)} : ${mainGame.get.lflist(connect.home.lflist)}` }}</span>
+							<span>
+								{{
+									`${mainGame.get.text(I18N_KEYS.SERVER_HOME_RULE)} : ${mainGame.get.text([
+										I18N_KEYS.SERVER_RULE_OCG, I18N_KEYS.SERVER_RULE_TCG, I18N_KEYS.SERVER_RULE_SC, I18N_KEYS.SERVER_RULE_CUSTOM, I18N_KEYS.SERVER_RULE_NO_EXCLUSIVE, I18N_KEYS.SERVER_RULE_ALL
+									][connect.home.rule] ?? I18N_KEYS.UNKNOW)}`
+								}}
+							</span>
+							<span>
+								{{
+									`${mainGame.get.text(I18N_KEYS.SERVER_HOME_MODE)} : ${mainGame.get.text([
+										I18N_KEYS.SERVER_MODE_SINGLE, I18N_KEYS.SERVER_MODE_MATCH, I18N_KEYS.SERVER_MODE_TAG
+									][connect.home.mode] ?? I18N_KEYS.UNKNOW)}`
+								}}
+							</span>
+							<span>{{ `${mainGame.get.text(I18N_KEYS.SERVER_HOME_TIME_LIMIT)} : ${connect.home.time_limit}` }}</span>
+							<span>{{ `${mainGame.get.text(I18N_KEYS.SERVER_HOME_START_LP)} : ${connect.home.start_lp}` }}</span>
+							<span>{{ `${mainGame.get.text(I18N_KEYS.SERVER_HOME_START_HAND)} : ${connect.home.start_hand}` }}</span>
+							<span v-show = 'connect.home.no_check_deck'>{{ mainGame.get.text(I18N_KEYS.SERVER_NO_CHECK_DECK) }}</span>
+							<span v-show = 'connect.home.no_shuffle_deck'>{{ mainGame.get.text(I18N_KEYS.SERVER_NO_SHUFFLE_DECK) }}</span>
 						</div>
 					</div>
 					<div class = 'start'>
-						<span>{{ `${mainGame.get.text().server.home.watch} : ${connect.home.watch}` }}</span>
+						<span>{{ `${mainGame.get.text(I18N_KEYS.SERVER_HOME_WATCH)} : ${connect.home.watch}` }}</span>
 						<Select
 							ref = 'deck'
 							name = 'deck'
@@ -123,11 +135,11 @@
 			<div class = 'select_tp'>
 				<Button
 					@click = 'connect.is_first.select(1)'
-					:content = 'mainGame.get.text().server.is_first[0]'
+					:content = 'mainGame.get.text(I18N_KEYS.SERVER_PLAYER_FIRST)'
 				></Button>
 				<Button
 					@click = 'connect.is_first.select(0)'
-					:content = 'mainGame.get.text().server.is_first[1]'
+					:content = 'mainGame.get.text(I18N_KEYS.SERVER_PLAYER_NEXT)'
 				></Button>
 			</div>
 		</var-popup>
@@ -141,7 +153,7 @@
 				/>
 				<div class = 'send'>
 					<Input
-						:placeholder = 'mainGame.get.text().server.chat'
+						:placeholder = 'mainGame.get.text(I18N_KEYS.SERVER_CHAT)'
 						v-model = 'server.chat'
 						@keydown = 'connect.chat.press'
 					/>
@@ -178,7 +190,8 @@
 	import { ConversationBlock } from 'conversation-vue'
 
 	import mainGame from '../../script/game';
-	import constant from '../../script/constant';
+	import { I18N_KEYS } from '../../script/language/i18n';
+	import * as CONSTANT from '../../script/constant';
 	import fs from '../../script/fs';
 	import Tcp, * as TCP from './post/tcp';
 	import toast from '../../script/toast';
@@ -223,9 +236,9 @@
 		connect : async () : Promise<void> => {
 			page.loading = true;
 			if (await tcp!.connect(server.address ?? '', server.name ?? '', server.pass ?? '', connect)) {
-				mainGame.push.system(constant.str.system_conf.string.server_address, server.address);
-				mainGame.push.system(constant.str.system_conf.string.server_name, server.name);
-				mainGame.push.system(constant.str.system_conf.string.server_pass, server.pass);
+				mainGame.push.system(CONSTANT.KEYS.SETTING_SERVER_ADDRESS, server.address);
+				mainGame.push.system(CONSTANT.KEYS.SETTING_SERVER_PLAYER_NAME, server.name);
+				mainGame.push.system(CONSTANT.KEYS.SETTING_SERVER_PASS, server.pass);
 				fs.write.system();
 			} else {
 				page.loading = false;
@@ -279,9 +292,9 @@
 				await tcp!.send.start();
 				await mainGame.load.pic(connect.deck);
 			} else if (!connect.deck)
-				toast.error(mainGame.get.text().toast.error.deck)
+				toast.error(mainGame.get.text(I18N_KEYS.SERVER_DECK_ERROR))
 			else
-				toast.error(mainGame.get.text().toast.error.player)
+				toast.error(mainGame.get.text(I18N_KEYS.SERVER_PLAYER_ERROR))
 		},
 		ready : async (deck : Deck | undefined) : Promise<void> => {
 			deck ? await tcp!.send.ready(deck) : await tcp!.send.un_ready();
@@ -337,7 +350,7 @@
 		},
 		surrender : async () : Promise<void> => {
 			Dialog({
-				title : mainGame.get.text().server.surrender,
+				title : mainGame.get.text(I18N_KEYS.SERVER_SURRENDER),
 				onConfirm : tcp!.send.surrender
 			});
 		},
@@ -365,9 +378,9 @@
 
 	const server = reactive({
 		chat : '',
-		name : mainGame.get.system(constant.str.system_conf.string.server_name) as string,
-		address : mainGame.get.system(constant.str.system_conf.string.server_address) as string,
-		pass : mainGame.get.system(constant.str.system_conf.string.server_pass) as string,
+		name : mainGame.get.system(CONSTANT.KEYS.SETTING_SERVER_PLAYER_NAME) as string,
+		address : mainGame.get.system(CONSTANT.KEYS.SETTING_SERVER_ADDRESS) as string,
+		pass : mainGame.get.system(CONSTANT.KEYS.SETTING_SERVER_PASS) as string,
 		options : computed(() => {
 			return Array.from(mainGame.servers).map(([k, v]) => ({ label: k, value: v }));
 		})
@@ -380,9 +393,6 @@
 
 	onMounted(() => {
 		page.server = true;
-		// page.duel = true;
-		// connect.rps.chk = true;
-		// connect.deck_count = [1,2,3,4,5,6]
 		document.addEventListener('click', page.chat_click);
 	});
 
