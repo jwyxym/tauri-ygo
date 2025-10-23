@@ -44,17 +44,17 @@
 							</div>
 							<div class = 'cards'>
 								<div class = 'card' v-for = 'card in list.decks[list.select].main'>
-									<img v-lazy = "list.get_pic(card)">
+									<img :src = "list.get_pic(card)">
 								</div>
 							</div>
 							<div class = 'cards'>
 								<div class = 'card' v-for = 'card in list.decks[list.select].extra'>
-									<img v-lazy = "list.get_pic(card)">
+									<img :src = "list.get_pic(card)">
 								</div>
 							</div>
 							<div class = 'cards'>
 								<div class = 'card' v-for = 'card in list.decks[list.select].side'>
-									<img v-lazy = "list.get_pic(card)">
+									<img :src = "list.get_pic(card)">
 								</div>
 							</div>
 						</div>
@@ -95,12 +95,11 @@
 		</var-popup>
 	</div>
 </template>
-<script setup lang='ts'>
-	import { reactive, onBeforeMount, TransitionGroup, watch } from 'vue';
+<script setup lang = 'ts'>
+	import { reactive, onBeforeMount, TransitionGroup } from 'vue';
 	import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 
 	import mainGame from '../../script/game';
-	import * as CONSTANT from '../../script/constant';
 	import { I18N_KEYS } from '../../script/language/i18n';
 	import toast from '../../script/toast';
 	import fs from '../../script/fs';

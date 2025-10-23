@@ -47,6 +47,7 @@ class Game {
 	interval_ct = 0;
 	unknown : Card = new Card([...new Array(11).fill(0), ...new Array(19).fill('')]);
 	back : Card = new Card([...new Array(11).fill(0), ...new Array(19).fill('')]);
+	font = document.createElement('style');
 
 	private lflist_now : string = '';
 
@@ -77,19 +78,18 @@ class Game {
 				if (i.name.match(CONSTANT.REG.FONT)) {
 					const url : string | undefined = await fs.read.file.as_url(await join(CONSTANT.DIRS.FONT, i.name));
 					if (url) {
-						const style = document.createElement('style')
-						style.textContent = `
+						this.font.textContent += `
 							@font-face {
 								font-family: '${i.name.split('.')[0]}';
-								src: url('${url}') format('woff2');
+								src: url('${url}');
 								font-weight: normal;
 								font-style: normal;
 							}
 						`
-						document.head.appendChild(style)
 					}
 				}
 			}
+			document.head.appendChild(this.font);
 
 			//读取./sound文件夹
 			for (const i of await fs.read.dir(CONSTANT.DIRS.SOUND, false)) {

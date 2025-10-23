@@ -18,7 +18,7 @@ const REG = {
 	CONF : /\.(conf)$/i,
 	INI : /\.(ini)$/i,
 	ZIP : /\.(ypk|zip)$/i,
-	FONT : /\.(ttf)$/i,
+	FONT : /\.(ttf|otf)$/i,
 	JSON : /\.(json)$/i,
 	DECK : /\.(ydk)$/i,
 	ATK : /^[0-9?\s]*$/,

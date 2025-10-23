@@ -15,12 +15,10 @@
 					:select = 'page.select'
 				/>
 			</transition>
-			<transition name = 'opacity'>
-				<Setting
-					v-if = 'page.show.setting'
-					:select = 'page.select'
-				/>
-			</transition>
+			<Setting
+				:show = 'page.show.setting'
+				:select = 'page.select'
+			/>
 			<transition name = 'opacity'>
 				<YGOMenu
 					v-if = 'page.show.menu'
@@ -37,7 +35,7 @@
 	import YGOMenu from './pages/menu/menu.vue';
 	import Deck from './pages/deck/deck_list.vue';
 	import Server from './pages/server/server.vue';
-	import Setting from './pages/setting.vue';
+	import Setting from './pages/setting/setting.vue';
 	import Voice from './pages/voice/voice.vue';
 
 	import mainGame from './script/game';
@@ -173,6 +171,9 @@
 		--checkbox-unchecked-color: #555 !important;
 		color: #555 !important;
 	}
+	.font-title {
+		font-family: 'title' !important;
+	}
 	.font-menu {
 		font-family: 'menu' !important;
 	}
@@ -209,5 +210,8 @@
 		--card-title-font-size: max(2.5vh, 10px);
 		--card-subtitle-font-size: max(1.5vh, 6px);
 		user-select: none;
+	}
+	body {
+		font-family: 'text' !important;
 	}
 </style>
