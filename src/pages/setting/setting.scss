@@ -1,0 +1,38 @@
+.setting {
+	width: 80vw;
+	height: calc(80vh + 2px);
+	position: relative;
+	border: 1px solid white;
+	border-radius: 10px;
+	.expansions, .items {
+		position: absolute;
+		width: 100%;
+		height: calc(80vh - 44px);
+	}
+	.expansions {
+		.button_list {
+			padding-top: 5px;
+			margin-left: 20px;
+			width: calc(100% - 40px);
+			display: flex;
+			gap: 10px;
+		}
+		.var-list {
+			height: calc(80vh - 80px);
+			width: 100%;
+			overflow-y: auto;
+			&::-webkit-scrollbar {
+				display: none;
+			}
+		}
+	}
+	.items {
+		overflow-y: auto;
+		&::-webkit-scrollbar {
+			display: none;
+		}
+		.var-list {
+			width: 100%;
+		}
+	}
+}

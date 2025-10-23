@@ -1,6 +1,5 @@
 import { exit } from '@tauri-apps/plugin-process';
 import { DirEntry } from '@tauri-apps/plugin-fs';
-import { join } from '@tauri-apps/api/path';
 
 import fs from './fs';
 import * as CONSTANT from './constant';
@@ -67,7 +66,7 @@ class Game {
 			//读取./textures文件夹
 			for (const i of await fs.read.dir(CONSTANT.DIRS.TEXTURE, false)) {
 				if (i.name.match(CONSTANT.REG.PICTURE)) {
-					const url : string | undefined = await fs.read.file.as_url(await join(CONSTANT.DIRS.TEXTURE, i.name));
+					const url : string | undefined = await fs.read.file.as_url(await fs.join(CONSTANT.DIRS.TEXTURE, i.name));
 					if (url)
 						this.textures.set(i.name, url);
 				}
@@ -76,7 +75,7 @@ class Game {
 			//读取./font文件夹
 			for (const i of await fs.read.dir(CONSTANT.DIRS.FONT, false)) {
 				if (i.name.match(CONSTANT.REG.FONT)) {
-					const url : string | undefined = await fs.read.file.as_url(await join(CONSTANT.DIRS.FONT, i.name));
+					const url : string | undefined = await fs.read.file.as_url(await fs.join(CONSTANT.DIRS.FONT, i.name));
 					if (url) {
 						this.font.textContent += `
 							@font-face {
@@ -94,7 +93,7 @@ class Game {
 			//读取./sound文件夹
 			for (const i of await fs.read.dir(CONSTANT.DIRS.SOUND, false)) {
 				if (i.name.match(CONSTANT.REG.BGM)) {
-					const url : string | undefined = await fs.read.bgm(await join(CONSTANT.DIRS.SOUND, i.name));
+					const url : string | undefined = await fs.read.bgm(await fs.join(CONSTANT.DIRS.SOUND, i.name));
 					if (url)
 						this.bgm.set(i.name, url);
 				}
@@ -177,7 +176,7 @@ class Game {
 			const load : Array<string> = load_expansion.filter(i => { return expansion_ypk.findIndex(j => j.name === i) > -1; });
 			this.system.set(CONSTANT.KEYS.SETTING_LOADING_EXPANSION, load.join('&&'));
 			for (let i = 0; i < load.length; i++) {
-				load[i] = await join(CONSTANT.DIRS.EXPANSION, load[i]);
+				load[i] = await fs.join(CONSTANT.DIRS.EXPANSION, load[i]);
 			}
 			return {
 				loading : load,
@@ -370,7 +369,7 @@ class Game {
 				}
 			}
 			//读取strings.conf
-			const strings : string | undefined = await fs.read.text(await join(CONSTANT.DIRS.STRING, CONSTANT.FILES.STRING_CONF.get(this.i18n)!));
+			const strings : string | undefined = await fs.read.text(await fs.join(CONSTANT.DIRS.STRING, CONSTANT.FILES.STRING_CONF.get(this.i18n)!));
 			if (strings !== undefined) {
 				const lines : Array<string> = strings.split(CONSTANT.REG.LINE_FEED);
 				for (const i of lines) {
@@ -380,7 +379,7 @@ class Game {
 			}
 
 			//读取cardinfo.conf
-			const info : string | undefined = await fs.read.text(await join(CONSTANT.DIRS.INFO, CONSTANT.FILES.INFO_CONF.get(this.i18n)!));
+			const info : string | undefined = await fs.read.text(await fs.join(CONSTANT.DIRS.INFO, CONSTANT.FILES.INFO_CONF.get(this.i18n)!));
 			if (info !== undefined) {
 				const lines : Array<string> = info.split(CONSTANT.REG.LINE_FEED);
 				for (const i of lines) {
@@ -389,7 +388,7 @@ class Game {
 				}
 			}
 			//读取cards.cdb
-			const database : Array<Array<string | number>> | undefined = await fs.read.database(await join(CONSTANT.DIRS.DB, CONSTANT.FILES.DB.get(this.i18n)!));
+			const database : Array<Array<string | number>> | undefined = await fs.read.database(await fs.join(CONSTANT.DIRS.DB, CONSTANT.FILES.DB.get(this.i18n)!));
 			if (database !== undefined)
 				this.read.database(database);
 		},
@@ -783,7 +782,7 @@ class Game {
 			if (key === CONSTANT.KEYS.SETTING_LOADING_EXPANSION) {
 				this.system.set(key, to_string(n as string));
 			} else if (key === CONSTANT.KEYS.SETTING_VOICE_BACK_BGM) {
-				this.system.set(key, n.toString());
+				this.system.set(key, `${n}`);
 				voice.update(key);
 			} else if (obj_key[0].startsWith('SETTING_CHK_')) {
 				this.system.set(key, n ? '1' : '0');

@@ -206,7 +206,7 @@
 		load : [] as Array<string>,
 		expansion : [] as Array<string>,
 		items_true : [] as Array<string>,
-		items : [] as Array<[string, string]>,
+		items : [] as Array<[keyof typeof I18N_KEYS, string]>,
 		sound : 0,
 		loading : false,
 	})
@@ -284,7 +284,7 @@
 		setting.expansion = load.ypk.map(i => i.name);
 		setting.load = (mainGame.get.system(CONSTANT.KEYS.SETTING_LOADING_EXPANSION) as Array<string> | undefined) ?? [];
 		const items = Object.entries(CONSTANT.KEYS).filter(i => i[0].startsWith('SETTING_CHK'));
-		setting.items = items;
+		setting.items = items as Array<[keyof typeof I18N_KEYS, string]>;
 		setting.items_true = setting.items.map(i => i[1]).filter(i => mainGame.get.system(i));
 		setting.sound = mainGame.get.system(CONSTANT.KEYS.SETTING_VOICE_BACK_BGM) as number;
 	});

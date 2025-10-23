@@ -21,6 +21,7 @@ class Fs {
 	base_dir : number;
 	rename_dir : fs.RenameOptions;
 	copy_dir : fs.CopyFileOptions;
+	join = path.join;
 
 	constructor () {
 		const base_dir = CONSTANT.BASE_DIR

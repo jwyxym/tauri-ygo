@@ -16,7 +16,7 @@
 				/>
 			</transition>
 			<Setting
-				:show = 'page.show.setting'
+				v-if = 'page.show.setting'
 				:select = 'page.select'
 			/>
 			<transition name = 'opacity'>
@@ -57,9 +57,10 @@
 				page.show.server = false;
 				page.show.deck = false;
 				page.show.setting = false;
-				setTimeout(() => {
-					page.show.menu = true;
-				}, 600);
+				if (!page.show.menu)
+					setTimeout(() => {
+						page.show.menu = true;
+					}, 600);
 			},
 			server : () : void => {
 				page.show.menu = false;
@@ -74,10 +75,7 @@
 				}, 600);
 			},
 			setting : () : void => {
-				page.show.menu = false;
-				setTimeout(() => {
-					page.show.setting = true;
-				}, 600);
+				page.show.setting = true;
 			}
 		},
 		contextmenu : (event : MouseEvent) : void => {
@@ -200,15 +198,14 @@
 		--card-outline-color: white !important;
 		--card-subtitle-color: white !important;
 		--card-description-color: white !important;
-		--button-mini-padding: 4px 4px !important;
-		--button-small-padding: 4px 4px !important;
-		--button-normal-padding: 4px 4px !important;
-		--button-large-padding: 4px 4px !important;
-		--cell-min-height: 5vh !important;
+		// --button-mini-padding: 4px 4px !important;
+		// --button-small-padding: 4px 4px !important;
+		// --button-normal-padding: 4px 4px !important;
+		// --button-large-padding: 4px 4px !important;
 		--cell-padding: 1vh 20px !important;
 		--field-decorator-line-size: 0.5px !important;
-		--card-title-font-size: max(2.5vh, 10px);
-		--card-subtitle-font-size: max(1.5vh, 6px);
+		--card-title-font-size: max(2.5vh, 10px) !important;
+		--card-subtitle-font-size: max(1.5vh, 6px) !important;
 		user-select: none;
 	}
 	body {
