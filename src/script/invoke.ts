@@ -25,10 +25,23 @@ type StringFile<T> = Array<[T, { content : string }]>;
 type BufferFile<T> = Array<[T, { content : Uint8Array }]>;
 
 class Invoke {
-	version = async (url : string, headers : Array<[string, string]> = []) : Promise<Result<string>> => {
+	modified_time = async (path : string) : Promise<Result<string>> => {
 		const result : Result<string> = {};
 		try {
-			result.content = await invoke<string>('version', {
+			result.content = await invoke<string>('modified_time', {
+				path : path
+			});
+		} catch (error) {
+			fs.write.log(error);
+			result.error = error;
+		}
+		return result;
+	};
+
+	game_version = async (url : string, headers : Array<[string, string]> = []) : Promise<Result<string>> => {
+		const result : Result<string> = {};
+		try {
+			result.content = await invoke<string>('get_game_version', {
 				url : url, headers : headers
 			});
 		} catch (error) {

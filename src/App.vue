@@ -102,7 +102,7 @@
 		const dialog = async () : Promise<void> => {
 			await Dialog({
 				title : mainGame.get.text(I18N_KEYS.START_TITLE),
-				message : mainGame.get.text(I18N_KEYS.START_MESSAGR),
+				message : mainGame.get.text(I18N_KEYS.START_MESSAGE),
 				onConfirm : download,
 				onCancel : mainGame.exit,
 				closeOnClickOverlay : false
@@ -176,6 +176,7 @@
 		font-family: 'menu' !important;
 	}
 	:root {
+		--result-background: transparent !important;
 		--card-background: transparent !important;
 		--dialog-background: transparent !important;
 		--popup-content-background-color: transparent !important;

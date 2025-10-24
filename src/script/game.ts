@@ -1,5 +1,6 @@
 import { exit } from '@tauri-apps/plugin-process';
 import { DirEntry } from '@tauri-apps/plugin-fs';
+import { fetch } from '@tauri-apps/plugin-http';
 
 import fs from './fs';
 import * as CONSTANT from './constant';
@@ -8,6 +9,7 @@ import Card, { Search } from './card';
 import { I18N_KEYS } from './language/i18n';
 import Zh_CN from './language/Zh-CN';
 import TAURI_STR from './language/string';
+
 
 import voice from '../pages/voice/voice';
 import Deck from '../pages/deck/deck';
@@ -93,7 +95,7 @@ class Game {
 			//读取./sound文件夹
 			for (const i of await fs.read.dir(CONSTANT.DIRS.SOUND, false)) {
 				if (i.name.match(CONSTANT.REG.BGM)) {
-					const url : string | undefined = await fs.read.bgm(await fs.join(CONSTANT.DIRS.SOUND, i.name));
+					const url : string | undefined = await fs.read.bgm([CONSTANT.DIRS.SOUND, i.name]);
 					if (url)
 						this.bgm.set(i.name, url);
 				}
@@ -124,14 +126,16 @@ class Game {
 		}
 	};
 
-	reload = async () : Promise<void> => {
+	reload = async () : Promise<boolean> => {
 		try {
 			this.clear();
 			await this.load.card();
 			await this.load.expansion();
+			return true;
 		} catch (error) {
 			fs.write.log(error);
 		}
+		return false;
 	};
 
 	get = {
@@ -369,7 +373,7 @@ class Game {
 				}
 			}
 			//读取strings.conf
-			const strings : string | undefined = await fs.read.text(await fs.join(CONSTANT.DIRS.STRING, CONSTANT.FILES.STRING_CONF.get(this.i18n)!));
+			const strings : string | undefined = await fs.read.text([CONSTANT.DIRS.STRING, CONSTANT.FILES.STRING_CONF.get(this.i18n)!]);
 			if (strings !== undefined) {
 				const lines : Array<string> = strings.split(CONSTANT.REG.LINE_FEED);
 				for (const i of lines) {
@@ -379,7 +383,7 @@ class Game {
 			}
 
 			//读取cardinfo.conf
-			const info : string | undefined = await fs.read.text(await fs.join(CONSTANT.DIRS.INFO, CONSTANT.FILES.INFO_CONF.get(this.i18n)!));
+			const info : string | undefined = await fs.read.text([CONSTANT.DIRS.INFO, CONSTANT.FILES.INFO_CONF.get(this.i18n)!]);
 			if (info !== undefined) {
 				const lines : Array<string> = info.split(CONSTANT.REG.LINE_FEED);
 				for (const i of lines) {
@@ -388,7 +392,7 @@ class Game {
 				}
 			}
 			//读取cards.cdb
-			const database : Array<Array<string | number>> | undefined = await fs.read.database(await fs.join(CONSTANT.DIRS.DB, CONSTANT.FILES.DB.get(this.i18n)!));
+			const database : Array<Array<string | number>> | undefined = await fs.read.database([CONSTANT.DIRS.DB, CONSTANT.FILES.DB.get(this.i18n)!]);
 			if (database !== undefined)
 				this.read.database(database);
 		},
@@ -811,15 +815,33 @@ class Game {
 		file : async () : Promise<boolean> => {
 			return await fs.exists(CONSTANT.FILES.ASSETS_ZIP);
 		},
-		version :  async () : Promise<boolean> => {
-			const time = await invoke.version(CONSTANT.URL.VERSION, CONSTANT.URL.VERSION_HEAD);
-			const local = this.get.system(CONSTANT.KEYS.SETTING_DOWMLOAD_TIME);
-			if (time.error === undefined && typeof local === 'string') {
-				return new Date(time.content!) <= new Date(local);
-			} else if (local === undefined)
-				return true;
-			return false;
-		},
+		version : {
+			game : async () : Promise<boolean> => {
+				const time = await invoke.game_version(CONSTANT.URL.VERSION, CONSTANT.URL.VERSION_HEAD);
+				const local = this.get.system(CONSTANT.KEYS.SETTING_DOWMLOAD_TIME);
+				if (time.error === undefined && typeof local === 'string') {
+					return new Date(time.content!) <= new Date(local);
+				} else if (local === undefined)
+					return true;
+				return false;
+			},
+			superpre : async () : Promise<boolean> => {
+				const time = await fetch(CONSTANT.URL.SUPER_PRE_VERSION, {
+					method: 'GET',
+				});
+				if (time.ok) {
+					const date = new Date(Number((await time.text()).trim()) * 1000);
+					const p = await fs.join(CONSTANT.DIRS.EXPANSION, CONSTANT.FILES.SUPER_PRE)
+					if (await fs.exists(p)) {
+						const local = await fs.read.time(p);
+						if (local)
+							return new Date(local) >= date;
+					}
+					return true;
+				}
+				return false;
+			},
+		}
 	}
 
 	exit = async () : Promise<void> => {

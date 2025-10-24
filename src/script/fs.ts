@@ -77,9 +77,11 @@ class Fs {
 	};
 
 	read = {
-		database : async (file : string) : Promise<Array<Array<string | number>> | undefined> => {
+		database : async (file : string | Array<string>) : Promise<Array<Array<string | number>> | undefined> => {
 			try {
-				const entries = await invoke.read_db(await path.join(this.path!, file));
+				const join = typeof file === 'string' ? path.join(this.path!, file as string) : path.join(this.path!, ...file);
+				const p = await join;
+				const entries = await invoke.read_db(await path.join(p));
 				if (entries.error === undefined)
 					return entries.content!.map(i => [...i[0], ...i[1]]);
 			} catch (error) {
@@ -150,9 +152,10 @@ class Fs {
 			}
 			return map;
 		},
-		text : async (file : string) : Promise<string | undefined> => {
+		text : async (file : string | Array<string>) : Promise<string | undefined> => {
 			try {
-				return await fs.readTextFile(file, this.dir);
+				const p = typeof file === 'string' ? file : await path.join(...file);
+				return await fs.readTextFile(p, this.dir);
 			} catch (error) {
 				this.write.log(error);
 			}
@@ -197,17 +200,20 @@ class Fs {
 			return [];
 		},
 		file : {
-			as_url : async (name : string) : Promise<string | undefined> => {
+			as_url : async (file : string | Array<string>) : Promise<string | undefined> => {
 				try {
-					return convertFileSrc(await path.join(this.path!, name));
+					const join = typeof file === 'string' ? path.join(this.path!, file as string) : path.join(this.path!, ...file);
+					const p = await join;
+					return convertFileSrc(p);
 				} catch (error) {
 					this.write.log(error);
 				}
 				return undefined;
 			},
-			as_u8 : async (name : string) : Promise<Uint8Array<ArrayBuffer> | undefined> => {
+			as_u8 : async (file : string | Array<string>) : Promise<Uint8Array<ArrayBuffer> | undefined> => {
 				try {
-					return await fs.readFile(name, this.dir);
+					const p = typeof file === 'string' ? file : await path.join(...file);
+					return await fs.readFile(p, this.dir);
 				} catch (error) {
 					this.write.log(error);
 				}
@@ -232,17 +238,35 @@ class Fs {
 			}
 			return [];
 		},
-		bgm : async (file : string) : Promise<string | undefined> => {
+		bgm : async (file : string | Array<string>) : Promise<string | undefined> => {
 			try {
-				const read_to_blob = async () => {
-					const bgm = await this.read.file.as_u8(file);
+				const read_to_blob = async () : Promise<string | undefined> => {
+					const p = typeof file === 'string' ? file : await path.join(...file);
+					const bgm = await this.read.file.as_u8(p);
 					if (bgm)
 						return URL.createObjectURL(
 							new Blob([new Uint8Array(bgm)], { type : 'audio/wav' })
 						)
 					return undefined;
 				}
-				return mainGame.is_android() ? await read_to_blob() : convertFileSrc(await path.join(this.path!, file));
+				const read_to_src = async () : Promise<string> => {
+					const join = typeof file === 'string' ? path.join(this.path!, file as string) : path.join(this.path!, ...file);
+					const p = await join;
+					return convertFileSrc(p);
+				}
+				return mainGame.is_android() ? await read_to_blob() : await read_to_src();
+			} catch (error) {
+				this.write.log(error);
+			}
+			return undefined;
+		},
+		time : async (file : string | Array<string>) : Promise<string | undefined> => {
+			try {
+				const join = typeof file === 'string' ? path.join(this.path!, file as string) : path.join(this.path!, ...file);
+				const p = await join;
+				const entries = await invoke.modified_time(p);
+				if (entries.error === undefined)
+					return entries.content!;
 			} catch (error) {
 				this.write.log(error);
 			}
@@ -326,8 +350,8 @@ class Fs {
 		from_url : async (url : string,  file : string) : Promise<string> => {
 			try {
 				const download = await invoke.download(url, this.path!, file);
-				if (typeof download === 'string')
-					return download;
+				if (download.error === undefined)
+					return download.content!;
 			} catch (error) {
 				this.write.log(error.message ?? error);
 			}
@@ -338,9 +362,9 @@ class Fs {
 				if (file.length > 0 && !file.endsWith('.ypk'))
 					file += '.ypk';
 				const download = await invoke.download(url, await path.join(this.path!, CONSTANT.DIRS.EXPANSION), file, '.ypk');
-				if (typeof download === 'string') {
-					const p = await path.join(CONSTANT.DIRS.EXPANSION, download);
-					return [p, download];
+				if (download.error === undefined) {
+					const p = await path.join(CONSTANT.DIRS.EXPANSION, download.content!);
+					return [p, download.content!];
 				}
 			} catch (error) {
 				this.write.log(error.message ?? error);

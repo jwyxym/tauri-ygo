@@ -8,25 +8,6 @@
 		position: absolute;
 		width: 100%;
 		height: calc(80vh - 44px);
-	}
-	.expansions {
-		.button_list {
-			padding-top: 5px;
-			margin-left: 20px;
-			width: calc(100% - 40px);
-			display: flex;
-			gap: 10px;
-		}
-		.var-list {
-			height: calc(80vh - 80px);
-			width: 100%;
-			overflow-y: auto;
-			&::-webkit-scrollbar {
-				display: none;
-			}
-		}
-	}
-	.items {
 		overflow-y: auto;
 		&::-webkit-scrollbar {
 			display: none;
@@ -34,5 +15,35 @@
 		.var-list {
 			width: 100%;
 		}
+	}
+	.expansions {
+		.var-cell {
+			:deep(.var-cell__extra) {
+				display: flex;
+				height: 40px;
+				.result {
+					width: 30vw;
+					position: relative;
+					display: flex;
+					justify-content: right;
+					align-items: center;
+				}
+			}
+		}
+	}
+}
+.download_custom {
+	display: flex;
+	flex-direction: column;
+	align-content: center;
+	gap: 10px;
+	width: 50vw;
+	height: 70vh;
+	overflow-y: auto;
+	.var-select, .var-input {
+		width: 100%;
+	}
+	&::-webkit-scrollbar {
+		display: none;
 	}
 }

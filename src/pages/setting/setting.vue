@@ -1,38 +1,93 @@
 <template>
-	<var-popup v-model:show = 'page.show'>
+	<var-popup
+		v-model:show = 'page.show'
+		:close-on-key-escape = 'false'
+		:close-on-click-overlay = 'false'
+		@click-overlay = 'page.exit'
+		@key-escape = 'page.exit'
+	>
 		<var-loading
 			:loading = 'page.loading'
 			color = 'white'
 			class = 'setting'
 		>
 			<var-tabs v-model:active = "page.select">
-				<var-tab>{{ mainGame.get.text(I18N_KEYS.SETTING_EX_CARDS) }}</var-tab>
+				<var-tab>{{ mainGame.get.text(I18N_KEYS.SETTING_PACKS) }}</var-tab>
 				<var-tab>{{ mainGame.get.text(I18N_KEYS.SETTING_ITEMS) }}</var-tab>
-				<var-tab>{{ mainGame.get.text(I18N_KEYS.SETTING_PICS) }}</var-tab>
+				<var-tab>{{ mainGame.get.text(I18N_KEYS.SETTING_OTHER) }}</var-tab>
 			</var-tabs>
 			<transition name = 'opacity'>
 				<div class = 'expansions' v-if = 'page.select === 0'>
-					<div class = 'button_list'>
-						<var-menu-select @select = 'download.popup.on'>
-							<Button :content = 'mainGame.get.text(I18N_KEYS.SETTING_EX_CARDS)'></Button>
-							<template #options>
-								<var-menu-option :label = 'mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_CUSTOM)'/>
-								<var-menu-option :label = 'mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_SUPER_PRE)' />
-							</template>
-						</var-menu-select>
-						<Button
-							@click = 'expansion.reload'
-							:content = 'mainGame.get.text(I18N_KEYS.SETTING_RELOAD)'
-						></Button>
-						<Button
-							@click = 'expansion.resert'
-							:content = 'mainGame.get.text(I18N_KEYS.SETTING_RESERT)'
-						></Button>
-						<Button
-							@click = 'expansion.chk_version'
-							:content = 'mainGame.get.text(I18N_KEYS.SETTING_VERSION)'
-						></Button>
-					</div>
+					<var-cell
+						:title = 'mainGame.get.text(I18N_KEYS.SETTING_GAME_VERSION)'
+						:border = 'true'
+					>
+						<template #extra>
+							<var-icon name = 'information-outline' v-show = 'expansion.version.game.loading === undefined' @click = 'expansion.version.game.chk'/>
+							<var-loading color = 'white' v-show = "expansion.version.game.loading === 'loading'"/>
+							<div
+								class = 'result'
+								v-show = "typeof expansion.version.game.loading === 'boolean'"
+								@click = 'expansion.version.game.update'
+							>
+								<span>{{ mainGame.get.text(expansion.version.game.loading ? I18N_KEYS.SETTING_LATEST : I18N_KEYS.SETTING_UPDATE) }}</span>
+								<var-badge type = 'danger' dot v-show = '!expansion.version.game.loading'/>
+								<var-badge color = 'chartreuse' dot v-show = 'expansion.version.game.loading'/>
+							</div>
+						</template>
+					</var-cell>
+					<var-cell
+						:title = 'mainGame.get.text(I18N_KEYS.SETTING_SUPER_PRE_VERSION)'
+						:border = 'true'
+					>
+						<template #extra>
+							<var-icon name = 'information-outline' v-show = 'expansion.version.superpre.loading === undefined' @click = 'expansion.version.superpre.chk'/>
+							<var-loading color = 'white' v-show = "expansion.version.superpre.loading === 'loading'"/>
+							<div
+								class = 'result'
+								v-show = "typeof expansion.version.superpre.loading === 'boolean'"
+								@click = 'expansion.version.superpre.update'
+							>
+								<span>{{ mainGame.get.text(expansion.version.superpre.loading ? I18N_KEYS.SETTING_LATEST : I18N_KEYS.SETTING_UPDATE) }}</span>
+								<var-badge type = 'danger' dot v-show = '!expansion.version.superpre.loading'/>
+								<var-badge color = 'chartreuse' dot v-show = 'expansion.version.superpre.loading'/>
+							</div>
+						</template>
+					</var-cell>
+					<var-cell
+						:border = 'true'
+						:title = 'mainGame.get.text(I18N_KEYS.SETTING_RESERT)'
+					>
+						<template #extra>
+							<var-icon
+								name = 'refresh'
+								@click = 'async () => { await expansion.resert() }'
+							/>
+						</template>
+					</var-cell>
+					<var-cell
+						:border = 'true'
+						:title = 'mainGame.get.text(I18N_KEYS.SETTING_RELOAD)'
+					>
+						<template #extra>
+							<var-icon
+								name = 'refresh'
+								@click = 'expansion.reload'
+							/>
+						</template>
+					</var-cell>
+					<var-cell
+						:border = 'true'
+						:title = 'mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_CUSTOM)'
+					>
+						<template #extra>
+							<var-icon
+								name = 'download-outline'
+								@click = 'download.popup.on'
+							/>
+						</template>
+					</var-cell>
+					<var-divider :description = 'mainGame.get.text(I18N_KEYS.SETTING_EX_CARDS)'/>
 					<var-checkbox-group v-model = 'setting.load'>
 						<var-list>
 							<TransitionGroup
@@ -51,6 +106,7 @@
 											:checked-value = 'i'
 											@change = 'expansion.change($event, v)'
 										></var-checkbox>
+										<var-icon name = 'trash-can-outline' @click = 'expansion.delete(v)'/>
 									</template>
 								</var-cell>
 							</TransitionGroup>
@@ -88,10 +144,10 @@
 							</div>
 						</template>
 					</var-cell>
-					<var-checkbox-group v-model = 'setting.items_true'>
+					<var-checkbox-group v-model = 'setting.items.chk'>
 						<var-list>
 							<var-cell
-								v-for = 'i in setting.items'
+								v-for = 'i in setting.items.all'
 								:key = 'i'
 								:title = 'mainGame.get.text(I18N_KEYS[i[0]])'
 								:border = 'true'
@@ -108,6 +164,20 @@
 				</div>
 			</transition>
 		</var-loading>
+		<var-popup :close-on-key-escape = 'false' v-model:show = 'download.popup.url' position = 'center' :close-on-click-overlay = 'false'>
+			<var-form class = 'download_custom'>
+				<Input
+					:placeholder = 'mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_CUSTOM)'
+					v-model = 'download.url'
+				/>
+				<Input
+					:placeholder = 'mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_NAME)'
+					:rules = 'download.name_rule'
+					v-model = 'download.name'
+				/>
+				<Button_List :loading = 'page.loading' :confirm = 'download.custom.confirm' :cancel = 'download.custom.cancel'></Button_List>
+			</var-form>
+		</var-popup>
 	</var-popup>
 </template>
 <script setup lang = 'ts'>
@@ -120,20 +190,28 @@
 	import fs from '../../script/fs';
 
 	import toast from '../../script/toast';
-	import Button from '../varlet/button.vue';
 	import Dialog from '../varlet/dialog';
+	import Input from '../varlet/input.vue';
+	import Button_List from '../varlet/button_list.vue';
 
 	const page = reactive({
 		show : false,
 		select : 0,
-		loading : false
+		loading : false,
+		exit : () => {
+			if (page.loading || expansion.version.game.loading === 'loading' || expansion.version.superpre.loading === 'loading')
+				page.show = true;
+			else page.show = false;
+		}
 	});
 
 	const setting = reactive({
 		load : [] as Array<string>,
 		expansion : [] as Array<string>,
-		items_true : [] as Array<[keyof typeof I18N_KEYS, string]>,
-		items : [] as Array<[keyof typeof I18N_KEYS, string]>,
+		items : {
+			all : [] as Array<[keyof typeof I18N_KEYS, string]>,
+			chk : [] as Array<[keyof typeof I18N_KEYS, string]>
+		},
 		sound : 0
 	})
 
@@ -147,25 +225,18 @@
 		},
 		popup : {
 			url : false,
-			on : async (value : string) : Promise<void> => {
-				switch (value) {
-					case mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_CUSTOM):
-						download.popup.url = true;
-						break;
-					case mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_SUPER_PRE):
-						await download.on(CONSTANT.URL.SUPER_PRE);
-						break;
-				}
+			on : async () : Promise<void> => {
+				download.popup.url = true;
 			}
 		},
-		on : async (url : string, name : string = '') : Promise<void> => {
+		on : async (url : string, name : string = '') : Promise<boolean> => {
 			if (!url) {
 				toast.error(mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_LEN));
-				return;
+				return false;
 			}
-			page.loading = true;
 			toast.info(mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_START));
 			const path = await fs.write.ypk(url, name);
+			console.log(path)
 			if (path.length == 2) {
 				mainGame.push.system(CONSTANT.KEYS.SETTING_LOADING_EXPANSION, path[1]);
 				const load = await mainGame.get.expansions();
@@ -175,8 +246,9 @@
 				await mainGame.load.ypk(path[0]);
 				await fs.write.system();
 				toast.info(mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_COMPELETE));
+				return true;
 			}
-			page.loading = false;
+			return false;
 		},
 		custom : {
 			confirm : async () : Promise<void> => {
@@ -194,7 +266,7 @@
 		}
 	});
 
-	const expansion = {
+	const expansion = reactive({
 		delete : (v : number) : void => {
 			Dialog({
 				title : mainGame.get.text(I18N_KEYS.SETTING_DELETE_YPK),
@@ -227,25 +299,44 @@
 			await mainGame.reload();
 			page.loading = false;
 		},
-		resert : async (chk : boolean = false) : Promise<void> => {
+		resert : async (chk : boolean = false) : Promise<boolean> => {
 			page.loading = true;
+			let result = false;
 			if (await fs.init(true, chk))
-				await mainGame.reload();
+				result = await mainGame.reload();
 			page.loading = false;
+			return result;
 		},
-		chk_version : async () : Promise<void> => {
-			page.loading = true;
-			const chk = await mainGame.chk.version()
-			if (!chk)
-				Dialog({
-					title : mainGame.get.text(I18N_KEYS.SETTING_UPDATE),
-					onConfirm : async () : Promise<void> => {
-						await expansion.resert(true);
-					}
-				});
-			page.loading = false;
+		version : {
+			game : {
+				chk : async () : Promise<void> => {
+					expansion.version.game.loading = 'loading';
+					expansion.version.game.loading = await mainGame.chk.version.game();
+				},
+				update : async () : Promise<void> => {
+					if (expansion.version.game.loading)
+						return;
+					expansion.version.game.loading = 'loading';
+					expansion.version.game.loading = await expansion.resert(true);
+				},
+				loading : undefined as undefined | boolean | string
+			},
+			superpre : {
+				chk : async () : Promise<void> => {
+					expansion.version.superpre.loading = 'loading';
+					const chk = await mainGame.chk.version.superpre();
+					expansion.version.superpre.loading = chk;
+				},
+				update : async () : Promise<void> => {
+					if (expansion.version.superpre.loading)
+						return;
+					expansion.version.superpre.loading = 'loading';
+					expansion.version.superpre.loading = await download.on(CONSTANT.URL.SUPER_PRE);
+				},
+				loading : undefined as undefined | boolean | string
+			}
 		},
-	};
+	});
 
 	const items = {
 		change : async (value : Array<string> | boolean, i : string) : Promise<void> => {
@@ -267,10 +358,9 @@
 		setting.expansion = load.ypk.map(i => i.name);
 		setting.load = (mainGame.get.system(CONSTANT.KEYS.SETTING_LOADING_EXPANSION) as Array<string> | undefined) ?? [];
 		const items = Object.entries(CONSTANT.KEYS).filter(i => i[0].startsWith('SETTING_CHK'));
-		setting.items = items as Array<[keyof typeof I18N_KEYS, string]>;
-		setting.items_true = setting.items.filter(i => mainGame.get.system(i[1]));
+		setting.items.all = items as Array<[keyof typeof I18N_KEYS, string]>;
+		setting.items.chk = setting.items.all.filter(i => mainGame.get.system(i[1]));
 		setting.sound = mainGame.get.system(CONSTANT.KEYS.SETTING_VOICE_BACK_BGM) as number;
-		console.log(setting)
 	});
 
 	onMounted(() => {

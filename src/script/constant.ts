@@ -18,7 +18,7 @@ const REG = {
 	CONF : /\.(conf)$/i,
 	INI : /\.(ini)$/i,
 	ZIP : /\.(ypk|zip)$/i,
-	FONT : /\.(ttf|otf)$/i,
+	FONT : /\.(ttf)$/i,
 	JSON : /\.(json)$/i,
 	DECK : /\.(ydk)$/i,
 	ATK : /^[0-9?\s]*$/,
@@ -50,6 +50,7 @@ const FILES = {
 	SYSTEM_CONF : 'system.conf',
 	BACK_BGM : 'Night View.wav',
 	BATTLE_BGM : 'City of Night.wav',
+	SUPER_PRE : 'ygopro-super-pre.ypk',
 	PIC_ZIP : 'pics.zip',
 	ASSETS_ZIP : 'assets.zip',
 	TEXTURE_UNKNOW : 'unknown.jpg',
@@ -89,6 +90,7 @@ const FILES = {
 
 const URL = {
 	SUPER_PRE : 'https://cdn02.moecube.com:444/ygopro-super-pre/archive/ygopro-super-pre.ypk',
+	SUPER_PRE_VERSION : 'https://cdn02.moecube.com:444/ygopro-super-pre/data/version.txt',
 	ASSETS : SYSTEM === 'android' ?
 		'https://api.gitcode.com/api/v5/repos/jwyxym/tauri-ygo/releases/release-latest/attach_files/assets_android.zip/download' :
 		'https://api.gitcode.com/api/v5/repos/jwyxym/tauri-ygo/releases/release-latest/attach_files/assets.zip/download',
