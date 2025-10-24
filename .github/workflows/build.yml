@@ -81,7 +81,7 @@ jobs:
     - name: Android Init
       shell: cmd
       env:
-        JAVA_HOME: ${{ github.workspace }}\jdk-21.0.8
+        JAVA_HOME: ${{ github.workspace }}\java21\java
         ANDROID_HOME: ${{ github.workspace }}\android-sdk
         NDK_HOME: ${{ github.workspace }}\android-ndk-r27d
       run: |
@@ -99,7 +99,7 @@ jobs:
     - name: Android build
       shell: cmd
       env:
-        JAVA_HOME: ${{ github.workspace }}\jdk-21.0.8
+        JAVA_HOME: ${{ github.workspace }}\java21\java
         NDK_HOME: ${{ github.workspace }}\android-ndk-r27d
       run: |
         npm run tauri android build
