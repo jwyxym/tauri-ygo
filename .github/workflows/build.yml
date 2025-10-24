@@ -24,9 +24,19 @@ jobs:
     - name: Install Java21
       shell: cmd
       run: |
-        wget https://download.oracle.com/java/21/latest/jdk-21_windows-x64_bin.zip
-        unzip jdk-21_windows-x64_bin.zip
+        wget https://download.oracle.com/java/21/21.0.8/jdk-21_windows-x64_bin.zip
+        unzip jdk-21_windows-x64_bin.zip -d java21
     
+    - name: Rename Java21Dir
+      shell: pwsh
+      run: |
+        $folders = Get-ChildItem -Path './java21' -Directory
+
+        if ($folders.Count -gt 0) {
+          $oldPath = Join-Path './java21' $folders[0].Name
+          Rename-Item -Path $oldPath -NewName "java"
+        }
+
     - name: Install Android sdk
       shell: cmd
       run: |
