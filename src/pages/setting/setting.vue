@@ -161,6 +161,24 @@
 							</var-cell>
 						</var-list>
 					</var-checkbox-group>
+					<var-list>
+						<var-cell
+							v-for = 'i in setting.counts'
+							:key = 'i'
+							:title = 'mainGame.get.text(I18N_KEYS[i.key[0]])'
+							:border = 'true'
+						>
+							<template #extra>
+								<Input
+									:variant = 'false'
+									placeholder = ''
+									type = 'number'
+									v-model = 'i.value'
+									@blur = 'items.change(i.value, i.key[1])'
+								/>
+							</template>
+						</var-cell>
+					</var-list>
 				</div>
 			</transition>
 		</var-loading>
@@ -212,7 +230,11 @@
 			all : [] as Array<[keyof typeof I18N_KEYS, string]>,
 			chk : [] as Array<[keyof typeof I18N_KEYS, string]>
 		},
-		sound : 0
+		sound : 0,
+		counts : [] as Array<{
+			key : [keyof typeof I18N_KEYS, string];
+			value : string
+		}>,
 	})
 
 	const download = reactive({
@@ -339,8 +361,8 @@
 	});
 
 	const items = {
-		change : async (value : Array<string> | boolean, i : string) : Promise<void> => {
-			mainGame.push.system(i, typeof value !== 'boolean');
+		change : async (value : Array<string> | string | boolean, i : string) : Promise<void> => {
+			mainGame.push.system(i, i.startsWith('SETTING_CHK_') ? typeof value !== 'boolean' : value as string);
 			await fs.write.system();
 		},
 		sound_change : async (value : number) : Promise<void> => {
@@ -357,9 +379,16 @@
 		const load = await mainGame.get.expansions();
 		setting.expansion = load.ypk.map(i => i.name);
 		setting.load = (mainGame.get.system(CONSTANT.KEYS.SETTING_LOADING_EXPANSION) as Array<string> | undefined) ?? [];
-		const items = Object.entries(CONSTANT.KEYS).filter(i => i[0].startsWith('SETTING_CHK'));
+		const items = Object.entries(CONSTANT.KEYS).filter(i => i[0].startsWith('SETTING_CHK_'));
 		setting.items.all = items as Array<[keyof typeof I18N_KEYS, string]>;
 		setting.items.chk = setting.items.all.filter(i => mainGame.get.system(i[1]));
+		const cts = Object.entries(CONSTANT.KEYS).filter(i => i[0].startsWith('SETTING_CT_'));
+		setting.counts = (cts as Array<[keyof typeof I18N_KEYS, string]>).map(i => {
+			return {
+				key : i,
+				value : mainGame.get.system(i[1]) as string
+			}
+		});
 		setting.sound = mainGame.get.system(CONSTANT.KEYS.SETTING_VOICE_BACK_BGM) as number;
 	});
 

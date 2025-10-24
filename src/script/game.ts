@@ -111,8 +111,20 @@ class Game {
 						this.read.system_conf(line);
 					}
 				}
+				if (!this.system.has(CONSTANT.KEYS.SETTING_CT_CARD))
+					this.push.system(CONSTANT.KEYS.SETTING_CT_CARD, 3);
+				if (!this.system.has(CONSTANT.KEYS.SETTING_CT_DECK_MAIN))
+					this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_MAIN, 60);
+				if (!this.system.has(CONSTANT.KEYS.SETTING_CT_DECK_EX))
+					this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_EX, 15);
+				if (!this.system.has(CONSTANT.KEYS.SETTING_CT_DECK_SIDE))
+					this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_SIDE, 15);
 			} else {
-				this.push.system(CONSTANT.KEYS.SETTING_DOWMLOAD_TIME, new Date().toISOString())
+				this.push.system(CONSTANT.KEYS.SETTING_DOWMLOAD_TIME, new Date().toISOString());
+				this.push.system(CONSTANT.KEYS.SETTING_CT_CARD, 3);
+				this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_MAIN, 60);
+				this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_EX, 15);
+				this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_SIDE, 15);
 				await fs.write.system();
 			}
 
@@ -154,7 +166,7 @@ class Game {
 				return undefined;
 			if (key === CONSTANT.KEYS.SETTING_LOADING_EXPANSION) {
 				return (value ?? '').split('&&').filter(i => i !== '');
-			} else if (key === CONSTANT.KEYS.SETTING_VOICE_BACK_BGM) {
+			} else if (key === CONSTANT.KEYS.SETTING_VOICE_BACK_BGM || obj_key[0].startsWith('SETTING_CT_')) {
 				return isNaN(number) ? 0 : number;
 			} else if (obj_key[0].startsWith('SETTING_CHK_')) {
 				return !!number;
@@ -785,8 +797,8 @@ class Game {
 				return undefined;
 			if (key === CONSTANT.KEYS.SETTING_LOADING_EXPANSION) {
 				this.system.set(key, to_string(n as string));
-			} else if (key === CONSTANT.KEYS.SETTING_VOICE_BACK_BGM) {
-				this.system.set(key, `${n}`);
+			} else if (key === CONSTANT.KEYS.SETTING_VOICE_BACK_BGM || key.startsWith('SETTING_CT_')) {
+				this.system.set(key, `${n ?? 0}`);
 				voice.update(key);
 			} else if (obj_key[0].startsWith('SETTING_CHK_')) {
 				this.system.set(key, n ? '1' : '0');

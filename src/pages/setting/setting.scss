@@ -31,6 +31,17 @@
 			}
 		}
 	}
+	.items {
+		.var-cell {
+			:deep(.var-cell__extra) {
+				display: flex;
+				height: 40px;
+				.var-input {
+					width: 30vw;
+				}
+			}
+		}
+	}
 }
 .download_custom {
 	display: flex;

@@ -280,10 +280,9 @@
 			main : (code : string | number) : void => {
 				code = typeof code === 'string' ? Number(code) : code;
 				const card : Card = mainGame.get.card(code);
-				console.log(deck)
 				if (card.is_token()) return;
 				const cards = [...deck.main, ...deck.extra, ...deck.side];
-				const ct = search.info.lflist ? mainGame.get.lflist(search.info.lflist, card.id) as number : 3;
+				const ct = search.info.lflist ? mainGame.get.lflist(search.info.lflist, card.id) as number : mainGame.get.system(CONSTANT.KEYS.SETTING_CT_CARD) as number;
 				if (cards.filter(i => i === code).length >= ct) {
 					toast.error(mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_MAX, ct.toString()));
 					return;
