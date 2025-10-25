@@ -5,7 +5,6 @@ import mainGame from '../../../script/game';
 import fs from '../../../script/fs';
 import invoke from '../../../script/invoke';
 import Message from './message';
-import * as CONSTANT from '../../../script/constant';
 import { I18N_KEYS } from '../../../script/language/i18n';
 import toast from '../../../script/toast';
 import Deck from '../../deck/deck';

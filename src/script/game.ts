@@ -119,12 +119,15 @@ class Game {
 					this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_EX, 15);
 				if (!this.system.has(CONSTANT.KEYS.SETTING_CT_DECK_SIDE))
 					this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_SIDE, 15);
+				if (!this.system.has(CONSTANT.KEYS.SETTING_SERVER_PLAYER_NAME))
+					this.push.system(CONSTANT.KEYS.SETTING_SERVER_PLAYER_NAME, '今晚有宵夜吗');
 			} else {
 				this.push.system(CONSTANT.KEYS.SETTING_DOWMLOAD_TIME, new Date().toISOString());
 				this.push.system(CONSTANT.KEYS.SETTING_CT_CARD, 3);
 				this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_MAIN, 60);
 				this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_EX, 15);
 				this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_SIDE, 15);
+				this.push.system(CONSTANT.KEYS.SETTING_SERVER_PLAYER_NAME, '今晚有宵夜吗');
 				await fs.write.system();
 			}
 

@@ -1,7 +1,7 @@
 import { Reactive } from "vue";
 import fs from './fs'
 
-interface POS_Like {
+interface Axis {
 	bottom : number;
 	height : number;
 	left : number;
@@ -14,9 +14,8 @@ interface POS_Like {
 
 class Position {
 	reactive = {
-		get : (pos : Reactive<POS_Like>, element : HTMLElement) : void => {
-			// @ts-ignore
-			const p : POS_Like = element.$el !== undefined ? element.$el.getBoundingClientRect() : element.getBoundingClientRect();
+		get : (pos : Reactive<Axis>, element : HTMLElement) : void => {
+			const p : Axis = element.getBoundingClientRect();
 			pos.bottom = p.bottom;
 			pos.height = p.height;
 			pos.left = p.left;
@@ -28,10 +27,9 @@ class Position {
 		}
 	}
 
-	get = (element : HTMLElement) : POS_Like => {
+	get = (element : HTMLElement) : Axis => {
 		try {
-			// @ts-ignore
-			const p : POS_Like = element.$el !== undefined ? element.$el.getBoundingClientRect() : element.getBoundingClientRect();
+			const p : Axis = element.getBoundingClientRect();
 			return p;
 		} catch (error) {
 			fs.write.log(error);
@@ -48,7 +46,7 @@ class Position {
 		};
 	}
 
-	oppo = (p1 : POS_Like, p2 : POS_Like) : number => {
+	oppo = (p1 : Axis, p2 : Axis) : number => {
 		try {
 			return p2.left - p1.left;
 		} catch (error) {
@@ -57,7 +55,7 @@ class Position {
 		return 0;
 	};
 
-	adjacent = (p1 : POS_Like, p2 : POS_Like) : number => {
+	adjacent = (p1 : Axis, p2 : Axis) : number => {
 		try {
 			return p1.top - p2.top;
 		} catch (error) {
@@ -66,7 +64,7 @@ class Position {
 		return 0;
 	};
 
-	angle = (p1 : POS_Like, p2 : POS_Like) : number => {
+	angle = (p1 : Axis, p2 : Axis) : number => {
 		try {
 			const adjacent = this.adjacent(p1, p2);
 			const oppo = this.oppo(p1, p2);
@@ -82,7 +80,7 @@ class Position {
 
 	compoute = Compoute
 
-	isHigh = (p1 : POS_Like, p2 : POS_Like) : boolean => {
+	isHigh = (p1 : Axis, p2 : Axis) : boolean => {
 		try {
 			return  p1.top < p2.top;
 		} catch (error) {
@@ -91,7 +89,7 @@ class Position {
 		return false;
 	}
 
-	isLeft = (p1 : POS_Like, p2 : POS_Like) : boolean => {
+	isLeft = (p1 : Axis, p2 : Axis) : boolean => {
 		try {
 			return  p1.left < p2.left;
 		} catch (error) {
@@ -100,14 +98,14 @@ class Position {
 		return false;
 	}
 
-	isLeftorHigh = (p1 : POS_Like, p2 : POS_Like) : boolean => {
+	isLeftorHigh = (p1 : Axis, p2 : Axis) : boolean => {
 		return this.isLeft(p1, p2) || this.isHigh(p1, p2)
 	}
 };
 
 class Compoute {
-	attacker : POS_Like;
-	defender : POS_Like;
+	attacker : Axis;
+	defender : Axis;
 	str : {
 		x : string;
 		y : string;
@@ -117,7 +115,7 @@ class Compoute {
 		y : Function;
 	};
 
-	constructor (attacker : POS_Like, defender : POS_Like) {
+	constructor (attacker : Axis, defender : Axis) {
 		this.attacker = attacker;
 		this.defender = defender;
 		this.str = {
@@ -144,4 +142,4 @@ class Compoute {
 }
 
 export default new Position();
-export type { POS_Like };
+export type { Axis };
