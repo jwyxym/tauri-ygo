@@ -37,6 +37,11 @@ jobs:
           Rename-Item -Path $oldPath -NewName "java"
         }
 
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+
     - name: Install Android sdk
       shell: cmd
       run: |
@@ -67,11 +72,11 @@ jobs:
       with:
         toolchain: 1.88.0
 
-    - name: Write Rust File
+    - name: Write Tauri Config
       shell: cmd
       run: |
-        cd src-tauri
-        copy tauri.conf.android.json tauri.conf.json
+        cd .ci
+        python tauri.conf.json.py android
 
     - name: NPM Init
       shell: cmd
@@ -141,6 +146,12 @@ jobs:
       with:
         toolchain: 1.88.0
 
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+
+
     - name: Install wget and unzip
       shell: powershell
       run: |
@@ -182,8 +193,8 @@ jobs:
       shell: cmd
       run: |
         xcopy .ci src-tauri /s /Y /e /I
-        cd src-tauri
-        copy tauri.conf.windows.json tauri.conf.json
+        cd .ci
+        python tauri.conf.json.py windows
 
     - name: NPM Init
       shell: cmd
