@@ -5,7 +5,7 @@ import * as path from '@tauri-apps/api/path';
 import * as CONSTANT from './constant';
 import toast from './toast';
 import mainGame from './game';
-import invoke, { Pic } from './invoke';
+import invoke, { Pic } from './post/invoke';
 
 import Deck from '../pages/deck/deck';
 import { I18N_KEYS } from './language/i18n';
