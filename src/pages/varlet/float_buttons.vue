@@ -5,6 +5,7 @@
 				@click = 'i.click'
 				:icon_name = 'i.icon'
 				v-show = 'i.show'
+				:loading = 'i.loading'
 			></Button>
 		</transition>
 	</div>

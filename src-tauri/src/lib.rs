@@ -7,12 +7,20 @@ use regex::Regex;
 use serde::Serialize;
 use serde_json::{from_str, Value};
 use std::{
-    fs::{create_dir_all, exists, File, metadata, Metadata},
-    io::{copy, Read, Write},
-    path::{Path, PathBuf},
-	time::{SystemTime, UNIX_EPOCH}
+	fs::{create_dir_all, exists, File, metadata, Metadata},
+	io::{copy, Read, Write},
+	path::{Path, PathBuf},
+	time::{SystemTime, UNIX_EPOCH, Instant, Duration},
+	sync::{mpsc::channel},
+	thread
 };
-use ureq::{get, http::Response, typestate::WithoutBody, Body, RequestBuilder};
+use ureq::{
+	get,
+	http::{Response},
+	typestate::WithoutBody,
+	Body,
+	RequestBuilder
+};
 use zip::ZipArchive;
 use chrono::{DateTime, Utc};
 
@@ -20,332 +28,364 @@ use trust_dns_resolver::{config::*, Resolver};
 
 #[derive(Serialize, Clone)]
 struct Pic {
-    code: i64,
-    path: String,
+	code: i64,
+	path: String,
+}
+
+#[derive(Serialize, Clone)]
+struct Resp {
+	url: String,
+	state: u16,
+	time: u128,
 }
 
 #[derive(Serialize, Clone)]
 struct Srv {
-    priority: u16,
-    weight: u16,
-    port: u16,
-    target: String,
+	priority: u16,
+	weight: u16,
+	port: u16,
+	target: String,
 }
 
 #[derive(Serialize)]
 #[serde(tag = "type", content = "content")]
 enum FileContent {
-    Binary(Vec<u8>),
-    Text(String),
+	Binary(Vec<u8>),
+	Text(String),
 }
 
 #[tauri::command]
 async fn unzip(path: String, file: String, chk: bool) -> Result<(), String> {
-    let file = File::open(file).map_err(|e| e.to_string())?;
-    let mut archive = ZipArchive::new(file).map_err(|e| e.to_string())?;
+	let file = File::open(file).map_err(|e| e.to_string())?;
+	let mut archive = ZipArchive::new(file).map_err(|e| e.to_string())?;
 
-    for i in 0..archive.len() {
-        let mut file = archive.by_index(i).map_err(|e| e.to_string())?;
-        let file_name = file.name().to_string();
-        let out_path = Path::new(&path).join(Path::new(&file_name));
+	for i in 0..archive.len() {
+		let mut file = archive.by_index(i).map_err(|e| e.to_string())?;
+		let file_name = file.name().to_string();
+		let out_path = Path::new(&path).join(Path::new(&file_name));
 
-        if file.is_dir() {
-            create_dir_all(&out_path).map_err(|e| e.to_string())?;
-        } else if !exists(&out_path).map_err(|e| e.to_string())? || chk {
-            if let Some(parent) = out_path.parent() {
-                create_dir_all(parent).map_err(|e| e.to_string())?;
-            }
-            let mut outfile = File::create(&out_path).map_err(|e| e.to_string())?;
-            copy(&mut file, &mut outfile).map_err(|e| e.to_string())?;
-        }
-    }
+		if file.is_dir() {
+			create_dir_all(&out_path).map_err(|e| e.to_string())?;
+		} else if !exists(&out_path).map_err(|e| e.to_string())? || chk {
+			if let Some(parent) = out_path.parent() {
+				create_dir_all(parent).map_err(|e| e.to_string())?;
+			}
+			let mut outfile = File::create(&out_path).map_err(|e| e.to_string())?;
+			copy(&mut file, &mut outfile).map_err(|e| e.to_string())?;
+		}
+	}
 
-    Ok(())
+	Ok(())
 }
 
 #[tauri::command]
 async fn read_texts(
-    dirs: Vec<String>,
-    file_type: Vec<String>,
+	dirs: Vec<String>,
+	file_type: Vec<String>,
 ) -> Result<Vec<(String, FileContent)>, String> {
-    let mut entries: Vec<(String, FileContent)> = Vec::new();
-    let _ = file::walk(dirs, |ext, stem, path| {
-        if file_type.contains(&ext) {
-            if let Ok(mut file) = File::open(path) {
-                let mut content: String = String::new();
-                if let Ok(_) = file.read_to_string(&mut content) {
-                    entries.push((stem, FileContent::Text(content)));
-                }
-            };
-        }
-    });
-    Ok(entries)
+	let mut entries: Vec<(String, FileContent)> = Vec::new();
+	let _ = file::walk(dirs, |ext, stem, path| {
+		if file_type.contains(&ext) {
+			if let Ok(mut file) = File::open(path) {
+				let mut content: String = String::new();
+				if let Ok(_) = file.read_to_string(&mut content) {
+					entries.push((stem, FileContent::Text(content)));
+				}
+			};
+		}
+	});
+	Ok(entries)
 }
 
 #[tauri::command]
 async fn read_files(
-    dirs: Vec<String>,
-    file_type: Vec<String>,
+	dirs: Vec<String>,
+	file_type: Vec<String>,
 ) -> Result<Vec<(String, FileContent)>, String> {
-    let mut entries: Vec<(String, FileContent)> = Vec::new();
-    let _ = file::walk(dirs, |ext, stem, path| {
-        if file_type.contains(&ext) {
-            if let Ok(mut file) = File::open(path) {
-                let mut content: Vec<u8> = Vec::new();
-                if let Ok(_) = file.read_to_end(&mut content) {
-                    entries.push((stem, FileContent::Binary(content)));
-                }
-            };
-        }
-    });
-    Ok(entries)
+	let mut entries: Vec<(String, FileContent)> = Vec::new();
+	let _ = file::walk(dirs, |ext, stem, path| {
+		if file_type.contains(&ext) {
+			if let Ok(mut file) = File::open(path) {
+				let mut content: Vec<u8> = Vec::new();
+				if let Ok(_) = file.read_to_end(&mut content) {
+					entries.push((stem, FileContent::Binary(content)));
+				}
+			};
+		}
+	});
+	Ok(entries)
 }
 
 #[tauri::command]
 async fn read_pics(dirs: Vec<String>, codes: Vec<i64>) -> Result<(Vec<Pic>, Vec<i64>), String> {
-    let mut entries: Vec<Pic> = Vec::new();
-    let mut unknows: Vec<i64> = Vec::new();
-    for code in &codes {
-        let mut path_chk = false;
-        for path in &dirs {
-            let full_name: String = format!("{}.jpg", code);
-            let file_path: PathBuf = Path::new(&path).join(full_name);
-            if exists(&file_path).map_err(|e| e.to_string())? {
-                if let Some(p) = file_path.to_str() {
-                    entries.push(Pic {
-                        code: *code,
-                        path: p.to_string(),
-                    });
-                    path_chk = true;
-                    break;
-                }
-            }
-        }
-        if !path_chk {
-            unknows.push(*code);
-        }
-    }
-    Ok((entries, unknows))
+	let mut entries: Vec<Pic> = Vec::new();
+	let mut unknows: Vec<i64> = Vec::new();
+	for code in &codes {
+		let mut path_chk = false;
+		for path in &dirs {
+			let full_name: String = format!("{}.jpg", code);
+			let file_path: PathBuf = Path::new(&path).join(full_name);
+			if exists(&file_path).map_err(|e| e.to_string())? {
+				if let Some(p) = file_path.to_str() {
+					entries.push(Pic {
+						code: *code,
+						path: p.to_string(),
+					});
+					path_chk = true;
+					break;
+				}
+			}
+		}
+		if !path_chk {
+			unknows.push(*code);
+		}
+	}
+	Ok((entries, unknows))
 }
 
 #[tauri::command]
 async fn read_zip(
-    path: String,
-    file_type: Vec<String>,
+	path: String,
+	file_type: Vec<String>,
 ) -> Result<Vec<(String, FileContent)>, String> {
-    let file: File = File::open(&path).map_err(|e| e.to_string())?;
-    let mut archive: ZipArchive<File> = ZipArchive::new(file).map_err(|e| e.to_string())?;
+	let file: File = File::open(&path).map_err(|e| e.to_string())?;
+	let mut archive: ZipArchive<File> = ZipArchive::new(file).map_err(|e| e.to_string())?;
 
-    let mut entries: Vec<(String, FileContent)> = Vec::new();
+	let mut entries: Vec<(String, FileContent)> = Vec::new();
 
-    let pic_regex: Regex =
-        Regex::new(r"^pics/(\d+)\.(jpg|png|jpeg)$").map_err(|e| e.to_string())?;
-    let db_regex: Regex = Regex::new(r"^[^/]+\.(cdb)$").map_err(|e| e.to_string())?;
-    let conf_regex: Regex = Regex::new(r"^[^/]+\.(conf|ini)$").map_err(|e| e.to_string())?;
-    for i in 0..archive.len() {
-        let mut file: zip::read::ZipFile<'_> = archive.by_index(i).map_err(|e| e.to_string())?;
-        let name: String = file.name().to_string();
+	let pic_regex: Regex =
+		Regex::new(r"^pics/(\d+)\.(jpg|png|jpeg)$").map_err(|e| e.to_string())?;
+	let db_regex: Regex = Regex::new(r"^[^/]+\.(cdb)$").map_err(|e| e.to_string())?;
+	let conf_regex: Regex = Regex::new(r"^[^/]+\.(conf|ini)$").map_err(|e| e.to_string())?;
+	for i in 0..archive.len() {
+		let mut file: zip::read::ZipFile<'_> = archive.by_index(i).map_err(|e| e.to_string())?;
+		let name: String = file.name().to_string();
 
-        if file.is_dir() {
-            continue;
-        }
+		if file.is_dir() {
+			continue;
+		}
 
-        if file_type.len() == 0 {
-            if db_regex.is_match(&name) {
-                let mut content: Vec<u8> = Vec::new();
-                file.read_to_end(&mut content).map_err(|e| e.to_string())?;
-                entries.push((name, FileContent::Binary(content)));
-            } else if conf_regex.is_match(&name) {
-                let mut content: String = String::new();
-                file.read_to_string(&mut content)
-                    .map_err(|e| e.to_string())?;
-                entries.push((name, FileContent::Text(content)));
-            }
-        } else {
-            if let Some(caps) = pic_regex.captures(&name) {
-                if let Some(file_match) = caps.get(1) {
-                    let file_name: String = file_match.as_str().to_string();
-                    if file_type.contains(&file_name)
-                        && !entries.iter().any(|(x, _)| x.to_string() == file_name)
-                    {
-                        let mut content: Vec<u8> = Vec::new();
-                        file.read_to_end(&mut content).map_err(|e| e.to_string())?;
-                        entries.push((name, FileContent::Binary(content)));
-                    }
-                }
-            }
-        }
+		if file_type.len() == 0 {
+			if db_regex.is_match(&name) {
+				let mut content: Vec<u8> = Vec::new();
+				file.read_to_end(&mut content).map_err(|e| e.to_string())?;
+				entries.push((name, FileContent::Binary(content)));
+			} else if conf_regex.is_match(&name) {
+				let mut content: String = String::new();
+				file.read_to_string(&mut content)
+					.map_err(|e| e.to_string())?;
+				entries.push((name, FileContent::Text(content)));
+			}
+		} else {
+			if let Some(caps) = pic_regex.captures(&name) {
+				if let Some(file_match) = caps.get(1) {
+					let file_name: String = file_match.as_str().to_string();
+					if file_type.contains(&file_name)
+						&& !entries.iter().any(|(x, _)| x.to_string() == file_name)
+					{
+						let mut content: Vec<u8> = Vec::new();
+						file.read_to_end(&mut content).map_err(|e| e.to_string())?;
+						entries.push((name, FileContent::Binary(content)));
+					}
+				}
+			}
+		}
 
-        if file_type.len() == entries.len() {
-            break;
-        }
-    }
-    Ok(entries)
+		if file_type.len() == entries.len() {
+			break;
+		}
+	}
+	Ok(entries)
 }
 
 #[tauri::command]
 async fn read_dbs(dirs: Vec<String>) -> Result<Vec<Vec<(Vec<i64>, Vec<String>)>>, String> {
-    let mut entries: Vec<Vec<(Vec<i64>, Vec<String>)>> = Vec::new();
-    let _ = file::walk(dirs, |ext, _stem, path| {
-        if ext == String::from("cdb") {
-            if let Ok(db) = sql::read(path) {
-                entries.push(db);
-            }
-        }
-    });
-    Ok(entries)
+	let mut entries: Vec<Vec<(Vec<i64>, Vec<String>)>> = Vec::new();
+	let _ = file::walk(dirs, |ext, _stem, path| {
+		if ext == String::from("cdb") {
+			if let Ok(db) = sql::read(path) {
+				entries.push(db);
+			}
+		}
+	});
+	Ok(entries)
 }
 
 #[tauri::command]
 async fn read_db(path: String) -> Result<Vec<(Vec<i64>, Vec<String>)>, String> {
-    Ok(sql::read(path)?)
+	Ok(sql::read(path)?)
 }
 
 #[tauri::command]
 fn get_srv(url: String) -> Result<Srv, String> {
-    let mut result: Vec<Srv> = Vec::new();
-    let resolver: Resolver = Resolver::new(ResolverConfig::default(), ResolverOpts::default())
-        .map_err(|e| e.to_string())?;
+	let mut result: Vec<Srv> = Vec::new();
+	let resolver: Resolver = Resolver::new(ResolverConfig::default(), ResolverOpts::default())
+		.map_err(|e| e.to_string())?;
 
-    match resolver.srv_lookup(&url) {
-        Ok(response) => {
-            for ip in response.iter() {
-                result.push(Srv {
-                    priority: ip.priority(),
-                    weight: ip.weight(),
-                    port: ip.port(),
-                    target: ip.target().to_string(),
-                });
-            }
-            result.sort_by_key(|srv| srv.priority);
-            if let Some(srv) = result.get(0) {
-                return Ok(srv.clone());
-            }
-        }
-        Err(_) => {
-            return Ok(Srv {
-                priority: 0,
-                weight: 0,
-                port: 7911,
-                target: url,
-            });
-        }
-    }
-    Err(String::from(""))
+	match resolver.srv_lookup(&url) {
+		Ok(response) => {
+			for ip in response.iter() {
+				result.push(Srv {
+					priority: ip.priority(),
+					weight: ip.weight(),
+					port: ip.port(),
+					target: ip.target().to_string(),
+				});
+			}
+			result.sort_by_key(|srv| srv.priority);
+			if let Some(srv) = result.get(0) {
+				return Ok(srv.clone());
+			}
+		}
+		Err(_) => {
+			return Ok(Srv {
+				priority: 0,
+				weight: 0,
+				port: 7911,
+				target: url,
+			});
+		}
+	}
+	Err(String::from(""))
 }
 
 #[tauri::command]
 async fn get_game_version(url: String, headers: Vec<(String, String)>) -> Result<String, String> {
-    let mut req: RequestBuilder<WithoutBody> = get(&url);
-    for (key, value) in headers {
-        req = req.header(key, value);
-    }
-    let response: Response<Body> = req.call().map_err(|e| e.to_string())?;
-    if response.status().is_success() {
-        let mut body = response.into_body();
-        let mut reader = body.as_reader();
-        let mut content: String = "".to_string();
-        reader
-            .read_to_string(&mut content)
-            .map_err(|e| e.to_string())?;
-        let json_data: Value = from_str(&content).map_err(|e| e.to_string())?;
-        if let Some(contents) = json_data.get("content") {
-            if let Value::Array(arr) = contents {
-                if let Some(content) = arr.get(0) {
-                    if let Some(created_at) = content.get("created_at") {
-                        if let Value::String(created_time) = created_at {
-                            return Ok(created_time.to_string());
-                        }
-                    }
-                }
-            }
-        }
-    } else {
-        return Err(format!("{}", response.status()));
-    }
-    Err(String::from(""))
+	let mut req: RequestBuilder<WithoutBody> = get(&url);
+	for (key, value) in headers {
+		req = req.header(key, value);
+	}
+	let response: Response<Body> = req.call().map_err(|e| e.to_string())?;
+	if response.status().is_success() {
+		let mut body = response.into_body();
+		let mut reader = body.as_reader();
+		let mut content: String = "".to_string();
+		reader
+			.read_to_string(&mut content)
+			.map_err(|e| e.to_string())?;
+		let json_data: Value = from_str(&content).map_err(|e| e.to_string())?;
+		if let Some(contents) = json_data.get("content") {
+			if let Value::Array(arr) = contents {
+				if let Some(content) = arr.get(0) {
+					if let Some(created_at) = content.get("created_at") {
+						if let Value::String(created_time) = created_at {
+							return Ok(created_time.to_string());
+						}
+					}
+				}
+			}
+		}
+	} else {
+		return Err(format!("{}", response.status()));
+	}
+	Err(String::from(""))
+}
+
+#[tauri::command]
+async fn response_time(urls: Vec<String>) -> Result<Vec<Resp>, String> {
+	let mut entries: Vec<Resp> = Vec::new();
+	for url in urls {
+		let (tx, rx) = channel::<Resp>();
+		thread::spawn(move || {
+			let start: Instant = Instant::now();
+			if let Ok(response) = get(&url).call() {
+				tx.send(Resp {
+					url: url.clone(),
+					state: response.status().as_u16(),
+					time: start.elapsed().as_millis()
+				}).unwrap();
+			};
+		});
+		if let Ok(rep) = rx.recv_timeout(Duration::from_secs(3)) {
+			entries.push(rep);
+		}
+	}
+
+	entries.sort_by_key(|i| i.time);
+	Ok(entries)
 }
 
 #[tauri::command]
 async fn download(
-    url: String,
-    path: String,
-    name: String,
-    ex_name: String,
+	url: String,
+	path: String,
+	name: String,
+	ex_name: String,
 ) -> Result<String, String> {
-    let response: Response<Body> = get(&url).call().map_err(|e| e.to_string())?;
-    let mut file_name: String = name;
-    if response.status().is_success() {
-        if file_name.len() == 0 {
-            if let Some(content_disp) = response.headers().get("Content-Disposition") {
-                if let Ok(cd_str) = content_disp.to_str() {
-                    if let Some(f) = parse_content_disposition(cd_str).filename() {
-                        if let Some(typ) = f.1 {
-                            file_name = format!("{}.{}", f.0, typ).to_string();
-                        }
-                    }
-                }
-            }
-        }
-        if file_name.len() == 0 {
-            let mut rng = rand::rng();
-            let random_number = rng.random_range(10_000_000..=100_000_000);
-            file_name = random_number.to_string();
-        }
-        if ex_name.len() == 0 && !file_name.ends_with(&ex_name) {
-            file_name += &ex_name;
-        }
-        let file_path: PathBuf = Path::new(&path).join(&file_name);
-        let mut body = response.into_body();
-        let mut reader = body.as_reader();
-        let mut bytes = Vec::new();
-        reader.read_to_end(&mut bytes).map_err(|e| e.to_string())?;
-        let mut file: File = File::create(&file_path).map_err(|e| e.to_string())?;
-        file.write_all(&bytes).map_err(|e| e.to_string())?;
-        Ok(file_name)
-    } else {
-        Err(format!("{}", response.status()))
-    }
+	let response: Response<Body> = get(&url).call().map_err(|e| e.to_string())?;
+	let mut file_name: String = name;
+	if response.status().is_success() {
+		if file_name.len() == 0 {
+			if let Some(content_disp) = response.headers().get("Content-Disposition") {
+				if let Ok(cd_str) = content_disp.to_str() {
+					if let Some(f) = parse_content_disposition(cd_str).filename() {
+						if let Some(typ) = f.1 {
+							file_name = format!("{}.{}", f.0, typ).to_string();
+						}
+					}
+				}
+			}
+		}
+		if file_name.len() == 0 {
+			let mut rng = rand::rng();
+			let random_number = rng.random_range(10_000_000..=100_000_000);
+			file_name = random_number.to_string();
+		}
+		if ex_name.len() == 0 && !file_name.ends_with(&ex_name) {
+			file_name += &ex_name;
+		}
+		let file_path: PathBuf = Path::new(&path).join(&file_name);
+		let mut body = response.into_body();
+		let mut reader = body.as_reader();
+		let mut bytes = Vec::new();
+		reader.read_to_end(&mut bytes).map_err(|e| e.to_string())?;
+		let mut file: File = File::create(&file_path).map_err(|e| e.to_string())?;
+		file.write_all(&bytes).map_err(|e| e.to_string())?;
+		Ok(file_name)
+	} else {
+		Err(format!("{}", response.status()))
+	}
 }
 
 #[tauri::command]
 fn modified_time(path : String) -> Result<String, String> {
-    let metadata: Metadata = metadata(path).map_err(|e| e.to_string())?;
-    let time: SystemTime = metadata.modified().map_err(|e| e.to_string())?;
+	let metadata: Metadata = metadata(path).map_err(|e| e.to_string())?;
+	let time: SystemTime = metadata.modified().map_err(|e| e.to_string())?;
 	match time.duration_since(UNIX_EPOCH) {
 		Ok(duration) => {
 			let time = DateTime::<Utc>::from(UNIX_EPOCH + duration);
 			return Ok(time.to_string());
 		},
 		Err(e) => {
-            return Err(e.to_string());
-        }
+			return Err(e.to_string());
+		}
 	}
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
-        .plugin(tauri_plugin_http::init())
-        .plugin(tauri_plugin_tcp::init())
-        .plugin(tauri_plugin_clipboard_manager::init())
-        .plugin(tauri_plugin_process::init())
-        .plugin(tauri_plugin_os::init())
-        .plugin(tauri_plugin_fs::init())
-        .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![
-            unzip,
-            read_zip,
-            read_texts,
-            read_files,
-            read_pics,
-            read_db,
-            read_dbs,
-            get_srv,
-            get_game_version,
-            download,
+	tauri::Builder::default()
+		.plugin(tauri_plugin_http::init())
+		.plugin(tauri_plugin_tcp::init())
+		.plugin(tauri_plugin_clipboard_manager::init())
+		.plugin(tauri_plugin_process::init())
+		.plugin(tauri_plugin_os::init())
+		.plugin(tauri_plugin_fs::init())
+		.plugin(tauri_plugin_opener::init())
+		.invoke_handler(tauri::generate_handler![
+			unzip,
+			read_zip,
+			read_texts,
+			read_files,
+			read_pics,
+			read_db,
+			read_dbs,
+			get_srv,
+			get_game_version,
+			response_time,
+			download,
 			modified_time
-        ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+		])
+		.run(tauri::generate_context!())
+		.expect("error while running tauri application");
 }

@@ -54,7 +54,6 @@ class Game {
 
     init = async (chk : boolean = true) : Promise<void> => {
 		try {
-			await fs.init_path();
 			//新建所需要的文件夹
 			for (const [k, i] of Object.entries(CONSTANT.DIRS)) {
 				if (k !== 'PIC' && !await fs.exists(i))

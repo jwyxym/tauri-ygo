@@ -1,83 +1,73 @@
-.var-form {
-	display: flex;
-	flex-direction: column;
-	width: 50vw;
-	max-height: 80vh;
-	border: 1px solid white;
-	background-color: rgba(0, 0, 0, 0.2);
-	.button_list {
-		align-self: left;
-		margin-left: 2%;
-		margin-top: 1%;
-		display: flex;
-		gap: 10px;
-		height: 30px;
-	}
-	.content {
-		height: calc(100% - 30px);
-		align-self: center;
-		display: flex;
-		flex-direction: column;
-		gap: 10px;
-		align-content: center;
-		align-items: center;
+.server {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	.address, .wait {
+		width: 50%;
+		max-height: 90%;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
 		overflow-y: auto;
-		width: 90%;
-		margin-bottom: 5%;
-		.var-select, .var-input, .var-auto-complete, .pass, .var-list {
-			width: 100%;
-		}
-		.home {
-			width: 100%;
-			height: calc(100% - 100px);
-			display: flex;
-			gap : 10%;
-			.var-list {
-				width: 50%;
-				.var-cell {
-					width: 100%;
-					height: 40px;
-					.extra {
-						width: 20px;
-						display: flex;
-					}
-				}
-			}
-			.info {
-				display: flex;
-				flex-direction: column;
-				width: 50%;
-				font-size: max(2vh, var(--font-size-md));
-				color: white;
-			}
-		}
-		.pass, .start {
-			height: 50px;
-			display: grid;
-			width: 100%;
-			grid-template-columns: repeat(2, 1fr);
-			justify-items: center;
-			align-items: center;
-		}
-		.start {
-			height: 100px;
-			grid-template-columns: repeat(3, 1fr);
-			font-size: max(2vh, var(--font-size-md));
-			color: white;
-			.var-select {
-				align-self: flex-start;
-			}
-		}
-
 		&::-webkit-scrollbar {
 			display: none;
 		}
+		.var-cell {
+			width: 100%;
+		}
+	}
+	.wait {
+		.var-cell {
+			width: calc(100% - 20px);
+			height: 44px;
+			.buttons {
+				width: 100%;
+				display: flex;
+				gap: 10px;
+				align-items: center;
+			}
+			.check_ready {
+				width: 20px;
+				display: flex;
+			}
+		}
+		.select_deck {
+			width: 50%;
+			height: 80px;
+		}
+	}
+	.info {
+		display: flex;
+		flex-direction: column;
+		font-size: max(2.5vh, 14px);
+		color: white;
+		position: fixed;
+		right: 0;
+		width: 40vw;
+		height: 100vh;
+		white-space: pre-line;
+		background-color: rgba(0, 0, 0, 0.2);
+		display: flex;
+		flex-direction: column;
+		gap: 5px;
+		overflow-y: auto;
+		span {
+			margin-left: 10px;
+		}
+		&::-webkit-scrollbar {
+			display: none;
+		}
+	}
+	.Duel {
+		position: absolute;
 	}
 }
 
 .chat {
 	border: 1px solid white;
-	width: 30vw;
+	width: 40vw;
+	min-width: 300px;
 	height: 100%;
 	background-color: rgba(0, 0, 0, 0.2);
 	.message {
@@ -95,7 +85,8 @@
 	}
 	.send {
 		height: 100px;
-		width: 100%;
+		width: calc(100% - 20px);
+		margin-left: 10px;
 		display: flex;
 		gap: 10px;
 		align-content: center;
@@ -103,7 +94,10 @@
 		justify-content: center;
 		justify-items: center;
 		.var-input {
-			width: 80%;
+			width: 50%;
+		}
+		.voice_input {
+			box-shadow: 0 0 10px 0 #00ffff;
 		}
 	}
 }
@@ -117,14 +111,5 @@
 		width: 100%;
 		height: 44px;
 		background: rgba(0, 0, 0, 0.6) ;
-	}
-}
-
-.server {
-	position: relative;
-	width: 100%;
-	height: 100%;
-	.Duel {
-		position: absolute;
 	}
 }

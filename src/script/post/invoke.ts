@@ -14,6 +14,12 @@ interface Pic {
 	url ?: string;
 }
 
+interface Resp {
+	url : string;
+	state : number;
+	time : number;
+}
+
 interface Result<T> {
 	content ?: T;
 	error ?: string;
@@ -146,6 +152,18 @@ class Invoke {
 		}
 		return result;
 	};
+	response_time = async (urls : Array<string>) : Promise<Result<Resp>> => {
+		const result : Result<Resp> = {};
+		try {
+			result.content = (await invoke<Array<Resp>>('response_time', {
+				urls : urls
+			}))[0];
+		} catch (error) {
+			fs.write.log(error);
+			result.error = error;
+		}
+		return result;
+	};
 
 	download = async (url : string, path : string, name : string, ex_name : string = '') : Promise<Result<string>> => {
 		const result : Result<string> = {};
@@ -165,4 +183,4 @@ class Invoke {
 };
 
 export default new Invoke();
-export type { Result, DataBase, File, StringFile, BufferFile, Srv, Pic };
+export type { Result, DataBase, File, StringFile, BufferFile, Srv, Pic, Resp };

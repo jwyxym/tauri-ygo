@@ -1,123 +1,116 @@
 <template>
 	<div class = 'server'>
-		<var-popup v-model:show = 'page.server' :close-on-key-escape = 'false' :overlay = 'false'>
-			<var-form>
-				<div class = 'button_list'>
-					<Button
-						@click = 'page.exit'
-						icon_name = 'exit'
-					></Button>
-				</div>
-				<div class = 'content'>
-					<Input
-						:placeholder = 'mainGame.get.text(I18N_KEYS.SERVER_NAME)'
-						v-model = 'server.name'
-					/>
-					<AutoInput
-						:placeholder = 'mainGame.get.text(I18N_KEYS.SERVER_ADDRESS)'
-						:options = server.options
-						v-model = 'server.address'
-					/>
-					<div class = 'pass'>
-						<Input
-							:placeholder = 'mainGame.get.text(I18N_KEYS.SERVER_PASSWORD)'
-							v-model = 'server.pass'
-						/>
-						<Button
-							:loading = 'page.loading'
-							@click = 'page.connect'
-							icon_name = 'socket'
-						></Button>
-					</div>
-				</div>
-			</var-form>
-		</var-popup>
-		<var-popup v-model:show = 'page.wait' :close-on-key-escape = 'false' :overlay = 'false'>
-			<var-form>
-				<div class = 'button_list'>
-					<Button
-						@click = 'page.disconnect'
-						icon_name = 'exit'
-					></Button>
-					<Button
-						@click = 'connect.to.duelist'
-						:content = 'mainGame.get.text(I18N_KEYS.SERVER_TO_DUELIST)'
-						:class = "{ 'readonly' : connect.self < 4 && connect.home.mode !== 2 }"
-					></Button>
-					<Button
-						@click = 'connect.to.watcher'
-						:content = 'mainGame.get.text(I18N_KEYS.SERVER_TO_WATCHER)'
-						:class = "{ 'readonly' : connect.self >= 4 }"
-					></Button>
-				</div>
-				<div class = 'content'>
-					<div class = 'home'>
-						<var-list>
-							<var-cell
-								v-for = '(i, v) in connect.player.slice(0, connect.home.mode === 2 ? 4 : 2)'
-								:title = 'i.name'
-								:border = 'true'
-								:key = 'v'
-							>
-								<template #extra>
-									<div class = 'extra' v-if = 'i.ready !== undefined'>
-										<var-checkbox
-											class = 'readonly'
-											:readonly = 'true'
-											v-model = 'i.ready'
-										></var-checkbox>
-										<var-icon
-											v-if = 'connect.is_host'
-											:color = "connect.self === v ? '#555' : 'white'"
-											name = 'close-circle-outline'
-											@click = 'connect.kick(v)'
-										/>
-									</div>
-								</template>
-							</var-cell>
-						</var-list>
-						<div class = 'info'>
-							<span>{{ `${mainGame.get.text(I18N_KEYS.SERVER_HOME_LFLIST)} : ${mainGame.get.lflist(connect.home.lflist)}` }}</span>
-							<span>
-								{{
-									`${mainGame.get.text(I18N_KEYS.SERVER_HOME_RULE)} : ${mainGame.get.text([
-										I18N_KEYS.SERVER_RULE_OCG, I18N_KEYS.SERVER_RULE_TCG, I18N_KEYS.SERVER_RULE_SC, I18N_KEYS.SERVER_RULE_CUSTOM, I18N_KEYS.SERVER_RULE_NO_EXCLUSIVE, I18N_KEYS.SERVER_RULE_ALL
-									][connect.home.rule] ?? I18N_KEYS.UNKNOW)}`
-								}}
-							</span>
-							<span>
-								{{
-									`${mainGame.get.text(I18N_KEYS.SERVER_HOME_MODE)} : ${mainGame.get.text([
-										I18N_KEYS.SERVER_MODE_SINGLE, I18N_KEYS.SERVER_MODE_MATCH, I18N_KEYS.SERVER_MODE_TAG
-									][connect.home.mode] ?? I18N_KEYS.UNKNOW)}`
-								}}
-							</span>
-							<span>{{ `${mainGame.get.text(I18N_KEYS.SERVER_HOME_TIME_LIMIT)} : ${connect.home.time_limit}` }}</span>
-							<span>{{ `${mainGame.get.text(I18N_KEYS.SERVER_HOME_START_LP)} : ${connect.home.start_lp}` }}</span>
-							<span>{{ `${mainGame.get.text(I18N_KEYS.SERVER_HOME_START_HAND)} : ${connect.home.start_hand}` }}</span>
-							<span v-show = 'connect.home.no_check_deck'>{{ mainGame.get.text(I18N_KEYS.SERVER_NO_CHECK_DECK) }}</span>
-							<span v-show = 'connect.home.no_shuffle_deck'>{{ mainGame.get.text(I18N_KEYS.SERVER_NO_SHUFFLE_DECK) }}</span>
-						</div>
-					</div>
-					<div class = 'start'>
-						<span>{{ `${mainGame.get.text(I18N_KEYS.SERVER_HOME_WATCH)} : ${connect.home.watch}` }}</span>
-						<Select
-							ref = 'deck'
-							name = 'deck'
-							v-model = 'connect.deck'
-							@change = 'connect.ready'
-							:rules = 'connect.rule'
-						></Select>
-						<Button
-							:loading = 'page.loading'
-							v-if = 'connect.is_host'
-							@click = 'connect.start'
-							icon_name = 'socket'
-						></Button>
-					</div>
-				</div>
-			</var-form>
-		</var-popup>
+		<transition name = 'opacity'>
+			<div class = 'address' v-if = 'page.server'>
+				<var-list>
+					<var-cell>
+						<template #default>
+							<Input
+								:placeholder = 'mainGame.get.text(I18N_KEYS.SERVER_NAME)'
+								v-model = 'server.name'
+							/>
+						</template>
+					</var-cell>
+					<var-cell>
+						<template #default>
+							<AutoInput
+								:placeholder = 'mainGame.get.text(I18N_KEYS.SERVER_ADDRESS)'
+								:options = server.options
+								v-model = 'server.address'
+							/>
+						</template>
+					</var-cell>
+					<var-cell>
+						<template #default>
+							<Input
+								:placeholder = 'mainGame.get.text(I18N_KEYS.SERVER_PASSWORD)'
+								v-model = 'server.pass'
+							/>
+						</template>
+					</var-cell>
+				</var-list>
+			</div>
+		</transition>
+		<transition name = 'opacity'>
+			<div class = 'wait' v-if = 'page.wait'>
+				<var-list>
+					<var-cell>
+						<template #default>
+							<div class = 'buttons'>
+								<Button
+									@click = 'connect.to.duelist'
+									:content = 'mainGame.get.text(I18N_KEYS.SERVER_TO_DUELIST)'
+									:class = "{ 'readonly' : connect.self < 4 && connect.home.mode !== 2 }"
+								></Button>
+								<Button
+									@click = 'connect.to.watcher'
+									:content = 'mainGame.get.text(I18N_KEYS.SERVER_TO_WATCHER)'
+									:class = "{ 'readonly' : connect.self >= 4 }"
+								></Button>
+								{{ `${mainGame.get.text(I18N_KEYS.SERVER_HOME_WATCH)} : ${connect.home.watch}` }}
+							</div>
+						</template>
+					</var-cell>
+					<var-cell
+						v-for = '(i, v) in connect.player.slice(0, connect.home.mode === 2 ? 4 : 2)'
+						:title = 'i.name'
+						:border = 'true'
+						:key = 'v'
+					>
+						<template #extra>
+							<div class = 'check_ready' v-if = 'i.ready !== undefined'>
+								<var-checkbox
+									class = 'readonly'
+									:readonly = 'true'
+									v-model = 'i.ready'
+								></var-checkbox>
+								<var-icon
+									v-if = 'connect.is_host'
+									:color = "connect.self === v ? '#555' : 'white'"
+									name = 'close-circle-outline'
+									@click = 'connect.kick(v)'
+								/>
+							</div>
+						</template>
+					</var-cell>
+					<var-cell class = 'select_deck'>
+						<template #default>
+							<Select
+								ref = 'deck'
+								name = 'deck'
+								v-model = 'connect.deck'
+								@change = 'connect.ready'
+								:rules = 'connect.rule'
+							></Select>
+						</template>
+					</var-cell>
+				</var-list>
+			</div>
+		</transition>
+		<transition name = 'move_right'>
+			<div class = 'info' v-if = 'page.info.chk' ref = 'info'>
+				<span>{{ `${mainGame.get.text(I18N_KEYS.SERVER_HOME_LFLIST)} : ${mainGame.get.lflist(connect.home.lflist)}` }}</span>
+				<span>
+					{{
+						`${mainGame.get.text(I18N_KEYS.SERVER_HOME_RULE)} : ${mainGame.get.text([
+							I18N_KEYS.SERVER_RULE_OCG, I18N_KEYS.SERVER_RULE_TCG, I18N_KEYS.SERVER_RULE_SC, I18N_KEYS.SERVER_RULE_CUSTOM, I18N_KEYS.SERVER_RULE_NO_EXCLUSIVE, I18N_KEYS.SERVER_RULE_ALL
+						][connect.home.rule] ?? I18N_KEYS.UNKNOW)}`
+					}}
+				</span>
+				<span>
+					{{
+						`${mainGame.get.text(I18N_KEYS.SERVER_HOME_MODE)} : ${mainGame.get.text([
+							I18N_KEYS.SERVER_MODE_SINGLE, I18N_KEYS.SERVER_MODE_MATCH, I18N_KEYS.SERVER_MODE_TAG
+						][connect.home.mode] ?? I18N_KEYS.UNKNOW)}`
+					}}
+				</span>
+				<span>{{ `${mainGame.get.text(I18N_KEYS.SERVER_HOME_TIME_LIMIT)} : ${connect.home.time_limit}` }}</span>
+				<span>{{ `${mainGame.get.text(I18N_KEYS.SERVER_HOME_START_LP)} : ${connect.home.start_lp}` }}</span>
+				<span>{{ `${mainGame.get.text(I18N_KEYS.SERVER_HOME_START_HAND)} : ${connect.home.start_hand}` }}</span>
+				<span v-show = 'connect.home.no_check_deck'>{{ mainGame.get.text(I18N_KEYS.SERVER_NO_CHECK_DECK) }}</span>
+				<span v-show = 'connect.home.no_shuffle_deck'>{{ mainGame.get.text(I18N_KEYS.SERVER_NO_SHUFFLE_DECK) }}</span>
+			</div>
+		</transition>
 		<TransitionGroup tag = 'div' name = 'opacity'>
 			<Duel
 				v-if = 'page.duel && connect.deck_count.length > 0'
@@ -143,7 +136,7 @@
 				></Button>
 			</div>
 		</var-popup>
-		<var-popup v-model:show = 'page.chat' :overlay = 'false' position = 'right'>
+		<var-popup v-model:show = 'page.chat.chk' :overlay = 'false' position = 'right'>
 			<div class = 'chat' ref = 'chat'>
 				<ConversationBlock
 					class = 'message'
@@ -161,28 +154,51 @@
 						@click = 'connect.chat.send'
 						icon_name = 'chat'
 					></Button>
+					<Button
+						@click = 'server.voice_input.shift'
+						icon_name = 'microphone'
+						v-if = 'voice_input.chk()'
+						:class = "{ 'voice_input' : server.voice_input.chk }"
+					></Button>
 				</div>
 			</div>
 		</var-popup>
-		<Float_Buttons
-			ref = 'float_buttons'
-			:show = '(page.wait || page.duel) && !page.chat'
-			:list = "[
-				{
-					click : page.chatting,
-					icon : 'chat',
-					show : true
-				}, {
-					click : connect.chat.robot,
-					icon : 'add_person',
-					show : page.wait
-				}, {
-					click : connect.surrender,
-					icon : 'flag',
-					show : page.duel
-				}
-			]"
-		/>
+		<transition name = 'move_right'>
+			<Float_Buttons
+				ref = 'float_buttons'
+				v-show = '!page.chat.chk && !page.info.chk && (
+					page.server || page.wait || page.duel
+				)'
+				:list = "[
+					{
+						click : page.server ? page.connect : connect.start,
+						loading : page.loading,
+						icon : 'socket',
+						show : page.server || page.wait
+					}, {
+						click : page.chat.shift,
+						icon : 'chat',
+						show : page.wait || page.duel
+					}, {
+						click : connect.surrender,
+						icon : 'flag',
+						show : page.duel
+					}, {
+						click : page.info.shift,
+						icon : 'info',
+						show : page.wait
+					}, {
+						click : connect.chat.robot,
+						icon : 'add_person',
+						show : page.wait
+					}, {
+						click : page.server ? page.exit : page.disconnect,
+						icon : 'exit',
+						show : page.server || page.wait
+					}
+				]"
+			/>
+		</transition>
 	</div>
 </template>
 <script setup lang = 'ts'>
@@ -195,6 +211,7 @@
 	import fs from '../../script/fs';
 	import Tcp, * as TCP from './post/tcp';
 	import toast from '../../script/toast';
+	import voice_input from '../../script/voice_input';
 
 	import Select from '../varlet/select.vue';
 	import Button from '../varlet/button.vue';
@@ -209,24 +226,38 @@
 	let tcp : Tcp | null = null;
 	const deck = ref<HTMLElement | null>(null);
 	const chat = ref<HTMLElement | null>(null);
+	const info = ref<HTMLElement | null>(null);
 	const float_buttons : Ref<{ dom: HTMLElement } | null> = ref(null);
 
 	const page = reactive({
 		server : false,
 		wait : false,
 		duel : false,
-		chat : false,
 		loading : false,
-		chatting : () => {
-			page.chat = !page.chat;
+		chat : {
+			chk : false,
+			shift : () => {
+				page.chat.chk = !page.chat.chk;
+			}
 		},
-		chat_click : (e : MouseEvent) => {
-			if (page.chat &&
-				chat.value && !chat.value.contains(e.target as HTMLElement)
-				&& float_buttons.value && !float_buttons.value!.dom.contains(e.target as HTMLElement)
-				&& !(e.target as HTMLElement).classList.contains('var-icon-close-circle')
+		info : {
+			chk : false,
+			shift : () => {
+				page.info.chk = !page.info.chk;
+			}
+		},
+		click : (e : MouseEvent) => {
+			const target = (e.target as HTMLElement);
+			console.log(Array.from(document.getElementsByClassName('var-dialog')))
+			if (target.classList.contains('var-icon-close-circle')
+				|| (float_buttons.value && float_buttons.value.dom.contains(e.target as HTMLElement))
+				|| Array.from(document.getElementsByClassName('var-dialog')).findIndex(i => i.contains(target)) > -1
 			)
-				page.chatting();
+				return;
+			if (page.chat.chk && chat.value && !chat.value.contains(target))
+				page.chat.shift();
+			if (page.info.chk && info.value && !info.value.contains(target))
+				page.info.shift();
 		},
 		exit : async () : Promise<void> => {
 			page.server = false;
@@ -383,23 +414,35 @@
 		pass : mainGame.get.system(CONSTANT.KEYS.SETTING_SERVER_PASS) as string,
 		options : computed(() => {
 			return Array.from(mainGame.servers).map(([k, v]) => ({ label: k, value: v }));
-		})
+		}),
+		voice_input : {
+			chk : false,
+			shift : () : void => {
+				voice_input.on ? voice_input.stop() : voice_input.start();
+				server.voice_input.chk = voice_input.on;
+			},
+			result : (str : string) : void => {
+				Dialog({
+					title : str,
+					onConfirm : () => { server.chat += str; }
+				});
+			},
+		}
 	});
 
 	onBeforeMount(async () => {
 		tcp = new Tcp();
 		await tcp.listen(connect);
+		voice_input.result(server.voice_input.result);
 	});
 
 	onMounted(() => {
-		console.log(0)
 		page.server = true;
-		console.log(1)
-		document.addEventListener('click', page.chat_click);
+		document.addEventListener('click', page.click);
 	});
 
 	onUnmounted(() => {
-		document.removeEventListener('click', page.chat_click);
+		document.removeEventListener('click', page.click);
 	})
 
 	watch(() => {return page.chat}, (n) => {
@@ -423,12 +466,12 @@
 		const off = async () => {
 			page.wait = false;
 			page.duel = false;
-			page.chat = false;
+			page.chat.chk = false;
 			await (new Promise(resolve => setTimeout(resolve, 200)));
 			page.server = true;
 			connect.clear();
 			page.loading = false;
-			page.chat = false;
+			page.chat.chk = false;
 			server.chat = '';
 		};
 		await [off, on, start][n]();

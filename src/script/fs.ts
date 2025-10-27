@@ -52,10 +52,15 @@ class Fs {
 
 	init = async (chk : boolean = false, chk_download : boolean = false) : Promise<boolean> => {
 		try {
+			await this.init_path();
 			if (!await this.exists(CONSTANT.FILES.ASSETS_ZIP) || chk_download) {
 				toast.info(mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_START));
-				if ((await this.write.from_url(CONSTANT.URL.ASSETS, CONSTANT.FILES.ASSETS_ZIP)).length === 0)
-					return false;
+				const res_time = await invoke.response_time(Array.from(CONSTANT.URL.ASSETS.keys()));
+				if (!res_time.error) {
+					const url = CONSTANT.URL.ASSETS.get(res_time.content!.url)!;
+					if ((await this.write.from_url(url, CONSTANT.FILES.ASSETS_ZIP)).length === 0)
+						return false;
+				}
 				toast.info(mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_COMPELETE));
 			}
 			await invoke.unzip(this.path!, await path.join(this.path!, CONSTANT.FILES.ASSETS_ZIP), chk);

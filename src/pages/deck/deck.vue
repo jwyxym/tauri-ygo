@@ -243,7 +243,7 @@
 			}
 		},
 		get_ct : (id : number) : number => {
-			return search.rule.forbidden() ? 3 : mainGame.get.lflist(search.info.lflist!, id) as number;
+			return (search.rule.forbidden() ? mainGame.get.system(CONSTANT.KEYS.SETTING_CT_CARD) : mainGame.get.lflist(search.info.lflist!, id)) as number;
 		},
 		name_rule : async (name : string | undefined) : Promise<string | boolean> => {
 			if (name === undefined || name.length === 0)

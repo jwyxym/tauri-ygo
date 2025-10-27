@@ -91,9 +91,16 @@ const FILES = {
 const URL = {
 	SUPER_PRE : 'https://cdn02.moecube.com:444/ygopro-super-pre/archive/ygopro-super-pre.ypk',
 	SUPER_PRE_VERSION : 'https://cdn02.moecube.com:444/ygopro-super-pre/data/version.txt',
-	ASSETS : SYSTEM === 'android' ?
-		'https://api.gitcode.com/api/v5/repos/jwyxym/tauri-ygo/releases/release-latest/attach_files/assets_android.zip/download' :
-		'https://api.gitcode.com/api/v5/repos/jwyxym/tauri-ygo/releases/release-latest/attach_files/assets.zip/download',
+	ASSETS : new Map([
+		['https://gitcode.com/', SYSTEM === 'android' ?
+			'https://api.gitcode.com/api/v5/repos/jwyxym/tauri-ygo/releases/release-latest/attach_files/assets_android.zip/download' :
+			'https://api.gitcode.com/api/v5/repos/jwyxym/tauri-ygo/releases/release-latest/attach_files/assets.zip/download'
+		],
+		['https://github.com/', SYSTEM === 'android' ?
+			'https://github.com/jwyxym/tauri-ygo/releases/download/assets-latest/assets_android.zip' :
+			'https://github.com/jwyxym/tauri-ygo/releases/download/assets-latest/assets.zip'
+		]
+	]),
 	VERSION : 'https://web-api.gitcode.com/api/v2/projects/jwyxym%2Ftauri-ygo/releases?repoId=jwyxym%252Ftauri-ygo',
 	VERSION_HEAD : [['Referer', 'https://gitcode.com/']] as Array<[string, string]>
 }
