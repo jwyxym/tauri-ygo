@@ -6,7 +6,7 @@
 		size = 'small'
 	>
 		<span>{{ content }}</span>
-		<component v-if = 'icon_name' :is = 'svg'/>
+		<component v-if = 'icon_name !== undefined' :is = 'svg'/>
 	</var-button>
 </template>
 <script setup lang = 'ts'>
@@ -44,7 +44,7 @@
 		['setting', Setting],
 		['exit', Exit],
 		['cancel', Cancel],
-		['confirm ', Confirm],
+		['confirm', Confirm],
 		['download', Download],
 		['refresh', Refresh],
 		['socket', Socket],

@@ -193,7 +193,7 @@
 					:rules = 'download.name_rule'
 					v-model = 'download.name'
 				/>
-				<Button_List :loading = 'page.loading' :confirm = 'download.custom.confirm' :cancel = 'download.custom.cancel'></Button_List>
+				<Button_List :loading = 'download.chk' :confirm = 'download.custom.confirm' :cancel = 'download.custom.cancel'></Button_List>
 			</var-form>
 		</var-popup>
 	</var-popup>
@@ -238,6 +238,7 @@
 	})
 
 	const download = reactive({
+		chk : false,
 		url : '',
 		name : '',
 		name_rule : (name : string | undefined) : string | boolean => {
@@ -256,9 +257,9 @@
 				toast.error(mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_LEN));
 				return false;
 			}
+			download.chk = true;
 			toast.info(mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_START));
 			const path = await fs.write.ypk(url, name);
-			console.log(path)
 			if (path.length == 2) {
 				mainGame.push.system(CONSTANT.KEYS.SETTING_LOADING_EXPANSION, path[1]);
 				const load = await mainGame.get.expansions();
@@ -268,9 +269,9 @@
 				await mainGame.load.ypk(path[0]);
 				await fs.write.system();
 				toast.info(mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_COMPELETE));
-				return true;
 			}
-			return false;
+			download.chk = false;
+			return path.length == 2;
 		},
 		custom : {
 			confirm : async () : Promise<void> => {

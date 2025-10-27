@@ -1,7 +1,7 @@
 <template>
 	<div class = 'button_list' :class = "mainGame.get.system(CONSTANT.KEYS.SETTING_CHK_SWAP_BUTTON) ? 'reverse' : ''">
-		<Button @click = 'confirm' icon_name = 'confirm' :loading = 'loading' id = 'confirm'></Button>
-		<Button @click = 'cancel' icon_name = 'cancel' :loading = 'loading' id = 'cancel'></Button>
+		<Button @click = 'confirm' icon_name = 'confirm' :loading = 'loading'></Button>
+		<Button @click = 'cancel' icon_name = 'cancel' :loading = 'loading'></Button>
 	</div>
 </template>
 <script setup lang = 'ts'>
