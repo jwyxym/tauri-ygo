@@ -53,7 +53,6 @@ declare global {
 
 class Voice_Input {
 	input : SpeechRecognition | undefined = undefined;
-	on : boolean = false;
 
 	constructor() {
 		const voice_input = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -82,7 +81,6 @@ class Voice_Input {
 			try {
 				// this.input.lang = 'zh-CN'
 				this.input.start();
-				this.on = true;
 			} catch (e) {
 				fs.write.log(e);
 			}
@@ -93,7 +91,6 @@ class Voice_Input {
 		if (this.input) {
 			try {
 				this.input.stop();
-				this.on = false;
 			} catch (e) {
 				fs.write.log(e);
 			}

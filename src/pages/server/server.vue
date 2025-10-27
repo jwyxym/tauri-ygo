@@ -248,10 +248,10 @@
 		},
 		click : (e : MouseEvent) => {
 			const target = (e.target as HTMLElement);
-			console.log(Array.from(document.getElementsByClassName('var-dialog')))
 			if (target.classList.contains('var-icon-close-circle')
 				|| (float_buttons.value && float_buttons.value.dom.contains(e.target as HTMLElement))
 				|| Array.from(document.getElementsByClassName('var-dialog')).findIndex(i => i.contains(target)) > -1
+				|| server.voice_input.chk
 			)
 				return;
 			if (page.chat.chk && chat.value && !chat.value.contains(target))
@@ -418,13 +418,16 @@
 		voice_input : {
 			chk : false,
 			shift : () : void => {
-				voice_input.on ? voice_input.stop() : voice_input.start();
-				server.voice_input.chk = voice_input.on;
+				server.voice_input.chk = !server.voice_input.chk;
 			},
 			result : (str : string) : void => {
 				Dialog({
 					title : str,
-					onConfirm : () => { server.chat += str; }
+					closeOnClickOverlay : false,
+					onConfirm : () => {
+						server.chat += str;
+						server.voice_input.chk = false;
+					}
 				});
 			},
 		}
@@ -448,6 +451,11 @@
 	watch(() => {return page.chat}, (n) => {
 		n ? toast.off() : toast.on();
 	});
+
+	watch(() => { return server.voice_input.chk; }, (n) => {
+		if (voice_input.chk())
+			n ? voice_input.start() : voice_input.stop();
+	})
 
 	watch(() => { return connect.state; }, async (n) => {
 		if (![0, 1, 2].includes(n)) return;
