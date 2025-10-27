@@ -55,9 +55,10 @@ class Fs {
 			await this.init_path();
 			if (!await this.exists(CONSTANT.FILES.ASSETS_ZIP) || chk_download) {
 				toast.info(mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_START));
-				const res_time = await invoke.response_time(Array.from(CONSTANT.URL.ASSETS.keys()));
+				const urls = Array.from(CONSTANT.URL.ASSETS.keys());
+				const res_time = await invoke.response_time(urls);
 				if (!res_time.error) {
-					const url = CONSTANT.URL.ASSETS.get(res_time.content!.url)!;
+					const url = CONSTANT.URL.ASSETS.get(res_time.content!.url ?? urls[0])!;
 					if ((await this.write.from_url(url, CONSTANT.FILES.ASSETS_ZIP)).length === 0)
 						return false;
 				}

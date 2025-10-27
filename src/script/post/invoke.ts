@@ -152,8 +152,8 @@ class Invoke {
 		}
 		return result;
 	};
-	response_time = async (urls : Array<string>) : Promise<Result<Resp>> => {
-		const result : Result<Resp> = {};
+	response_time = async (urls : Array<string>) : Promise<Result<Resp | undefined>> => {
+		const result : Result<Resp | undefined> = {};
 		try {
 			result.content = (await invoke<Array<Resp>>('response_time', {
 				urls : urls

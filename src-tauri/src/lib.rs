@@ -289,12 +289,14 @@ async fn response_time(urls: Vec<String>) -> Result<Vec<Resp>, String> {
 		thread::spawn(move || {
 			let start: Instant = Instant::now();
 			if let Ok(response) = get(&url).call() {
-				tx.send(Resp {
-					url: url.clone(),
-					state: response.status().as_u16(),
-					time: start.elapsed().as_millis()
-				}).unwrap();
-			};
+				if response.status().is_success() {
+					let _ = tx.send(Resp {
+						url: url.clone(),
+						state: response.status().as_u16(),
+						time: start.elapsed().as_millis()
+					}).map_err(|e| e.to_string());
+				}
+			}
 		});
 		if let Ok(rep) = rx.recv_timeout(Duration::from_secs(3)) {
 			entries.push(rep);
