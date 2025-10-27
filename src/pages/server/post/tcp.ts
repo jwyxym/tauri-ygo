@@ -3,6 +3,7 @@ import { Reactive } from 'vue';
 
 import mainGame from '../../../script/game';
 import fs from '../../../script/fs';
+import * as CONSTANT from '../../../script/constant';
 import invoke from '../../../script/post/invoke';
 import Message from './message';
 import { I18N_KEYS } from '../../../script/language/i18n';
@@ -196,6 +197,7 @@ class Tcp {
 						}],
 						[MSG.HINT, async () => {
 							const [type, player, content] = to_package(buffer, data, [8, 8, 32], pos);
+							console.log(type, player, content)
 							switch (type) {
 								case HINT.EVENT:
 									break;
@@ -232,7 +234,19 @@ class Tcp {
 							}
 						}],
 						[MSG.WIN, async () => {
-
+							const [player, type] = to_package(buffer, data, [8, 8], pos);
+							let key;
+							if(player == 2)
+								key = I18N_KEYS.DRAW_GAME
+							else {
+								if (to_palyer(player) === 0)
+									key = I18N_KEYS.DUEL_WIN
+								else
+									key = I18N_KEYS.DUEL_LOSE
+							}
+							if (key)
+								toast.info(mainGame.get.text(key), true);
+							
 						}],
 						[MSG.UPDATE_DATA, async () => {
 							const pack = to_package(buffer, data, [8, 8], pos);
@@ -270,6 +284,7 @@ class Tcp {
 										] as Array<[number, Function]>) {
 											if ((flag & i[0]) === i[0]) {
 												const pack = to_package(buffer, data, [32], p);
+												// console.log(flag.toString(16), i[0].toString(16), pack)
 												await i[1](pack[0]);
 												p += 4;
 											}
@@ -416,6 +431,8 @@ class Tcp {
 					const player = pack[0];
 					let str = '';
 					if (player < 4) {
+						if (mainGame.get.system(CONSTANT.KEYS.SETTING_CHK_HIDDEN_CHAT))
+							return;
 						str += connect.player[player].name;
 					} else if ((player < 11 || player > 19) && player !== 8) {
 						str += mainGame.get.text(I18N_KEYS.SERVER_WATCHER)
@@ -431,7 +448,11 @@ class Tcp {
 			[STOC.HS_PLAYER_ENTER,
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					const pack = to_package(buffer, data, [40, 8], pos);
-					connect.player[pack[1]] = { name : pack[0], ready : false };
+					connect.player[pack[1]] = {
+						name : mainGame.get.system(CONSTANT.KEYS.SETTING_CHK_HIDDEN_NAME) && connect.self !== pack[1] ?
+							mainGame.get.text(I18N_KEYS.HIDDEN_NAME) : pack[0],
+						ready : false
+					};
 				}
 			],
 			[STOC.HS_PLAYER_CHANGE,

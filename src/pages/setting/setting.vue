@@ -387,7 +387,7 @@
 		setting.counts = (cts as Array<[keyof typeof I18N_KEYS, string]>).map(i => {
 			return {
 				key : i,
-				value : mainGame.get.system(i[1]) as string
+				value : (mainGame.get.system(i[1]) as number).toString()
 			}
 		});
 		setting.sound = mainGame.get.system(CONSTANT.KEYS.SETTING_VOICE_BACK_BGM) as number;
