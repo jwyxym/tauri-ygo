@@ -235,18 +235,9 @@ class Tcp {
 						}],
 						[MSG.WIN, async () => {
 							const [player, type] = to_package(buffer, data, [8, 8], pos);
-							let key;
-							if(player == 2)
-								key = I18N_KEYS.DRAW_GAME
-							else {
-								if (to_palyer(player) === 0)
-									key = I18N_KEYS.DUEL_WIN
-								else
-									key = I18N_KEYS.DUEL_LOSE
-							}
-							if (key)
-								toast.info(mainGame.get.text(key), true);
-							
+							const key = player === 2 ? I18N_KEYS.DRAW_GAME : to_palyer(player) === 0 ? I18N_KEYS.DUEL_WIN : I18N_KEYS.DUEL_LOSE;
+							const message = mainGame.get.strings.victory(type);
+							connect.win(mainGame.get.text(key), message);
 						}],
 						[MSG.UPDATE_DATA, async () => {
 							const pack = to_package(buffer, data, [8, 8], pos);
@@ -296,6 +287,31 @@ class Tcp {
 								}
 							}
 						}],
+						[MSG.SELECT_CHAIN, async () => {
+							let pack = to_package(buffer, data, [-8, 8, 8, -32, -32], pos);
+							const count = pack[0];
+							const array = new Array(count).fill([8, 8, 32, 8, 8, 8, 8, 32]).flat();
+							pack = to_package(buffer, data, array, pos + 14);
+							const cards : Array<Client_Card> = connect.duel.cards.get(LOCATION.ALL)!().filter((i : Client_Card) => i.activatable.chk);
+							cards.forEach(i => i.activatable.clear());
+							for (let i = 0; i < count; i += 8) {
+								if (i + 8 > pack.length) break;
+								const forced = pack[i + 1];
+								const flag = pack[i] | (forced << 8);
+								const code = pack[i + 2];
+								const tp = pack[i + 3];
+								const location = pack[i + 4];
+								const seq = pack[i + 5];
+								const v = pack[i + 6];
+								const desc = pack[i + 7];
+								const get_cards : Function | undefined = connect.duel.cards.get(location);
+								if (get_cards) {
+									const card : Client_Card = get_cards(tp, seq)[v];
+									card.activatable.on(desc, flag);
+								}
+							}
+
+						}],
 						[MSG.NEW_TURN, async () => {
 							const pack = to_package(buffer, data, [8], pos);
 							const tp = to_palyer(pack[0] & 0x1);
@@ -322,7 +338,7 @@ class Tcp {
 								}
 							}
 							connect.duel.draw(tp, ct);
-						}],
+						}]
 					]);
 					const cur_msg : number = to_package(buffer, data, [8], pos)[0];
 					pos += 1;

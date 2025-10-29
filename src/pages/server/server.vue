@@ -123,6 +123,24 @@
 				key = 'RPS'
 				:connect = 'connect'
 			></RPS>
+			<Avatar
+				v-if = 'page.duel && connect.deck_count.length > 0'
+				class = 'avatar_self'
+				key = 'Avatar_self'
+				:lp = 'connect.home.start_lp - connect.lp.ct[0]'
+				:name = 'connect.player[connect.self].name'
+				:src = 'mainGame.get.avatar(0)'
+				color = 'blue'
+			/>
+			<Avatar
+				v-if = 'page.duel && connect.deck_count.length > 0'
+				class = 'avatar_oppo'
+				key = 'Avatar_oppo'
+				:lp = 'connect.home.start_lp - connect.lp.ct[1]'
+				:name = 'connect.player[connect.home.mode === 2 ? connect.self < 2 ? 2 : 0 : 1 - connect.self].name'
+				:src = 'mainGame.get.avatar(1)'
+				color = 'red'
+			/>
 		</TransitionGroup>
 		<var-popup v-model:show = 'connect.is_first.selecting' :overlay = 'false' :close-on-key-escape = 'false' :close-on-click-overlay = 'false'>
 			<div class = 'select_tp'>
@@ -217,11 +235,14 @@
 	import Button from '../varlet/button.vue';
 	import Input from '../varlet/input.vue';
 	import AutoInput from '../varlet/auto_input.vue';
+	import Dialog from '../varlet/dialog';
+	import Float_Buttons from '../varlet/float_buttons.vue';
+
 	import Deck from '../deck/deck';
 	import Duel from './duel.vue';
 	import RPS from './rps.vue';
-	import Dialog from '../varlet/dialog';
-	import Float_Buttons from '../varlet/float_buttons.vue';
+	import Avatar from './avatar.vue';
+import { avatarProps } from '@varlet/ui';
 
 	let tcp : Tcp | null = null;
 	const deck = ref<HTMLElement | null>(null);
@@ -233,6 +254,7 @@
 		server : false,
 		wait : false,
 		duel : false,
+		win : false,
 		loading : false,
 		chat : {
 			chk : false,
@@ -289,6 +311,15 @@
 		player : new Array(4).fill({ name : '' }) as Array<TCP.Player>,
 		deck_count : [] as Array<number>,
 		duel : {},
+		lp : {
+			ct : new Array(2).fill(0),
+			lose : (tp : number, lp : number) => {
+				connect.lp.ct[tp] += lp;
+			},
+			cover : (tp : number, lp : number) => {
+				connect.lp.ct[tp] -= lp;
+			}
+		},
 		chat : {
 			list : [] as TCP.Chats,
 			send : async () : Promise<void> => {
@@ -383,6 +414,13 @@
 			Dialog({
 				title : mainGame.get.text(I18N_KEYS.SERVER_SURRENDER),
 				onConfirm : tcp!.send.surrender
+			});
+		},
+		win : (title : string, message : string) => {
+			Dialog({
+				title : title,
+				message : message,
+				cancelButton : false
 			});
 		},
 		clear : () => {

@@ -21,7 +21,7 @@ class Client_Card {
 	def : number;
 	scale : number;
 
-	constructor(three : CSS.CSS3DObject) {
+	constructor (three : CSS.CSS3DObject) {
 		this.code = 0;
 		this.alias = 0;
 		this.card = undefined;
@@ -191,6 +191,22 @@ class Client_Card {
 			rotation ? POS.FACEDOWN_ATTACK : POS.FACEDOWN_DEFENSE : rotation ? POS.FACEUP_ATTACK : POS.FACEUP_DEFENSE;
 		return pos;
 	}
+
+	activatable = {
+		chk : false,
+		desc : 0,
+		flag : 0,
+		on : (desc : number, flag : number) => {
+			this.activatable.chk = true;
+			this.activatable.desc = desc;
+			this.activatable.flag = flag;
+		},
+		clear : () => {
+			this.activatable.chk = false;
+			this.activatable.desc = 0;
+			this.activatable.flag = 0;
+		},
+	};
 }
 
 export default Client_Card;

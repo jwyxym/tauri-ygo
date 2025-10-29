@@ -166,7 +166,11 @@ class Game {
 			const obj_key = Object.entries(CONSTANT.KEYS).find(([_, v]) => v === key);
 			if (obj_key === undefined)
 				return undefined;
-			if (key === CONSTANT.KEYS.SETTING_LOADING_EXPANSION) {
+			if ([
+					CONSTANT.KEYS.SETTING_AVATAR,
+					CONSTANT.KEYS.SETTING_LOADING_EXPANSION,
+				].includes(key)
+			) {
 				return (value ?? '').split('&&').filter(i => i !== '');
 			} else if (key === CONSTANT.KEYS.SETTING_VOICE_BACK_BGM || obj_key[0].startsWith('SETTING_CT_')) {
 				return isNaN(number) ? 0 : number;
@@ -227,6 +231,14 @@ class Game {
 				}
 				return value;
 			},
+			victory : (key : number, replace : Array<string | number> | string | number = []) : string => {
+				let value = this.strings.get(CONSTANT.KEYS.VICTORY)!.get(key) ?? this.get.text(I18N_KEYS.UNKNOW).toString();
+				replace = typeof replace === 'object' ? replace : [replace];
+				for (const str of replace) {
+					value = value.replace(typeof str === 'string' ? '%ls' : '%d', `${str}`);
+				}
+				return value;
+			},
 			race : (data : number) : string => {
 				return [...this.strings.get(CONSTANT.KEYS.RACE)!]
 					.filter(i => (i[0] & data) === i[0])
@@ -278,7 +290,10 @@ class Game {
 		name : (id : number) : string => {
 			const card = mainGame.get.card(id);
 			return card === this.unknown ? this.get.text(I18N_KEYS.UNKNOW).toString() : card.name;
-		}
+		},
+		avatar : (tp : number) : string => {
+			return this.textures.get(`avatar${(this.get.system(CONSTANT.KEYS.SETTING_AVATAR) as Array<string>)[tp] ?? 0}.png`) ?? '';
+		},
 	}
 
 	load = {

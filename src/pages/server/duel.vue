@@ -261,10 +261,10 @@
 					color : 'white',
 					textShadow : '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',
 					fontSize : '14px',
-					fontFamily : 'atkdef',
+					fontFamily : 'AtkDef',
 					display : 'flex',
 					justifyContent : 'center',
-					transition : 'all 0.2s ease',
+					transition : 'all 0.2s ease'
 				});
 				dom.appendChild(atk);
 				const info = document.createElement('div');
@@ -281,7 +281,7 @@
 					display : 'flex',
 					gap : '2px',
 					alignItems: 'center',
-					transition : 'all 0.2s ease',
+					transition : 'all 0.2s ease'
 				});
 				for (const [key, src] of [
 					['link', CONSTANT.FILES.TEXTURE_TYPE_LINK],
@@ -312,6 +312,9 @@
 					info.appendChild(div);
 				}
 				dom.appendChild(info);
+				dom.addEventListener('click', () => {
+					props.connect.lp.lose(0, 500);
+				});
 				const client_card = new Client_Card(new CSS.CSS3DObject(dom));
 				return client_card;
 			},
@@ -659,6 +662,9 @@
 			}],
 			[LOCATION.ONFIELD, (tp : number) : Array<Client_Card> => {
 				return [...duel.cards.get(LOCATION.MZONE)!(tp), ...duel.cards.get(LOCATION.SZONE)!(tp)];
+			}],
+			[LOCATION.ALL, () : Array<Client_Card> => {
+				return Array.from(duel.cards).map(i => [...i[1](0), ...i[1](1)]).flat();
 			}]
 		]) as Map<number, Function>,
 		draw : async (tp : number, ct : number) => {
