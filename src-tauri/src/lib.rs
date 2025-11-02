@@ -65,13 +65,13 @@ async fn unzip(path: String, file: String, chk: bool) -> Result<(), String> {
 		let out_path = Path::new(&path).join(Path::new(&file_name));
 
 		if file.is_dir() {
-			create_dir_all(&out_path).map_err(|e| e.to_string());
+			let _ = create_dir_all(&out_path).map_err(|e| e.to_string());
 		} else if !exists(&out_path).map_err(|e| e.to_string())? || chk {
 			if let Some(parent) = out_path.parent() {
-				create_dir_all(parent).map_err(|e| e.to_string());
+				let _ = create_dir_all(parent).map_err(|e| e.to_string());
 			}
 			let mut outfile = File::create(&out_path).map_err(|e| e.to_string())?;
-			copy(&mut file, &mut outfile).map_err(|e| e.to_string());
+			let _ = copy(&mut file, &mut outfile).map_err(|e| e.to_string());
 		}
 	}
 
@@ -168,11 +168,11 @@ async fn read_zip(
 		if file_type.len() == 0 {
 			if db_regex.is_match(&name) {
 				let mut content: Vec<u8> = Vec::new();
-				file.read_to_end(&mut content).map_err(|e| e.to_string());
+				let _ = file.read_to_end(&mut content).map_err(|e| e.to_string());
 				entries.push((name, FileContent::Binary(content)));
 			} else if conf_regex.is_match(&name) {
 				let mut content: String = String::new();
-				file.read_to_string(&mut content)
+				let _ = file.read_to_string(&mut content)
 					.map_err(|e| e.to_string());
 				entries.push((name, FileContent::Text(content)));
 			}
@@ -184,7 +184,7 @@ async fn read_zip(
 						&& !entries.iter().any(|(x, _)| x.to_string() == file_name)
 					{
 						let mut content: Vec<u8> = Vec::new();
-						file.read_to_end(&mut content).map_err(|e| e.to_string());
+						let _ = file.read_to_end(&mut content).map_err(|e| e.to_string());
 						entries.push((name, FileContent::Binary(content)));
 					}
 				}
@@ -260,7 +260,7 @@ async fn get_game_version(url: String, headers: Vec<(String, String)>) -> Result
 		let mut body = response.into_body();
 		let mut reader = body.as_reader();
 		let mut content: String = "".to_string();
-		reader
+		let _ = reader
 			.read_to_string(&mut content)
 			.map_err(|e| e.to_string());
 		let json_data: Value = from_str(&content).map_err(|e| e.to_string())?;
@@ -340,9 +340,9 @@ async fn download(
 		let mut body = response.into_body();
 		let mut reader = body.as_reader();
 		let mut bytes = Vec::new();
-		reader.read_to_end(&mut bytes).map_err(|e| e.to_string());
+		let _ = reader.read_to_end(&mut bytes).map_err(|e| e.to_string());
 		let mut file: File = File::create(&file_path).map_err(|e| e.to_string())?;
-		file.write_all(&bytes).map_err(|e| e.to_string());
+		let _ = file.write_all(&bytes).map_err(|e| e.to_string());
 		Ok(file_name)
 	} else {
 		Err(format!("{}", response.status()))
