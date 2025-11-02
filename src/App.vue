@@ -156,6 +156,15 @@
 		background-color: transparent !important;
 	}
 	.var-button {
+		height: 32px !important;
+		max-height: 8vh !important;
+		overflow: hidden;
+		svg {
+			width: calc(8vh - 2px);
+			height: calc(8vh - 2px);
+			max-width: 30px;
+			max-height: 30px;
+		}
 		span {
 			font-size: min(4vh, var(--font-size-md)) !important;
 		}

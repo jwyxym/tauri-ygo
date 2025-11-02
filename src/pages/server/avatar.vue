@@ -8,26 +8,50 @@
 					<strong>LP</strong>
 					<span>:</span>
 					<var-count-to :from = 'page.lp.from' :to = 'page.lp.to' :duration = '300'/>
+					<strong>Time</strong>
+					<span>:</span>
+					<var-countdown
+						:time = 'page.time'
+						format = 'ss'
+						ref = 'countdown'
+					/>
 				</div>
 			</div>
 		</div>
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { reactive, watch } from 'vue';
+	import { reactive, watch, ref } from 'vue';
 
+	interface VarCountdown extends HTMLElement {
+		start : Function;
+		pause : Function;
+	}
+
+	const countdown = ref<VarCountdown | null>(null);
 	const page = reactive({
 		lp : {
 			from : 0,
 			to : 0,
-		}
+		},
+		time : 0
 	});
+	defineExpose({ countdown });
 
-	const props = defineProps(['src', 'name', 'lp', 'color', 'position']);
+	const props = defineProps(['src', 'name', 'lp', 'color', 'position', 'time', 'time_palyer', 'tp']);
 
 	watch(() => { return props.lp; }, (n) => {
 		page.lp.from = page.lp.to;
 		page.lp.to = n;
+	}, { immediate : true });
+
+	watch(() => { return props.time; }, (n) => {
+		page.time = n;
+	}, { immediate : true });
+
+	watch(() => { return props.time_palyer; }, (n) => {
+		if (!countdown.value) return;
+		props.tp === n ? countdown.value.start() : countdown.value.pause();
 	}, { immediate : true });
 
 </script>
@@ -40,6 +64,7 @@
 		width: 25vw;
 		max-width: 250px;
 		height: 60px;
+		z-index: 10;
 		.var-avatar {
 			transform: translateY(5px);
 			width: 50px;
@@ -50,8 +75,10 @@
 			white-space: nowrap;
 			color: white;
 			--count-to-text-color: white !important;
-			--count-to-text-font-size: max(1.5vh, 12px);
+			--countdown-text-color: white !important;
 			font-size: max(1.5vh, 12px);
+			--count-to-text-font-size: max(1.5vh, 12px);
+			--countdown-text-font-size: max(1.5vh, 12px);
 			transform: translateY(5px);
 			gap: 10px;
 			width: calc(100% - 48px);

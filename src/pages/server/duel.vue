@@ -313,7 +313,7 @@
 				}
 				dom.appendChild(info);
 				dom.addEventListener('click', () => {
-					props.connect.lp.lose(0, 500);
+					props.connect.time.add(0, 3);
 				});
 				const client_card = new Client_Card(new CSS.CSS3DObject(dom));
 				return client_card;

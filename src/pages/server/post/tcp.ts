@@ -441,6 +441,12 @@ class Tcp {
 					connect.rps.chk = true;
 				}
 			],
+			[STOC.TIME_LIMIT,
+				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+					const pack = to_package(buffer, data, [8, -1, 16], pos);
+					connect.time.to(pack[0], pack[1]);
+				}
+			],
 			[STOC.CHAT,
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					let pack = to_package(buffer, data, [16, (len - 2).toString()], pos);

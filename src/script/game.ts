@@ -135,6 +135,7 @@ class Game {
 			
 			await this.load.card();
 			await this.load.expansion();
+			await this.load.pic(Array.from(this.cards.keys()));
 		} catch (error) {
 			fs.write.log(error);
 		}

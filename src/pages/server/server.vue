@@ -130,6 +130,9 @@
 				:lp = 'connect.home.start_lp - connect.lp.ct[0]'
 				:name = 'connect.player[connect.self].name'
 				:src = 'mainGame.get.avatar(0)'
+				:time = 'connect.time.this[0]'
+				:time_player = 'connect.time.palyer'
+				:tp = '0'
 				color = 'blue'
 			/>
 			<Avatar
@@ -139,6 +142,9 @@
 				:lp = 'connect.home.start_lp - connect.lp.ct[1]'
 				:name = 'connect.player[connect.home.mode === 2 ? connect.self < 2 ? 2 : 0 : 1 - connect.self].name'
 				:src = 'mainGame.get.avatar(1)'
+				:time = 'connect.time.this[1]'
+				:time_player = 'connect.time.palyer'
+				:tp = '1'
 				color = 'red'
 			/>
 		</TransitionGroup>
@@ -217,6 +223,12 @@
 				]"
 			/>
 		</transition>
+		<transition name = 'move_right'>
+			<Card_List
+				:cards = 'new Array(100).fill(483)'
+				v-if = 'page.duel && connect.show_cards.length > 0'
+			/>
+		</transition>
 	</div>
 </template>
 <script setup lang = 'ts'>
@@ -242,7 +254,7 @@
 	import Duel from './duel.vue';
 	import RPS from './rps.vue';
 	import Avatar from './avatar.vue';
-import { avatarProps } from '@varlet/ui';
+	import Card_List from './card_list.vue';
 
 	let tcp : Tcp | null = null;
 	const deck = ref<HTMLElement | null>(null);
@@ -310,6 +322,7 @@ import { avatarProps } from '@varlet/ui';
 		deck : undefined as Deck | undefined,
 		player : new Array(4).fill({ name : '' }) as Array<TCP.Player>,
 		deck_count : [] as Array<number>,
+		show_cards : [] as Array<number>,
 		duel : {},
 		lp : {
 			ct : new Array(2).fill(0),
@@ -410,6 +423,15 @@ import { avatarProps } from '@varlet/ui';
 				connect.is_first.selecting = false;
 			},
 		},
+		time : {
+			this : [0, 0],
+			palyer : -1,
+			to : (tp : number, time : number) : void => {
+				tp > -1 ? connect.time.this[tp] = time * 1000
+					: connect.time.this = new Array(2).fill(connect.home.time_limit * 1000);
+				connect.time.palyer = tp ;
+			}
+		},
 		surrender : async () : Promise<void> => {
 			Dialog({
 				title : mainGame.get.text(I18N_KEYS.SERVER_SURRENDER),
@@ -439,8 +461,9 @@ import { avatarProps } from '@varlet/ui';
 				watch : 0
 			};
 			connect.deck = undefined;
-			connect.chat.list = [] as TCP.Chats;
-			connect.deck_count = [];
+			connect.chat.list.length = 0;
+			connect.deck_count.length = 0;
+			connect.show_cards.length = 0;
 			connect.is_first.chk = undefined;
 		}
 	});
@@ -493,7 +516,11 @@ import { avatarProps } from '@varlet/ui';
 	watch(() => { return server.voice_input.chk; }, (n) => {
 		if (voice_input.chk())
 			n ? voice_input.start() : voice_input.stop();
-	})
+	});
+
+	watch(() => { return connect.home.time_limit; }, (n) => {
+		connect.time.this = new Array(2).fill(n * 1000);
+	});
 
 	watch(() => { return connect.state; }, async (n) => {
 		if (![0, 1, 2].includes(n)) return;

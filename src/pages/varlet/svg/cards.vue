@@ -1,5 +1,5 @@
 <template>
-	<svg viewBox = '0 0 500 500' width = '30' height = '30' stroke = 'white' fill = 'white' stroke-width = '20px'>
+	<svg viewBox = '0 0 500 500' stroke = 'white' fill = 'white' stroke-width = '20px'>
 		<g>
 			<g>
 				<path d = 'M366.92,116.77l93.49,21.99-70.86,301.3-153.36-36.07M364.38,177.32l-6.1,145.32,21.04,4.95,32.7-139.06-47.64-11.2h0Z' fill = 'none' stroke-width = '20px'></path>
