@@ -8,12 +8,9 @@
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { reactive, watch, ref, onUnmounted, onMounted, TransitionGroup } from 'vue';
+	import { ref, onMounted, TransitionGroup } from 'vue';
 	import mainGame from '../../script/game';
 	const dom = ref<HTMLElement | null>(null);
-
-	onMounted(() => {
-	})
 
 	const props = defineProps(['cards']);
 	defineExpose({ dom });

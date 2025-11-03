@@ -225,8 +225,14 @@
 		</transition>
 		<transition name = 'move_right'>
 			<Card_List
-				:cards = 'new Array(100).fill(483)'
-				v-if = 'page.duel && connect.show_cards.length > 0'
+				:cards = 'connect.cards.array'
+				v-if = 'page.duel && connect.cards.show'
+			/>
+		</transition>
+		<transition name = 'move_down'>
+			<Card_Select_List
+				:cards = 'connect.select_cards.array'
+				v-if = 'connect.select_cards.show'
 			/>
 		</transition>
 	</div>
@@ -255,6 +261,7 @@
 	import RPS from './rps.vue';
 	import Avatar from './avatar.vue';
 	import Card_List from './card_list.vue';
+	import Card_Select_List from './card_select_list.vue';
 
 	let tcp : Tcp | null = null;
 	const deck = ref<HTMLElement | null>(null);
@@ -322,8 +329,15 @@
 		deck : undefined as Deck | undefined,
 		player : new Array(4).fill({ name : '' }) as Array<TCP.Player>,
 		deck_count : [] as Array<number>,
-		show_cards : [] as Array<number>,
 		duel : {},
+		cards : {
+			show : false,
+			array : [] as Array<number>
+		},
+		select_cards : {
+			show : false,
+			array : [] as Array<number>
+		},
 		lp : {
 			ct : new Array(2).fill(0),
 			lose : (tp : number, lp : number) => {
@@ -463,7 +477,8 @@
 			connect.deck = undefined;
 			connect.chat.list.length = 0;
 			connect.deck_count.length = 0;
-			connect.show_cards.length = 0;
+			connect.cards.show = false;
+			connect.cards.array.length = 0;
 			connect.is_first.chk = undefined;
 		}
 	});

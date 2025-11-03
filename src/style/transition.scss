@@ -79,16 +79,16 @@
 	}
 
 	&-enter-from {
-		transform: translateX(-200%);
+		transform: translateY(200%);
 	}
 
 	&-enter-to,
 	&-leave-from {
-		transform: translateX(0%);
+		transform: translateY(0%);
 	}
 
 	&-leave-to  {
-		transform: translateX(200%);
+		transform: translateY(200%);
 	}
 }
 
