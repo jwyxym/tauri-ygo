@@ -21,7 +21,9 @@ class Client_Card {
 	def : number;
 	scale : number;
 
-	constructor (three : CSS.CSS3DObject) {
+	constructor (src : string, size : {
+		width : number; height : number;
+	}) {
 		this.code = 0;
 		this.alias = 0;
 		this.card = undefined;
@@ -37,7 +39,86 @@ class Client_Card {
 		this.atk = 0;
 		this.def = 0;
 		this.scale = 0;
-		this.three = three;
+		this.three = this.init(src, size);
+	};
+
+	init = (src : string, size : {
+		width : number; height : number;
+	}) : CSS.CSS3DObject => {
+		const dom = document.createElement('div');
+		dom.style.opacity = '0';
+		const child = document.createElement('img');
+		child.src = src;
+		Object.assign(child.style, {
+			width : `${size.width}px`,
+			height : `${size.height}px`,
+			transition : 'all 0.2s ease'
+		});
+		dom.appendChild(child);
+		const atk = document.createElement('div');
+		atk.innerText = '';
+		Object.assign(atk.style, {
+			backgroundColor : 'rgba(0, 0, 0, 0.3)',
+			opacity : '0',
+			position : 'absolute',
+			bottom : '0',
+			left : `-${(size.height - size.width) / 2}px`,
+			width : `${size.height}px`,
+			color : 'white',
+			textShadow : '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',
+			fontSize : '14px',
+			fontFamily : 'AtkDef',
+			display : 'flex',
+			justifyContent : 'center',
+			transition : 'all 0.2s ease'
+		});
+		dom.appendChild(atk);
+		const info = document.createElement('div');
+		Object.assign(info.style, {
+			opacity : '0',
+			position : 'absolute',
+			bottom : '20px',
+			left : '-10px',
+			height : '16px',
+			width : `${size.height}px`,
+			color : 'white',
+			textShadow : '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',
+			fontSize : '14px',
+			display : 'flex',
+			gap : '2px',
+			alignItems: 'center',
+			transition : 'all 0.2s ease'
+		});
+		for (const [key, src] of [
+			['link', CONSTANT.FILES.TEXTURE_TYPE_LINK],
+			['rank', CONSTANT.FILES.TEXTURE_TYPE_RANK],
+			['overlay', CONSTANT.FILES.TEXTURE_TYPE_OVERLAY],
+			['scale', CONSTANT.FILES.TEXTURE_TYPE_SCALE],
+			['tuner', CONSTANT.FILES.TEXTURE_TYPE_TUNER],
+			['level', CONSTANT.FILES.TEXTURE_TYPE_LV],
+		]) {
+			const div = document.createElement('div');
+			div.classList.add(key);
+			Object.assign(div.style, {
+				height : '100%',
+				display : 'none'
+			});
+			const img = document.createElement('img');
+			img.src = mainGame.get.textures(src) as string | undefined ?? '';
+			img.style.height = '100%';
+			div.appendChild(img);
+			const span = document.createElement('span');
+			span.innerText = '';
+			if (key === 'tuner')
+				span.style.display = 'none';
+			else if (key === 'scale') {
+				div.style.margin = `0 ${size.height / 2 - 16}px`;
+			}
+			div.appendChild(span);
+			info.appendChild(div);
+		}
+		dom.appendChild(info);
+		return new CSS.CSS3DObject(dom);
 	};
 
 	update = {

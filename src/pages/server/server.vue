@@ -232,7 +232,7 @@
 		<transition name = 'move_down'>
 			<Card_Select_List
 				:cards = 'connect.select_cards.array'
-				v-if = 'connect.select_cards.show'
+				v-if = 'page.duel && connect.select_cards.show'
 			/>
 		</transition>
 	</div>
