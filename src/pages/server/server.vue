@@ -173,6 +173,7 @@
 						:placeholder = 'mainGame.get.text(I18N_KEYS.SERVER_CHAT)'
 						v-model = 'server.chat'
 						@keydown = 'connect.chat.press'
+						@clear = 'connect.chat.clear'
 					/>
 					<Button
 						@click = 'connect.chat.send'
@@ -349,14 +350,36 @@
 		},
 		chat : {
 			list : [] as TCP.Chats,
+			send_list : [] as Array<string>,
+			send_key : -1,
 			send : async () : Promise<void> => {
 				if (server.chat === '') return;
+				connect.chat.send_list.push(server.chat);
+				connect.chat.send_key = connect.chat.send_list.length;
 				await tcp!.send.chat(server.chat);
 				server.chat = '';
 			},
 			press : async (event : KeyboardEvent) : Promise<void> => {
-				if (event.key === 'Enter')
-					await connect.chat.send();
+				switch (event.key) {
+					case 'Enter':
+						await connect.chat.send();
+						break;
+					case 'ArrowUp':
+						if (connect.chat.send_key > 0) {
+							connect.chat.send_key --;
+							server.chat = connect.chat.send_list[connect.chat.send_key] ?? '';
+						}
+						break;
+					case 'ArrowDown':
+						if (connect.chat.send_key < connect.chat.send_list.length - 1) {
+							connect.chat.send_key ++;
+							server.chat = connect.chat.send_list[connect.chat.send_key] ?? '';
+						}
+						break;
+				}
+			},
+			clear : () : void => {
+				connect.chat.send_key = connect.chat.send_list.length;
 			},
 			robot : async () : Promise<void> => {
 				await tcp!.send.chat('/ai');
@@ -480,6 +503,8 @@
 			connect.cards.show = false;
 			connect.cards.array.length = 0;
 			connect.is_first.chk = undefined;
+			connect.chat.send_list.length = 0;
+			connect.chat.send_key = -1;
 		}
 	});
 
