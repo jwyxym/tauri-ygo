@@ -144,6 +144,7 @@
 							:data-swapy-slot = '`side_card:${v}:${i}`'
 							class = 'card'
 							:key = 'i'
+							ref = 'cards'
 							:id = 'i.toString()'
 						>
 								<div :data-swapy-item = '`side_card:${v}:${i}`' :id = 'i.toString()' @click = 'cardinfo.on(i)'>
@@ -313,10 +314,17 @@
 			}
 		},
 		remove : {
+			block : false,
 			on : (func : () => void, title : string) : void => {
+				deck.remove.block = true;
 				Dialog({
 					title : title,
-					onConfirm : func
+					onConfirm : func,
+					onClose : () => {
+						setTimeout(() => {
+							deck.remove.block = false;
+						}, 200);
+					}
 				}, mainGame.get.system(CONSTANT.KEYS.SETTING_CHK_DELETE_DECK));
 			},
 			main : (code : string | number) : void => {
