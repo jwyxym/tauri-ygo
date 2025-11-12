@@ -308,6 +308,7 @@
 		},
 		connect : async () : Promise<void> => {
 			page.loading = true;
+			console.log(server.pass)
 			if (await tcp!.connect(server.address ?? '', server.name ?? '', server.pass ?? '', connect)) {
 				mainGame.push.system(CONSTANT.KEYS.SETTING_SERVER_ADDRESS, server.address);
 				mainGame.push.system(CONSTANT.KEYS.SETTING_SERVER_PLAYER_NAME, server.name);

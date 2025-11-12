@@ -1,7 +1,7 @@
 import Card, { TYPE } from '../../../script/card';
 import mainGame from '../../../script/game';
 import * as CONSTANT from '../../../script/constant';
-import { POS } from './network';
+import { COMMAND, EDESC, POS } from './network';
 import * as CSS from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import gsap from '../../../script/gsap';
 
@@ -20,9 +20,15 @@ class Client_Card {
 	atk : number;
 	def : number;
 	scale : number;
+	size : {
+		width : number;
+		height : number;
+	}
 
 	constructor (src : string, size : {
 		width : number; height : number;
+	}, hover : {
+		on : Function; end : Function; click : Function;
 	}) {
 		this.code = 0;
 		this.alias = 0;
@@ -39,12 +45,14 @@ class Client_Card {
 		this.atk = 0;
 		this.def = 0;
 		this.scale = 0;
-		this.three = this.init(src, size);
+		this.size = size;
+		this.three = this.init(src, hover);
 	};
 
-	init = (src : string, size : {
-		width : number; height : number;
+	init = (src : string, hover : {
+		on : Function; end : Function; click : Function;
 	}) : CSS.CSS3DObject => {
+		const size = this.size;
 		const dom = document.createElement('div');
 		dom.style.opacity = '0';
 		const child = document.createElement('img');
@@ -54,6 +62,9 @@ class Client_Card {
 			height : `${size.height}px`,
 			transition : 'all 0.2s ease'
 		});
+		child.addEventListener('mouseenter', hover.on.bind(null, this));
+		child.addEventListener('mouseout', hover.end.bind(null, this));
+		child.addEventListener('click', hover.click.bind(null, this));
 		dom.appendChild(child);
 		const atk = document.createElement('div');
 		atk.innerText = '';
@@ -70,7 +81,8 @@ class Client_Card {
 			fontFamily : 'AtkDef',
 			display : 'flex',
 			justifyContent : 'center',
-			transition : 'all 0.2s ease'
+			transition : 'all 0.2s ease',
+			userSelect: 'none'
 		});
 		dom.appendChild(atk);
 		const info = document.createElement('div');
@@ -87,7 +99,8 @@ class Client_Card {
 			display : 'flex',
 			gap : '2px',
 			alignItems: 'center',
-			transition : 'all 0.2s ease'
+			transition : 'all 0.2s ease',
+			userSelect: 'none'
 		});
 		for (const [key, src] of [
 			['link', CONSTANT.FILES.TEXTURE_TYPE_LINK],
@@ -118,6 +131,51 @@ class Client_Card {
 			info.appendChild(div);
 		}
 		dom.appendChild(info);
+		const btn = document.createElement('div');
+		Object.assign(btn.style, {
+			opacity : '1',
+			height : '48px',
+			minWidth : '0px',
+			display : 'none',
+			gap : '2px',
+			justifyContent: 'center',
+			position : 'absolute',
+			top : '0px',
+			left : '50%',
+			transform: 'translateX(-50%)',
+			transition : 'all 0.2s ease'
+		});
+		for (const i of [
+			['activate', CONSTANT.FILES.TEXTURE_BTN_ACTIVATE],
+			['attack', CONSTANT.FILES.TEXTURE_BTN_ATTACK],
+			['mset', CONSTANT.FILES.TEXTURE_BTN_MSET],
+			['sset', CONSTANT.FILES.TEXTURE_BTN_SSET],
+			['pos_attack', CONSTANT.FILES.TEXTURE_BTN_POS_ATTACK],
+			['pos_defence', CONSTANT.FILES.TEXTURE_BTN_POS_DEFENCE],
+			['summon', CONSTANT.FILES.TEXTURE_BTN_SUMMON],
+			['psummon', CONSTANT.FILES.TEXTURE_BTN_PSUMMON],
+			['spsummon', CONSTANT.FILES.TEXTURE_BTN_SPSUMMON],
+			['scale', CONSTANT.FILES.TEXTURE_BTN_SCALE],
+		]) {
+			const [key, src] = i as [string, Array<string>];
+			const img = document.createElement('img');
+			img.classList.add(key);
+			img.classList.add('btn');
+			Object.assign(img.style, {
+				height : '100%',
+				display : 'none'
+			});
+			const srcs = mainGame.get.textures(src) as Array<string> | undefined ?? ['', ''];
+			img.src = srcs[0];
+			img.addEventListener('mouseenter', () => {
+				img.src = srcs[1];
+			});
+			img.addEventListener('mouseout', () => {
+				img.src = srcs[0];
+			});
+			btn.appendChild(img);
+		}
+		dom.appendChild(btn);
 		return new CSS.CSS3DObject(dom);
 	};
 
@@ -239,6 +297,15 @@ class Client_Card {
 			},
 			atk : () : void => {
 				(this.three.element.children[1] as HTMLElement).style.opacity = '1';
+			},
+			btn: () : void => {
+				(this.three.element.children[3] as HTMLElement).style.display = 'flex';
+				setTimeout(() => {
+					Object.assign((this.three.element.children[3] as HTMLElement).style, {
+						opacity : '1',
+						top : '-50px'
+					});
+				}, 50);
 			}
 		},
 		off : {
@@ -247,6 +314,15 @@ class Client_Card {
 			},
 			atk : () : void => {
 				(this.three.element.children[1] as HTMLElement).style.opacity = '0';
+			},
+			btn: () : void => {
+				Object.assign((this.three.element.children[3] as HTMLElement).style, {
+					opacity : '0',
+					top : '0px'
+				});
+				setTimeout(() => {
+					(this.three.element.children[3] as HTMLElement).style.display = 'none';
+				}, 200);
 			}
 		}
 	};
@@ -274,18 +350,52 @@ class Client_Card {
 	}
 
 	activatable = {
-		chk : false,
-		desc : 0,
+		desc : [] as Array<{desc : number; flag : number;}>,
 		flag : 0,
-		on : (desc : number, flag : number) => {
-			this.activatable.chk = true;
-			this.activatable.desc = desc;
-			this.activatable.flag = flag;
+		on : (i : number | {desc : number; flag : number;} | undefined) => {
+			if (i === undefined) return;
+			typeof i === 'number' ? (() => {
+				if (i > 0)
+					this.activatable.flag |= i;
+			})() : (() => {
+				if (i.flag === EDESC.NONE) {
+					const flags = new Map([
+						[1160, COMMAND.SCALE]
+					]);
+					this.activatable.flag |= flags.get(i.desc) ?? COMMAND.ACTIVATE;
+				}
+			})()
+			const style = (this.three.element.children[0] as HTMLElement).style;
+			style.boxShadow = `0 0 8px ${
+				(this.activatable.flag & (COMMAND.ACTIVATE + COMMAND.SPSUMMON + COMMAND.PSUMMON + COMMAND.SCALE)) > 0 ?
+					'yellow' : (this.activatable.flag > 0 ? 'rgba(119, 166, 255, 1)' : 'initial')
+			}`;
+			const map = new Map([
+				[COMMAND.ACTIVATE, 'activate'],
+				[COMMAND.ATTACK, 'attack'],
+				[COMMAND.MSET, 'mset'],
+				[COMMAND.SSET, 'sset'],
+				[COMMAND.REPOS, 'pos_attack'],
+				[COMMAND.REPOS, 'pos_defence'],
+				[COMMAND.SUMMON, 'summon'],
+				[COMMAND.PSUMMON, 'psummon'],
+				[COMMAND.SPSUMMON, 'spsummon'],
+				[COMMAND.SCALE, 'scale']
+			]);
+			for (const [_, i] of Object.entries(COMMAND)) {
+				if (!map.has(i))
+					continue;
+				const btn = this.three.element.children[3].querySelector(`.${map.get(i)!}`)! as HTMLElement;
+				btn.style.display = (this.activatable.flag & i) === i ? 'initial' : 'none';
+			}
 		},
 		clear : () => {
-			this.activatable.chk = false;
-			this.activatable.desc = 0;
 			this.activatable.flag = 0;
+			const style = (this.three.element.children[0] as HTMLElement).style;
+			style.boxShadow = 'initial';
+			(Array.from(this.three.element.children[3].children) as Array<HTMLElement>).forEach(btn => {
+				btn.style.display = 'none';
+			});
 		},
 	};
 }

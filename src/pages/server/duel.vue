@@ -34,47 +34,42 @@
 	const canvas : Ref<HTMLElement | null> = ref(null);
 
 	const hover = {
-		on : (e : MouseEvent) : void => {
-			let v = three.cards.map.get(LOCATION.HAND)![0].findIndex(i => i.three.element.contains(e.target as HTMLElement));
-			let card : Client_Card | undefined = three.cards.map.get(LOCATION.HAND)![0][v];
-			if (card && hover.select !== card) {
-				(card.three.element.children[0] as HTMLElement).style.transform = 'translateY(-20px)';
-				card.three.position.z = v * 0.02 + 0.1;
-				return
-			}
-			v = three.cards.map.get(LOCATION.HAND)![1].findIndex(i => i.three.element.contains(e.target as HTMLElement));
-			card = three.cards.map.get(LOCATION.HAND)![1][v];
-			if (card) {
-				(card.three.element.children[0] as HTMLElement).style.transform = 'translateY(-20px)';
-				card.three.position.z = v * 0.02 + 0.1;
-				return
+		on : (card : Client_Card, _ : MouseEvent) : void => {
+			if (duel.cards.get(LOCATION.HAND)!(0).includes(card) && hover.select !== card) {
+				(card.three.element.children[0] as HTMLElement).style.transform = 'translateY(-30px)';
+				card.three.position.setZ(duel.cards.get(LOCATION.HAND)!(0).indexOf(card) * three.create.hand_gap + 0.1 + three.create.float);
+			} else if (duel.cards.get(LOCATION.HAND)!(1).includes(card)) {
+				(card.three.element.children[0] as HTMLElement).style.transform = 'translateY(-30px)';
+				card.three.position.setZ(duel.cards.get(LOCATION.HAND)!(1).indexOf(card) * three.create.hand_gap + 0.1);
 			}
 		},
-		end : (e : MouseEvent) : void => {
-			let v = three.cards.map.get(LOCATION.HAND)![0].findIndex(i => i.three.element.contains(e.target as HTMLElement));
-			let card : Client_Card | undefined = three.cards.map.get(LOCATION.HAND)![0][v];
-			if (card && hover.select !== card) {
+		end : (card : Client_Card, _ : MouseEvent) : void => {
+			if (duel.cards.get(LOCATION.HAND)!(0).includes(card) && hover.select !== card) {
 				(card.three.element.children[0] as HTMLElement).style.transform = 'translateY(0)';
-				card.three.position.z = v * 0.02;
-				return
-			}
-			v = three.cards.map.get(LOCATION.HAND)![1].findIndex(i => i.three.element.contains(e.target as HTMLElement));
-			card = three.cards.map.get(LOCATION.HAND)![1][v];
-			if (card) {
+				card.three.position.setZ(duel.cards.get(LOCATION.HAND)!(0).indexOf(card) * three.create.hand_gap + three.create.float);
+			} else if (duel.cards.get(LOCATION.HAND)!(1).includes(card)) {
 				(card.three.element.children[0] as HTMLElement).style.transform = 'translateY(0)';
-				card.three.position.z = v * 0.02;
-				return
+				card.three.position.setZ(duel.cards.get(LOCATION.HAND)!(1).indexOf(card) * three.create.hand_gap);
 			}
 		},
-		click : (e : MouseEvent) : void => {
-			let card : Client_Card | undefined;
-			if (hover.select !== undefined) {
-				const v = three.cards.map.get(LOCATION.HAND)![0].findIndex(i => i === hover.select);
-				(hover.select.three.element.children[0] as HTMLElement).style.transform = 'translateY(0)';
-				hover.select.three.position.z = v * 0.02;
+		click : (card : Client_Card, _ : MouseEvent) : void => {
+			if (duel.cards.get(LOCATION.HAND)!(0).includes(card)) {
+				const show_off = () => {
+					hover.select!.show.off.btn();
+					(hover.select!.three.element.children[0] as HTMLElement).style.transform = 'translateY(0)';
+					hover.select!.three.position.setZ(duel.cards.get(LOCATION.HAND)!(0).indexOf(hover.select) * three.create.hand_gap + three.create.float);
+				}
+				hover.select !== card ? (() => {
+					if (hover.select !== undefined) show_off();
+					(card.three.element.children[0] as HTMLElement).style.transform = 'translateY(-30px)';
+					card.three.position.setZ(duel.cards.get(LOCATION.HAND)!(0).indexOf(card) * three.create.hand_gap + 0.1 + three.create.float);
+					card.show.on.btn();
+					hover.select = card;
+				})() : (() => {
+					show_off();
+					hover.select = undefined;
+				})();
 			}
-			card = three.cards.map.get(LOCATION.HAND)![0].find(i => i.three.element.contains(e.target as HTMLElement));
-			hover.select = card && hover.select !== card ? card : undefined;
 		},
 		select : undefined as Client_Card | undefined
 	};
@@ -237,9 +232,11 @@
 			},
 			offset : 0,
 			gap : 8,
+			hand_gap : 0.05,
+			float : 60,
 			color : '#9ed3ff',
 			card : (src : string) : Client_Card => {
-				return new Client_Card(src, three.create.size);
+				return new Client_Card(src, three.create.size, hover);
 			},
 			back : (srcs : Array<string> = []) : CSS.CSS3DObject => {
 				const dom = document.createElement('div');
@@ -412,7 +409,7 @@
 				three.cards.map.get(location)![owner].forEach((card, v) => {
 					const x = (three.create.size.height + three.create.gap) * axis.x + Math.min(width / ct, three.create.size.width) * v * (!!owner ? -1 : 1);
 					const y = (three.create.size.height + three.create.gap * 2) * axis.y;
-					const z = v * 0.02;
+					const z = v * three.create.hand_gap + (!!owner ? 0 : three.create.float);
 					if (card.three.position.x !== x || card.three.position.y !== y || card.three.position.z !== z)
 						tl.to(card.three.position, {
 							x : x,
@@ -473,24 +470,25 @@
 						duration : 0.2
 					})
 				const pic = target.pic ?? three.src.unknown;
+				const img = target.three.element.children[0] as HTMLImageElement;
 				switch (pos) {
 					case POS.FACEDOWN_ATTACK:
-						if ((target.three.element.children[0] as HTMLImageElement).src !== three.src.cover)
-							gsap.turn(target.three.element.children[0] as HTMLImageElement, three.src.cover, tl);
+						if (img.src !== three.src.cover)
+							gsap.turn(img, three.src.cover, tl);
 						break;
 					case POS.FACEDOWN_DEFENSE:
-						if ((target.three.element.children[0] as HTMLImageElement).src !== three.src.cover)
-							gsap.turn(target.three.element.children[0] as HTMLImageElement, three.src.cover, tl);
-						gsap.pos(target.three.element.children[0] as HTMLImageElement, pos, tl);
+						if (img.src !== three.src.cover)
+							gsap.turn(img, three.src.cover, tl);
+						gsap.pos(img, pos, tl);
 						break;
 					case POS.FACEUP_ATTACK:
-						if ((target.three.element.children[0] as HTMLImageElement).src !== pic)
-							gsap.turn(target.three.element.children[0] as HTMLImageElement, pic, tl);
+						if (img.src !== pic)
+							gsap.turn(img, pic, tl);
 						break;
 					case POS.FACEUP_DEFENSE:
-						if ((target.three.element.children[0] as HTMLImageElement).src !== pic)
-							gsap.turn(target.three.element.children[0] as HTMLImageElement, pic, tl);
-						gsap.pos(target.three.element.children[0] as HTMLImageElement, pos, tl);
+						if (img.src !== pic)
+							gsap.turn(img, pic, tl);
+						gsap.pos(img, pos, tl);
 						break;
 				}
 				tl.then(() => {
@@ -586,8 +584,12 @@
 			[LOCATION.ONFIELD, (tp : number) : Array<Client_Card> => {
 				return [...duel.cards.get(LOCATION.MZONE)!(tp), ...duel.cards.get(LOCATION.SZONE)!(tp)];
 			}],
-			[LOCATION.ALL, () : Array<Client_Card> => {
-				return Array.from(duel.cards).map(i => [...i[1](0), ...i[1](1)]).flat();
+			[LOCATION.ALL, (tp : number) : Array<Client_Card> => {
+				return Array.from(three.cards.map).map((i) => {
+					if (tp === 2)
+						return [...i[1][0], ...i[1][1]];
+					return i[1][tp];
+				}).flat();
 			}]
 		]) as Map<number, Function>,
 		draw : async (tp : number, ct : number) => {
@@ -715,17 +717,18 @@
 
 		animate();
 
+			// await duel.draw(0, 8);
+			// await duel.draw(1, 8);
+
+			// duel.cards.get(LOCATION.HAND)!(0).forEach((card : Client_Card) => {
+			// 	card.activatable.on({flag : 0, desc : 1160});
+			// });
+
 		window.addEventListener('resize', three.resize);
-		document.addEventListener('click', hover.click);
-		document.addEventListener('mouseout', hover.end);
-		document.addEventListener('mouseover', hover.on);
-	})
+	});
 
 	onUnmounted(() => {
 		window.removeEventListener('resize', three.resize);
-		document.removeEventListener('click', hover.click);
-		document.removeEventListener('mouseout', hover.end);
-		document.removeEventListener('mouseover', hover.on);
 	});
 
 	const props = defineProps(['connect']);

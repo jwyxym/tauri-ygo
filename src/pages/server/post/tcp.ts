@@ -9,7 +9,7 @@ import Message from './message';
 import { I18N_KEYS } from '../../../script/language/i18n';
 import toast from '../../../script/toast';
 import Deck from '../../deck/deck';
-import { CTOS, STOC, LOCATION, MSG, ERROR, PLAYERCHANGE, HINT, QUERY, PHASE } from './network';
+import { CTOS, STOC, LOCATION, MSG, ERROR, PLAYERCHANGE, HINT, QUERY, PHASE, COMMAND, EDESC } from './network';
 import Client_Card from './client_card';
 
 interface Player {
@@ -90,13 +90,29 @@ class Tcp {
 	}
 
 	listen = async (connect : Reactive<any>) : Promise<void> => {
-		await tcp.listen(async (x) => {
+		const messages = {
+			array : [] as Array<Uint8Array<ArrayBuffer>>,
+			on : false,
+			process : async (chk : boolean = false) : Promise<void> => {
+				if ((!chk && messages.on) || messages.array.length === 0) {
+					messages.on = messages.array.length !== 0;
+					return;
+				}
+				messages.on = true;
+				const message = messages.array.shift();
+				if (message)
+					await listen(message);
+				messages.process(true);
+			}
+		};
+		await tcp.listen((x) => {
 			if (x.payload.id === this.cid && this.address !== '') {
 				if (x.payload.event.disconnect == this.address) {
 					connect.state = 0;
 					this.address = '';
 				} else if (x.payload.event.message) {
-					await listen(new Uint8Array(x.payload.event.message.data));
+					messages.array.push(new Uint8Array(x.payload.event.message.data))
+					messages.process();
 				}
 			}
 		});
@@ -111,14 +127,14 @@ class Tcp {
 				const len = data.getUint16(pos, true);
 				const proto = data.getUint8(pos + 2);
 				const func = funcs.get(proto);
-				// console.log(len, proto.toString(16))
+				console.log(len, proto.toString(16))
 				if (func)
 					await func(buffer, data, len, connect, pos);
 				pos += len + 2;
 			}
 		};
 
-		const to_package = (buffer : Uint8Array<ArrayBuffer>, data : DataView, lens : Array<number | string>, pos : number) : Array<any> => {
+		const to_package = <T>(buffer : Uint8Array<ArrayBuffer>, data : DataView, lens : Array<number | string>, pos : number) : Array<T> => {
 			let result : Array<any> = [];
 			pos += 3;
 			for (let len of lens) {
@@ -196,8 +212,7 @@ class Tcp {
 
 						}],
 						[MSG.HINT, async () => {
-							const [type, player, content] = to_package(buffer, data, [8, 8, 32], pos);
-							console.log(type, player, content)
+							const [type, player, content] = to_package<number>(buffer, data, [8, 8, 32], pos);
 							switch (type) {
 								case HINT.EVENT:
 									break;
@@ -228,19 +243,18 @@ class Tcp {
 								case HINT.ZONE:
 									break;
 								case HINT.DIALOG:
-									hint(mainGame.get.desc(content));
+									hint(mainGame.get.desc(content as number));
 									break;
-
 							}
 						}],
 						[MSG.WIN, async () => {
-							const [player, type] = to_package(buffer, data, [8, 8], pos);
+							const [player, type] = to_package<number>(buffer, data, [8, 8], pos);
 							const key = player === 2 ? I18N_KEYS.DRAW_GAME : to_palyer(player) === 0 ? I18N_KEYS.DUEL_WIN : I18N_KEYS.DUEL_LOSE;
 							const message = mainGame.get.strings.victory(type);
 							connect.win(mainGame.get.text(key), message);
 						}],
 						[MSG.UPDATE_DATA, async () => {
-							const pack = to_package(buffer, data, [8, 8], pos);
+							const pack = to_package<number>(buffer, data, [8, 8], pos);
 							const tp = to_palyer(pack[0]);
 							const location = pack[1];
 							const cards = connect.duel.cards.get(location);
@@ -248,7 +262,7 @@ class Tcp {
 								return;
 							pos += 2;
 							for (const card of (cards(tp) as Array<Client_Card>)){
-								const [len] = to_package(buffer, data, [32], pos);
+								const [len] = to_package<number>(buffer, data, [32], pos);
 								let p = pos + 4;
 								if(len !== undefined && len > 8) {
 									const [flag] : Array<number> = to_package(buffer, data, [32], p);
@@ -275,7 +289,6 @@ class Tcp {
 										] as Array<[number, Function]>) {
 											if ((flag & i[0]) === i[0]) {
 												const pack = to_package(buffer, data, [32], p);
-												// console.log(flag.toString(16), i[0].toString(16), pack)
 												await i[1](pack[0]);
 												p += 4;
 											}
@@ -287,47 +300,92 @@ class Tcp {
 								}
 							}
 						}],
+						[MSG.SELECT_IDLECMD, async () => {
+							let p = pos + 1;
+							const arr = [COMMAND.SUMMON, COMMAND.SPSUMMON, COMMAND.REPOS, COMMAND.MSET, COMMAND.SSET, COMMAND.ACTIVATE];
+							const cards : Array<Client_Card> = connect.duel.cards.get(LOCATION.ALL)!(2).filter((i : Client_Card) => i.activatable.flag > 0);
+							for (const i of arr) {
+								const [ct] = to_package<number>(buffer, data, [8], p);
+								p += 1;
+								if (ct <= 0) continue;
+								if (ct === undefined) break;
+								const array = new Array(ct).fill(i === COMMAND.ACTIVATE ? [32, 8, 8, 8, 32] : [32, 8, 8, 8])
+								const pack = to_package<number>(buffer, data, array.flat(), p);
+								p += ((i === COMMAND.ACTIVATE ? 11 : 7) * ct);
+								for (let j = 0; j < array.length * ct; j += array.length) {
+									if (j + array.length > pack.length) break;
+									let code = pack[j];
+									const tp = to_palyer(pack[j + 1]);
+									const loc = pack[j + 2];
+									const seq = pack[j + 3];
+									const get_cards : Function | undefined = connect.duel.cards.get(loc);
+									if (get_cards && loc !== LOCATION.OVERLAY) {
+										const card : Client_Card | undefined = get_cards(tp)[seq];
+										if (card) {
+											const index = cards.indexOf(card)
+											if (index > -1)
+												cards.splice(index, 1);
+											if (i === COMMAND.ACTIVATE) {
+												const desc = pack[j + 4];
+												const flag = (code & 0x80000000) > 0 ? EDESC.OPERATION : EDESC.NONE;
+												// code &= ((code & 0x80000000) > 0 ? 0x7fffffff : 0);
+												card.activatable.on({desc : desc, flag : flag});
+												continue;
+											}
+											card.activatable.on(i);
+										}
+									}
+								}
+							}
+							const pack = to_package<number>(buffer, data, [8, 8, 8], p);
+							cards.forEach(i => i.activatable.clear());
+						}],
 						[MSG.SELECT_CHAIN, async () => {
-							let pack = to_package(buffer, data, [-8, 8, 8, -32, -32], pos);
+							let pack = to_package<number>(buffer, data, [-1, 8, 8, -4, -4], pos);
 							const count = pack[0];
 							const array = new Array(count).fill([8, 8, 32, 8, 8, 8, 8, 32]).flat();
-							pack = to_package(buffer, data, array, pos + 14);
-							const cards : Array<Client_Card> = connect.duel.cards.get(LOCATION.ALL)!().filter((i : Client_Card) => i.activatable.chk);
-							cards.forEach(i => i.activatable.clear());
+							pack = to_package<number>(buffer, data, array, pos + 11);
+							console.log(pack)
+							const cards : Array<Client_Card> = connect.duel.cards.get(LOCATION.ALL)!(2).filter((i : Client_Card) => i.activatable.flag > 0);
 							for (let i = 0; i < count; i += 8) {
 								if (i + 8 > pack.length) break;
 								const forced = pack[i + 1];
 								const flag = pack[i] | (forced << 8);
 								const code = pack[i + 2];
-								const tp = pack[i + 3];
-								const location = pack[i + 4];
+								const tp = to_palyer(pack[i + 3]);
+								const loc = pack[i + 4];
 								const seq = pack[i + 5];
 								const v = pack[i + 6];
 								const desc = pack[i + 7];
-								const get_cards : Function | undefined = connect.duel.cards.get(location);
-								if (get_cards) {
-									const card : Client_Card = get_cards(tp, seq)[v];
-									card.activatable.on(desc, flag);
+								const get_cards : Function | undefined = connect.duel.cards.get(loc);
+								if (get_cards && loc !== LOCATION.OVERLAY) {
+									const card : Client_Card | undefined = get_cards(tp)[seq];
+									if (card) {
+										const index = cards.indexOf(card)
+										if (index > -1)
+											cards.splice(index, 1);
+										card.activatable.on({desc : desc, flag : flag});
+									}
 								}
 							}
-
+							cards.forEach(i => i.activatable.clear());
 						}],
 						[MSG.NEW_TURN, async () => {
-							const pack = to_package(buffer, data, [8], pos);
+							const pack = to_package<number>(buffer, data, [8], pos);
 							const tp = to_palyer(pack[0] & 0x1);
 
 						}],
 						[MSG.NEW_PHASE, async () => {
-							const [phase] = to_package(buffer, data, [16], pos);
+							const [phase] = to_package<number>(buffer, data, [16], pos);
 
 						}],
 						[MSG.DRAW, async () => {
-							const pack = to_package(buffer, data, [8, 8], pos);
+							const pack = to_package<number>(buffer, data, [8, 8], pos);
 							const tp = to_palyer(pack[0]);
 							const ct = pack[1];
 							if (tp === 0) {
 								const cards : Array<Client_Card> = connect.duel.cards.get(LOCATION.DECK)!(tp);
-								const codes = to_package(buffer, data, new Array(ct).fill(32), pos + 2);
+								const codes = to_package<number>(buffer, data, new Array(ct).fill(32), pos + 2);
 								let i = 1;
 								for (const code of codes) {
 									const v = cards.length - i;
@@ -337,10 +395,10 @@ class Tcp {
 									i ++;
 								}
 							}
-							connect.duel.draw(tp, ct);
+							await connect.duel.draw(tp, ct);
 						}]
 					]);
-					const cur_msg : number = to_package(buffer, data, [8], pos)[0];
+					const cur_msg : number = to_package<number>(buffer, data, [8], pos)[0];
 					pos += 1;
 					console.log(cur_msg)
 					if (msg_funcs.has(cur_msg))
@@ -349,7 +407,7 @@ class Tcp {
 			],
 			[STOC.ERROR_MSG,
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
-					const pack = to_package(buffer, data, [8, -3, 32], pos);
+					const pack = to_package<number>(buffer, data, [8, -3, 32], pos);
 					const [msg, code] = pack;
 					switch (msg) {
 						case ERROR.DECKERROR:
@@ -400,19 +458,19 @@ class Tcp {
 			],
 			[STOC.HAND_RESULT,
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
-					const pack = to_package(buffer, data, new Array(2).fill(8), pos);
+					const pack = to_package<number>(buffer, data, new Array(2).fill(8), pos);
 					connect.rps.result = pack;
 				}
 			],
 			[STOC.DECK_COUNT,
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
-					const pack = to_package(buffer, data, new Array(6).fill(16), pos);
+					const pack = to_package<number>(buffer, data, new Array(6).fill(16), pos);
 					connect.deck_count = pack;
 				}
 			],
 			[STOC.JOIN_GAME,
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
-					const pack = to_package(buffer, data, [32, ...new Array(5).fill(8), -3, 32, 8, 8, 16], pos);
+					const pack = to_package<number>(buffer, data, [32, ...new Array(5).fill(8), -3, 32, 8, 8, 16], pos);
 					connect.home.lflist = pack[0];
 					connect.home.rule = pack[1];
 					connect.home.mode = pack[2];
@@ -428,7 +486,7 @@ class Tcp {
 			],
 			[STOC.TYPE_CHANGE,
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
-					const pack = to_package(buffer, data, [8], pos);
+					const pack = to_package<number>(buffer, data, [8], pos);
 					const self = pack[0] & 0xf;
 					const is_host = ((pack[0] >> 4) & 0xf) != 0;
 					connect.is_host = is_host;
@@ -443,14 +501,14 @@ class Tcp {
 			],
 			[STOC.TIME_LIMIT,
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
-					const pack = to_package(buffer, data, [8, -1, 16], pos);
+					const pack = to_package<number>(buffer, data, [8, -1, 16], pos);
 					connect.time.to(pack[0], pack[1]);
 				}
 			],
 			[STOC.CHAT,
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
-					let pack = to_package(buffer, data, [16, (len - 2).toString()], pos);
-					const player = pack[0];
+					let pack = to_package<number | string>(buffer, data, [16, (len - 2).toString()], pos);
+					const player : number = pack[0] as number;
 					let str = '';
 					if (player < 4) {
 						if (mainGame.get.system(CONSTANT.KEYS.SETTING_CHK_HIDDEN_CHAT))
@@ -461,7 +519,7 @@ class Tcp {
 					}
 					if (str.length > 0)
 						str += ' : '
-					str += pack[1];
+					str += pack[1] as string;
 					if (connect.self !== player)
 						toast.info(str, true);
 					connect.chat.list.push({ msg : str, contentType : 1 } as Chat);
@@ -469,7 +527,7 @@ class Tcp {
 			],
 			[STOC.HS_PLAYER_ENTER,
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
-					const pack = to_package(buffer, data, [40, 8], pos);
+					const pack = to_package<number>(buffer, data, [40, 8], pos);
 					connect.player[pack[1]] = {
 						name : mainGame.get.system(CONSTANT.KEYS.SETTING_CHK_HIDDEN_NAME) && connect.self !== pack[1] ?
 							mainGame.get.text(I18N_KEYS.HIDDEN_NAME) : pack[0],
@@ -479,7 +537,7 @@ class Tcp {
 			],
 			[STOC.HS_PLAYER_CHANGE,
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
-					const pack = to_package(buffer, data, [8], pos);
+					const pack = to_package<number>(buffer, data, [8], pos);
 					const state = pack[0] & 0xf;
 					const player = (pack[0] >> 4) & 0xf;
 					switch (state) {
@@ -508,7 +566,7 @@ class Tcp {
 			],
 			[STOC.HS_WATCH_CHANGE,
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
-					const pack = to_package(buffer, data, [16], pos);
+					const pack = to_package<number>(buffer, data, [16], pos);
 					connect.home.watch = pack[0];
 				}
 			],

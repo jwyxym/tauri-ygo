@@ -492,29 +492,11 @@ class Game {
 		this.cards.forEach(i => {
 			i.clear();
 		});
-		this.cards = new Map();
-		this.lflist = new Map();
-		this.servers = new Map();
-		this.strings = new Map([
-			[CONSTANT.KEYS.SYSTEM, new Map],
-			[CONSTANT.KEYS.VICTORY, new Map],
-			[CONSTANT.KEYS.COUNTER, new Map],
-			[CONSTANT.KEYS.SETCODE, new Map],
-			[CONSTANT.KEYS.OT, new Map],
-			[CONSTANT.KEYS.ATTRIBUTE, new Map],
-			[CONSTANT.KEYS.CATEGORY, new Map],
-			[CONSTANT.KEYS.LINK, new Map],
-			[CONSTANT.KEYS.RACE, new Map],
-			[CONSTANT.KEYS.TYPE, new Map]
-		]);
-		this.icons = new Map([
-			[CONSTANT.KEYS.OT, new Map],
-			[CONSTANT.KEYS.ATTRIBUTE, new Map],
-			[CONSTANT.KEYS.CATEGORY, new Map],
-			[CONSTANT.KEYS.LINK, new Map],
-			[CONSTANT.KEYS.RACE, new Map],
-			[CONSTANT.KEYS.TYPE, new Map]
-		]);
+		this.cards.clear();
+		this.lflist.clear();
+		this.servers.clear();
+		this.strings.forEach(i => i.clear());
+		this.icons.forEach(i => i.clear());
 	}
 
 	read = {

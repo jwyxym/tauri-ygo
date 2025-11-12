@@ -45,10 +45,10 @@
 	.menu-pointer {
 		position: absolute;
 		text-shadow:
-			0 0 5px #00ffff,
-			0 0 10px #00ffff,
-			0 0 20px #00ffff,
-			0 0 40px #00ffff;
+			0 0 5px aqua,
+			0 0 10px aqua,
+			0 0 20px aqua,
+			0 0 40px aqua;
 		transition: all 0.4s ease;
 		transform: translate(var(--x), var(--y));
 	}
