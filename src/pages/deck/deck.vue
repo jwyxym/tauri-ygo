@@ -68,12 +68,12 @@
 		</transition>
 		<div class = 'deck_show'>
 			<div class = 'deck'>
-				<span>{{ `${mainGame.get.text(I18N_KEYS.DECK_MAIN)} : ${deck.ct.main}` }}</span>
+				<span>{{ `${mainGame.get.text(I18N_KEYS.DECK_MAIN)} : ${deck.main.length}` }}</span>
 				<div
 					class = 'main'
 					ref = 'main'
 					:style = "{
-						'--height' : `${(Math.trunc(deck.ct.main / 20) + 1) * (deck.size.height + 5)}px`,
+						'--height' : `${(Math.trunc(deck.main.length / 20) + 1) * (deck.size.height + 5)}px`,
 						'--card_height' : `${deck.size.height}px`,
 						'--card_width' : `${deck.size.width}px`
 					}"
@@ -85,9 +85,8 @@
 							class = 'card'
 							ref = 'cards'
 							:key = 'i'
-							:id = 'i.toString()'
 						>
-								<div :data-swapy-item = '`main_card:${v}:${i}`' :id = 'i.toString()' @click = 'cardinfo.on(i)'>
+								<div :data-swapy-item = '`main_card:${v}:${i}`' @click = 'cardinfo.on(i)'>
 									<img :src = 'mainGame.get.card(i).pic' ref = 'main_card' :alt = 'i.toString()'></img>
 									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
 										<template #value>
@@ -98,12 +97,12 @@
 						</div>
 					</TransitionGroup>
 				</div>
-				<span>{{ `${mainGame.get.text(I18N_KEYS.DECK_EXTRA)} : ${deck.ct.extra}` }}</span>
+				<span>{{ `${mainGame.get.text(I18N_KEYS.DECK_EXTRA)} : ${deck.extra.length}` }}</span>
 				<div
 					class = 'extra'
 					ref = 'extra'
 					:style = "{
-						'--height' : `${(Math.trunc(deck.ct.extra / 20) + 1) * (deck.size.height + 5)}px`,
+						'--height' : `${(Math.trunc(deck.extra.length / 20) + 1) * (deck.size.height + 5)}px`,
 						'--card_height' : `${deck.size.height}px`,
 						'--card_width' : `${deck.size.width}px`
 					}"
@@ -115,9 +114,8 @@
 							class = 'card'
 							ref = 'cards'
 							:key = 'i'
-							:id = 'i.toString()'
 						>
-								<div :data-swapy-item = '`extra_card:${v}:${i}`' :id = 'i.toString()' @click = 'cardinfo.on(i)'>
+								<div :data-swapy-item = '`extra_card:${v}:${i}`' @click = 'cardinfo.on(i)'>
 									<img :src = 'mainGame.get.card(i).pic' ref = 'extra_card' :alt = 'i.toString()'></img>
 									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
 										<template #value>
@@ -128,12 +126,12 @@
 						</div>
 					</TransitionGroup>
 				</div>
-				<span>{{ `${mainGame.get.text(I18N_KEYS.DECK_SIDE)} : ${deck.ct.side}` }}</span>
+				<span>{{ `${mainGame.get.text(I18N_KEYS.DECK_SIDE)} : ${deck.side.length}` }}</span>
 				<div
 					class = 'side'
 					ref = 'side'
 					:style = "{
-						'--height' : `${(Math.trunc(deck.ct.side / 20) + 1) * (deck.size.height + 5)}px`,
+						'--height' : `${(Math.trunc(deck.side.length / 20) + 1) * (deck.size.height + 5)}px`,
 						'--card_height' : `${deck.size.height}px`,
 						'--card_width' : `${deck.size.width}px`
 					}"
@@ -145,9 +143,8 @@
 							class = 'card'
 							:key = 'i'
 							ref = 'cards'
-							:id = 'i.toString()'
 						>
-								<div :data-swapy-item = '`side_card:${v}:${i}`' :id = 'i.toString()' @click = 'cardinfo.on(i)'>
+								<div :data-swapy-item = '`side_card:${v}:${i}`' @click = 'cardinfo.on(i)'>
 									<img :src = 'mainGame.get.card(i).pic' ref = 'side_card' :alt = 'i.toString()'></img>
 									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
 										<template #value>
@@ -230,19 +227,6 @@
 				deck.size.height = width * 1.45; 
 			}
 		},
-		ct : {
-			main : 0,
-			extra : 0,
-			side : 0,
-			remove : (el : HTMLElement) : void => {
-				if (el.parentElement?.classList.contains('deck_main'))
-					deck.ct.main --;
-				else if (el.parentElement?.classList.contains('deck_extra'))
-					deck.ct.extra --;
-				else if (el.parentElement?.classList.contains('deck_side'))
-					deck.ct.side --;
-			}
-		},
 		get_ct : (id : number) : number => {
 			return (search.rule.forbidden() ? mainGame.get.system(CONSTANT.KEYS.SETTING_CT_CARD) : mainGame.get.lflist(search.info.lflist!, id)) as number;
 		},
@@ -259,9 +243,9 @@
 			const rule = await deck.name_rule(deck.name);
 			if (typeof rule == 'boolean') {
 				const write_deck = new Deck({
-					main : deck.main,
-					extra : deck.extra,
-					side : deck.side,
+					main : Array.from(main.value!.querySelectorAll('img') ?? []).map(i => parseInt(i.alt)),
+					extra : Array.from(extra.value!.querySelectorAll('img') ?? []).map(i => parseInt(i.alt)),
+					side : Array.from(side.value!.querySelectorAll('img') ?? []).map(i => parseInt(i.alt)),
 					name : deck.name
 				});
 				const write = await fs.write.ydk(props.this_deck.name?.length ?? 0 > 0 ? props.this_deck.name : deck.name, write_deck);
@@ -439,9 +423,6 @@
 			deck.extra = d.extra;
 			deck.side = d.side;
 			deck.name = d.name;
-			deck.ct.main = d.main.length;
-			deck.ct.extra = d.extra.length;
-			deck.ct.side = d.side.length;
 		}
 	});
 

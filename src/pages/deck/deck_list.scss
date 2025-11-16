@@ -47,20 +47,23 @@
 				justify-items: center;
 				height: 100%;
 				width: 100%;
-				.card {
-					width: calc(100% / 15);
-					aspect-ratio: 1 / 1.45;
-					display: inline-block;
-					img {
-						width: 100%;
-						height: 100%;
+				.cards {
+					width: 100%;
+					.card {
+						width: calc(100% / 15);
+						aspect-ratio: 1 / 1.45;
+						display: inline-block;
+						img {
+							width: 100%;
+							height: 100%;
+						}
 					}
-				}
-				.deck_name {
-					span {
-						color: white;
-						font-size: 10vh;
-						white-space: nowrap;
+					.deck_name {
+						span {
+							color: white;
+							font-size: 10vh;
+							white-space: nowrap;
+						}
 					}
 				}
 			}
