@@ -4,6 +4,7 @@ import os
 
 response = requests.request("GET", "https://ygom.top/")
 print(response.status_code)
+print(response.text)
 if response.ok:
     response.encoding = 'utf-8'
     soup = BeautifulSoup(response.text, 'html.parser')
