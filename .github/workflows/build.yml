@@ -186,7 +186,7 @@ jobs:
         pip install BeautifulSoup4 requests
         python pics.py
         7z x YGOMobile.apk -ir!assets/data/pics.zip
-        copy assets\data\pics.zip pics.zip /Y
+        copy assets\data\pics.zip pics.zip
         unzip pics.zip
         7z a -tzip -mx=9 assets.zip strings info cdb sound textures lflist.conf pics
         cd ..
