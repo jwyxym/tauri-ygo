@@ -49,3 +49,4 @@ src-tauri/textures
 .ci/cookies_and_headers.py
 /.ci/__pycache__
 *.apk
+.ci/index.html

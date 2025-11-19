@@ -1,11 +1,8 @@
 from bs4 import BeautifulSoup
-import requests
 import os
 
-response = requests.request("GET", "https://api.jwyxym.top/web/ygom")
-if response.ok:
-    response.encoding = 'utf-8'
-    soup = BeautifulSoup(response.text, 'html.parser')
+with open("index.html", "r", encoding="utf-8") as html:
+    soup = BeautifulSoup(html.read(), 'html.parser')
     elem = soup.select_one('#downloadButton')
     if elem:
         link = elem.get('href')

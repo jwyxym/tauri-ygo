@@ -183,7 +183,8 @@ jobs:
         copy ygopro-database-master\locales\ja-JP\strings.conf strings\strings-ja-JP.conf
         copy ygopro-database-master\locales\en-US_mdpro3\strings.conf strings\strings-en-US.conf
         wget https://github.com/Fluorohydride/ygopro/raw/refs/heads/master/lflist.conf
-        pip install BeautifulSoup4 requests
+        wget https://github.com/ifvlaboratory/ygom-site/raw/refs/heads/main/site/index.html
+        pip install BeautifulSoup4
         python pics.py
         7z x YGOMobile.apk -ir!assets/data/pics.zip
         copy assets\data\pics.zip pics.zip
