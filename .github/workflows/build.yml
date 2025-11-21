@@ -183,7 +183,7 @@ jobs:
         copy ygopro-database-master\locales\ja-JP\strings.conf strings\strings-ja-JP.conf
         copy ygopro-database-master\locales\en-US_mdpro3\strings.conf strings\strings-en-US.conf
         wget https://github.com/Fluorohydride/ygopro/raw/refs/heads/master/lflist.conf
-        wget https://github.com/jwyxym/card-pics/releases/download/pics/pics.zip
+        wget https://api.jwyxym.top/file/pics -O pics.zip
         unzip pics.zip
         7z a -tzip -mx=9 assets.zip strings info cdb sound textures lflist.conf pics
         cd ..
