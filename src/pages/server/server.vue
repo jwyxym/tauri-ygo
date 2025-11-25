@@ -127,7 +127,7 @@
 				v-if = 'page.duel && connect.deck_count.length > 0'
 				class = 'avatar_self'
 				key = 'Avatar_self'
-				:lp = 'connect.home.start_lp - connect.lp.ct[0]'
+				:lp = 'connect.lp.ct[0]'
 				:name = 'connect.player[connect.self].name'
 				:src = 'mainGame.get.avatar(0)'
 				:time = 'connect.time.this[0]'
@@ -139,7 +139,7 @@
 				v-if = 'page.duel && connect.deck_count.length > 0'
 				class = 'avatar_oppo'
 				key = 'Avatar_oppo'
-				:lp = 'connect.home.start_lp - connect.lp.ct[1]'
+				:lp = 'connect.lp.ct[1]'
 				:name = 'connect.player[connect.home.mode === 2 ? connect.self < 2 ? 2 : 0 : 1 - connect.self].name'
 				:src = 'mainGame.get.avatar(1)'
 				:time = 'connect.time.this[1]'
@@ -199,7 +199,7 @@
 						click : page.server ? page.connect : connect.start,
 						loading : page.loading,
 						icon : 'socket',
-						show : page.server || page.wait
+						show : page.server || (page.wait && connect.is_host)
 					}, {
 						click : page.chat.shift,
 						icon : 'chat',
@@ -230,12 +230,27 @@
 				v-if = 'page.duel && connect.cards.show'
 			/>
 		</transition>
-		<transition name = 'move_down'>
+		<TransitionGroup tag = 'div' name = 'move_down'>
 			<Card_Select_List
+				:title = 'connect.select_cards.title'
+				:min = 'connect.select_cards.min'
+				:max = 'connect.select_cards.max'
 				:cards = 'connect.select_cards.array'
-				v-if = 'page.duel && connect.select_cards.show'
+				:confirm = 'connect.select_cards.confirm'
+				:cancle = 'connect.select_cards.cancle'
+				v-if = 'page.duel && connect.select_cards.array.length > 0'
+				:key = '0'
 			/>
-		</transition>
+			<Plaid_Select_List
+				:title = 'connect.select_plaids.title'
+				:ct = 'connect.select_plaids.ct'
+				:plaids = 'connect.select_plaids.array'
+				:confirm = 'connect.select_plaids.confirm'
+				:cancle = 'connect.select_plaids.cancle'
+				v-if = 'page.duel && connect.select_plaids.array.length > 0'
+				:key = '1'
+			/>
+		</TransitionGroup>
 	</div>
 </template>
 <script setup lang = 'ts'>
@@ -247,6 +262,7 @@
 	import * as CONSTANT from '../../script/constant';
 	import fs from '../../script/fs';
 	import Tcp, * as TCP from './post/tcp';
+	import { Plaids } from './post/tcp';
 	import toast from '../../script/toast';
 	import voice_input from '../../script/voice_input';
 
@@ -263,6 +279,8 @@
 	import Avatar from './avatar.vue';
 	import Card_List from './card_list.vue';
 	import Card_Select_List from './card_select_list.vue';
+	import Plaid_Select_List from './plaid_select_list.vue';
+	import Client_Card from './post/client_card';
 
 	let tcp : Tcp | null = null;
 	const deck = ref<HTMLElement | null>(null);
@@ -308,7 +326,6 @@
 		},
 		connect : async () : Promise<void> => {
 			page.loading = true;
-			console.log(server.pass)
 			if (await tcp!.connect(server.address ?? '', server.name ?? '', server.pass ?? '', connect)) {
 				mainGame.push.system(CONSTANT.KEYS.SETTING_SERVER_ADDRESS, server.address);
 				mainGame.push.system(CONSTANT.KEYS.SETTING_SERVER_PLAYER_NAME, server.name);
@@ -337,16 +354,57 @@
 			array : [] as Array<number>
 		},
 		select_cards : {
-			show : false,
-			array : [] as Array<number>
+			title : '',
+			min : 0,
+			max : 0,
+			array : [] as Array<number>,
+			on : (title : string, array : Array<number>, min : number, max : number) : void => {
+				connect.select_cards.title = title;
+				connect.select_cards.min = min;
+				connect.select_cards.max = max;
+				connect.select_cards.array = array;
+			},
+			confirm : async () => {
+
+			},
+			cancle : async () => {
+				
+			},
+			clear : () : void => {
+				connect.select_cards.title = '';
+				connect.select_cards.min = 0;
+				connect.select_cards.max = 0;
+				connect.select_cards.array.length = 0;
+			}
+		},
+		select_plaids : {
+			title : '',
+			ct : 0,
+			array : [] as Plaids,
+			on : (title : string, array : Plaids, ct : number) : void => {
+				connect.select_plaids.title = title;
+				connect.select_plaids.ct = ct;
+				connect.select_plaids.array = array;
+			},
+			confirm : async () => {
+
+			},
+			cancle : async () => {
+				
+			},
+			clear : () : void => {
+				connect.select_plaids.title = '';
+				connect.select_plaids.ct = 0;
+				connect.select_plaids.array.length = 0;
+			}
 		},
 		lp : {
 			ct : new Array(2).fill(0),
 			lose : (tp : number, lp : number) => {
-				connect.lp.ct[tp] += lp;
+				connect.lp.ct[tp] -= lp;
 			},
 			cover : (tp : number, lp : number) => {
-				connect.lp.ct[tp] -= lp;
+				connect.lp.ct[tp] += lp;
 			}
 		},
 		chat : {
@@ -470,7 +528,48 @@
 				connect.time.palyer = tp ;
 			}
 		},
-		surrender : async () : Promise<void> => {
+		idle : {
+			summon : {
+				array : [] as Array<Client_Card>,
+				push : (card : Client_Card) : void => {
+					connect.idle.summon.array.push(card);
+				},
+				clear : () : void => {
+					connect.idle.summon.array.length = 0;
+				},
+				index : (card : Client_Card) : number => {
+					return connect.idle.summon.array.indexOf(card);
+				}
+			},
+			spsummon : {
+				array : [] as Array<Client_Card>,
+				push : (card : Client_Card) : void => {
+					connect.idle.spsummon.array.push(card);
+				},
+				clear : () : void => {
+					connect.idle.spsummon.array.length = 0;
+				},
+				index : (card : Client_Card) : number => {
+					return connect.idle.spsummon.array.indexOf(card);
+				}
+			},
+			activate : {
+				array : [] as Array<Client_Card>,
+				push : (card : Client_Card) : void => {
+					connect.idle.activate.array.push(card);
+				},
+				clear : () : void => {
+					connect.idle.activate.array.length = 0;
+				},
+				index : (card : Client_Card) : number => {
+					return connect.idle.activate.array.indexOf(card);
+				}
+			},
+		},
+		response : async (v : number) : Promise<void> => {
+			await tcp!.send.response(v);
+		},
+		surrender : () : void => {
 			Dialog({
 				title : mainGame.get.text(I18N_KEYS.SERVER_SURRENDER),
 				onConfirm : tcp!.send.surrender
@@ -506,6 +605,7 @@
 			connect.is_first.chk = undefined;
 			connect.chat.send_list.length = 0;
 			connect.chat.send_key = -1;
+			connect.idle.summon.clear();
 		}
 	});
 

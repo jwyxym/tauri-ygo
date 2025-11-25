@@ -11,6 +11,7 @@ import toast from '../../../script/toast';
 import Deck from '../../deck/deck';
 import { CTOS, STOC, LOCATION, MSG, ERROR, PLAYERCHANGE, HINT, QUERY, PHASE, COMMAND, EDESC } from './network';
 import Client_Card from './client_card';
+import Plaid from './plaid';
 
 interface Player {
 	name : string;
@@ -23,6 +24,7 @@ interface Chat {
 };
 
 type Chats = Array<Chat>;
+type Plaids = Array<{ plaid : Plaid; card ?: number; pos ?: number; }>;
 
 interface HostInfo {
 	lflist : number;
@@ -53,9 +55,14 @@ interface CTOS_JoinGame {
 class Tcp {
 	cid : string;
 	address : string;
+	select_hint : number;
+	last_select_hint : number;
+
 	constructor () {
 		this.cid = 'xiaoye';
 		this.address = '';
+		this.select_hint = 0;
+		this.last_select_hint = 0;
 	}
 
 	connect = async (address : string, name : string, pass : string, connect : Reactive<any>) : Promise<boolean> => {
@@ -87,6 +94,10 @@ class Tcp {
 			return false;
 		}
 		return true;
+	}
+
+	to = {
+		player : undefined as undefined | Function
 	}
 
 	listen = async (connect : Reactive<any>) : Promise<void> => {
@@ -127,7 +138,7 @@ class Tcp {
 				const len = data.getUint16(pos, true);
 				const proto = data.getUint8(pos + 2);
 				const func = funcs.get(proto);
-				console.log(len, proto.toString(16))
+				// console.log('0x'+proto.toString(16))
 				if (func)
 					await func(buffer, data, len, connect, pos);
 				pos += len + 2;
@@ -197,10 +208,12 @@ class Tcp {
 			return str;
 		}
 
-		const to_palyer = (player : number) : number => {
+		const to_player = (player : number) : number => {
 			player = player > 0 ? 1 : 0;
 			return connect.is_first.chk ? player : 1 - player;
 		}
+
+		this.to.player = to_player;
 
 		const funcs : Map<number, Function> = new Map([
 			[STOC.GAME_MSG,
@@ -220,6 +233,8 @@ class Tcp {
 									hint(mainGame.get.desc(content));
 									break;
 								case HINT.SELECTMSG:
+									this.select_hint = content;
+									this.last_select_hint = content;
 									break;
 								case HINT.OPSELECTED:
 									hint(mainGame.get.strings.system(1510, mainGame.get.desc(content)));
@@ -247,15 +262,20 @@ class Tcp {
 									break;
 							}
 						}],
+						[MSG.START, async () => {
+							const pack = to_package<number>(buffer, data, [8, -1, 32, 32], pos);
+							connect.is_first.chk =  (pack[0] & 0xf) === 0;
+							connect.lp.ct = [pack[1], pack[2]];
+						}],
 						[MSG.WIN, async () => {
 							const [player, type] = to_package<number>(buffer, data, [8, 8], pos);
-							const key = player === 2 ? I18N_KEYS.DRAW_GAME : to_palyer(player) === 0 ? I18N_KEYS.DUEL_WIN : I18N_KEYS.DUEL_LOSE;
+							const key = player === 2 ? I18N_KEYS.DRAW_GAME : to_player(player) === 0 ? I18N_KEYS.DUEL_WIN : I18N_KEYS.DUEL_LOSE;
 							const message = mainGame.get.strings.victory(type);
 							connect.win(mainGame.get.text(key), message);
 						}],
 						[MSG.UPDATE_DATA, async () => {
 							const pack = to_package<number>(buffer, data, [8, 8], pos);
-							const tp = to_palyer(pack[0]);
+							const tp = to_player(pack[0]);
 							const location = pack[1];
 							const cards = connect.duel.cards.get(location);
 							if (cards === undefined)
@@ -312,10 +332,11 @@ class Tcp {
 								const array = new Array(ct).fill(i === COMMAND.ACTIVATE ? [32, 8, 8, 8, 32] : [32, 8, 8, 8])
 								const pack = to_package<number>(buffer, data, array.flat(), p);
 								p += ((i === COMMAND.ACTIVATE ? 11 : 7) * ct);
-								for (let j = 0; j < array.length * ct; j += array.length) {
-									if (j + array.length > pack.length) break;
+								const step = i === COMMAND.ACTIVATE ? 5 : 4;
+								for (let j = 0; j < step * ct; j += step) {
+									if (j + step - 1 > pack.length) break;
 									let code = pack[j];
-									const tp = to_palyer(pack[j + 1]);
+									const tp = to_player(pack[j + 1]);
 									const loc = pack[j + 2];
 									const seq = pack[j + 3];
 									const get_cards : Function | undefined = connect.duel.cards.get(loc);
@@ -325,6 +346,7 @@ class Tcp {
 											const index = cards.indexOf(card)
 											if (index > -1)
 												cards.splice(index, 1);
+											await card.update.code(code);
 											if (i === COMMAND.ACTIVATE) {
 												const desc = pack[j + 4];
 												const flag = (code & 0x80000000) > 0 ? EDESC.OPERATION : EDESC.NONE;
@@ -340,19 +362,21 @@ class Tcp {
 							const pack = to_package<number>(buffer, data, [8, 8, 8], p);
 							cards.forEach(i => i.activatable.clear());
 						}],
+						[MSG.SELECT_EFFECTYN, async () => {
+						}],
 						[MSG.SELECT_CHAIN, async () => {
 							let pack = to_package<number>(buffer, data, [-1, 8, 8, -4, -4], pos);
 							const count = pack[0];
 							const array = new Array(count).fill([8, 8, 32, 8, 8, 8, 8, 32]).flat();
 							pack = to_package<number>(buffer, data, array, pos + 11);
-							console.log(pack)
 							const cards : Array<Client_Card> = connect.duel.cards.get(LOCATION.ALL)!(2).filter((i : Client_Card) => i.activatable.flag > 0);
-							for (let i = 0; i < count; i += 8) {
-								if (i + 8 > pack.length) break;
+							for (let j = 0; j < count; j ++) {
+								const i = j * 8;
+								if (i + 7 > pack.length) break;
 								const forced = pack[i + 1];
 								const flag = pack[i] | (forced << 8);
 								const code = pack[i + 2];
-								const tp = to_palyer(pack[i + 3]);
+								const tp = to_player(pack[i + 3]);
 								const loc = pack[i + 4];
 								const seq = pack[i + 5];
 								const v = pack[i + 6];
@@ -364,16 +388,25 @@ class Tcp {
 										const index = cards.indexOf(card)
 										if (index > -1)
 											cards.splice(index, 1);
+										await card.update.code(code);
 										card.activatable.on({desc : desc, flag : flag});
 									}
 								}
 							}
 							cards.forEach(i => i.activatable.clear());
 						}],
+						[MSG.SELECT_PLACE, async () => {
+							const pack = to_package<number>(buffer, data, [8, 8, 32], pos);
+							const tp = pack[0];
+							const ct = Math.max(pack[1], 1);
+							const place = tp === to_player(0) ? ~pack[2] : ((~pack[2] >> 16) | (~pack[2] << 16));
+							const title = !!this.select_hint ? mainGame.get.strings.system(569, mainGame.get.name(this.select_hint))
+								: mainGame.get.strings.system(560);
+							this.select_hint = 0;
+							connect.select_plaids.on(title, connect.duel.plaid.get(place), ct);
+						}],
 						[MSG.NEW_TURN, async () => {
 							const pack = to_package<number>(buffer, data, [8], pos);
-							const tp = to_palyer(pack[0] & 0x1);
-
 						}],
 						[MSG.NEW_PHASE, async () => {
 							const [phase] = to_package<number>(buffer, data, [16], pos);
@@ -381,7 +414,7 @@ class Tcp {
 						}],
 						[MSG.DRAW, async () => {
 							const pack = to_package<number>(buffer, data, [8, 8], pos);
-							const tp = to_palyer(pack[0]);
+							const tp = to_player(pack[0]);
 							const ct = pack[1];
 							if (tp === 0) {
 								const cards : Array<Client_Card> = connect.duel.cards.get(LOCATION.DECK)!(tp);
@@ -449,6 +482,11 @@ class Tcp {
 					}
 				}
 			],
+			[STOC.SELECT_HAND,
+				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
+					connect.rps.chk = true;
+				}
+			],
 			[STOC.SELECT_TP,
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					if (connect.rps.chk)
@@ -478,6 +516,7 @@ class Tcp {
 					connect.home.no_check_deck = pack[4] === 0;
 					connect.home.no_shuffle_deck = pack[5] === 0;
 					connect.home.start_lp = pack[6];
+					connect.lp.ct = new Array(2).fill(pack[6]);
 					connect.home.start_hand = pack[7];
 					connect.home.draw_count = pack[8];
 					connect.home.time_limit = pack[9];
@@ -503,6 +542,8 @@ class Tcp {
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					const pack = to_package<number>(buffer, data, [8, -1, 16], pos);
 					connect.time.to(pack[0], pack[1]);
+					if(to_player(pack[0]) === 0)
+						this.send.on(CTOS.TIME_CONFIRM);
 				}
 			],
 			[STOC.CHAT,
@@ -629,6 +670,9 @@ class Tcp {
 		surrender : async () : Promise<void> => {
 			await this.send.on(CTOS.SURRENDER);
 		},
+		response : async (v : number | object) : Promise<void> => {
+			await this.send.on(CTOS.RESPONSE, typeof v === 'number' ? new Message(v, 32) : v);
+		},
 	}
 
 	disconnect = async (connect : Reactive<any>) : Promise<void> => {
@@ -641,4 +685,4 @@ class Tcp {
 }
 
 export default Tcp;
-export type { HostInfo, Player, Chats };
+export type { HostInfo, Player, Chats, Plaids };

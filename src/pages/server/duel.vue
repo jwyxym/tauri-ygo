@@ -11,6 +11,8 @@
 	import * as CONSTANT from '../../script/constant';
 	import { LOCATION, POS } from './post/network';
 	import Client_Card from './post/client_card';
+	import Plaid from './post/plaid';
+	import { Plaids } from './post/tcp';
 	import gsap from '../../script/gsap';
 
 	interface Axis {
@@ -55,7 +57,7 @@
 		click : (card : Client_Card, _ : MouseEvent) : void => {
 			if (duel.cards.get(LOCATION.HAND)!(0).includes(card)) {
 				const show_off = () => {
-					hover.select!.show.off.btn();
+					hover.select!.show.btn.off();
 					(hover.select!.three.element.children[0] as HTMLElement).style.transform = 'translateY(0)';
 					hover.select!.three.position.setZ(duel.cards.get(LOCATION.HAND)!(0).indexOf(hover.select) * three.create.hand_gap + three.create.float);
 				}
@@ -63,13 +65,23 @@
 					if (hover.select !== undefined) show_off();
 					(card.three.element.children[0] as HTMLElement).style.transform = 'translateY(-30px)';
 					card.three.position.setZ(duel.cards.get(LOCATION.HAND)!(0).indexOf(card) * three.create.hand_gap + 0.1 + three.create.float);
-					card.show.on.btn();
+					card.show.btn.on();
 					hover.select = card;
 				})() : (() => {
 					show_off();
 					hover.select = undefined;
 				})();
 			}
+		},
+		response : async (card : Client_Card, key : string) : Promise<void> => {
+			let code;
+			switch (key) {
+				case 'summon':
+					code = props.connect.idle.summon.index(card) << 16;
+					break;
+			}
+			if (code)
+				await props.connect.response(code);
 		},
 		select : undefined as Client_Card | undefined
 	};
@@ -78,6 +90,7 @@
 		renderer : new CSS.CSS3DRenderer(),
 		scene : new THREE.Scene(),
 		camera : new THREE.PerspectiveCamera(),
+		plaids : [] as Array<Plaid>,
 		src : {
 			unknown : mainGame.get.textures(CONSTANT.FILES.TEXTURE_UNKNOW) as string | undefined ?? '',
 			cover : mainGame.get.textures(CONSTANT.FILES.TEXTURE_COVER) as string | undefined ?? ''
@@ -234,9 +247,8 @@
 			gap : 8,
 			hand_gap : 0.05,
 			float : 60,
-			color : '#9ed3ff',
 			card : (src : string) : Client_Card => {
-				return new Client_Card(src, three.create.size, hover);
+				return new Client_Card(src, three.create.size, hover, props.connect.idle);
 			},
 			back : (srcs : Array<string> = []) : CSS.CSS3DObject => {
 				const dom = document.createElement('div');
@@ -252,15 +264,6 @@
 						child.style.transform = 'scaleY(-1)';
 					dom.appendChild(child);
 				}
-				return new CSS.CSS3DObject(dom);
-			},
-			plaid : () : CSS.CSS3DObject => {
-				const dom = document.createElement('div');
-				const child = document.createElement('div');
-				child.style.width = `${three.create.size.height}px`;
-				child.style.height = `${three.create.size.height}px`;
-				child.style.border = `2px solid ${three.create.color}`;
-				dom.appendChild(child);
 				return new CSS.CSS3DObject(dom);
 			},
 			send : {
@@ -304,11 +307,11 @@
 							target.add.level();
 						}
 						target.add.atk();
-						target.show.on.info();
-						target.show.on.atk();
+						target.show.info.on();
+						target.show.atk.on();
 						three.cards.map.get(location)![owner].slice(0, -1).forEach(card => {
-							card.show.off.info();
-							card.show.off.atk();
+							card.show.info.off();
+							card.show.atk.off();
 							three.rotate(card, location, owner, (pos & POS.ATTACK) > 0 ? POS.FACEUP_DEFENSE : POS.FACEUP_ATTACK);
 						});
 					} else if ((location & LOCATION.MZONE) === LOCATION.MZONE) {
@@ -318,15 +321,15 @@
 						three.cards.map.get(location)![owner][len].change.xyz(len);
 					} else if ((location & LOCATION.PZONE) === LOCATION.PZONE) {
 						if ((from & LOCATION.MZONE) === LOCATION.MZONE) {
-							target.show.off.atk();
-							target.show.off.info();
+							target.show.atk.off();
+							target.show.info.off();
 							target.remove();
 						}
 						target.add.pendulum();
-						target.show.on.info();
+						target.show.info.on();
 					} else {
-						target.show.off.info();
-						target.show.off.atk();
+						target.show.info.off();
+						target.show.atk.off();
 					}
 					three.sort(owner, from);
 					three.sort(owner, location);
@@ -335,8 +338,8 @@
 					const ct = three.cards.change(target, owner, from, LOCATION.HAND, undefined);
 					three.rotate(target, from, owner, POS.FACEUP_ATTACK);
 					three.sort(owner, LOCATION.HAND);
-					target.show.off.info();
-					target.show.off.atk();
+					target.show.info.off();
+					target.show.atk.off();
 					if (ct > 0)
 						three.cards.map.get(from)![owner][0].change.xyz(three.cards.map.get(from)![owner].length - 1);
 				}
@@ -355,13 +358,14 @@
 			back : (pic : Array<string | undefined> = mainGame.get.textures(CONSTANT.FILES.TEXTURE_BACK) as Array<string>) : void => {
 				const back = three.create.back(pic.filter(i => i !== undefined));
 				three.create.send.back(back, { x : 0, y : 0, z : 0 * three.create.size.top });
-				gsap.opacity(back.element, 1)
 				three.scene.add(back);
+				gsap.opacity(back.element, 1);
 			},
 			plaid : (x : number, y : number) : void => {
-				const dom = three.create.plaid();
-				three.create.send.back(dom, { x : x, y : y, z : 0 });
-    			three.scene.add(dom);
+				const plaid = new Plaid(three.create.size, x, y)
+				three.create.send.back(plaid.three, { x : x, y : y, z : 0 });
+    			three.scene.add(plaid.three);
+				three.plaids.push(plaid);
 			}
 		},
 		move : (target : CSS.CSS3DObject, from : number, owner : number, x : number, y : number, z : number) => {
@@ -592,6 +596,28 @@
 				}).flat();
 			}]
 		]) as Map<number, Function>,
+		plaid : {
+			get : (place : number) : Plaids => {
+				const plaids = three.plaids.filter(i => (i.loc & place) > 0);
+				const array : Plaids = [];
+				for (const i of plaids) {
+					const cards : Array<Client_Card> | undefined = i.seq[1] < 2 ? (three.cards.map.get(i.seq[0])?? [undefined, undefined])[i.seq[1]]
+						: (() : Array<Client_Card> | undefined => {
+							const result = three.cards.map.get(i.seq[1]);
+							if (!result)
+								return undefined;
+							return [...result[0], ...result[1]];
+						})();
+					if (cards) {
+						const card = cards[cards.length - 1];
+						array.push({ plaid : i, card : card.code, pos : card.pos() });
+						continue;
+					}
+					array.push({ plaid : i });
+				}
+				return array;
+			}
+		},
 		draw : async (tp : number, ct : number) => {
 			const len = three.cards.map.get(LOCATION.DECK)![tp].length - 1;
 			for (let i = len; i > len - ct; i --) {
@@ -607,7 +633,6 @@
 				for (const i of 'length' in from_to ? from_to as Array<Card_From>  : [from_to as Card_From]) {
 					const card = three.cards.map.get(i.location)![tp][i.seq];
 					const loc = LOCATION.MZONE | (i.zone << 16);
-					card.update.code(359563)
 					three.create.send.to(card, to_tp, loc, i.location, three.cards.map.get(loc)![tp].length, i.pos);
 					await mainGame.sleep(150);
 				}
@@ -658,7 +683,6 @@
 				for (const i of 'length' in from_to ? from_to as Array<Card_From>  : [from_to as Card_From]) {
 					const card = three.cards.map.get(i.location)![tp][i.seq];
 					const loc = LOCATION.MZONE | (i.zone << 16)
-					card.update.code(483)
 					const len = three.cards.map.get(loc)![tp].length - 1;
 					three.create.send.to(card, to_tp, loc, i.location, len, (three.cards.map.get(loc)![tp][len].pos() & POS.ATTACK) > 0 ? POS.FACEUP_DEFENSE : POS.FACEUP_ATTACK);
 					await mainGame.sleep(150);

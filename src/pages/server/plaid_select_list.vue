@@ -6,9 +6,17 @@
 		</div>
 		<var-checkbox-group v-model = 'page.selects'>
 			<TransitionGroup class = 'list'  tag = 'div' name = 'scale'>
-				<div v-for = '(i, v) in cards' :key = 'i' class = 'pics'>
-					<img :src = 'mainGame.get.card(i).pic' @click = 'page.select(v)'/>
-					<var-checkbox :checked-value = 'v'></var-checkbox>
+				<div v-for = 'i in plaids' :key = 'i.plaid.name' class = 'plaids'>
+					<div class = 'plaid' @click = 'page.select(i)'>
+						<div>
+							<img
+								:src = "(i.pos & POS.FACEUP) > 0 ? mainGame.get.card(i.card).pic : (mainGame.get.textures(FILES.TEXTURE_COVER) as string | undefined) ?? ''"
+								:class = "{ 'defence' : (i.pos & POS.DEFENSE) > 0 }"
+							/>
+						</div>
+						<span>{{ i.plaid.name }}</span>
+					</div>
+					<var-checkbox :checked-value = 'i'></var-checkbox>
 				</div>
 			</TransitionGroup>
 		</var-checkbox-group>
@@ -18,14 +26,16 @@
 <script setup lang = 'ts'>
 	import { ref, reactive, TransitionGroup, onBeforeMount } from 'vue';
 	import mainGame from '../../script/game';
+	import { FILES } from '../../script/constant';
+	import { POS } from './post/network';
+	import Plaid from './post/plaid';
 
 	import Button_List from '../varlet/button_list.vue';
 
 	const page = reactive({
 		title : '',
-		min : 0,
-		max : 0,
-		selects : [] as Array<number>,
+		ct : 0,
+		selects : [] as Array<Plaid>,
 		show : true,
 		confirm : () => {
 			props.confirm();
@@ -33,12 +43,17 @@
 		cancel : () => {
 			props.cancel();
 		},
-		select : (v : number) => {
+		select : (v : Plaid) => {
 			page.selects.includes(v) ? (() => {
 				const ct = page.selects.findIndex(i => i === v);
-				if (ct > -1)
+				if (ct > -1) {
 					page.selects.splice(ct, 1)
-			})() : page.selects.push(v);
+					v.select.off();
+				}
+			})() : (() => {
+				page.selects.push(v);
+				v.select.on();
+			})();
 		}
 	});
 
@@ -46,11 +61,10 @@
 
 	onBeforeMount(() => {
 		page.title = props.title;
-		page.min = props.min;
-		page.max = props.max;
+		page.ct = props.ct;
 	});
 
-	const props = defineProps(['cards', 'title', 'min', 'max', 'confirm', 'cancel']);
+	const props = defineProps(['plaids', 'title', 'ct', 'confirm', 'cancel']);
 	defineExpose({ dom });
 </script>
 <style scoped lang = 'scss'>

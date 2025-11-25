@@ -1,6 +1,7 @@
 import YGOProDeck, { YGOProDeckLike } from 'ygopro-deck-encode';
 import fs from '../../script/fs';
-import constant, { REG } from '../../script/constant';
+import { REG } from '../../script/constant';
+import { I18N_KEYS } from '../../script/language/i18n';
 import mainGame from '../../script/game';
 
 class Deck extends YGOProDeck {
@@ -56,7 +57,7 @@ class Deck extends YGOProDeck {
 				}
 			}
 		} catch (e) {
-			fs.write.log(mainGame.get.text().toast.error.ydk.from_code)
+			fs.write.log(mainGame.get.text(I18N_KEYS.DECK_FROM_CODE_ERROR))
 			return new Deck();
 		}
 		return deck;
@@ -72,7 +73,7 @@ class Deck extends YGOProDeck {
 				name : deck.name
 			})
 		} catch (e) {
-			fs.write.log(mainGame.get.text().toast.error.ydk.from_url)
+			fs.write.log(mainGame.get.text(I18N_KEYS.DECK_FROM_URL_ERROR))
 			return new Deck();
 		}
 	}
