@@ -166,28 +166,12 @@ jobs:
         [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
         choco install 7zip -y
 
-    - name: Download Assets
-      shell: cmd
-      run: |
-        cd .ci
-        wget -O ygopro-database.zip https://github.com/mycard/ygopro-database/archive/refs/heads/master.zip
-        unzip ygopro-database.zip
-        mkdir cdb
-        mkdir strings
-        copy ygopro-database-master\locales\zh-CN\cards.cdb cdb\cards-zh-CN.cdb
-        copy ygopro-database-master\locales\ko-KR\cards.cdb cdb\cards-ko-KR.cdb
-        copy ygopro-database-master\locales\ja-JP\cards.cdb cdb\cards-ja-JP.cdb
-        copy ygopro-database-master\locales\en-US_mdpro3\cards.cdb cdb\cards-en-US.cdb
-        copy ygopro-database-master\locales\zh-CN\strings.conf strings\strings-zh-CN.conf
-        copy ygopro-database-master\locales\ko-KR\strings.conf strings\strings-ko-KR.conf
-        copy ygopro-database-master\locales\ja-JP\strings.conf strings\strings-ja-JP.conf
-        copy ygopro-database-master\locales\en-US_mdpro3\strings.conf strings\strings-en-US.conf
-        wget https://github.com/Fluorohydride/ygopro/raw/refs/heads/master/lflist.conf
-        wget https://api.jwyxym.top/file/pics -O pics.zip
-        unzip pics.zip
-        7z a -tzip -mx=9 assets.zip strings info cdb sound textures lflist.conf pics
-        cd ..
-        copy .ci\assets.zip src-tauri\assets.zip
+    - name: Download assets
+      uses: robinraju/release-downloader@v1.10
+      with:
+        tag: assets-latest
+        fileName: "assets.zip"
+        out-file-path: "./src-tauri/"
 
     - name: Write Rust File
       shell: cmd
