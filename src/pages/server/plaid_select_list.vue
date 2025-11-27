@@ -4,19 +4,20 @@
 			{{ page.title }}
 			<var-switch v-model = 'page.show'/>
 		</div>
-		<var-checkbox-group v-model = 'page.selects'>
+		<var-checkbox-group v-model = 'page.selects' :max = 'page.ct'>
 			<TransitionGroup class = 'list'  tag = 'div' name = 'scale'>
 				<div v-for = 'i in plaids' :key = 'i.plaid.name' class = 'plaids'>
-					<div class = 'plaid' @click = 'page.select(i)'>
+					<div class = 'plaid' @click = 'page.select(i.plaid)'>
 						<div>
 							<img
+								v-if = 'i.card'
 								:src = "(i.pos & POS.FACEUP) > 0 ? mainGame.get.card(i.card).pic : (mainGame.get.textures(FILES.TEXTURE_COVER) as string | undefined) ?? ''"
 								:class = "{ 'defence' : (i.pos & POS.DEFENSE) > 0 }"
 							/>
 						</div>
 						<span>{{ i.plaid.name }}</span>
 					</div>
-					<var-checkbox :checked-value = 'i'></var-checkbox>
+					<var-checkbox :checked-value = 'i.plaid' @change = 'page.select(i.plaid, false)'></var-checkbox>
 				</div>
 			</TransitionGroup>
 		</var-checkbox-group>
@@ -38,20 +39,29 @@
 		selects : [] as Array<Plaid>,
 		show : true,
 		confirm : () => {
-			props.confirm();
+			const plaid = page.selects[0];
+			props.confirm({
+				player : plaid.player,
+				loc : plaid.seq[0] & 0xff,
+				seq : (plaid.seq[0] >> 8) & 0xff
+			});
 		},
 		cancel : () => {
 			props.cancel();
 		},
-		select : (v : Plaid) => {
+		select : (v : Plaid, chk : boolean = true) => {
 			page.selects.includes(v) ? (() => {
-				const ct = page.selects.findIndex(i => i === v);
+				const ct = page.selects.indexOf(v);
 				if (ct > -1) {
-					page.selects.splice(ct, 1)
+					if (chk)
+						page.selects.splice(ct, 1)
 					v.select.off();
 				}
 			})() : (() => {
-				page.selects.push(v);
+				if (page.selects.length >= page.ct)
+					return;
+				if (chk)
+					page.selects.push(v);
 				v.select.on();
 			})();
 		}

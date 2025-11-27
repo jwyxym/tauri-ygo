@@ -4,7 +4,7 @@
 			{{ page.title }}
 			<var-switch v-model = 'page.show'/>
 		</div>
-		<var-checkbox-group v-model = 'page.selects'>
+		<var-checkbox-group v-model = 'page.selects' :max = 'page.max'>
 			<TransitionGroup class = 'list'  tag = 'div' name = 'scale'>
 				<div v-for = '(i, v) in cards' :key = 'i' class = 'pics'>
 					<img :src = 'mainGame.get.card(i).pic' @click = 'page.select(v)'/>
@@ -35,10 +35,14 @@
 		},
 		select : (v : number) => {
 			page.selects.includes(v) ? (() => {
-				const ct = page.selects.findIndex(i => i === v);
+				const ct = page.selects.indexOf(v);
 				if (ct > -1)
 					page.selects.splice(ct, 1)
-			})() : page.selects.push(v);
+			})() :(() => {
+				if (page.selects.length >= page.max)
+					return;
+				page.selects.push(v)
+			});
 		}
 	});
 

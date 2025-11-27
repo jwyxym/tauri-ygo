@@ -281,6 +281,7 @@
 	import Card_Select_List from './card_select_list.vue';
 	import Plaid_Select_List from './plaid_select_list.vue';
 	import Client_Card from './post/client_card';
+import { LOCATION } from './post/network';
 
 	let tcp : Tcp | null = null;
 	const deck = ref<HTMLElement | null>(null);
@@ -380,22 +381,56 @@
 		select_plaids : {
 			title : '',
 			ct : 0,
+			chk_player : undefined as undefined | number,
+			pzone : false,
 			array : [] as Plaids,
-			on : (title : string, array : Plaids, ct : number) : void => {
+			on : (title : string, array : Plaids, place : number, ct : number) : void => {
 				connect.select_plaids.title = title;
 				connect.select_plaids.ct = ct;
 				connect.select_plaids.array = array;
+				connect.select_plaids.chk_player = (place & 0x60) > 0 ? 0
+					: (place & (0x60 << 16)) > 0 ? 1
+						: undefined;
+				connect.select_plaids.pzone = (place & 0xc000c000) > 0;
 			},
-			confirm : async () => {
+			confirm : async (result : { loc : number, seq : number; player : number}) => {
+				if (connect.select_plaids.chk_player !== undefined
+					&& result.loc === LOCATION.MZONE
+					&& [5, 6].includes(result.seq)
+					&& result.player !== connect.select_plaids.chk_player
+				)
+					result = {
+						player : connect.select_plaids.chk_player,
+						loc : result.loc,
+						seq : result.seq === 5 ? 6 : 5
+					};
+				else if (connect.select_plaids.pzone
+					&& result.loc === LOCATION.SZONE
+					&& [0, 4].includes(result.seq)
+				)
+					result.seq = result.seq === 0 ? 6 : 7;
+				else if (result.loc === LOCATION.FZONE)
+					result = {
+						player : result.player,
+						loc : LOCATION.SZONE,
+						seq : 5
+					};
 
+				result.player = tcp!.to.player!(result.player);
+				await tcp!.send.response(result);
+				connect.select_plaids.clear();
 			},
 			cancle : async () => {
+				//
 				
+				connect.select_plaids.clear();
 			},
 			clear : () : void => {
 				connect.select_plaids.title = '';
 				connect.select_plaids.ct = 0;
 				connect.select_plaids.array.length = 0;
+				connect.select_plaids.chk_player = undefined;
+				connect.select_plaids.pzone = false;
 			}
 		},
 		lp : {
@@ -583,6 +618,8 @@
 			});
 		},
 		clear : () => {
+			connect.select_cards.clear();
+			connect.select_plaids.clear();
 			connect.player = new Array(4).fill({ name : '' }) as Array<TCP.Player>;
 			connect.home = {
 				lflist : 0,

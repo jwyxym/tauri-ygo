@@ -24,35 +24,43 @@ class Plaid {
 		});
 		dom.appendChild(child);
 		this.three = new CSS.CSS3DObject(dom);
-		this.loc = Math.abs(x) === 3 ? 0
-			: (() : number => {
+		this.loc = Math.abs(x) === 3 ?
+			(() : number  => {
+				if (x * y <= 0 || Math.abs(y) !== 1)
+					return 0;
+				return 0x20 << (y < 0 ? 8 : 24);
+			})() : (() : number => {
 				let loc : string = '1';
 				if (y > 0) {
 					loc += '0'.repeat(- x + 2);
 					return parseInt(loc, 2) << ((y + 1) * 8);
 				} else if (y === 0) {
 					return x === -1 ? (() : number => {
-						return 0x20 | (0x40 << 8);
+						return 0x20 | (0x40 << 16);
 					})()
 					: (() : number => {
-						return 0x40 | (0x20 << 8);
+						return 0x40 | (0x20 << 16);
 					})()
 				} else {
 					loc += '0'.repeat(x + 2);
-					return parseInt(loc, 2) << ((y + 2) * 8);
+					return parseInt(loc, 2) << ((- 1 - y) * 8);
 				}
 			})();
-		this.seq = Math.abs(x) === 3 ? [0, 0]
-			: (() : [number, number] => {
+		this.seq = Math.abs(x) === 3 ?
+			(() : [number, number]  => {
+				if (x * y <= 0 || Math.abs(y) !== 1)
+					return [0, 0];
+				return [LOCATION.FZONE, y < 0 ? 0 : 1];
+			})() : (() : [number, number] => {
 				switch (y) {
 					case 2:
-						return [LOCATION.MZONE | ((- x + 2) << 16), 1];
-					case 1:
 						return [LOCATION.SZONE | ((- x + 2) << 16), 1];
+					case 1:
+						return [LOCATION.MZONE | ((- x + 2) << 16), 1];
 					case -1:
-						return [LOCATION.SZONE | ((x + 2) << 16), 0];
-					case -2:
 						return [LOCATION.MZONE | ((x + 2) << 16), 0];
+					case -2:
+						return [LOCATION.SZONE | ((x + 2) << 16), 0];
 					default:
 						return [LOCATION.MZONE | ((x > 0 ? 6 : 5) << 16), 2];
 				}

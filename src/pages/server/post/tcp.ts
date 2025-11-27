@@ -403,7 +403,7 @@ class Tcp {
 							const title = !!this.select_hint ? mainGame.get.strings.system(569, mainGame.get.name(this.select_hint))
 								: mainGame.get.strings.system(560);
 							this.select_hint = 0;
-							connect.select_plaids.on(title, connect.duel.plaid.get(place), ct);
+							connect.select_plaids.on(title, connect.duel.plaid.get(place), place, ct);
 						}],
 						[MSG.NEW_TURN, async () => {
 							const pack = to_package<number>(buffer, data, [8], pos);
@@ -670,8 +670,14 @@ class Tcp {
 		surrender : async () : Promise<void> => {
 			await this.send.on(CTOS.SURRENDER);
 		},
-		response : async (v : number | object) : Promise<void> => {
-			await this.send.on(CTOS.RESPONSE, typeof v === 'number' ? new Message(v, 32) : v);
+		response : async (res : number | object) : Promise<void> => {
+			console.log(res)
+			await this.send.on(CTOS.RESPONSE, typeof res === 'number' ? new Message(res, 32) : (() : object => {
+				const obj : { [key : string] : Message<number | string> } = {};
+				for (const [i, v] of Object.entries(res))
+					obj[i] = typeof v === 'number' ? new Message(v, 8) : new Message(v);
+				return obj;
+			})());
 		},
 	}
 

@@ -610,7 +610,7 @@
 						})();
 					if (cards) {
 						const card = cards[cards.length - 1];
-						array.push({ plaid : i, card : card.code, pos : card.pos() });
+						array.push({ plaid : i, card : card?.code, pos : card?.pos() });
 						continue;
 					}
 					array.push({ plaid : i });
