@@ -230,27 +230,28 @@
 				v-if = 'page.duel && connect.cards.show'
 			/>
 		</transition>
-		<TransitionGroup tag = 'div' name = 'move_down'>
+		<transition name = 'move_up'>
 			<Card_Select_List
 				:title = 'connect.select_cards.title'
 				:min = 'connect.select_cards.min'
 				:max = 'connect.select_cards.max'
 				:cards = 'connect.select_cards.array'
 				:confirm = 'connect.select_cards.confirm'
-				:cancle = 'connect.select_cards.cancle'
+				:cancel = 'connect.select_cards.cancel'
 				v-if = 'page.duel && connect.select_cards.array.length > 0'
-				:key = '0'
 			/>
+		</transition>
+		<transition name = 'move_up'>
 			<Plaid_Select_List
 				:title = 'connect.select_plaids.title'
-				:ct = 'connect.select_plaids.ct'
+				:min = 'connect.select_plaids.min'
 				:plaids = 'connect.select_plaids.array'
 				:confirm = 'connect.select_plaids.confirm'
-				:cancle = 'connect.select_plaids.cancle'
+				:cancel = 'connect.select_plaids.cancel'
 				v-if = 'page.duel && connect.select_plaids.array.length > 0'
-				:key = '1'
+				v-show = 'connect.select_plaids.show'
 			/>
-		</TransitionGroup>
+		</transition>
 	</div>
 </template>
 <script setup lang = 'ts'>
@@ -281,7 +282,8 @@
 	import Card_Select_List from './card_select_list.vue';
 	import Plaid_Select_List from './plaid_select_list.vue';
 	import Client_Card from './post/client_card';
-import { LOCATION } from './post/network';
+	import { LOCATION } from './post/network';
+	import Plaid from './post/plaid';
 
 	let tcp : Tcp | null = null;
 	const deck = ref<HTMLElement | null>(null);
@@ -368,7 +370,7 @@ import { LOCATION } from './post/network';
 			confirm : async () => {
 
 			},
-			cancle : async () => {
+			cancel : async () => {
 				
 			},
 			clear : () : void => {
@@ -379,14 +381,15 @@ import { LOCATION } from './post/network';
 			}
 		},
 		select_plaids : {
+			show : true,
 			title : '',
-			ct : 0,
+			min : 0,
 			chk_player : undefined as undefined | number,
 			pzone : false,
 			array : [] as Plaids,
 			on : (title : string, array : Plaids, place : number, ct : number) : void => {
 				connect.select_plaids.title = title;
-				connect.select_plaids.ct = ct;
+				connect.select_plaids.min = ct;
 				connect.select_plaids.array = array;
 				connect.select_plaids.chk_player = (place & 0x60) > 0 ? 0
 					: (place & (0x60 << 16)) > 0 ? 1
@@ -420,14 +423,24 @@ import { LOCATION } from './post/network';
 				await tcp!.send.response(result);
 				connect.select_plaids.clear();
 			},
-			cancle : async () => {
-				//
-				
-				connect.select_plaids.clear();
+			cancel : async (cancelable : boolean, result : Array<Plaid>) => {
+				cancelable ? await (async () => {
+					await tcp!.send.response({
+						player : tcp!.to.player!(0),
+						loc : 0,
+						seq : 0
+					});
+					connect.select_plaids.clear();
+				})() : await (async () => {
+					connect.select_plaids.show = false;
+					await mainGame.sleep(250);
+					connect.select_plaids.show = true;
+					result.forEach(i => i.select.on());
+				})();
 			},
 			clear : () : void => {
 				connect.select_plaids.title = '';
-				connect.select_plaids.ct = 0;
+				connect.select_plaids.min = 0;
 				connect.select_plaids.array.length = 0;
 				connect.select_plaids.chk_player = undefined;
 				connect.select_plaids.pzone = false;

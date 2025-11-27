@@ -1,10 +1,10 @@
 <template>
 	<div class = 'select_list' ref = 'dom' :class = "{ 'unshow' : !page.show }">
 		<div class = 'title'>
-			{{ page.title }}
 			<var-switch v-model = 'page.show'/>
+			{{ page.title }} [{{ page.min }} - 1]
 		</div>
-		<var-checkbox-group v-model = 'page.selects' :max = 'page.ct'>
+		<var-checkbox-group v-model = 'page.selects' :max = '1'>
 			<TransitionGroup class = 'list'  tag = 'div' name = 'scale'>
 				<div v-for = 'i in plaids' :key = 'i.plaid.name' class = 'plaids'>
 					<div class = 'plaid' @click = 'page.select(i.plaid)'>
@@ -35,19 +35,23 @@
 
 	const page = reactive({
 		title : '',
-		ct : 0,
+		min : 0,
 		selects : [] as Array<Plaid>,
 		show : true,
 		confirm : () => {
 			const plaid = page.selects[0];
+			page.selects.forEach(i => i.select.off());
+			if (page.selects.length < page.min)
+				props.cancel(false, page.selects);
 			props.confirm({
 				player : plaid.player,
 				loc : plaid.seq[0] & 0xff,
-				seq : (plaid.seq[0] >> 8) & 0xff
+				seq : (plaid.seq[0] >> 16) & 0xff
 			});
 		},
 		cancel : () => {
-			props.cancel();
+			page.selects.forEach(i => i.select.off());
+			props.cancel(page.min == 0, page.selects);
 		},
 		select : (v : Plaid, chk : boolean = true) => {
 			page.selects.includes(v) ? (() => {
@@ -58,7 +62,7 @@
 					v.select.off();
 				}
 			})() : (() => {
-				if (page.selects.length >= page.ct)
+				if (page.selects.length >= 1)
 					return;
 				if (chk)
 					page.selects.push(v);
@@ -71,10 +75,10 @@
 
 	onBeforeMount(() => {
 		page.title = props.title;
-		page.ct = props.ct;
+		page.min = props.min;
 	});
 
-	const props = defineProps(['plaids', 'title', 'ct', 'confirm', 'cancel']);
+	const props = defineProps(['plaids', 'title', 'min', 'confirm', 'cancel']);
 	defineExpose({ dom });
 </script>
 <style scoped lang = 'scss'>

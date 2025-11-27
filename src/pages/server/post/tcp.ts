@@ -671,7 +671,6 @@ class Tcp {
 			await this.send.on(CTOS.SURRENDER);
 		},
 		response : async (res : number | object) : Promise<void> => {
-			console.log(res)
 			await this.send.on(CTOS.RESPONSE, typeof res === 'number' ? new Message(res, 32) : (() : object => {
 				const obj : { [key : string] : Message<number | string> } = {};
 				for (const [i, v] of Object.entries(res))

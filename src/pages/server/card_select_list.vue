@@ -1,8 +1,8 @@
 <template>
 	<div class = 'select_list' ref = 'dom' :class = "{ 'unshow' : !page.show }">
 		<div class = 'title'>
-			{{ page.title }}
 			<var-switch v-model = 'page.show'/>
+			{{ page.title }} [{{ page.min }} - {{ page.max }}]
 		</div>
 		<var-checkbox-group v-model = 'page.selects' :max = 'page.max'>
 			<TransitionGroup class = 'list'  tag = 'div' name = 'scale'>
@@ -28,6 +28,7 @@
 		selects : [] as Array<number>,
 		show : true,
 		confirm : () => {
+			// if (page.selects.length < page.min)
 			props.confirm();
 		},
 		cancel : () => {
