@@ -98,8 +98,8 @@ jobs:
 
     - name: Android icon
       run: |
-        wget https://code.moenext.com/mycard/hd-arts/-/raw/master/arts/84477320.jpg
-        npm run tauri icon -p 84477320.jpg
+        copy src-tauri\icons\icon.jpg .\
+        npm run tauri icon -p icon.jpg
 
     - name: Android build
       shell: cmd
