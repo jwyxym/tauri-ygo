@@ -9,7 +9,7 @@ import Message from './message';
 import { I18N_KEYS } from '../../../script/language/i18n';
 import toast from '../../../script/toast';
 import Deck from '../../deck/deck';
-import { CTOS, STOC, LOCATION, MSG, ERROR, PLAYERCHANGE, HINT, QUERY, PHASE, COMMAND, EDESC } from './network';
+import { CTOS, STOC, LOCATION, MSG, ERROR, PLAYERCHANGE, HINT, QUERY, PHASE, COMMAND, EDESC, POS } from './network';
 import Client_Card from './client_card';
 import Plaid from './plaid';
 
@@ -138,7 +138,7 @@ class Tcp {
 				const len = data.getUint16(pos, true);
 				const proto = data.getUint8(pos + 2);
 				const func = funcs.get(proto);
-				// console.log('0x'+proto.toString(16))
+				console.log('0x'+proto.toString(16))
 				if (func)
 					await func(buffer, data, len, connect, pos);
 				pos += len + 2;
@@ -213,6 +213,44 @@ class Tcp {
 			return connect.is_first.chk ? player : 1 - player;
 		}
 
+		const to_card = (player : number, loc : number, seq : number, ct : number = -1) : Client_Card | undefined => {
+			const is_xyz = (loc & LOCATION.OVERLAY) > 0;
+			const get_cards : Function | undefined = connect.duel.cards.get(is_xyz ? LOCATION.OVERLAY : loc);
+			if (get_cards) {
+				const cards : Array<Client_Card> = is_xyz ? get_cards(player, seq) : get_cards(player);
+				return is_xyz ? cards[ct >= 0 ? ct : cards.length - 1] : cards[seq];
+			}
+			return undefined;
+		};
+
+		const update_card = async (buffer : Uint8Array<ArrayBuffer>, data : DataView, flag : number, card : Client_Card, p : number) : Promise<void> => {
+			if (flag === 0)
+				card.clear();
+			else
+				for (const i of [
+					[QUERY.CODE, card.update.code],
+					[QUERY.POSITION, () => {}],
+					[QUERY.ALIAS, card.update.alias],
+					[QUERY.TYPE, card.update.type],
+					[QUERY.LEVEL, card.update.level],
+					[QUERY.RANK, card.update.rank],
+					[QUERY.ATTRIBUTE, card.update.attribute],
+					[QUERY.RACE, card.update.race],
+					[QUERY.ATTACK, card.update.atk],
+					[QUERY.DEFENSE, card.update.def],
+					[QUERY.BASE_ATTACK, () => {}],
+					[QUERY.BASE_DEFENSE, () => {}],
+					[QUERY.REASON, () => {}],
+					[QUERY.REASON_CARD, () => {}],
+					[QUERY.EQUIP_CARD, () => {}],
+				] as Array<[number, Function]>)
+					if ((flag & i[0]) === i[0]) {
+						const pack = to_package(buffer, data, [32], p);
+						await i[1](pack[0]);
+						p += 4;
+					}
+		}
+
 		this.to.player = to_player;
 
 		const funcs : Map<number, Function> = new Map([
@@ -269,7 +307,7 @@ class Tcp {
 						}],
 						[MSG.WIN, async () => {
 							const [player, type] = to_package<number>(buffer, data, [8, 8], pos);
-							const key = player === 2 ? I18N_KEYS.DRAW_GAME : to_player(player) === 0 ? I18N_KEYS.DUEL_WIN : I18N_KEYS.DUEL_LOSE;
+							const key = player === 2 ? I18N_KEYS.DUEL_GAME : to_player(player) === 0 ? I18N_KEYS.DUEL_WIN : I18N_KEYS.DUEL_LOSE;
 							const message = mainGame.get.strings.victory(type);
 							connect.win(mainGame.get.text(key), message);
 						}],
@@ -283,42 +321,22 @@ class Tcp {
 							pos += 2;
 							for (const card of (cards(tp) as Array<Client_Card>)){
 								const [len] = to_package<number>(buffer, data, [32], pos);
-								let p = pos + 4;
-								if(len !== undefined && len > 8) {
-									const [flag] : Array<number> = to_package(buffer, data, [32], p);
-									p += 4;
-									if (flag === 0) {
-										card.clear();
-									} else {
-										for (const i of [
-											[QUERY.CODE, card.update.code],
-											[QUERY.POSITION, () => {}],
-											[QUERY.ALIAS, card.update.alias],
-											[QUERY.TYPE, card.update.type],
-											[QUERY.LEVEL, card.update.level],
-											[QUERY.RANK, card.update.rank],
-											[QUERY.ATTRIBUTE, card.update.attribute],
-											[QUERY.RACE, card.update.race],
-											[QUERY.ATTACK, card.update.atk],
-											[QUERY.DEFENSE, card.update.def],
-											[QUERY.BASE_ATTACK, () => {}],
-											[QUERY.BASE_DEFENSE, () => {}],
-											[QUERY.REASON, () => {}],
-											[QUERY.REASON_CARD, () => {}],
-											[QUERY.EQUIP_CARD, () => {}],
-										] as Array<[number, Function]>) {
-											if ((flag & i[0]) === i[0]) {
-												const pack = to_package(buffer, data, [32], p);
-												await i[1](pack[0]);
-												p += 4;
-											}
-										}
-									}
-									pos += len;
-								} else {
+								if(len === undefined || len <= 8)
 									break;
-								}
+								const [flag] : Array<number> = to_package(buffer, data, [32], pos + 4);
+								await update_card(buffer, data, flag, card, pos + 8);
+								pos += len;
 							}
+						}],
+						[MSG.UPDATE_CARD, async () => {
+							const pack = to_package<number>(buffer, data, [8, 8, 8, 32, 32], pos);
+							const player = to_player(pack[0]);
+							const loc = pack[1];
+							const seq = pack[2];
+							const flag = pack[3];
+							const card = to_card(player, loc, seq)
+							if (card)
+								await update_card(buffer, data, flag, card, pos + 11);
 						}],
 						[MSG.SELECT_IDLECMD, async () => {
 							let p = pos + 1;
@@ -405,12 +423,130 @@ class Tcp {
 							this.select_hint = 0;
 							connect.select_plaids.on(title, connect.duel.plaid.get(place), place, ct);
 						}],
+						[MSG.SELECT_POSITION, async () => {
+							const pack = to_package<number>(buffer, data, [-1, 32, 8], pos);
+							const code = pack[0];
+							const position = pack[1];
+							[POS.FACEUP_ATTACK, POS.FACEUP_DEFENSE, POS.FACEDOWN_ATTACK, POS.FACEDOWN_DEFENSE]
+								.includes(position) ? await this.send.response(position)
+									: connect.select_position.on(mainGame.get.strings.system(561), code, position);
+						}],
 						[MSG.NEW_TURN, async () => {
 							const pack = to_package<number>(buffer, data, [8], pos);
 						}],
 						[MSG.NEW_PHASE, async () => {
 							const [phase] = to_package<number>(buffer, data, [16], pos);
 
+						}],
+						[MSG.MOVE, async () => {
+							const pack = to_package<number>(buffer, data, [32, ...new Array(8).fill(8), 32], pos);
+							const code = pack[0];
+							const from = {
+								player : to_player(pack[1]),
+								loc : pack[2],
+								seq : pack[3],
+								ct : pack[4]
+							};
+							const to = {
+								player : to_player(pack[5]),
+								loc : pack[6],
+								seq : pack[7],
+								pos : pack[8]
+							};
+							const reason = pack[9];
+							const is_xyz = (from.loc & LOCATION.OVERLAY) > 0;
+							const is_onfield = (from.loc & LOCATION.ONFIELD) > 0;
+							const card : Client_Card | undefined = to_card(from.player, from.loc, from.seq, from.ct);
+							if (card)
+								await card.update.code(code);
+							from.loc === 0 ? await (async () => {
+								connect.duel.add.card(to.player, to.loc, to.seq, code);
+							})() : await (async () => {
+								switch (to.loc) {
+									case LOCATION.NONE:
+										connect.duel.to.none(from.player, {
+											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
+											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
+											zone : to.seq,
+											pos : to.pos
+										}, to.player);
+										break;
+									case LOCATION.MZONE:
+										connect.duel.to.mzone(from.player, {
+											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
+											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
+											zone : to.seq,
+											pos : to.pos
+										}, to.player);
+										break;
+									case LOCATION.SZONE:
+										connect.duel.to.szone(from.player, {
+											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
+											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
+											zone : to.seq,
+											pos : to.pos
+										}, to.player);
+										break;
+									case LOCATION.GRAVE:
+										connect.duel.to.grave(from.player, {
+											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
+											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
+											zone : to.seq,
+											pos : to.pos
+										}, to.player);
+										break;
+									case LOCATION.REMOVED:
+										connect.duel.to.grave(from.player, {
+											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
+											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
+											zone : to.seq,
+											pos : to.pos
+										}, to.player);
+										break;
+									case LOCATION.DECK:
+										connect.duel.to.deck(from.player, {
+											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
+											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
+											zone : to.seq,
+											pos : to.pos
+										}, to.player);
+										break;
+									case LOCATION.EXTRA:
+										connect.duel.to.extra(from.player, {
+											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
+											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
+											zone : to.seq,
+											pos : to.pos
+										}, to.player);
+										break;
+									case LOCATION.OVERLAY:
+										connect.duel.to.overlay(from.player, {
+											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
+											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
+											zone : to.seq,
+											pos : to.pos
+										}, to.player);
+										break;
+								}
+							})();
+						}],
+						[MSG.CHAINING, async () => {
+							const pack = to_package<number>(buffer, data, [32, ...new Array(7).fill(8), 32], pos);
+							const code = pack[0];
+							const player = to_player(pack[1]);
+							const loc = pack[2];
+							const seq = pack[3];
+							const ct = pack[4];
+							const card : Client_Card | undefined = to_card(player, loc, seq, ct);
+							if (card) {
+								await card.update.code(code);
+								card.show.activate();
+							}
+							connect.chains.push({ player : player, code : code });
+							await mainGame.sleep(600);
+						}],
+						[MSG.CHAINED, async () => {
+							const pack = to_package<number>(buffer, data, [8], pos);
 						}],
 						[MSG.DRAW, async () => {
 							const pack = to_package<number>(buffer, data, [8, 8], pos);

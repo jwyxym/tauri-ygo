@@ -17,9 +17,9 @@
 </template>
 <script setup lang = 'ts'>
 	import { ref, reactive, TransitionGroup, onBeforeMount } from 'vue';
-	import mainGame from '../../script/game';
+	import mainGame from '../../../script/game';
 
-	import Button_List from '../varlet/button_list.vue';
+	import Button_List from '../../varlet/button_list.vue';
 
 	const page = reactive({
 		title : '',
@@ -35,15 +35,11 @@
 			props.cancel();
 		},
 		select : (v : number) => {
-			page.selects.includes(v) ? (() => {
-				const ct = page.selects.indexOf(v);
-				if (ct > -1)
-					page.selects.splice(ct, 1)
-			})() :(() => {
-				if (page.selects.length >= page.max)
-					return;
-				page.selects.push(v)
-			});
+			const ct = page.selects.indexOf(v);
+			if (ct > -1)
+				page.selects.splice(ct, 1);
+			else if (page.selects.length < page.max)
+				page.selects.push(v);
 		}
 	});
 

@@ -48,6 +48,7 @@ const CTOS = {
 };
 
 const LOCATION = {
+	NONE : 0,
 	DECK : 0x01,
 	HAND : 0x02,
 	MZONE : 0x04,

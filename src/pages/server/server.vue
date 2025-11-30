@@ -226,8 +226,14 @@
 		</transition>
 		<transition name = 'move_right'>
 			<Card_List
-				:cards = 'connect.cards.array'
-				v-if = 'page.duel && connect.cards.show'
+				:cards = 'connect.cards'
+				v-if = 'page.duel && connect.cards.length > 0'
+			/>
+		</transition>
+		<transition name = 'move_right'>
+			<Chain_List
+				:cards = 'connect.chains'
+				v-if = 'page.duel && connect.chains.length > 0'
 			/>
 		</transition>
 		<transition name = 'move_up'>
@@ -250,6 +256,15 @@
 				:cancel = 'connect.select_plaids.cancel'
 				v-if = 'page.duel && connect.select_plaids.array.length > 0'
 				v-show = 'connect.select_plaids.show'
+			/>
+		</transition>
+		<transition name = 'move_up'>
+			<Pos_Select_List
+				:title = 'connect.select_position.title'
+				:code = 'connect.select_position.code'
+				:pos = 'connect.select_position.pos'
+				:confirm = 'connect.select_position.select'
+				v-if = 'page.duel && connect.select_position.pos > 0 && connect.select_position.code > 0'
 			/>
 		</transition>
 	</div>
@@ -278,12 +293,14 @@
 	import Duel from './duel.vue';
 	import RPS from './rps.vue';
 	import Avatar from './avatar.vue';
-	import Card_List from './card_list.vue';
-	import Card_Select_List from './card_select_list.vue';
-	import Plaid_Select_List from './plaid_select_list.vue';
-	import Client_Card from './post/client_card';
+	import Card_List from './card_list/cards.vue';
+	import Chain_List from './card_list/chains.vue';
+	import Card_Select_List from './select_list/cards.vue';
+	import Plaid_Select_List from './select_list/plaids.vue';
+	import Pos_Select_List from './select_list/pos.vue';
 	import { LOCATION } from './post/network';
 	import Plaid from './post/plaid';
+	import Idle from './idle';
 
 	let tcp : Tcp | null = null;
 	const deck = ref<HTMLElement | null>(null);
@@ -352,9 +369,26 @@
 		player : new Array(4).fill({ name : '' }) as Array<TCP.Player>,
 		deck_count : [] as Array<number>,
 		duel : {},
-		cards : {
-			show : false,
-			array : [] as Array<number>
+		cards : [] as Array<number>,
+		chains : [] as Array<{ player : number; code : string | number; }>,
+		select_position : {
+			title : '',
+			code : 0,
+			pos : 0,
+			on : async (title : string,  code : number, pos : number) : Promise<void> => {
+				connect.select_position.title = title;
+				connect.select_position.code = code;
+				connect.select_position.pos = pos;
+			},
+			select : async (result : number) : Promise<void> => {
+				await tcp!.send.response(result);
+				connect.select_position.clear();
+			},
+			clear : () : void => {
+				connect.select_position.title = '';
+				connect.select_position.code = 0;
+				connect.select_position.pos = 0;
+			}
 		},
 		select_cards : {
 			title : '',
@@ -577,42 +611,11 @@
 			}
 		},
 		idle : {
-			summon : {
-				array : [] as Array<Client_Card>,
-				push : (card : Client_Card) : void => {
-					connect.idle.summon.array.push(card);
-				},
-				clear : () : void => {
-					connect.idle.summon.array.length = 0;
-				},
-				index : (card : Client_Card) : number => {
-					return connect.idle.summon.array.indexOf(card);
-				}
-			},
-			spsummon : {
-				array : [] as Array<Client_Card>,
-				push : (card : Client_Card) : void => {
-					connect.idle.spsummon.array.push(card);
-				},
-				clear : () : void => {
-					connect.idle.spsummon.array.length = 0;
-				},
-				index : (card : Client_Card) : number => {
-					return connect.idle.spsummon.array.indexOf(card);
-				}
-			},
-			activate : {
-				array : [] as Array<Client_Card>,
-				push : (card : Client_Card) : void => {
-					connect.idle.activate.array.push(card);
-				},
-				clear : () : void => {
-					connect.idle.activate.array.length = 0;
-				},
-				index : (card : Client_Card) : number => {
-					return connect.idle.activate.array.indexOf(card);
-				}
-			},
+			summon : new Idle(),
+			spsummon : new Idle(),
+			activate : new Idle(),
+			mset : new Idle(),
+			sset : new Idle(),
 		},
 		response : async (v : number) : Promise<void> => {
 			await tcp!.send.response(v);
@@ -633,6 +636,7 @@
 		clear : () => {
 			connect.select_cards.clear();
 			connect.select_plaids.clear();
+			connect.select_position.clear();
 			connect.player = new Array(4).fill({ name : '' }) as Array<TCP.Player>;
 			connect.home = {
 				lflist : 0,
@@ -650,12 +654,13 @@
 			connect.deck = undefined;
 			connect.chat.list.length = 0;
 			connect.deck_count.length = 0;
-			connect.cards.show = false;
-			connect.cards.array.length = 0;
+			connect.cards.length = 0;
+			connect.chains.length = 0;
 			connect.is_first.chk = undefined;
 			connect.chat.send_list.length = 0;
 			connect.chat.send_key = -1;
-			connect.idle.summon.clear();
+			for (const i of Object.values(connect.idle))
+				i.clear();
 		}
 	});
 

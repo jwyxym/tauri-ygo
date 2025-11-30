@@ -67,25 +67,25 @@ class Plaid {
 			})();
 		this.name = (() : string => {
 			if ((x === -3 && y === 2) || (x === 3 && y === -2))
-				return mainGame.get.text(I18N_KEYS.DRAW_LOCATION_DECK)
+				return mainGame.get.text(I18N_KEYS.DUEL_LOCATION_DECK)
 			else if ((x === -3 && y === 1) || (x === 3 && y === -1))
-				return mainGame.get.text(I18N_KEYS.DRAW_LOCATION_GRAVE)
+				return mainGame.get.text(I18N_KEYS.DUEL_LOCATION_GRAVE)
 			else if ((x === -3 && y === 0) || (x === 3 && y === 0))
-				return mainGame.get.text(I18N_KEYS.DRAW_LOCATION_REMOVED)
+				return mainGame.get.text(I18N_KEYS.DUEL_LOCATION_REMOVED)
 			else if ((x === -3 && y === -1) || (x === 3 && y === 1))
-				return mainGame.get.text(I18N_KEYS.DRAW_LOCATION_FIELD)
+				return mainGame.get.text(I18N_KEYS.DUEL_LOCATION_FIELD)
 			else if ((x === -3 && y === -2) || (x === 3 && y === 2))
-				return mainGame.get.text(I18N_KEYS.DRAW_LOCATION_EX_DECK)
+				return mainGame.get.text(I18N_KEYS.DUEL_LOCATION_EX_DECK)
 			else if (y === -2)
-				return `${mainGame.get.text(I18N_KEYS.DRAW_LOCATION_SZONE)}[${x + 2}]`
+				return `${mainGame.get.text(I18N_KEYS.DUEL_LOCATION_SZONE)}[${x + 2}]`
 			else if (y === 2)
-				return `${mainGame.get.text(I18N_KEYS.DRAW_LOCATION_SZONE)}[${- x + 2}]`
+				return `${mainGame.get.text(I18N_KEYS.DUEL_LOCATION_SZONE)}[${- x + 2}]`
 			else if (y === -1)
-				return `${mainGame.get.text(I18N_KEYS.DRAW_LOCATION_MZONE)}[${x + 2}]`
+				return `${mainGame.get.text(I18N_KEYS.DUEL_LOCATION_MZONE)}[${x + 2}]`
 			else if (y === 1)
-				return `${mainGame.get.text(I18N_KEYS.DRAW_LOCATION_MZONE)}[${-x + 2}]`
+				return `${mainGame.get.text(I18N_KEYS.DUEL_LOCATION_MZONE)}[${-x + 2}]`
 			else if (y === 0)
-				return `${mainGame.get.text(I18N_KEYS.DRAW_LOCATION_EX_MZONE)}[${x > 0 ? 1 : 0}]`
+				return `${mainGame.get.text(I18N_KEYS.DUEL_LOCATION_EX_MZONE)}[${x > 0 ? 1 : 0}]`
 			return '';
 		})();
 		this.player = (y > 0 || (y === 0 && x === -3)) ? 1 : 0;

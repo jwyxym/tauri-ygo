@@ -44,11 +44,11 @@
 				}
 			}
 		}
-		.plaids {
+		.plaids, .poss {
 			height: 100%;
 			aspect-ratio: 1 / 1.3;
 			position: relative;
-			.plaid {
+			.plaid, .pos {
 				position: absolute;
 				height: 100%;
 				width: 100%;
@@ -78,7 +78,7 @@
 					}
 					.defence {
 						transform-origin: center center;
-						transform: rotateZ(90deg);
+						transform: rotateZ(-90deg);
 					}
 				}
 			}
@@ -94,8 +94,14 @@
 		}
 	}
 	.button_list {
+		background: rgba(0, 0, 0, 0.6) ;
 		min-width: 25%;
 		gap: 5px;
+	}
+	.confirm {
+		display: grid;
+		justify-items: center;
+		align-items: center;
 	}
 }
 .unshow {

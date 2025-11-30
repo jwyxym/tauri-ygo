@@ -11,6 +11,7 @@
 					<strong>Time</strong>
 					<span>:</span>
 					<var-countdown
+						:auto-start = 'false'
 						:time = 'page.time'
 						format = 'ss'
 						ref = 'countdown'
@@ -38,7 +39,7 @@
 	});
 	defineExpose({ countdown });
 
-	const props = defineProps(['src', 'name', 'lp', 'color', 'position', 'time', 'time_palyer', 'tp']);
+	const props = defineProps(['src', 'name', 'lp', 'color', 'position', 'time', 'time_player', 'tp']);
 
 	watch(() => { return props.lp; }, (n) => {
 		page.lp.from = page.lp.to;
@@ -49,7 +50,8 @@
 		page.time = n;
 	}, { immediate : true });
 
-	watch(() => { return props.time_palyer; }, (n) => {
+	watch(() => { return props.time_player; }, (n) => {
+		console.log(props.tp, n)
 		if (!countdown.value) return;
 		props.tp === n ? countdown.value.start() : countdown.value.pause();
 	}, { immediate : true });

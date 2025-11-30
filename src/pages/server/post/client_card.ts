@@ -203,12 +203,7 @@ class Client_Card {
 					hover.click(this, null);
 					await hover.response(this, key);
 					// await hover.activate()
-					// const style = (this.three.element.children[0] as HTMLElement).style;
-					// style.filter = 'brightness(1.5)';
-					// 
-					// setTimeout(() => {
-					// 	style.filter = 'initial';
-					// }, 600);
+					
 				});
 				child.appendChild(img);
 			}
@@ -365,6 +360,13 @@ class Client_Card {
 					(this.three.element.children[3] as HTMLElement).style.display = 'none';
 				}, 200);
 			}
+		},
+		activate : () : void => {
+			const style = (this.three.element.children[0] as HTMLElement).style;
+			style.filter = 'brightness(1.5)';
+			setTimeout(() => {
+				style.filter = 'initial';
+			}, 600);
 		}
 	};
 
@@ -412,12 +414,6 @@ class Client_Card {
 					const f = map.get(i);
 					if (f)
 						f(this);
-					switch (i) {
-						case COMMAND.SUMMON:
-							(this);
-							break;
-					}
-					
 				}
 			})() : (() => {
 				if (i.flag === EDESC.NONE) {

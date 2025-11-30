@@ -26,12 +26,12 @@
 </template>
 <script setup lang = 'ts'>
 	import { ref, reactive, TransitionGroup, onBeforeMount } from 'vue';
-	import mainGame from '../../script/game';
-	import { FILES } from '../../script/constant';
-	import { POS } from './post/network';
-	import Plaid from './post/plaid';
+	import mainGame from '../../../script/game';
+	import { FILES } from '../../../script/constant';
+	import { POS } from '../post/network';
+	import Plaid from '../post/plaid';
 
-	import Button_List from '../varlet/button_list.vue';
+	import Button_List from '../../varlet/button_list.vue';
 
 	const page = reactive({
 		title : '',
@@ -54,20 +54,16 @@
 			props.cancel(page.min == 0, page.selects);
 		},
 		select : (v : Plaid, chk : boolean = true) => {
-			page.selects.includes(v) ? (() => {
-				const ct = page.selects.indexOf(v);
-				if (ct > -1) {
-					if (chk)
-						page.selects.splice(ct, 1)
-					v.select.off();
-				}
-			})() : (() => {
-				if (page.selects.length >= 1)
-					return;
+			const ct = page.selects.indexOf(v);
+			if (ct > -1) {
+				if (chk)
+					page.selects.splice(ct, 1)
+				v.select.off();
+			} else if (page.selects.length < 1) {
 				if (chk)
 					page.selects.push(v);
 				v.select.on();
-			})();
+			}
 		}
 	});
 
