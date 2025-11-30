@@ -5,7 +5,7 @@
 			{{ page.title }}
 		</div>
 		<var-checkbox-group v-model = 'page.selects' :max = '1'>
-			<TransitionGroup class = 'list'  tag = 'div' name = 'scale'>
+			<TransitionGroup class = 'list pos_list'  tag = 'div' name = 'scale'>
 				<div
 					:key = 'POS.FACEUP_ATTACK'
 					v-if = '(page.pos & POS.FACEUP_ATTACK) === POS.FACEUP_ATTACK'
