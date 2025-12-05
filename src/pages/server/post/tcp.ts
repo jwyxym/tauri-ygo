@@ -12,7 +12,7 @@ import Deck from '../../deck/deck';
 import { CTOS, STOC, LOCATION, MSG, ERROR, PLAYERCHANGE, HINT, QUERY, PHASE, COMMAND, EDESC, POS } from './network';
 import Client_Card from './client_card';
 import Plaid from './plaid';
-import { Idle, EffectIdle } from '../idle';
+import { Idle } from '../idle';
 
 interface Player {
 	name : string;
@@ -426,8 +426,7 @@ class Tcp {
 									const card : Client_Card | undefined = get_cards(tp)[seq];
 									if (card) {
 										await card.update.code(code);
-										if (idles.has(i))
-											idles.get(i)!(card, desc);
+										idles.get(COMMAND.ACTIVATE)!(card, desc);
 										const index = cards.indexOf(card);
 										if (index > -1)
 											cards.splice(index, 1);
@@ -435,6 +434,8 @@ class Tcp {
 									}
 								}
 							}
+							if (connect.idle.activate.length() === 0)
+								this.send.response(-1);
 							cards.forEach(i => i.activatable.clear());
 						}],
 						[MSG.SELECT_PLACE, async () => {

@@ -9,6 +9,7 @@
 	
 	import mainGame from '../../script/game';
 	import * as CONSTANT from '../../script/constant';
+	import { TYPE } from '../../script/card';
 	import { LOCATION, POS } from './post/network';
 	import Client_Card from './post/client_card';
 	import Plaid from './post/plaid';
@@ -625,11 +626,18 @@
 				for (const p of tp === 2 ? [0, 1] : [tp])
 					for (const i of [0, 4]) {
 						const len = three.cards.map.get(LOCATION.SZONE)![p].length;
-						group.push(three.cards.map.get(LOCATION.SZONE | (i << 16))![tp][len - 1]);
+						group.push(three.cards.map.get(LOCATION.SZONE | (i << 16))![p][len - 1]);
 					}
 				return group.filter(i => i !== undefined);
 			}],
 			[LOCATION.ONFIELD, (tp : number) : Array<Client_Card> => {
+				if (tp === 2)
+					return [
+						...duel.cards.get(LOCATION.MZONE)!(0),
+						...duel.cards.get(LOCATION.SZONE)!(0),
+						...duel.cards.get(LOCATION.MZONE)!(1),
+						...duel.cards.get(LOCATION.SZONE)!(1)
+					];
 				return [...duel.cards.get(LOCATION.MZONE)!(tp), ...duel.cards.get(LOCATION.SZONE)!(tp)];
 			}],
 			[LOCATION.ALL, (tp : number) : Array<Client_Card> => {
@@ -701,16 +709,18 @@
 					if (i.zone === 5) {
 						await duel.to.fzone(tp, i, to_tp);
 						continue;
-					} else if ([6, 7].includes(i.zone)) {
-						i.zone = i.zone === 6 ? 0 : 1;
-						await duel.to.pzone(tp, i, to_tp);
-						continue;
+					} else {
+						const cards : Array<Client_Card> = three.cards.map.get(i.location)![tp];
+						const card = cards[i.seq >= 0 ? i.seq : cards.length - 1];
+						if ((card.type & TYPE.PENDULUM) === TYPE.PENDULUM && [0, 4].includes(i.zone)) {
+							i.zone = i.zone === 0 ? 0 : 1;
+							await duel.to.pzone(tp, i, to_tp);
+						} else {
+							const loc = LOCATION.SZONE | (i.zone << 16);
+							three.create.send.to(card, to_tp, loc, i.location, three.cards.map.get(loc)![tp].length, ((i.pos ?? 0) & POS.FACEDOWN) > 0 ? POS.FACEDOWN_ATTACK : POS.FACEUP_ATTACK);
+							await mainGame.sleep(150);
+						}
 					}
-					const cards : Array<Client_Card> = three.cards.map.get(i.location)![tp];
-					const card = cards[i.seq >= 0 ? i.seq : cards.length - 1];
-					const loc = LOCATION.SZONE | (i.zone << 16);
-					three.create.send.to(card, to_tp, loc, i.location, three.cards.map.get(loc)![tp].length, ((i.pos ?? 0) & POS.FACEDOWN) > 0 ? POS.FACEDOWN_ATTACK : POS.FACEUP_ATTACK);
-					await mainGame.sleep(150);
 				}
 			},
 			fzone : async (tp : number, i : Card_From, to_tp : number = tp) => {

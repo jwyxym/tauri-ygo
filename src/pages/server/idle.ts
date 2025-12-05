@@ -45,6 +45,10 @@ class EffectIdle {
 		return this.array.findIndex(i => i.card === card && i.desc === desc);
 	};
 
+	length = () : number => {
+		return this.array.length;
+	};
+
 	filter = (card : Client_Card) : Array<{
 		card : Client_Card;
 		desc : number;
