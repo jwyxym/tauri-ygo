@@ -70,34 +70,41 @@
 	min-width: 300px;
 	height: 100%;
 	background-color: rgba(0, 0, 0, 0.2);
-	.message {
-		height: calc(100% - 100px) !important;
-		overflow-y: auto;
-		:deep(.content-align-right) {
-			color: black !important;
-		}
-		:deep(.content-align-left) {
-			color: white !important;
-		}
-		&::-webkit-scrollbar {
-			display: none;
-		}
-	}
-	.send {
-		height: 100px;
-		width: calc(100% - 20px);
-		margin-left: 10px;
+	.content {
 		display: flex;
-		gap: 10px;
-		align-content: center;
-		align-items: center;
-		justify-content: center;
-		justify-items: center;
-		.var-input {
-			width: 50%;
+		flex-direction: column;
+		height: calc(100% - 50px) !important;
+		width: 100%;
+		overflow: hidden;
+		.message {
+			height: calc(100% - 100px) !important;
+			overflow-y: auto;
+			:deep(.content-align-right) {
+				color: black !important;
+			}
+			:deep(.content-align-left) {
+				color: white !important;
+			}
+			&::-webkit-scrollbar {
+				display: none;
+			}
 		}
-		.voice_input {
-			box-shadow: 0 0 10px 0 #00ffff;
+		.send {
+			height: 100px;
+			width: calc(100% - 20px);
+			margin-left: 10px;
+			display: flex;
+			gap: 10px;
+			align-content: center;
+			align-items: center;
+			justify-content: center;
+			justify-items: center;
+			.var-input {
+				width: 50%;
+			}
+			.voice_input {
+				box-shadow: 0 0 10px 0 #00ffff;
+			}
 		}
 	}
 }

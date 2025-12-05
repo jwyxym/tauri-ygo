@@ -13,19 +13,6 @@ interface Hover {
 	response : Function
 };
 
-interface Idles {
-	summon : Idle;
-	spsummon : Idle;
-	activate : Idle;
-};
-
-interface Idle {
-	array : Array<Client_Card>;
-	push : Function;
-	clear : Function;
-	index : Function;
-};
-
 class Client_Card {
 	three : CSS.CSS3DObject;
 	code : number;
@@ -41,11 +28,10 @@ class Client_Card {
 	atk : number;
 	def : number;
 	scale : number;
-	idle : Idles;
 
 	constructor (src : string, size : {
 		width : number; height : number;
-	}, hover : Hover, idle : Idles) {
+	}, hover : Hover) {
 		this.code = 0;
 		this.alias = 0;
 		this.card = undefined;
@@ -62,7 +48,6 @@ class Client_Card {
 		this.def = 0;
 		this.scale = 0;
 		this.three = this.init.on(src, size, hover);
-		this.idle = idle;
 	};
 
 	init = {
@@ -203,7 +188,6 @@ class Client_Card {
 					hover.click(this, null);
 					await hover.response(this, key);
 					// await hover.activate()
-					
 				});
 				child.appendChild(img);
 			}
@@ -395,27 +379,8 @@ class Client_Card {
 	activatable = {
 		desc : [] as Array<{desc : number; flag : number;}>,
 		flag : 0,
-		on : (i : number | {desc : number; flag : number;}) => {
-			typeof i === 'number' ? (() => {
-				if (i > 0) {
-					this.activatable.flag |= i;
-					const map = new Map([
-						[COMMAND.ACTIVATE, this.idle.activate.push],
-						// [COMMAND.ATTACK, 'attack'],
-						// [COMMAND.MSET, 'mset'],
-						// [COMMAND.SSET, 'sset'],
-						// [COMMAND.REPOS, 'pos_attack'],
-						// [COMMAND.REPOS, 'pos_defence'],
-						[COMMAND.SUMMON, this.idle.summon.push],
-						[COMMAND.PSUMMON, this.idle.spsummon.push],
-						[COMMAND.SPSUMMON, this.idle.spsummon.push],
-						[COMMAND.SCALE, this.idle.activate.push]
-					]) as Map<number, Function>;
-					const f = map.get(i);
-					if (f)
-						f(this);
-				}
-			})() : (() => {
+		on : (i : number | {desc : number; flag : number;}, show_btn : boolean = true) => {
+			typeof i === 'number' ? this.activatable.flag |= i : (() => {
 				if (i.flag === EDESC.NONE) {
 					const flags = new Map([
 						[1160, COMMAND.SCALE]
@@ -428,23 +393,25 @@ class Client_Card {
 				(this.activatable.flag & (COMMAND.ACTIVATE + COMMAND.SPSUMMON + COMMAND.PSUMMON + COMMAND.SCALE)) > 0 ?
 					'yellow' : (this.activatable.flag > 0 ? 'rgba(119, 166, 255, 1)' : 'initial')
 			}`;
-			const map = new Map([
-				[COMMAND.ACTIVATE, 'activate'],
-				[COMMAND.ATTACK, 'attack'],
-				[COMMAND.MSET, 'mset'],
-				[COMMAND.SSET, 'sset'],
-				[COMMAND.REPOS, 'pos_attack'],
-				[COMMAND.REPOS, 'pos_defence'],
-				[COMMAND.SUMMON, 'summon'],
-				[COMMAND.PSUMMON, 'psummon'],
-				[COMMAND.SPSUMMON, 'spsummon'],
-				[COMMAND.SCALE, 'scale']
-			]) as Map<number, string>;
-			for (const [_, i] of Object.entries(COMMAND)) {
-				if (!map.has(i))
-					continue;
-				const btn = this.three.element.children[3].querySelector(`.${map.get(i)!}`)! as HTMLElement;
-				btn.style.display = (this.activatable.flag & i) === i ? 'initial' : 'none';
+			if (show_btn) {
+				const map = new Map([
+					[COMMAND.ACTIVATE, 'activate'],
+					[COMMAND.ATTACK, 'attack'],
+					[COMMAND.MSET, 'mset'],
+					[COMMAND.SSET, 'sset'],
+					[COMMAND.REPOS, 'pos_attack'],
+					[COMMAND.REPOS, 'pos_defence'],
+					[COMMAND.SUMMON, 'summon'],
+					[COMMAND.PSUMMON, 'psummon'],
+					[COMMAND.SPSUMMON, 'spsummon'],
+					[COMMAND.SCALE, 'scale']
+				]) as Map<number, string>;
+				for (const [_, i] of Object.entries(COMMAND)) {
+					if (!map.has(i))
+						continue;
+					const btn = this.three.element.children[3].querySelector(`.${map.get(i)!}`)! as HTMLElement;
+					btn.style.display = (this.activatable.flag & i) === i ? 'initial' : 'none';
+				}
 			}
 		},
 		clear : () => {

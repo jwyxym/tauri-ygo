@@ -88,6 +88,22 @@
 				case 'sset':
 					code = (props.connect.idle.sset.index(card) << 16) + 4;
 					break;
+				case 'activate':
+					const effects : Array<{
+						card : Client_Card,
+						desc : number
+					}> = props.connect.idle.activate.filter(card);
+					if (effects.length === 1)
+						code = (props.connect.idle.activate.index(effects[0].card, effects[0].desc) << 16) + 5;
+					else {
+						const i = await props.connect.select.option.on(effects, mainGame.get.strings.system(555));
+						if (i !== undefined)
+							code = (props.connect.idle.activate.index(i.card, i.desc) << 16) + 5;
+					}
+					break;
+				case 'scale':
+					code = (props.connect.idle.activate.index(card, 1160) << 16) + 5;
+					break;
 			}
 			if (code !== undefined)
 				await props.connect.response(code);
@@ -259,7 +275,7 @@
 			hand_gap : 0.05,
 			float : 60,
 			card : (src : string) : Client_Card => {
-				return new Client_Card(src, three.create.size, hover, props.connect.idle);
+				return new Client_Card(src, three.create.size, hover);
 			},
 			back : (srcs : Array<string> = []) : CSS.CSS3DObject => {
 				const dom = document.createElement('div');

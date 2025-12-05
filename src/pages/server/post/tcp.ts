@@ -12,6 +12,7 @@ import Deck from '../../deck/deck';
 import { CTOS, STOC, LOCATION, MSG, ERROR, PLAYERCHANGE, HINT, QUERY, PHASE, COMMAND, EDESC, POS } from './network';
 import Client_Card from './client_card';
 import Plaid from './plaid';
+import { Idle, EffectIdle } from '../idle';
 
 interface Player {
 	name : string;
@@ -249,7 +250,20 @@ class Tcp {
 						await i[1](pack[0]);
 						p += 4;
 					}
-		}
+		};
+
+		const idles = new Map([
+			[COMMAND.ACTIVATE, connect.idle.activate.push],
+			// [COMMAND.ATTACK, 'attack'],
+			// [COMMAND.MSET, 'mset'],
+			// [COMMAND.SSET, 'sset'],
+			// [COMMAND.REPOS, 'pos_attack'],
+			// [COMMAND.REPOS, 'pos_defence'],
+			[COMMAND.SUMMON, connect.idle.summon.push],
+			[COMMAND.PSUMMON, connect.idle.spsummon.push],
+			[COMMAND.SPSUMMON, connect.idle.spsummon.push],
+			[COMMAND.SCALE, connect.idle.activate.push]
+		]) as Map<number, Function>;
 
 		this.to.player = to_player;
 
@@ -342,6 +356,8 @@ class Tcp {
 							let p = pos + 1;
 							const arr = [COMMAND.SUMMON, COMMAND.SPSUMMON, COMMAND.REPOS, COMMAND.MSET, COMMAND.SSET, COMMAND.ACTIVATE];
 							const cards : Array<Client_Card> = connect.duel.cards.get(LOCATION.ALL)!(2).filter((i : Client_Card) => i.activatable.flag > 0);
+							for (const i of Object.values(connect.idle))
+								(i as Idle).clear();
 							for (const i of arr) {
 								const [ct] = to_package<number>(buffer, data, [8], p);
 								p += 1;
@@ -361,7 +377,7 @@ class Tcp {
 									if (get_cards && loc !== LOCATION.OVERLAY) {
 										const card : Client_Card | undefined = get_cards(tp)[seq];
 										if (card) {
-											const index = cards.indexOf(card)
+											const index = cards.indexOf(card);
 											if (index > -1)
 												cards.splice(index, 1);
 											await card.update.code(code);
@@ -370,9 +386,13 @@ class Tcp {
 												const flag = (code & 0x80000000) > 0 ? EDESC.OPERATION : EDESC.NONE;
 												// code &= ((code & 0x80000000) > 0 ? 0x7fffffff : 0);
 												card.activatable.on({desc : desc, flag : flag});
+												if (idles.has(i))
+													idles.get(i)!(card, desc);
 												continue;
 											}
 											card.activatable.on(i);
+											if (idles.has(i))
+												idles.get(i)!(card);
 										}
 									}
 								}
@@ -388,6 +408,8 @@ class Tcp {
 							const array = new Array(count).fill([8, 8, 32, 8, 8, 8, 8, 32]).flat();
 							pack = to_package<number>(buffer, data, array, pos + 11);
 							const cards : Array<Client_Card> = connect.duel.cards.get(LOCATION.ALL)!(2).filter((i : Client_Card) => i.activatable.flag > 0);
+							for (const i of Object.values(connect.idle))
+								(i as Idle).clear();
 							for (let j = 0; j < count; j ++) {
 								const i = j * 8;
 								if (i + 7 > pack.length) break;
@@ -403,11 +425,13 @@ class Tcp {
 								if (get_cards && loc !== LOCATION.OVERLAY) {
 									const card : Client_Card | undefined = get_cards(tp)[seq];
 									if (card) {
-										const index = cards.indexOf(card)
+										await card.update.code(code);
+										if (idles.has(i))
+											idles.get(i)!(card, desc);
+										const index = cards.indexOf(card);
 										if (index > -1)
 											cards.splice(index, 1);
-										await card.update.code(code);
-										card.activatable.on({desc : desc, flag : flag});
+										card.activatable.on({desc : desc, flag : flag}, false);
 									}
 								}
 							}
@@ -421,7 +445,7 @@ class Tcp {
 							const title = !!this.select_hint ? mainGame.get.strings.system(569, mainGame.get.name(this.select_hint))
 								: mainGame.get.strings.system(560);
 							this.select_hint = 0;
-							connect.select_plaids.on(title, connect.duel.plaid.get(place), place, ct);
+							connect.select.plaids.on(title, connect.duel.plaid.get(place), place, ct);
 						}],
 						[MSG.SELECT_POSITION, async () => {
 							const pack = to_package<number>(buffer, data, [-1, 32, 8], pos);
@@ -429,7 +453,7 @@ class Tcp {
 							const position = pack[1];
 							[POS.FACEUP_ATTACK, POS.FACEUP_DEFENSE, POS.FACEDOWN_ATTACK, POS.FACEDOWN_DEFENSE]
 								.includes(position) ? await this.send.response(position)
-									: connect.select_position.on(mainGame.get.strings.system(561), code, position);
+									: connect.select.position.on(mainGame.get.strings.system(561), code, position);
 						}],
 						[MSG.NEW_TURN, async () => {
 							const pack = to_package<number>(buffer, data, [8], pos);
@@ -546,7 +570,12 @@ class Tcp {
 							await mainGame.sleep(600);
 						}],
 						[MSG.CHAINED, async () => {
-							const pack = to_package<number>(buffer, data, [8], pos);
+							const [ct] = to_package<number>(buffer, data, [8], pos);
+							// console.log(connect.chains[ct - 1]);
+						}],
+						[MSG.CHAIN_SOLVING, async () => {
+							const [ct] = to_package<number>(buffer, data, [8], pos);
+							connect.chains.splice(ct - 1, 1);
 						}],
 						[MSG.DRAW, async () => {
 							const pack = to_package<number>(buffer, data, [8, 8], pos);

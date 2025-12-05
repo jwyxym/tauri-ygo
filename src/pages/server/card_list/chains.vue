@@ -2,7 +2,7 @@
 	<div class = 'chain_list' ref = 'dom'>
 		<TransitionGroup class = 'list'  tag = 'div' name = 'move_up'>
 			<div
-				v-for = '(i, v) in page.chains' :key = 'i.code'
+				v-for = '(i, v) in cards' :key = 'i.code'
 				:style = "{ '--color' : i.player ===  0 ? 'blue' : 'red' }"
 			>
 				{{ mainGame.get.text(I18N_KEYS.DUEL_CHAIN) }} : {{ v }}
@@ -16,21 +16,9 @@
 	import mainGame from '../../../script/game';
 	import { I18N_KEYS } from '../../../script/language/i18n';
 	const dom = ref<HTMLElement | null>(null);
-
-	interface Chain {
-		player : number;
-		code : string | number;
-	};
-
-	const page = reactive({
-		chains : [] as Array<Chain>
-	});
 	
-	watch(() => { return props.cards; }, (n : Array<Chain>) => {
-		page.chains.push(...n.filter(i => !page.chains.includes(i)));
-	}, { immediate : true });
-
 	const props = defineProps(['cards']);
+
 	defineExpose({ dom });
 </script>
 <style scoped lang = 'scss'>

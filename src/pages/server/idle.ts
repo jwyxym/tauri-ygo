@@ -20,4 +20,37 @@ class Idle {
 	};
 }
 
-export default Idle;
+class EffectIdle {
+	array : Array<{
+		card : Client_Card;
+		desc : number;
+	}>;
+
+	constructor () {
+		this.array = [];
+	}
+
+	push = (card : Client_Card, desc : number) : void => {
+		this.array.push({
+			card : card,
+			desc : desc
+		});
+	};
+
+	clear = () : void => {
+		this.array.length = 0;
+	};
+
+	index = (card : Client_Card, desc : number) : number => {
+		return this.array.findIndex(i => i.card === card && i.desc === desc);
+	};
+
+	filter = (card : Client_Card) : Array<{
+		card : Client_Card;
+		desc : number;
+	}> => {
+		return this.array.filter(i => i.card === card && i.desc !== 1160);
+	};
+};
+
+export { Idle, EffectIdle };

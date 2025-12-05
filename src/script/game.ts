@@ -286,7 +286,7 @@ class Game {
 			const code = (data >> 4) & 0x0fffffff;
 			const offset = data & 0xf;
 			const card =  mainGame.get.card(code);
-			return card === this.unknown ? this.get.text(I18N_KEYS.UNKNOW).toString() : card.desc[offset];
+			return card === this.unknown ? this.get.text(I18N_KEYS.UNKNOW).toString() : card.hint[offset];
 		},
 		name : (id : number) : string => {
 			const card = mainGame.get.card(id);
@@ -734,7 +734,7 @@ class Game {
 					for (const i of desc) {
 						const id = Number(i);
 						if (
-							(i !== '' && !card.name.includes(i) && !card.desc.includes(i))
+							(i !== '' && !card.name.toLowerCase().includes(i.toLowerCase()) && !card.desc.toLowerCase().includes(i.toLowerCase()))
 								&& (isNaN(id) ? true : card.id !== id && card.alias !== id && desc.length == 1)
 						)
 							return false;

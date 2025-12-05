@@ -41,7 +41,7 @@
 	onMounted(() => {
 		page.resize();
 		page.show = true;
-	})
+	});
 
 	onUnmounted(() => {
 		window.removeEventListener('resize', page.resize);

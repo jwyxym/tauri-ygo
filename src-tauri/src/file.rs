@@ -2,7 +2,7 @@ use std::fs::create_dir_all;
 use walkdir::WalkDir;
 pub fn walk(
 	dirs: Vec<String>,
-	mut callback: impl FnMut(String, String, String) -> (),
+	mut callback: impl FnMut(String, String, String) -> ()
 ) -> Result<(), String> {
 	for dir in dirs {
 		create_dir_all(&dir).map_err(|e| e.to_string())?;

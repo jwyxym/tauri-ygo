@@ -81,7 +81,7 @@ async fn unzip(path: String, file: String, chk: bool) -> Result<(), String> {
 #[tauri::command]
 async fn read_texts(
 	dirs: Vec<String>,
-	file_type: Vec<String>,
+	file_type: Vec<String>
 ) -> Result<Vec<(String, FileContent)>, String> {
 	let mut entries: Vec<(String, FileContent)> = Vec::new();
 	let _ = file::walk(dirs, |ext, stem, path| {
@@ -100,7 +100,7 @@ async fn read_texts(
 #[tauri::command]
 async fn read_files(
 	dirs: Vec<String>,
-	file_type: Vec<String>,
+	file_type: Vec<String>
 ) -> Result<Vec<(String, FileContent)>, String> {
 	let mut entries: Vec<(String, FileContent)> = Vec::new();
 	let _ = file::walk(dirs, |ext, stem, path| {
@@ -146,7 +146,7 @@ async fn read_pics(dirs: Vec<String>, codes: Vec<i64>) -> Result<(Vec<Pic>, Vec<
 #[tauri::command]
 async fn read_zip(
 	path: String,
-	file_type: Vec<String>,
+	file_type: Vec<String>
 ) -> Result<Vec<(String, FileContent)>, String> {
 	let file: File = File::open(&path).map_err(|e| e.to_string())?;
 	let mut archive: ZipArchive<File> = ZipArchive::new(file).map_err(|e| e.to_string())?;

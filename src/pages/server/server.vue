@@ -162,30 +162,40 @@
 		</var-popup>
 		<var-popup v-model:show = 'page.chat.chk' :overlay = 'false' position = 'right'>
 			<div class = 'chat' ref = 'chat'>
-				<ConversationBlock
-					class = 'message'
-					:list = 'connect.chat.list'
-					:userOptions = "{ position: 'left' }"
-					:answerOptions = "{ position: 'right' }"
-				/>
-				<div class = 'send'>
-					<Input
-						:placeholder = 'mainGame.get.text(I18N_KEYS.SERVER_CHAT)'
-						v-model = 'server.chat'
-						@keydown = 'connect.chat.press'
-						@clear = 'connect.chat.clear'
+				<var-tabs v-model:active = 'page.chat.ct'>
+					<var-tab>{{ mainGame.get.text(I18N_KEYS.DUEL_CHAT) }}</var-tab>
+					<var-tab>{{ mainGame.get.text(I18N_KEYS.DUEL_HISTORY) }}</var-tab>
+				</var-tabs>
+				<TransitionGroup tag = 'div' name = 'move_right' class = 'content'>
+					<ConversationBlock
+						class = 'message'
+						:list = 'connect.chat.list'
+						:userOptions = "{ position: 'left' }"
+						:answerOptions = "{ position: 'right' }"
+						:key = '0'
+						v-show = 'page.chat.ct === 0'
 					/>
-					<Button
-						@click = 'connect.chat.send'
-						icon_name = 'chat'
-					></Button>
-					<Button
-						@click = 'server.voice_input.shift'
-						icon_name = 'microphone'
-						v-if = 'voice_input.chk()'
-						:class = "{ 'voice_input' : server.voice_input.chk }"
-					></Button>
-				</div>
+					<div class = 'send' :key = '1' v-show = 'page.chat.ct === 0'>
+						<Input
+							:placeholder = 'mainGame.get.text(I18N_KEYS.SERVER_CHAT)'
+							v-model = 'server.chat'
+							@keydown = 'connect.chat.press'
+							@clear = 'connect.chat.clear'
+						/>
+						<Button
+							@click = 'connect.chat.send'
+							icon_name = 'chat'
+						></Button>
+						<Button
+							@click = 'server.voice_input.shift'
+							icon_name = 'microphone'
+							v-if = 'voice_input.chk()'
+							:class = "{ 'voice_input' : server.voice_input.chk }"
+						></Button>
+					</div>
+					<div class = 'history' :key = '2' v-show = 'page.chat.ct === 1'>
+					</div>
+				</TransitionGroup>
 			</div>
 		</var-popup>
 		<transition name = 'move_right'>
@@ -238,40 +248,40 @@
 		</transition>
 		<transition name = 'move_up'>
 			<Card_Select_List
-				:title = 'connect.select_cards.title'
-				:min = 'connect.select_cards.min'
-				:max = 'connect.select_cards.max'
-				:cards = 'connect.select_cards.array'
-				:confirm = 'connect.select_cards.confirm'
-				:cancel = 'connect.select_cards.cancel'
-				v-if = 'page.duel && connect.select_cards.array.length > 0'
+				:title = 'connect.select.cards.title'
+				:min = 'connect.select.cards.min'
+				:max = 'connect.select.cards.max'
+				:cards = 'connect.select.cards.array'
+				:confirm = 'connect.select.cards.confirm'
+				:cancel = 'connect.select.cards.cancel'
+				v-if = 'page.duel && connect.select.cards.array.length > 0'
 			/>
 		</transition>
 		<transition name = 'move_up'>
 			<Plaid_Select_List
-				:title = 'connect.select_plaids.title'
-				:min = 'connect.select_plaids.min'
-				:plaids = 'connect.select_plaids.array'
-				:confirm = 'connect.select_plaids.confirm'
-				:cancel = 'connect.select_plaids.cancel'
-				v-if = 'page.duel && connect.select_plaids.array.length > 0'
-				v-show = 'connect.select_plaids.show'
+				:title = 'connect.select.plaids.title'
+				:min = 'connect.select.plaids.min'
+				:plaids = 'connect.select.plaids.array'
+				:confirm = 'connect.select.plaids.confirm'
+				:cancel = 'connect.select.plaids.cancel'
+				v-if = 'page.duel && connect.select.plaids.array.length > 0'
+				v-show = 'connect.select.plaids.show'
 			/>
 		</transition>
 		<transition name = 'move_up'>
 			<Pos_Select_List
-				:title = 'connect.select_position.title'
-				:code = 'connect.select_position.code'
-				:pos = 'connect.select_position.pos'
-				:confirm = 'connect.select_position.select'
-				v-if = 'page.duel && connect.select_position.pos > 0 && connect.select_position.code > 0'
+				:title = 'connect.select.position.title'
+				:code = 'connect.select.position.code'
+				:pos = 'connect.select.position.pos'
+				:confirm = 'connect.select.position.select'
+				v-if = 'page.duel && connect.select.position.pos > 0 && connect.select.position.code > 0'
 			/>
 		</transition>
 	</div>
 </template>
 <script setup lang = 'ts'>
 	import { ref, Ref, reactive, onBeforeMount, onMounted, computed, watch, TransitionGroup, onUnmounted } from 'vue';
-	import { ConversationBlock } from 'conversation-vue'
+	import { ConversationBlock } from 'conversation-vue';
 
 	import mainGame from '../../script/game';
 	import { I18N_KEYS } from '../../script/language/i18n';
@@ -288,6 +298,7 @@
 	import AutoInput from '../varlet/auto_input.vue';
 	import Dialog from '../varlet/dialog';
 	import Float_Buttons from '../varlet/float_buttons.vue';
+	import Picker from '../varlet/picker';
 
 	import Deck from '../deck/deck';
 	import Duel from './duel.vue';
@@ -300,7 +311,8 @@
 	import Pos_Select_List from './select_list/pos.vue';
 	import { LOCATION } from './post/network';
 	import Plaid from './post/plaid';
-	import Idle from './idle';
+	import { Idle, EffectIdle } from './idle';
+import Client_Card from './post/client_card';
 
 	let tcp : Tcp | null = null;
 	const deck = ref<HTMLElement | null>(null);
@@ -316,6 +328,7 @@
 		loading : false,
 		chat : {
 			chk : false,
+			ct : 0,
 			shift : () => {
 				page.chat.chk = !page.chat.chk;
 			}
@@ -334,10 +347,9 @@
 				|| server.voice_input.chk
 			)
 				return;
-			if (page.chat.chk && chat.value && !chat.value.contains(target))
+			if ((page.chat.chk && chat.value && !chat.value.contains(target))
+				|| (page.info.chk && info.value && !info.value.contains(target)))
 				page.chat.shift();
-			if (page.info.chk && info.value && !info.value.contains(target))
-				page.info.shift();
 		},
 		exit : async () : Promise<void> => {
 			page.server = false;
@@ -371,113 +383,125 @@
 		duel : {},
 		cards : [] as Array<number>,
 		chains : [] as Array<{ player : number; code : string | number; }>,
-		select_position : {
-			title : '',
-			code : 0,
-			pos : 0,
-			on : async (title : string,  code : number, pos : number) : Promise<void> => {
-				connect.select_position.title = title;
-				connect.select_position.code = code;
-				connect.select_position.pos = pos;
+		select : {
+			position : {
+				title : '',
+				code : 0,
+				pos : 0,
+				on : async (title : string,  code : number, pos : number) : Promise<void> => {
+					connect.select.position.title = title;
+					connect.select.position.code = code;
+					connect.select.position.pos = pos;
+				},
+				select : async (result : number) : Promise<void> => {
+					await tcp!.send.response(result);
+					connect.select.position.clear();
+				},
+				clear : () : void => {
+					connect.select.position.title = '';
+					connect.select.position.code = 0;
+					connect.select.position.pos = 0;
+				}
 			},
-			select : async (result : number) : Promise<void> => {
-				await tcp!.send.response(result);
-				connect.select_position.clear();
-			},
-			clear : () : void => {
-				connect.select_position.title = '';
-				connect.select_position.code = 0;
-				connect.select_position.pos = 0;
-			}
-		},
-		select_cards : {
-			title : '',
-			min : 0,
-			max : 0,
-			array : [] as Array<number>,
-			on : (title : string, array : Array<number>, min : number, max : number) : void => {
-				connect.select_cards.title = title;
-				connect.select_cards.min = min;
-				connect.select_cards.max = max;
-				connect.select_cards.array = array;
-			},
-			confirm : async () => {
+			cards : {
+				title : '',
+				min : 0,
+				max : 0,
+				array : [] as Array<number>,
+				on : (title : string, array : Array<number>, min : number, max : number) : void => {
+					connect.select.cards.title = title;
+					connect.select.cards.min = min;
+					connect.select.cards.max = max;
+					connect.select.cards.array = array;
+				},
+				confirm : async () => {
 
+				},
+				cancel : async () => {
+					
+				},
+				clear : () : void => {
+					connect.select.cards.title = '';
+					connect.select.cards.min = 0;
+					connect.select.cards.max = 0;
+					connect.select.cards.array.length = 0;
+				}
 			},
-			cancel : async () => {
-				
-			},
-			clear : () : void => {
-				connect.select_cards.title = '';
-				connect.select_cards.min = 0;
-				connect.select_cards.max = 0;
-				connect.select_cards.array.length = 0;
-			}
-		},
-		select_plaids : {
-			show : true,
-			title : '',
-			min : 0,
-			chk_player : undefined as undefined | number,
-			pzone : false,
-			array : [] as Plaids,
-			on : (title : string, array : Plaids, place : number, ct : number) : void => {
-				connect.select_plaids.title = title;
-				connect.select_plaids.min = ct;
-				connect.select_plaids.array = array;
-				connect.select_plaids.chk_player = (place & 0x60) > 0 ? 0
-					: (place & (0x60 << 16)) > 0 ? 1
-						: undefined;
-				connect.select_plaids.pzone = (place & 0xc000c000) > 0;
-			},
-			confirm : async (result : { loc : number, seq : number; player : number}) => {
-				if (connect.select_plaids.chk_player !== undefined
-					&& result.loc === LOCATION.MZONE
-					&& [5, 6].includes(result.seq)
-					&& result.player !== connect.select_plaids.chk_player
-				)
-					result = {
-						player : connect.select_plaids.chk_player,
-						loc : result.loc,
-						seq : result.seq === 5 ? 6 : 5
-					};
-				else if (connect.select_plaids.pzone
-					&& result.loc === LOCATION.SZONE
-					&& [0, 4].includes(result.seq)
-				)
-					result.seq = result.seq === 0 ? 6 : 7;
-				else if (result.loc === LOCATION.FZONE)
-					result = {
-						player : result.player,
-						loc : LOCATION.SZONE,
-						seq : 5
-					};
+			plaids : {
+				show : true,
+				title : '',
+				min : 0,
+				chk_player : undefined as undefined | number,
+				pzone : false,
+				array : [] as Plaids,
+				on : (title : string, array : Plaids, place : number, ct : number) : void => {
+					connect.select.plaids.title = title;
+					connect.select.plaids.min = ct;
+					connect.select.plaids.array = array;
+					connect.select.plaids.chk_player = (place & 0x60) > 0 ? 0
+						: (place & (0x60 << 16)) > 0 ? 1
+							: undefined;
+					connect.select.plaids.pzone = (place & 0xc000c000) > 0;
+				},
+				confirm : async (result : { loc : number, seq : number; player : number}) => {
+					if (connect.select.plaids.chk_player !== undefined
+						&& result.loc === LOCATION.MZONE
+						&& [5, 6].includes(result.seq)
+						&& result.player !== connect.select.plaids.chk_player
+					)
+						result = {
+							player : connect.select.plaids.chk_player,
+							loc : result.loc,
+							seq : result.seq === 5 ? 6 : 5
+						};
+					else if (connect.select.plaids.pzone
+						&& result.loc === LOCATION.SZONE
+						&& [0, 4].includes(result.seq)
+					)
+						result.seq = result.seq === 0 ? 6 : 7;
+					else if (result.loc === LOCATION.FZONE)
+						result = {
+							player : result.player,
+							loc : LOCATION.SZONE,
+							seq : 5
+						};
 
-				result.player = tcp!.to.player!(result.player);
-				await tcp!.send.response(result);
-				connect.select_plaids.clear();
+					result.player = tcp!.to.player!(result.player);
+					await tcp!.send.response(result);
+					connect.select.plaids.clear();
+				},
+				cancel : async (cancelable : boolean, result : Array<Plaid>) => {
+					cancelable ? await (async () => {
+						await tcp!.send.response({
+							player : tcp!.to.player!(0),
+							loc : 0,
+							seq : 0
+						});
+						connect.select.plaids.clear();
+					})() : await (async () => {
+						connect.select.plaids.show = false;
+						await mainGame.sleep(250);
+						connect.select.plaids.show = true;
+						result.forEach(i => i.select.on());
+					})();
+				},
+				clear : () : void => {
+					connect.select.plaids.title = '';
+					connect.select.plaids.min = 0;
+					connect.select.plaids.array.length = 0;
+					connect.select.plaids.chk_player = undefined;
+					connect.select.plaids.pzone = false;
+				}
 			},
-			cancel : async (cancelable : boolean, result : Array<Plaid>) => {
-				cancelable ? await (async () => {
-					await tcp!.send.response({
-						player : tcp!.to.player!(0),
-						loc : 0,
-						seq : 0
-					});
-					connect.select_plaids.clear();
-				})() : await (async () => {
-					connect.select_plaids.show = false;
-					await mainGame.sleep(250);
-					connect.select_plaids.show = true;
-					result.forEach(i => i.select.on());
-				})();
-			},
-			clear : () : void => {
-				connect.select_plaids.title = '';
-				connect.select_plaids.min = 0;
-				connect.select_plaids.array.length = 0;
-				connect.select_plaids.chk_player = undefined;
-				connect.select_plaids.pzone = false;
+			option : {
+				on : async (desc : Array<{ card : Client_Card; desc : number; }>, title : string, no_cancle : boolean = false) : Promise<{ card : Client_Card; desc : number; } | undefined> => {
+					const i = await Picker(
+						[desc.map(i => { return { text : mainGame.get.desc(i.desc) }; })],
+						title,
+						no_cancle
+					);
+					return i !== undefined && tcp !== null ? desc[i[0]] : undefined;
+				}
 			}
 		},
 		lp : {
@@ -613,7 +637,7 @@
 		idle : {
 			summon : new Idle(),
 			spsummon : new Idle(),
-			activate : new Idle(),
+			activate : new EffectIdle(),
 			mset : new Idle(),
 			sset : new Idle(),
 		},
@@ -634,9 +658,9 @@
 			});
 		},
 		clear : () => {
-			connect.select_cards.clear();
-			connect.select_plaids.clear();
-			connect.select_position.clear();
+			connect.select.cards.clear();
+			connect.select.plaids.clear();
+			connect.select.position.clear();
 			connect.player = new Array(4).fill({ name : '' }) as Array<TCP.Player>;
 			connect.home = {
 				lflist : 0,
@@ -703,9 +727,9 @@
 
 	onUnmounted(() => {
 		document.removeEventListener('click', page.click);
-	})
+	});
 
-	watch(() => {return page.chat}, (n) => {
+	watch(() => {return page.chat.chk}, (n) => {
 		n ? toast.off() : toast.on();
 	});
 
