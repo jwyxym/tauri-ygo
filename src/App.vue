@@ -33,7 +33,7 @@
 	import { LoadingBar } from '@varlet/ui';
 
 	import YGOMenu from './pages/menu/menu.vue';
-	import Deck from './pages/deck/deck_list.vue';
+	import Deck from './pages/deck/list.vue';
 	import Server from './pages/server/server.vue';
 	import Setting from './pages/setting/setting.vue';
 	import Voice from './pages/voice/voice.vue';
@@ -184,7 +184,14 @@
 	.font-menu {
 		font-family: 'menu' !important;
 	}
+
+	.var-picker__picked {
+		border: 1px solid white !important;
+	}
+
 	:root {
+		--picker-mask-background-image: transparent !important;
+		--picker-background: transparent !important;
 		--result-background: transparent !important;
 		--card-background: transparent !important;
 		--dialog-background: transparent !important;
@@ -208,6 +215,10 @@
 		--card-outline-color: white !important;
 		--card-subtitle-color: white !important;
 		--card-description-color: white !important;
+		--picker-option-text-color: white !important;
+		--picker-title-text-color: white !important;
+		--picker-cancel-button-text-color: white !important;
+		--picker-picked-border:	5px solid white;
 		--cell-padding: 1vh 20px !important;
 		--field-decorator-line-size: 0.5px !important;
 		--card-title-font-size: max(2.5vh, 10px) !important;
