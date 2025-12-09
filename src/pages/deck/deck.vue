@@ -77,12 +77,12 @@
 					<TransitionGroup tag = 'div' name = 'scale' class = 'deck_main'>
 						<div
 							v-for = '(i, v) in deck.main'
-							:data-swapy-slot = '`main_card:${v}:${i}:${Date.now()}:${Math.random().toString(36).substring(2, 11)}`'
+							:data-swapy-slot = "swapy.random('main_card', v, i)"
 							class = 'card'
 							ref = 'cards'
 							:key = 'i'
 						>
-								<div :data-swapy-item = '`main_card:${v}:${i}:${Date.now()}:${Math.random().toString(36).substring(2, 11)}`' @click = 'cardinfo.on(i)'>
+								<div :data-swapy-item = "swapy.random('main_card', v, i)" @click = 'cardinfo.on(i)'>
 									<img :src = 'mainGame.get.card(i).pic' ref = 'main_card' :alt = 'i.toString()'></img>
 									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
 										<template #value>
@@ -106,12 +106,12 @@
 					<TransitionGroup tag = 'div' name = 'scale' class = 'deck_extra'>
 						<div
 							v-for = '(i, v) in deck.extra'
-							:data-swapy-slot = '`extra_card:${v}:${i}:${Date.now()}:${Math.random().toString(36).substring(2, 11)}`'
+							:data-swapy-slot = "swapy.random('extra_card', v, i)"
 							class = 'card'
 							ref = 'cards'
 							:key = 'i'
 						>
-								<div :data-swapy-item = '`extra_card:${v}:${i}:${Date.now()}:${Math.random().toString(36).substring(2, 11)}`' @click = 'cardinfo.on(i)'>
+								<div :data-swapy-item = "swapy.random('extra_card', v, i)" @click = 'cardinfo.on(i)'>
 									<img :src = 'mainGame.get.card(i).pic' ref = 'extra_card' :alt = 'i.toString()'></img>
 									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
 										<template #value>
@@ -135,12 +135,12 @@
 					<TransitionGroup tag = 'div' name = 'scale' class = 'deck_side'>
 						<div
 							v-for = '(i, v) in deck.side'
-							:data-swapy-slot = '`side_card:${v}:${i}:${Date.now()}:${Math.random().toString(36).substring(2, 11)}`'
+							:data-swapy-slot = "swapy.random('side_card', v, i)"
 							class = 'card'
 							:key = 'i'
 							ref = 'cards'
 						>
-								<div :data-swapy-item = '`side_card:${v}:${i}:${Date.now()}:${Math.random().toString(36).substring(2, 11)}`' @click = 'cardinfo.on(i)'>
+								<div :data-swapy-item = "swapy.random('side_card', v, i)" @click = 'cardinfo.on(i)'>
 									<img :src = 'mainGame.get.card(i).pic' ref = 'side_card' :alt = 'i.toString()'></img>
 									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
 										<template #value>
@@ -472,7 +472,7 @@
 		} as Search
 	});
 
-	const swapy = {
+	const swapy = reactive({
 		main : undefined as Swapy | undefined,
 		extra : undefined as Swapy | undefined,
 		side : undefined as Swapy | undefined,
@@ -483,8 +483,11 @@
 			});
 			s.enable(true);
 			return s;
+		},
+		random : (head : string, v : number, i : number) => {
+			return `${head}:${v}:${i}:${Date.now()}:${Math.random().toString(36).substring(2, 11)}`;
 		}
-	}
+	});
 
 	onBeforeMount(async () : Promise<void> => {
 		const d = props.this_deck;
@@ -508,7 +511,7 @@
 		}
 		deck.size.resize();
 		window.addEventListener("resize", deck.size.resize);
-	})
+	});
 
 	onUnmounted(() => {
 		window.removeEventListener("resize", deck.size.resize);
@@ -532,19 +535,20 @@
 	});
 
 	if (!mainGame.is_android()) {
-		for (const i of [
-			{ array : main_card, swapy : swapy.main, element : main},
-			{ array : extra_card, swapy : swapy.extra, element : extra},
-			{ array : side_card, swapy : swapy.side, element : side}
-		]) {
-			watch(() => { return i.array; }, () => {
-				if (i.element.value === null) return;
-				if (i.swapy === undefined)
-					i.swapy = swapy.create(i.element.value);
-				else
-					i.swapy.update();
-			}, { deep : true });
-		}
+		watch(() => { return main_card; }, () => {
+			if (main_card.value === null || main.value === null) return;
+			swapy.main === undefined ? swapy.main = swapy.create(main.value) : swapy.main.update();
+		}, { deep : true });
+
+		watch(() => { return extra_card; }, () => {
+			if (extra_card.value === null || extra.value === null) return;
+			swapy.extra === undefined ? swapy.extra = swapy.create(extra.value) : swapy.extra.update();
+		}, { deep : true });
+
+		watch(() => { return side_card; }, () => {
+			if (side_card.value === null || side.value === null) return;
+			swapy.side === undefined ? swapy.side = swapy.create(side.value) : swapy.side.update();
+		}, { deep : true });
 	}
 
 </script>
