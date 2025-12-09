@@ -269,12 +269,6 @@
 		},
 		clear : async (chk : boolean = true) : Promise<void> => {
 			const on = async () : Promise<void> => {
-				// swapy.main?.destroy();
-				// swapy.extra?.destroy();
-				// swapy.side?.destroy();
-				// swapy.main = undefined;
-				// swapy.extra = undefined;
-				// swapy.side = undefined;
 				deck.main.length = 0;
 				deck.extra.length = 0;
 				deck.side.length = 0;
