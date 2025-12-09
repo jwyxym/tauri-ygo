@@ -658,14 +658,14 @@
 		response : async (v : number) : Promise<void> => {
 			await tcp!.send.response(v);
 		},
-		surrender : () : void => {
-			Dialog({
+		surrender : async () : Promise<void> => {
+			await Dialog({
 				title : mainGame.get.text(I18N_KEYS.SERVER_SURRENDER),
 				onConfirm : tcp!.send.surrender
 			});
 		},
-		win : (title : string, message : string) => {
-			Dialog({
+		win : async (title : string, message : string) : Promise<void> => {
+			await Dialog({
 				title : title,
 				message : message,
 				cancelButton : false
@@ -715,8 +715,8 @@
 			shift : () : void => {
 				server.voice_input.chk = !server.voice_input.chk;
 			},
-			result : (str : string) : void => {
-				Dialog({
+			result : async (str : string) : Promise<void> => {
+				await Dialog({
 					title : str,
 					closeOnClickOverlay : false,
 					onConfirm : () => {
@@ -731,7 +731,7 @@
 	onBeforeMount(async () => {
 		tcp = new Tcp();
 		await tcp.listen(connect);
-		voice_input.result(server.voice_input.result);
+		voice_input.result(await server.voice_input.result);
 	});
 
 	onMounted(() => {

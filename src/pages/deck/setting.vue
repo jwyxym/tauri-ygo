@@ -30,11 +30,12 @@
 			if (dom.value && !dom.value.contains(e.target as HTMLElement)
 				&& props.except.findIndex((i : HTMLElement | null) => i && i.contains(e.target as HTMLElement)) === -1
 				&& !(e.target as HTMLElement).classList.contains('var-icon-close-circle')
+				&& !props.deck.show.setting.block
 			)
 				props.unshow();
 		},
 		keydown : (e : KeyboardEvent) => {
-			if (e.key === 'Escape')
+			if (e.key === 'Escape' && !props.deck.show.setting.block)
 				props.unshow();
 		}
 	};

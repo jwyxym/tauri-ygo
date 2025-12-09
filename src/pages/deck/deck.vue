@@ -77,12 +77,12 @@
 					<TransitionGroup tag = 'div' name = 'scale' class = 'deck_main'>
 						<div
 							v-for = '(i, v) in deck.main'
-							:data-swapy-slot = '`main_card:${v}:${i}`'
+							:data-swapy-slot = '`main_card:${v}:${i}:${Date.now()}:${Math.random().toString(36).substring(2, 11)}`'
 							class = 'card'
 							ref = 'cards'
 							:key = 'i'
 						>
-								<div :data-swapy-item = '`main_card:${v}:${i}`' @click = 'cardinfo.on(i)'>
+								<div :data-swapy-item = '`main_card:${v}:${i}:${Date.now()}:${Math.random().toString(36).substring(2, 11)}`' @click = 'cardinfo.on(i)'>
 									<img :src = 'mainGame.get.card(i).pic' ref = 'main_card' :alt = 'i.toString()'></img>
 									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
 										<template #value>
@@ -106,12 +106,12 @@
 					<TransitionGroup tag = 'div' name = 'scale' class = 'deck_extra'>
 						<div
 							v-for = '(i, v) in deck.extra'
-							:data-swapy-slot = '`extra_card:${v}:${i}`'
+							:data-swapy-slot = '`extra_card:${v}:${i}:${Date.now()}:${Math.random().toString(36).substring(2, 11)}`'
 							class = 'card'
 							ref = 'cards'
 							:key = 'i'
 						>
-								<div :data-swapy-item = '`extra_card:${v}:${i}`' @click = 'cardinfo.on(i)'>
+								<div :data-swapy-item = '`extra_card:${v}:${i}:${Date.now()}:${Math.random().toString(36).substring(2, 11)}`' @click = 'cardinfo.on(i)'>
 									<img :src = 'mainGame.get.card(i).pic' ref = 'extra_card' :alt = 'i.toString()'></img>
 									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
 										<template #value>
@@ -135,12 +135,12 @@
 					<TransitionGroup tag = 'div' name = 'scale' class = 'deck_side'>
 						<div
 							v-for = '(i, v) in deck.side'
-							:data-swapy-slot = '`side_card:${v}:${i}`'
+							:data-swapy-slot = '`side_card:${v}:${i}:${Date.now()}:${Math.random().toString(36).substring(2, 11)}`'
 							class = 'card'
 							:key = 'i'
 							ref = 'cards'
 						>
-								<div :data-swapy-item = '`side_card:${v}:${i}`' @click = 'cardinfo.on(i)'>
+								<div :data-swapy-item = '`side_card:${v}:${i}:${Date.now()}:${Math.random().toString(36).substring(2, 11)}`' @click = 'cardinfo.on(i)'>
 									<img :src = 'mainGame.get.card(i).pic' ref = 'side_card' :alt = 'i.toString()'></img>
 									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
 										<template #value>
@@ -197,6 +197,7 @@
 		show : {
 			setting : {
 				chk : false,
+				block : false,
 				select : () : void => {
 					deck.show.setting.chk = true;
 				},
@@ -250,9 +251,8 @@
 				const write_deck = deck.to_deck();
 				const write = await fs.write.ydk(props.this_deck.name?.length ?? 0 > 0 ? props.this_deck.name : deck.name, write_deck);
 				let rename = true;
-				if (write && deck.name !== props.this_deck.name && (props.this_deck.name?.length ?? 0 > 0)) {
+				if (write && deck.name !== props.this_deck.name && (props.this_deck.name?.length ?? 0 > 0))
 					rename = await fs.rename.ydk(props.this_deck.name, deck.name);
-				}
 				if (write && rename)
 					toast.info(mainGame.get.text(I18N_KEYS.DECK_SAVE_COMPELETE));
 				if (props.this_deck.new)
@@ -267,33 +267,76 @@
 			await writeText(text);
 			toast.info(mainGame.get.text(I18N_KEYS.DECK_COPY_COMPELETE));
 		},
-		clear : async () : Promise<void> => {
-			deck.main.length = 0;
-			deck.extra.length = 0;
-			deck.side.length = 0;
-			await mainGame.sleep(500);
+		clear : async (chk : boolean = true) : Promise<void> => {
+			const on = async () : Promise<void> => {
+				// swapy.main?.destroy();
+				// swapy.extra?.destroy();
+				// swapy.side?.destroy();
+				// swapy.main = undefined;
+				// swapy.extra = undefined;
+				// swapy.side = undefined;
+				deck.main.length = 0;
+				deck.extra.length = 0;
+				deck.side.length = 0;
+			};
+			deck.show.setting.block = true;
+			await Dialog({
+				title : mainGame.get.text(I18N_KEYS.DECK_CLEAR),
+				onConfirm : on,
+				onClose : () => {
+					setTimeout(() => {
+						deck.show.setting.block = false;
+					}, 200);
+				}
+			}, mainGame.get.system(CONSTANT.KEYS.SETTING_CHK_CLEAR_DECK) && chk);
 		},
 		sort : async () : Promise<void> => {
-			const d = deck.to_deck();
-			await deck.clear();
-			const sort = (a : number, b : number) : number => {
-				const card = {
-					a : mainGame.get.card(a),
-					b : mainGame.get.card(b)
+			const on = async () : Promise<void> => {
+				const d = deck.to_deck();
+				await deck.clear(false);
+				await mainGame.sleep(500);
+				const sort = (a : number, b : number) : number => {
+					const card = {
+						a : mainGame.get.card(a),
+						b : mainGame.get.card(b)
+					};
+					return card.a.level === card.b.level ? card.a.id - card.b.id : card.b.level - card.a.level;
 				};
-				return card.a.level === card.b.level ? card.a.id - card.b.id : card.b.level - card.a.level;
+				deck.main.push(...d.main.sort(sort));
+				deck.extra.push(...d.extra.sort(sort));
+				deck.side.push(...d.side.sort(sort));
 			};
-			deck.main.push(...d.main.sort(sort));
-			deck.extra.push(...d.extra.sort(sort));
-			deck.side.push(...d.side.sort(sort));
+			deck.show.setting.block = true;
+			await Dialog({
+				title : mainGame.get.text(I18N_KEYS.DECK_SORT),
+				onConfirm : on,
+				onClose : () => {
+					setTimeout(() => {
+						deck.show.setting.block = false;
+					}, 200);
+				}
+			}, mainGame.get.system(CONSTANT.KEYS.SETTING_CHK_SORT_DECK));
 		},
 		disrupt : async () : Promise<void> => {
-			const d = deck.to_deck();
-			await deck.clear();
-			const sort = () : number =>  Math.random() - 0.5;
-			deck.main.push(...d.main.sort(sort));
-			deck.extra.push(...d.extra.sort(sort));
-			deck.side.push(...d.side.sort(sort));
+			const on = async () : Promise<void> => {
+				const d = deck.to_deck();
+				await deck.clear(false);
+				await mainGame.sleep(500);
+				const sort = () : number =>  Math.random() - 0.5;
+				deck.main.push(...d.main.sort(sort));
+				deck.extra.push(...d.extra.sort(sort));
+				deck.side.push(...d.side.sort(sort));
+			};
+			deck.show.setting.block = true;
+			await Dialog({
+				title : mainGame.get.text(I18N_KEYS.DECK_DISRUPT),
+				onConfirm : on,
+				onClose : () => {
+					setTimeout(() => {
+						deck.show.setting.block = false;
+					}, 200);
+				}
+			}, mainGame.get.system(CONSTANT.KEYS.SETTING_CHK_DISRUPT_DECK));
 		},
 		push : {
 			main : (code : string | number) : void => {
@@ -373,7 +416,7 @@
 			}
 		},
 		exit : async () : Promise<void> => {
-			Dialog({
+			await Dialog({
 				title : mainGame.get.text(I18N_KEYS.DECK_EXIT),
 				onConfirm : props.offdeck
 			}, mainGame.get.system(CONSTANT.KEYS.SETTING_CHK_EXIT_DECK));

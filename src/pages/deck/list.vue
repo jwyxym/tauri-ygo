@@ -222,7 +222,7 @@
 					list.select = -1;
 				}
 			}
-			Dialog({
+			await Dialog({
 				title : mainGame.get.text(I18N_KEYS.DECK_DELETE_TITLE),
 				message : mainGame.get.text(I18N_KEYS.DECK_DELETE_MESSAGR, list.decks[list.select].name ?? ''),
 				onConfirm : confirm
