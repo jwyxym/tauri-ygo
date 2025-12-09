@@ -13,10 +13,6 @@
 						icon : 'search',
 						show : true
 					}, {
-						click : deck.save,
-						icon : 'save',
-						show : true
-					}, {
 						click : deck.exit,
 						icon : 'exit',
 						show : true
@@ -163,6 +159,7 @@
 	import { ref, reactive, onMounted, Ref, watch, onBeforeMount, onUnmounted } from "vue";
 	import { createSwapy, Swapy } from 'swapy';
 	import Sortable from 'sortablejs';
+	import { writeText } from '@tauri-apps/plugin-clipboard-manager';
 
 	import mainGame from '../../script/game';
 	import * as CONSTANT from '../../script/constant';
@@ -172,9 +169,9 @@
 	import fs from '../../script/fs';
 
 	import Dialog from '../varlet/dialog';
-	import Card_Drawer from './/card_drawer.vue';
-	import Deck_Setting from './deck_setting.vue';
-	import Deck_Search from './deck_search.vue';
+	import Card_Drawer from './card.vue';
+	import Deck_Setting from './setting.vue';
+	import Deck_Search from './search.vue';
 	import Float_Buttons from '../varlet/float_buttons.vue';
 
 	import Deck from './deck';
@@ -239,15 +236,18 @@
 				return mainGame.get.text(I18N_KEYS.DECK_RULE_NAME_EXIST);
 			return true;
 		},
+		to_deck : () : Deck => {
+			return new Deck({
+				main : Array.from(main.value!.querySelectorAll('img') ?? []).map(i => parseInt(i.alt)),
+				extra : Array.from(extra.value!.querySelectorAll('img') ?? []).map(i => parseInt(i.alt)),
+				side : Array.from(side.value!.querySelectorAll('img') ?? []).map(i => parseInt(i.alt)),
+				name : deck.name
+			});
+		},
 		save : async () : Promise<void> => {
 			const rule = await deck.name_rule(deck.name);
 			if (typeof rule == 'boolean') {
-				const write_deck = new Deck({
-					main : Array.from(main.value!.querySelectorAll('img') ?? []).map(i => parseInt(i.alt)),
-					extra : Array.from(extra.value!.querySelectorAll('img') ?? []).map(i => parseInt(i.alt)),
-					side : Array.from(side.value!.querySelectorAll('img') ?? []).map(i => parseInt(i.alt)),
-					name : deck.name
-				});
+				const write_deck = deck.to_deck();
 				const write = await fs.write.ydk(props.this_deck.name?.length ?? 0 > 0 ? props.this_deck.name : deck.name, write_deck);
 				let rename = true;
 				if (write && deck.name !== props.this_deck.name && (props.this_deck.name?.length ?? 0 > 0)) {
@@ -260,6 +260,40 @@
 			} else {
 				toast.error(rule);
 			}
+		},
+		copy : async () : Promise<void> => {
+			const d = deck.to_deck();
+			const text = d.toYGOMobileDeckURL();
+			await writeText(text);
+			toast.info(mainGame.get.text(I18N_KEYS.DECK_COPY_COMPELETE));
+		},
+		clear : async () : Promise<void> => {
+			deck.main.length = 0;
+			deck.extra.length = 0;
+			deck.side.length = 0;
+			await mainGame.sleep(500);
+		},
+		sort : async () : Promise<void> => {
+			const d = deck.to_deck();
+			await deck.clear();
+			const sort = (a : number, b : number) : number => {
+				const card = {
+					a : mainGame.get.card(a),
+					b : mainGame.get.card(b)
+				};
+				return card.a.level === card.b.level ? card.a.id - card.b.id : card.b.level - card.a.level;
+			};
+			deck.main.push(...d.main.sort(sort));
+			deck.extra.push(...d.extra.sort(sort));
+			deck.side.push(...d.side.sort(sort));
+		},
+		disrupt : async () : Promise<void> => {
+			const d = deck.to_deck();
+			await deck.clear();
+			const sort = () : number =>  Math.random() - 0.5;
+			deck.main.push(...d.main.sort(sort));
+			deck.extra.push(...d.extra.sort(sort));
+			deck.side.push(...d.side.sort(sort));
 		},
 		push : {
 			main : (code : string | number) : void => {

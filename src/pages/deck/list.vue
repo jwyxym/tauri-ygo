@@ -97,7 +97,7 @@
 </template>
 <script setup lang = 'ts'>
 	import { reactive, onBeforeMount, TransitionGroup } from 'vue';
-	import { writeText } from '@tauri-apps/plugin-clipboard-manager'
+	import { writeText } from '@tauri-apps/plugin-clipboard-manager';
 
 	import mainGame from '../../script/game';
 	import { I18N_KEYS } from '../../script/language/i18n';
@@ -211,7 +211,7 @@
 			if (list.select <= -1) return;
 			const text = list.decks[list.select].toYGOMobileDeckURL();
 			await writeText(text);
-			toast.info(mainGame.get.text(I18N_KEYS.DECK_COPY_COMPELETE))
+			toast.info(mainGame.get.text(I18N_KEYS.DECK_COPY_COMPELETE));
 		},
 		delete : async () : Promise<void> => {
 			if (list.select <= -1) return;
@@ -255,5 +255,5 @@
 	onBeforeMount(list.load)
 </script>
 <style scoped lang = 'scss'>
-	@use './deck_list.scss';
+	@use './list.scss';
 </style>

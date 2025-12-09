@@ -31,6 +31,10 @@
 	import Add_person from './svg/add_person.vue';
 	import Info from './svg/info.vue';
 	import Microphone from './svg/microphone.vue';
+	import Clear from './svg/clear.vue';
+	import Sort from './svg/sort.vue';
+	import Disrupt from './svg/disrupt.vue';
+
 	const props = defineProps(['icon_name', 'content']);
 	const svgs : Map<string, Component> = new Map ([
 		['cards', Cards],
@@ -53,6 +57,9 @@
 		['add_person', Add_person],
 		['info', Info],
 		['microphone', Microphone],
+		['clear', Clear],
+		['sort', Sort],
+		['disrupt', Disrupt],
 	]);
 	const svg : null | Component = svgs.get(props.icon_name) ?? null;
 </script>

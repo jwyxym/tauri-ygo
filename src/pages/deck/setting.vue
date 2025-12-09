@@ -6,6 +6,13 @@
 			:variant = 'true'
 			v-model = 'deck.name'
 		/>
+		<div class = 'btn'>
+			<Button icon_name = 'save' @click = 'deck.save'></Button>
+			<Button icon_name = 'share' @click = 'deck.copy'></Button>
+			<Button icon_name = 'sort' @click = 'deck.sort'></Button>
+			<Button icon_name = 'disrupt' @click = 'deck.disrupt'></Button>
+			<Button icon_name = 'clear' @click = 'deck.clear'></Button>
+		</div>
 	</div>
 </template>
 <script setup lang = 'ts'>
@@ -13,6 +20,7 @@
 	import mainGame from '../../script/game';
 	import { I18N_KEYS } from '../../script/language/i18n';
 	import Input from '../varlet/input.vue';
+	import Button from '../varlet/button.vue';
 
 	const dom = ref<HTMLElement | null>(null);
 	const props = defineProps(['deck', 'except', 'unshow']);
@@ -48,20 +56,32 @@
 <style lang = 'scss'>
 	.deck_setting {
 		position: fixed;
-		right: 0;
-		top: 0;
+		right: 25vw;
+		top: 25vh;
+		width: 50vw;
+		height: 50vh;
 		display: flex;
 		flex-direction: column;
-		width: 40vw;
-		height: 80px;
+		align-content: center;
+		align-items: center;
 		gap: 10px;
 		background-color: rgba(0, 0, 0, 0.5);
 		z-index: 1;
-		overflow-y: auto;
 		border-radius: 10px;
 		.var-input {
-			transform: translate(10px, 15px);
-			width: calc(90% - 10px);
+			margin-top: 15px;
+			width: 90%;
+			height: 80px;
+		}
+		.btn {
+			height: calc(100% - 115px);
+			width: 90%;
+			display: flex;
+			gap: 10px;
+			overflow-y: auto;
+			&::-webkit-scrollbar {
+				display: none;
+			}
 		}
 	}
 </style>
