@@ -76,7 +76,6 @@
 					<var-cell class = 'select_deck'>
 						<template #default>
 							<Select
-								ref = 'deck'
 								name = 'deck'
 								v-model = 'connect.deck'
 								@change = 'connect.ready'
@@ -255,6 +254,7 @@
 				:confirm = 'connect.select.cards.confirm'
 				:cancel = 'connect.select.cards.cancel'
 				v-if = 'page.duel && connect.select.cards.array.length > 0'
+				v-show = 'connect.select.cards.show'
 			/>
 		</transition>
 		<transition name = 'move_up'>
@@ -288,7 +288,7 @@
 	import * as CONSTANT from '../../script/constant';
 	import fs from '../../script/fs';
 	import Tcp, * as TCP from './post/tcp';
-	import { Plaids } from './post/tcp';
+	import { Plaids, Select_Cards } from './post/tcp';
 	import toast from '../../script/toast';
 	import voice_input from '../../script/voice_input';
 
@@ -312,10 +312,8 @@
 	import { LOCATION } from './post/network';
 	import Plaid from './post/plaid';
 	import { Idle, EffectIdle } from './idle';
-import Client_Card from './post/client_card';
 
 	let tcp : Tcp | null = null;
-	const deck = ref<HTMLElement | null>(null);
 	const chat = ref<HTMLElement | null>(null);
 	const info = ref<HTMLElement | null>(null);
 	const float_buttons : Ref<{ dom: HTMLElement } | null> = ref(null);
@@ -404,27 +402,41 @@ import Client_Card from './post/client_card';
 				}
 			},
 			cards : {
+				show : true,
 				title : '',
 				min : 0,
 				max : 0,
-				array : [] as Array<number>,
-				on : (title : string, array : Array<number>, min : number, max : number) : void => {
+				cancelable : false,
+				array : [] as Select_Cards,
+				on : (title : string, array : Select_Cards, min : number, max : number, cancelable : boolean) : void => {
 					connect.select.cards.title = title;
 					connect.select.cards.min = min;
 					connect.select.cards.max = max;
 					connect.select.cards.array = array;
+					connect.select.cards.cancelable = cancelable;
 				},
-				confirm : async () => {
-
+				confirm : async (result : Array<number>) => {
+					connect.select.cards.clear();
+					await mainGame.sleep(200);
+					await tcp!.send.response(result);
 				},
-				cancel : async () => {
-					
+				cancel : async (result : Select_Cards) => {
+					connect.select.cards.cancelable ? await (async () => {
+						await tcp!.send.response(-1);
+						connect.select.cards.clear();
+					})() : await (async () => {
+						connect.select.cards.show = false;
+						await mainGame.sleep(250);
+						connect.select.cards.show = true;
+						result.forEach(i => i.card?.select.on());
+					})();
 				},
 				clear : () : void => {
 					connect.select.cards.title = '';
 					connect.select.cards.min = 0;
 					connect.select.cards.max = 0;
 					connect.select.cards.array.length = 0;
+					connect.select.cards.cancelable = false;
 				}
 			},
 			plaids : {
@@ -442,6 +454,7 @@ import Client_Card from './post/client_card';
 						: (place & (0x60 << 16)) > 0 ? 1
 							: undefined;
 					connect.select.plaids.pzone = (place & 0xc000c000) > 0;
+					console.log(connect.select.plaids.array)
 				},
 				confirm : async (result : { loc : number, seq : number; player : number}) => {
 					if (connect.select.plaids.chk_player !== undefined
@@ -467,8 +480,9 @@ import Client_Card from './post/client_card';
 						};
 
 					result.player = tcp!.to.player!(result.player);
-					await tcp!.send.response(result);
 					connect.select.plaids.clear();
+					await mainGame.sleep(200);
+					await tcp!.send.response(result);
 				},
 				cancel : async (cancelable : boolean, result : Array<Plaid>) => {
 					cancelable ? await (async () => {
@@ -494,13 +508,13 @@ import Client_Card from './post/client_card';
 				}
 			},
 			option : {
-				on : async (desc : Array<{ card : Client_Card; desc : number; }>, title : string, no_cancle : boolean = false) : Promise<{ card : Client_Card; desc : number; } | undefined> => {
+				on : async (desc : Array<number>, title : string = mainGame.get.strings.system(555), no_cancle : boolean = false) : Promise<number | undefined> => {
 					const i = await Picker(
-						[desc.map(i => { return { text : mainGame.get.desc(i.desc) }; })],
+						[desc.map(i => { return { text : mainGame.get.strings.system(i) }; })],
 						title,
 						no_cancle
 					);
-					return i !== undefined && tcp !== null ? desc[i[0]] : undefined;
+					return i !== undefined && tcp !== null ? i[0] : undefined;
 				}
 			}
 		},

@@ -224,6 +224,13 @@ class Client_Card {
 		},
 		type : (type : number) : void => {
 			this.type = type;
+			if ((this.type & TYPE.PENDULUM) === 0) {
+				const el : HTMLElement = this.three.element.children[2].querySelector('.scale')!;
+				if (el.style.display === 'flex') {
+					el.style.display = 'none';
+					el.querySelector('span')!.innerHTML = '';
+				}
+			}
 		},
 		level : (level : number) : void => {
 			this.level = level;
@@ -264,6 +271,8 @@ class Client_Card {
 		this.atk = 0;
 		this.def = 0;
 		this.scale = 0;
+		this.activatable.clear();
+		this.remove();
 	};
 	is_xyz = () : boolean => {
 		return this.rank !== undefined && this.rank > 0;
@@ -294,12 +303,12 @@ class Client_Card {
 			(this.three.element.children[2] as HTMLElement).style.color = 'lightgreen';
 		},
 		level : () : void => {
-			const el : HTMLElement  = this.three.element.children[2].querySelector('.level')!;
+			const el : HTMLElement = this.three.element.children[2].querySelector('.level')!;
 			el.style.display = 'flex';
 			el.querySelector('span')!.innerHTML = this.level.toString();
 		},
 		pendulum : () : void => {
-			const el : HTMLElement  = this.three.element.children[2].querySelector('.scale')!;
+			const el : HTMLElement = this.three.element.children[2].querySelector('.scale')!;
 			el.style.display = 'flex';
 			el.querySelector('span')!.innerHTML = this.scale.toString();
 		},
@@ -374,7 +383,18 @@ class Client_Card {
 		const pos = (this.three.element.children[0] as HTMLImageElement).src === mainGame.get.textures(CONSTANT.FILES.TEXTURE_COVER) ?
 			rotation ? POS.FACEDOWN_ATTACK : POS.FACEDOWN_DEFENSE : rotation ? POS.FACEUP_ATTACK : POS.FACEUP_DEFENSE;
 		return pos;
-	}
+	};
+
+	select = {
+		on : () => {
+			const style = (this.three.element.children[0] as HTMLElement).style;
+			style.boxShadow = '0 0 8px yellow';
+		},
+		off : () => {
+			const style = (this.three.element.children[0] as HTMLElement).style;
+			style.boxShadow = 'initial';
+		}
+	};
 
 	activatable = {
 		desc : [] as Array<{desc : number; flag : number;}>,
@@ -389,10 +409,8 @@ class Client_Card {
 				}
 			})();
 			const style = (this.three.element.children[0] as HTMLElement).style;
-			style.boxShadow = `0 0 8px ${
-				(this.activatable.flag & (COMMAND.ACTIVATE + COMMAND.SPSUMMON + COMMAND.PSUMMON + COMMAND.SCALE)) > 0 ?
-					'yellow' : (this.activatable.flag > 0 ? 'rgba(119, 166, 255, 1)' : 'initial')
-			}`;
+			style.boxShadow = (this.activatable.flag & (COMMAND.ACTIVATE + COMMAND.SPSUMMON + COMMAND.PSUMMON + COMMAND.SCALE)) > 0 ?
+				'0 0 8px yellow' : this.activatable.flag > 0 ? '0 0 8px rgba(119, 166, 255, 1)' : 'initial';
 			if (show_btn) {
 				const map = new Map([
 					[COMMAND.ACTIVATE, 'activate'],

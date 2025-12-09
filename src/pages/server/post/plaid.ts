@@ -65,7 +65,9 @@ class Plaid {
 						return [LOCATION.MZONE | ((x > 0 ? 6 : 5) << 16), 2];
 				}
 			})();
-		this.name = (() : string => {
+		this.player = (y > 0 || (y === 0 && x === -3)) ? 1 : 0;
+		const players = [I18N_KEYS.DUEL_PLAYER_SELF, I18N_KEYS.DUEL_PLAYER_OPPO];
+		this.name = `[${mainGame.get.text(players[this.player])}]${(() : string => {
 			if ((x === -3 && y === 2) || (x === 3 && y === -2))
 				return mainGame.get.text(I18N_KEYS.DUEL_LOCATION_DECK)
 			else if ((x === -3 && y === 1) || (x === 3 && y === -1))
@@ -87,8 +89,7 @@ class Plaid {
 			else if (y === 0)
 				return `${mainGame.get.text(I18N_KEYS.DUEL_LOCATION_EX_MZONE)}[${x > 0 ? 1 : 0}]`
 			return '';
-		})();
-		this.player = (y > 0 || (y === 0 && x === -3)) ? 1 : 0;
+		})()}`;
 	};
 
 	select = {
@@ -96,7 +97,7 @@ class Plaid {
 			this.three.element.style.border = '2px solid yellow';
 		},
 		off : () : void => {
-			this.three.element.style.border = '2px solid #9ed3ff';
+			this.three.element.style.border = 'initial';
 		}
 	}
 }

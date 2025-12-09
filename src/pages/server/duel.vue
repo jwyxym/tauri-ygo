@@ -97,9 +97,9 @@
 					if (effects.length === 1)
 						code = (props.connect.idle.activate.index(effects[0].card, effects[0].desc) << 16) + 5;
 					else {
-						const i = await props.connect.select.option.on(effects, mainGame.get.strings.system(555));
+						const i = await props.connect.select.option.on(effects.map(i => i.desc));
 						if (i !== undefined)
-							code = (props.connect.idle.activate.index(i.card, i.desc) << 16) + 5;
+							code = (props.connect.idle.activate.index(effects[i].card, effects[i].desc) << 16) + 5;
 					}
 					break;
 				case 'scale':
