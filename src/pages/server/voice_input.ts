@@ -69,10 +69,10 @@ class Voice_Input {
 		return this.input !== undefined;
 	}
 
-	result = (f : (arg : string) => void) => {
+	result = (f : (arg : string) => Promise<void>) => {
 		if (this.input)
-			this.input.onresult = (event: SpeechRecognitionEvent) => {
-				f(event.results[event.results.length - 1][0].transcript);
+			this.input.onresult = async (event: SpeechRecognitionEvent) => {
+				await f(event.results[event.results.length - 1][0].transcript);
 			};
 	};
 
