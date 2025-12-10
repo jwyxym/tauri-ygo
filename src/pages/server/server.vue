@@ -290,7 +290,7 @@
 	import Tcp, * as TCP from './post/tcp';
 	import { Plaids, Select_Cards } from './post/tcp';
 	import toast from '../../script/toast';
-	import voice_input from '../../script/voice_input';
+	import voice_input from './voice_input';
 
 	import Select from '../varlet/select.vue';
 	import Button from '../varlet/button.vue';
