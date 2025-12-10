@@ -374,7 +374,7 @@
 		state : 0,
 		is_host : false,
 		self : -1,
-		chk_deck : undefined as string | boolean | undefined,
+		chk_deck : undefined as ((value: string | boolean | PromiseLike<string | boolean>) => void) | undefined,
 		deck : undefined as Deck | undefined,
 		player : new Array(4).fill({ name : '' }) as Array<TCP.Player>,
 		deck_count : [] as Array<number>,
@@ -588,13 +588,19 @@
 				toast.error(mainGame.get.text(I18N_KEYS.SERVER_PLAYER_ERROR))
 		},
 		ready : async (deck : Deck | undefined) : Promise<void> => {
-			deck ? await tcp!.send.ready(deck) : await tcp!.send.un_ready();
+			deck ? await (async () => {
+				if (connect.player[connect.self]?.ready)
+					await tcp!.send.un_ready();
+				await tcp!.send.ready(deck);
+			})() : await tcp!.send.un_ready();
 		},
 		rule : async (deck : Deck | undefined) : Promise<string | boolean> => {
 			if (deck) {
-				while (connect.chk_deck === undefined)
-					await (new Promise(resolve => setTimeout(resolve, 200)));
-				const result = connect.chk_deck;
+				const promise_deck = new Promise<string | boolean>((resolve) => {
+					connect.chk_deck = resolve;
+				});
+				const result = await promise_deck;
+				await mainGame.sleep(100);
 				connect.chk_deck = undefined;
 				return result;
 			} else {

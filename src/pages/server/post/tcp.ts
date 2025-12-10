@@ -702,7 +702,7 @@ class Tcp {
 									str = mainGame.get.text(I18N_KEYS.UNKNOW);
 									break;
 							}
-							connect.chk_deck = str;
+							connect.chk_deck(str);
 							error(str);
 							break;
 					}
@@ -815,7 +815,7 @@ class Tcp {
 							break;
 						case PLAYERCHANGE.READY:
 							connect.player[player].ready = true;
-							connect.chk_deck = true;
+							connect.chk_deck(true);
 							break;
 						case PLAYERCHANGE.NOTREADY:
 							connect.player[player].ready = false;
