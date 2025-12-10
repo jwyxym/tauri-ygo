@@ -68,7 +68,6 @@ class Client_Card {
 			});
 			child.addEventListener('mouseenter', hover.on.bind(null, this));
 			child.addEventListener('mouseout', hover.end.bind(null, this));
-			child.addEventListener('click', hover.click.bind(null, this));
 			return child;
 		},
 		atk : (size : { width : number; height : number; }) : HTMLDivElement => {
@@ -184,10 +183,7 @@ class Client_Card {
 					img.src = srcs[0];
 				});
 				img.addEventListener('click', async () => {
-					this.show.btn.off();
-					hover.click(this, null);
 					await hover.response(this, key);
-					// await hover.activate()
 				});
 				child.appendChild(img);
 			}
@@ -352,6 +348,9 @@ class Client_Card {
 				setTimeout(() => {
 					(this.three.element.children[3] as HTMLElement).style.display = 'none';
 				}, 200);
+			},
+			chk : () : boolean => {
+				return (this.three.element.children[3] as HTMLElement).style.display === 'flex';
 			}
 		},
 		activate : () : void => {

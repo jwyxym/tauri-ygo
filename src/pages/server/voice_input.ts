@@ -67,7 +67,7 @@ class Voice_Input {
 
 	chk = () : boolean => {
 		return this.input !== undefined;
-	}
+	};
 
 	result = (f : (arg : string) => Promise<void>) => {
 		if (this.input)

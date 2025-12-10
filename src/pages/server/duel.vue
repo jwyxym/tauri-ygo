@@ -3,7 +3,7 @@
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { ref, onMounted, Ref, watch, Reactive, reactive, onUnmounted } from 'vue';
+	import { ref, onMounted, Ref, onUnmounted } from 'vue';
 	import * as THREE from 'three';
 	import * as CSS from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 	
@@ -55,24 +55,50 @@
 				card.three.position.setZ(duel.cards.get(LOCATION.HAND)!(1).indexOf(card) * three.create.hand_gap);
 			}
 		},
-		click : (card : Client_Card, _ : MouseEvent) : void => {
-			if (duel.cards.get(LOCATION.HAND)!(0).includes(card)) {
-				const show_off = () => {
-					hover.select!.show.btn.off();
-					(hover.select!.three.element.children[0] as HTMLElement).style.transform = 'translateY(0)';
-					hover.select!.three.position.setZ(duel.cards.get(LOCATION.HAND)!(0).indexOf(hover.select) * three.create.hand_gap + three.create.float);
+		click : (e : MouseEvent) : void => {
+			const target = e.target as HTMLElement;
+			let cards : Array<Client_Card>;
+			let ct : number;
+			const show_off = () => {
+				if (hover.select === undefined)
+					return;
+				hover.select.show.btn.off();
+				if ((duel.cards.get(LOCATION.HAND)!(0) as Array<Client_Card>).includes(hover.select)) {
+					(hover.select.three.element.children[0] as HTMLElement).style.transform = 'translateY(0)';
+					hover.select.three.position.setZ(duel.cards.get(LOCATION.HAND)!(0).indexOf(hover.select) * three.create.hand_gap + three.create.float);
 				}
-				hover.select !== card ? (() => {
-					if (hover.select !== undefined) show_off();
+				hover.select = undefined;
+			}
+			cards = duel.cards.get(LOCATION.HAND)!(0);
+			ct = cards.findIndex(i => i.three.element.contains(target));
+			if (ct > -1) {
+				console.log('HAND')
+				const card = cards[ct];
+				const chk = hover.select !== card;
+				console.log(chk)
+				show_off();
+				if (chk) {
 					(card.three.element.children[0] as HTMLElement).style.transform = 'translateY(-30px)';
 					card.three.position.setZ(duel.cards.get(LOCATION.HAND)!(0).indexOf(card) * three.create.hand_gap + 0.1 + three.create.float);
 					card.show.btn.on();
 					hover.select = card;
-				})() : (() => {
-					show_off();
-					hover.select = undefined;
-				})();
+				}
+				return;
 			}
+			cards = duel.cards.get(LOCATION.ONFIELD)!(2);
+			ct = cards.findIndex(i => i.three.element.contains(target));
+			if (ct > -1) {
+				console.log('ONFIELD')
+				const card = cards[ct];
+				const chk = hover.select !== card;
+				show_off();
+				if (chk) {
+					card.show.btn.on();
+					hover.select = card;
+				}
+				return;
+			}
+			show_off();
 		},
 		response : async (card : Client_Card, key : string) : Promise<void> => {
 			let code;
@@ -839,18 +865,25 @@
 
 		animate();
 
-			// await duel.draw(0, 8);
-			// await duel.draw(1, 8);
+			await duel.draw(0, 8);
+			await duel.draw(1, 8);
+			await duel.to.mzone(0, {
+				location : LOCATION.DECK,
+				seq : 0,
+				zone : 0
+			})
 
-			// duel.cards.get(LOCATION.HAND)!(0).forEach((card : Client_Card) => {
-			// 	card.activatable.on({flag : 0, desc : 1160});
-			// });
+			duel.cards.get(LOCATION.ONFIELD)!(2).forEach((card : Client_Card) => {
+				card.activatable.on({flag : 0, desc : 1160});
+			});
 
 		window.addEventListener('resize', three.resize);
+		window.addEventListener('click', hover.click);
 	});
 
 	onUnmounted(() => {
 		window.removeEventListener('resize', three.resize);
+		window.removeEventListener('click', hover.click);
 	});
 
 	const props = defineProps(['connect']);

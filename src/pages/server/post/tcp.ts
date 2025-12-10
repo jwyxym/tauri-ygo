@@ -815,7 +815,8 @@ class Tcp {
 							break;
 						case PLAYERCHANGE.READY:
 							connect.player[player].ready = true;
-							connect.chk_deck(true);
+							if (connect.chk_deck)
+								connect.chk_deck(true);
 							break;
 						case PLAYERCHANGE.NOTREADY:
 							connect.player[player].ready = false;

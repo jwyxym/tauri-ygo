@@ -5,7 +5,7 @@ class Idle {
 
 	constructor () {
 		this.array = [];
-	}
+	};
 
 	push = (card : Client_Card) : void => {
 		this.array.push(card);
@@ -28,7 +28,7 @@ class EffectIdle {
 
 	constructor () {
 		this.array = [];
-	}
+	};
 
 	push = (card : Client_Card, desc : number) : void => {
 		this.array.push({
