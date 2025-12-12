@@ -72,10 +72,8 @@
 			cards = duel.cards.get(LOCATION.HAND)!(0);
 			ct = cards.findIndex(i => i.three.element.contains(target));
 			if (ct > -1) {
-				console.log('HAND')
 				const card = cards[ct];
 				const chk = hover.select !== card;
-				console.log(chk)
 				show_off();
 				if (chk) {
 					(card.three.element.children[0] as HTMLElement).style.transform = 'translateY(-30px)';
@@ -88,7 +86,6 @@
 			cards = duel.cards.get(LOCATION.ONFIELD)!(2);
 			ct = cards.findIndex(i => i.three.element.contains(target));
 			if (ct > -1) {
-				console.log('ONFIELD')
 				const card = cards[ct];
 				const chk = hover.select !== card;
 				show_off();
@@ -667,9 +664,7 @@
 			}],
 			[LOCATION.ALL, (tp : number) : Array<Client_Card> => {
 				return Array.from(three.cards.map).map((i) => {
-					if (tp === 2)
-						return i[1].flat();
-					return i[1][tp];
+					return i[0] === LOCATION.PZONE ? [] : tp === 2 ? i[1].flat() : i[1][tp];
 				}).flat();
 			}]
 		]) as Map<number, Function>,
@@ -864,17 +859,17 @@
 
 		animate();
 
-			await duel.draw(0, 8);
-			await duel.draw(1, 8);
-			await duel.to.mzone(0, {
-				location : LOCATION.DECK,
-				seq : 0,
-				zone : 0
-			})
+			// await duel.draw(0, 8);
+			// await duel.draw(1, 8);
+			// await duel.to.mzone(0, {
+			// 	location : LOCATION.DECK,
+			// 	seq : 0,
+			// 	zone : 0
+			// })
 
-			duel.cards.get(LOCATION.ONFIELD)!(2).forEach((card : Client_Card) => {
-				card.activatable.on({flag : 0, desc : 1160});
-			});
+			// duel.cards.get(LOCATION.ONFIELD)!(2).forEach((card : Client_Card) => {
+			// 	card.activatable.on({flag : 0, desc : 1160});
+			// });
 
 		window.addEventListener('resize', three.resize);
 		window.addEventListener('click', hover.click);

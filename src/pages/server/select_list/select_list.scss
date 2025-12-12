@@ -30,7 +30,7 @@
 		flex-wrap: nowrap;
 		background-color: rgba(0, 0, 0, 0.5);
 		border: 1px white solid;
-		.plaid, .posl, .pic {
+		.plaid, .pos, .pic {
 			position: absolute;
 			font-size: max(2vh, 12px);
 			height: 100%;
@@ -63,8 +63,6 @@
 			position: relative;
 			.plaid, .pos {
 				div {
-					height: 60%;
-					width: 60%;
 					border: 2px solid #9ed3ff;
 					display: flex;
 					align-content: center;
@@ -72,7 +70,7 @@
 					justify-items: center;
 					justify-content: center;
 					img {
-						height: 80%;
+						height: 90%;
 						&:hover {
 							cursor: pointer;
 						}
@@ -81,6 +79,18 @@
 						transform-origin: center center;
 						transform: rotateZ(-90deg);
 					}
+				}
+			}
+			.plaid {
+				div {
+					height: 60%;
+					width: 60%;
+				}
+			}
+			.pos {
+				div {
+					height: 90%;
+					width: 90%;
 				}
 			}
 		}

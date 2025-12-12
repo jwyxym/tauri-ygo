@@ -446,10 +446,63 @@ class Tcp {
 							}
 							const title = !!this.select_hint ? mainGame.get.desc(this.select_hint)
 								: mainGame.get.strings.system(560);
+							const cards : Array<Client_Card> = connect.duel.cards.get(LOCATION.ALL)!(2).filter((i : Client_Card) => i.activatable.flag > 0);
+							cards.forEach(i => i.activatable.clear());
 							connect.select.cards.on(title, result, min, max, cancelable);
 							this.select_hint = 0;
 						}],
 						[MSG.SELECT_UNSELECT_CARD, async () => {
+							let pack = to_package<number>(buffer, data, [-1].concat(new Array(4).fill(8)), pos);
+							const cancelable = !!(pack[0] + pack[1]);
+							const min = pack[2];
+							const max = pack[3];
+							let [ct] = to_package<number>(buffer, data, [8], pos + 5);
+							pack = to_package<number>(buffer, data, new Array(ct).fill([32, 8, 8, 8, 8]).flat(), pos + 6);
+							const unselected : Select_Cards = [];
+							for (let j = 0; j < ct; j ++) {
+								const i = j * 5;
+								if (i + 4 >= pack.length) break;
+								const obj : Select_Card = {
+									code : pack[i],
+									tp : to_player(pack[i + 1]),
+									loc : pack[i + 2],
+									seq : pack[i + 3],
+									ct : pack[i + 4]
+								};
+								const card : Client_Card | undefined = to_card(obj.tp, obj.loc, obj.seq, obj.ct);
+								if (card) {
+									obj.card = card;
+									await card.update.code(obj.code);
+								}
+								unselected.push(obj);
+							}
+							const p = pos + 6 + ct * 8;
+							[ct] = to_package<number>(buffer, data, [8], p);
+							pack = to_package<number>(buffer, data, new Array(ct).fill([32, 8, 8, 8, 8]).flat(), p + 1);
+							const selected : Select_Cards = [];
+							for (let j = 0; j < ct; j ++) {
+								const i = j * 5;
+								if (i + 4 >= pack.length) break;
+								const obj : Select_Card = {
+									code : pack[i],
+									tp : to_player(pack[i + 1]),
+									loc : pack[i + 2],
+									seq : pack[i + 3],
+									ct : pack[i + 4]
+								};
+								const card : Client_Card | undefined = to_card(obj.tp, obj.loc, obj.seq, obj.ct);
+								if (card) {
+									obj.card = card;
+									await card.update.code(obj.code);
+								}
+								selected.push(obj);
+							}
+							const title = !!this.select_hint ? mainGame.get.desc(this.select_hint)
+								: mainGame.get.strings.system(560);
+							const cards : Array<Client_Card> = connect.duel.cards.get(LOCATION.ALL)!(2).filter((i : Client_Card) => i.activatable.flag > 0);
+							cards.forEach(i => i.activatable.clear());
+							connect.select.group.on(title, unselected, selected, min, max, cancelable);
+							this.select_hint = 0;
 						}],
 						[MSG.SELECT_CHAIN, async () => {
 							let pack = to_package<number>(buffer, data, [-1, 8, 8, -4, -4], pos);
@@ -494,6 +547,8 @@ class Tcp {
 							const title = !!this.select_hint ? mainGame.get.strings.system(569, mainGame.get.name(this.select_hint))
 								: mainGame.get.strings.system(560);
 							this.select_hint = 0;
+							const cards : Array<Client_Card> = connect.duel.cards.get(LOCATION.ALL)!(2).filter((i : Client_Card) => i.activatable.flag > 0);
+							cards.forEach(i => i.activatable.clear());
 							connect.select.plaids.on(title, connect.duel.plaid.get(place), place, ct);
 						}],
 						[MSG.SELECT_DISFIELD, async () => {
@@ -504,6 +559,8 @@ class Tcp {
 							const title = !!this.select_hint ? mainGame.get.desc(this.select_hint)
 								: mainGame.get.strings.system(570);
 							this.select_hint = 0;
+							const cards : Array<Client_Card> = connect.duel.cards.get(LOCATION.ALL)!(2).filter((i : Client_Card) => i.activatable.flag > 0);
+							cards.forEach(i => i.activatable.clear());
 							connect.select.plaids.on(title, connect.duel.plaid.get(place), place, ct);
 						}],
 						[MSG.SELECT_POSITION, async () => {
@@ -660,6 +717,8 @@ class Tcp {
 					const cur_msg : number = to_package<number>(buffer, data, [8], pos)[0];
 					pos += 1;
 					console.log(cur_msg)
+					if (connect.select.group.chk && cur_msg !== MSG.SELECT_UNSELECT_CARD)
+						connect.select.group.clear();
 					if (msg_funcs.has(cur_msg))
 						await msg_funcs.get(cur_msg)!();
 				}

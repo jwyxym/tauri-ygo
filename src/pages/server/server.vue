@@ -246,6 +246,17 @@
 			/>
 		</transition>
 		<transition name = 'move_up'>
+			<Group_Select_List
+				:title = 'connect.select.group.title'
+				:min = 'connect.select.group.min'
+				:max = 'connect.select.group.max'
+				:list = 'connect.select.group.list'
+				:confirm = 'connect.select.group.confirm'
+				:cancel = 'connect.select.group.cancel'
+				v-if = 'page.duel && connect.select.group.chk'
+			/>
+		</transition>
+		<transition name = 'move_up'>
 			<Card_Select_List
 				:title = 'connect.select.cards.title'
 				:min = 'connect.select.cards.min'
@@ -306,6 +317,7 @@
 	import Avatar from './avatar.vue';
 	import Card_List from './card_list/cards.vue';
 	import Chain_List from './card_list/chains.vue';
+	import Group_Select_List from './select_list/group.vue';
 	import Card_Select_List from './select_list/cards.vue';
 	import Plaid_Select_List from './select_list/plaids.vue';
 	import Pos_Select_List from './select_list/pos.vue';
@@ -401,6 +413,48 @@
 					connect.select.position.pos = 0;
 				}
 			},
+			group : {
+				chk : false,
+				title : '',
+				min : 0,
+				max : 0,
+				cancelable : false,
+				list : {
+					unselected : [] as Select_Cards,
+					selected : [] as Select_Cards
+				},
+				on : (title : string, unselected : Select_Cards, selected : Select_Cards, min : number, max : number, cancelable : boolean) : void => {
+					connect.select.group.title = title;
+					connect.select.group.min = min;
+					connect.select.group.max = max;
+					connect.select.group.list = {
+						unselected : unselected,
+						selected : selected
+					};
+					connect.select.group.cancelable = cancelable;
+					connect.select.group.chk = true;
+				},
+				confirm : async (result : Array<number>) => {
+					console.log('confirm')
+					await tcp!.send.response(result);
+				},
+				cancel : async () => {
+					if (connect.select.group.cancelable)
+					console.log('cancel')
+						await tcp!.send.response(-1);
+				},
+				clear : () : void => {
+					connect.select.group.list.unselected.forEach(i => i.card?.select.off());
+					connect.select.group.list.selected.forEach(i => i.card?.select.off());
+					connect.select.group.chk = false;
+					connect.select.group.list.unselected.length = 0;
+					connect.select.group.list.selected.length = 0;
+					connect.select.group.cancelable = false;
+					connect.select.group.title = '';
+					connect.select.group.min = 0;
+					connect.select.group.max = 0;
+				}
+			},
 			cards : {
 				show : true,
 				title : '',
@@ -454,7 +508,6 @@
 						: (place & (0x60 << 16)) > 0 ? 1
 							: undefined;
 					connect.select.plaids.pzone = (place & 0xc000c000) > 0;
-					console.log(connect.select.plaids.array)
 				},
 				confirm : async (result : { loc : number, seq : number; player : number}) => {
 					if (connect.select.plaids.chk_player !== undefined
