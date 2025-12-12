@@ -47,6 +47,7 @@
 	display: flex;
 	flex-direction: column;
 	align-content: center;
+	color: white;
 	gap: 10px;
 	width: 50vw;
 	height: 70vh;
@@ -56,5 +57,15 @@
 	}
 	&::-webkit-scrollbar {
 		display: none;
+	}
+	.buttons {
+		position: relative;
+		width: 50vw;
+		> div {
+			top: 0;
+			position: absolute;
+			left: 50%;
+			transform: translateX(-50%);
+		}
 	}
 }

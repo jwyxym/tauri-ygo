@@ -25,6 +25,7 @@ use zip::ZipArchive;
 use chrono::{DateTime, Utc};
 
 use trust_dns_resolver::{config::*, Resolver};
+use tauri::{AppHandle, Emitter};
 
 #[derive(Serialize, Clone)]
 struct Pic {
@@ -172,8 +173,8 @@ async fn read_zip(
 				entries.push((name, FileContent::Binary(content)));
 			} else if conf_regex.is_match(&name) {
 				let mut content: String = String::new();
-				let _ = file.read_to_string(&mut content)
-					.map_err(|e| e.to_string());
+				file.read_to_string(&mut content)
+					.map_err(|e| e.to_string())?;
 				entries.push((name, FileContent::Text(content)));
 			}
 		} else {
@@ -184,7 +185,7 @@ async fn read_zip(
 						&& !entries.iter().any(|(x, _)| x.to_string() == file_name)
 					{
 						let mut content: Vec<u8> = Vec::new();
-						let _ = file.read_to_end(&mut content).map_err(|e| e.to_string());
+						file.read_to_end(&mut content).map_err(|e| e.to_string())?;
 						entries.push((name, FileContent::Binary(content)));
 					}
 				}
@@ -294,7 +295,7 @@ async fn response_time(urls: Vec<String>) -> Result<Vec<Resp>, String> {
 						url: url.clone(),
 						state: response.status().as_u16(),
 						time: start.elapsed().as_millis()
-					}).map_err(|e| e.to_string());
+					});
 				}
 			}
 		});
@@ -309,6 +310,7 @@ async fn response_time(urls: Vec<String>) -> Result<Vec<Resp>, String> {
 
 #[tauri::command]
 async fn download(
+	app: AppHandle,
 	url: String,
 	path: String,
 	name: String,
@@ -328,6 +330,13 @@ async fn download(
 				}
 			}
 		}
+		if let Some(content_length) = response.headers().get("content-length") {
+       		if let Ok(size) = content_length.to_str() {
+				app.emit("download-started", size).map_err(|e| e.to_string())?;
+			}
+		} else {
+			app.emit("download-started", "0").map_err(|e| e.to_string())?;
+		}
 		if file_name.len() == 0 {
 			let mut rng = rand::rng();
 			let random_number = rng.random_range(10_000_000..=100_000_000);
@@ -339,10 +348,19 @@ async fn download(
 		let file_path: PathBuf = Path::new(&path).join(&file_name);
 		let mut body = response.into_body();
 		let mut reader = body.as_reader();
-		let mut bytes = Vec::new();
-		let _ = reader.read_to_end(&mut bytes).map_err(|e| e.to_string());
+
 		let mut file: File = File::create(&file_path).map_err(|e| e.to_string())?;
-		let _ = file.write_all(&bytes).map_err(|e| e.to_string());
+		let mut buffer = vec![0u8; 8192];
+		loop {
+			let bytes_read = reader.read(&mut buffer)
+				.map_err(|e| e.to_string())?;
+			app.emit("download-progress", 8192).map_err(|e| e.to_string())?;
+			if bytes_read == 0 {
+				break;
+			}
+			file.write_all(&buffer[..bytes_read])
+				.map_err(|e| e.to_string())?;
+		}
 		Ok(file_name)
 	} else {
 		Err(format!("{}", response.status()))

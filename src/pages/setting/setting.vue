@@ -193,7 +193,31 @@
 					:rules = 'download.name_rule'
 					v-model = 'download.name'
 				/>
-				<Button_List :loading = 'download.chk' :confirm = 'download.custom.confirm' :cancel = 'download.custom.cancel'></Button_List>
+				<TransitionGroup tag = 'div' name = 'opacity' class = 'buttons'>
+					<Button_List
+						:loading = 'download.chk'
+						:confirm = 'download.custom.confirm'
+						:cancel = 'download.custom.cancel'
+						v-show = 'download.size < 0'
+						:key = '0'
+					/>
+					<div
+						:key = '1'
+						v-show = 'download.size === 0'
+					>
+						{{ mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_PROGRESS) }}&nbsp;
+						{{ (download.progress / (1024 * 1024)).toFixed(2) }}
+						MB
+					</div>
+					<div
+						:key = '2'
+						v-show = 'download.size > 0'
+					>
+						{{ mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_PROGRESS) }}&nbsp;
+						{{ Math.min((download.progress / download.size) * 100, 99.99).toFixed(2) }}
+						%
+					</div>
+				</TransitionGroup>
 			</var-form>
 		</var-popup>
 	</var-popup>
@@ -206,6 +230,7 @@
 	import { I18N_KEYS } from '../../script/language/i18n';
 	import * as CONSTANT from '../../script/constant';
 	import fs from '../../script/fs';
+	import listen from '../../script/post/listen';
 
 	import toast from '../../script/toast';
 	import Dialog from '../varlet/dialog';
@@ -238,6 +263,9 @@
 	})
 
 	const download = reactive({
+		size : -1,
+		progress : 0,
+		now : 0,
 		chk : false,
 		url : '',
 		name : '',
@@ -259,7 +287,17 @@
 			}
 			download.chk = true;
 			toast.info(mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_START));
+			const d = {
+				start : await listen.download_start((i : number) => {
+					download.size = i;
+				}),
+				progress : await listen.download_progress((i : number) => {
+					download.progress += i;
+				})
+			};
 			const path = await fs.write.ypk(url, name);
+			d.start();
+			d.progress();
 			if (path.length == 2) {
 				mainGame.push.system(CONSTANT.KEYS.SETTING_LOADING_EXPANSION, path[1]);
 				const load = await mainGame.get.expansions();
@@ -271,6 +309,10 @@
 				toast.info(mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_COMPELETE));
 			}
 			download.chk = false;
+			setTimeout(() => {
+				download.size = -1;
+				download.progress = 0;
+			}, 200);
 			return path.length == 2;
 		},
 		custom : {
