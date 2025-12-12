@@ -597,32 +597,32 @@
 		cards : new Map([
 			[LOCATION.HAND, (tp : number) : Array<Client_Card> => {
 				if (tp === 2)
-					return [...three.cards.map.get(LOCATION.HAND)![0], ...three.cards.map.get(LOCATION.HAND)![1]];
+					return three.cards.map.get(LOCATION.HAND)!.flat();
 				return three.cards.map.get(LOCATION.HAND)![tp];
 			}],
 			[LOCATION.DECK, (tp : number) : Array<Client_Card> => {
 				if (tp === 2)
-					return [...three.cards.map.get(LOCATION.DECK)![0], ...three.cards.map.get(LOCATION.DECK)![1]];
+					return three.cards.map.get(LOCATION.DECK)!.flat();
 				return three.cards.map.get(LOCATION.DECK)![tp];
 			}],
 			[LOCATION.EXTRA, (tp : number) : Array<Client_Card> => {
 				if (tp === 2)
-					return [...three.cards.map.get(LOCATION.EXTRA)![0], ...three.cards.map.get(LOCATION.EXTRA)![1]];
+					return three.cards.map.get(LOCATION.EXTRA)!.flat();
 				return three.cards.map.get(LOCATION.EXTRA)![tp];
 			}],
 			[LOCATION.FZONE, (tp : number) : Array<Client_Card> => {
 				if (tp === 2)
-					return [...three.cards.map.get(LOCATION.FZONE)![0], ...three.cards.map.get(LOCATION.FZONE)![1]];
+					return three.cards.map.get(LOCATION.FZONE)!.flat();
 				return three.cards.map.get(LOCATION.FZONE)![tp];
 			}],
 			[LOCATION.GRAVE, (tp : number) : Array<Client_Card> => {
 				if (tp === 2)
-					return [...three.cards.map.get(LOCATION.GRAVE)![0], ...three.cards.map.get(LOCATION.GRAVE)![1]];
+					return three.cards.map.get(LOCATION.GRAVE)!.flat();
 				return three.cards.map.get(LOCATION.GRAVE)![tp];
 			}],
 			[LOCATION.REMOVED, (tp : number) : Array<Client_Card> => {
 				if (tp === 2)
-					return [...three.cards.map.get(LOCATION.REMOVED)![0], ...three.cards.map.get(LOCATION.REMOVED)![1]];
+					return three.cards.map.get(LOCATION.REMOVED)!.flat();
 				return three.cards.map.get(LOCATION.REMOVED)![tp];
 			}],
 			[LOCATION.MZONE, (tp : number) : Array<Client_Card> => {
@@ -658,18 +658,17 @@
 			}],
 			[LOCATION.ONFIELD, (tp : number) : Array<Client_Card> => {
 				if (tp === 2)
-					return [
-						...duel.cards.get(LOCATION.MZONE)!(0),
-						...duel.cards.get(LOCATION.SZONE)!(0),
-						...duel.cards.get(LOCATION.MZONE)!(1),
-						...duel.cards.get(LOCATION.SZONE)!(1)
-					];
-				return [...duel.cards.get(LOCATION.MZONE)!(tp), ...duel.cards.get(LOCATION.SZONE)!(tp)];
+					return duel.cards.get(LOCATION.MZONE)!(0).concat(
+						duel.cards.get(LOCATION.SZONE)!(0),
+						duel.cards.get(LOCATION.MZONE)!(1),
+						duel.cards.get(LOCATION.SZONE)!(1)
+					);
+				return duel.cards.get(LOCATION.MZONE)!(tp).concat(duel.cards.get(LOCATION.SZONE)!(tp));
 			}],
 			[LOCATION.ALL, (tp : number) : Array<Client_Card> => {
 				return Array.from(three.cards.map).map((i) => {
 					if (tp === 2)
-						return [...i[1][0], ...i[1][1]];
+						return i[1].flat();
 					return i[1][tp];
 				}).flat();
 			}]
@@ -684,7 +683,7 @@
 							const result = three.cards.map.get(i.seq[1]);
 							if (!result)
 								return undefined;
-							return [...result[0], ...result[1]];
+							return result.flat();
 						})();
 					if (cards) {
 						const card = cards[cards.length - 1];

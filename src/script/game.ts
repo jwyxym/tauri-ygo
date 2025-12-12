@@ -46,8 +46,8 @@ class Game {
 	i18n = CONSTANT.LANGUAGE.Zh_CN;
 	interval = -1;
 	interval_ct = 0;
-	unknown : Card = new Card([...new Array(11).fill(0), ...new Array(19).fill('')]);
-	back : Card = new Card([...new Array(11).fill(0), ...new Array(19).fill('')]);
+	unknown : Card = new Card(new Array(11).fill(0).concat(new Array(19).fill('')));
+	back : Card = new Card(new Array(11).fill(0).concat(new Array(19).fill('')));
 	font = document.createElement('style');
 
 	private lflist_now : string = '';
@@ -240,37 +240,37 @@ class Game {
 				return value;
 			},
 			race : (data : number) : string => {
-				return [...this.strings.get(CONSTANT.KEYS.RACE)!]
+				return Array.from(this.strings.get(CONSTANT.KEYS.RACE)!)
 					.filter(i => (i[0] & data) === i[0])
 					.map(i => i[1])
 					.join('|');
 			},
 			attribute : (data : number) : string => {
-				return [...this.strings.get(CONSTANT.KEYS.ATTRIBUTE)!]
+				return Array.from(this.strings.get(CONSTANT.KEYS.ATTRIBUTE)!)
 					.filter(i => (i[0] & data) === i[0])
 					.map(i => i[1])
 					.join('|');
 			},
 			ot : (data : number) : string => {
-				return [...this.strings.get(CONSTANT.KEYS.OT)!]
+				return Array.from(this.strings.get(CONSTANT.KEYS.OT)!)
 					.filter(i => (i[0] & data) === i[0])
 					.map(i => i[1])
 					.join('|');
 			},
 			type : (data : number) : string => {
-				return [...this.strings.get(CONSTANT.KEYS.TYPE)!]
+				return Array.from(this.strings.get(CONSTANT.KEYS.TYPE)!)
 					.filter(i => (i[0] & data) === i[0])
 					.map(i => i[1])
 					.join('|');
 			},
 			category : (data : number) : string => {
-				return [...this.strings.get(CONSTANT.KEYS.CATEGORY)!]
+				return Array.from(this.strings.get(CONSTANT.KEYS.CATEGORY)!)
 					.filter(i => (i[0] & data) === i[0])
 					.map(i => i[1])
 					.join('|');
 			},
 			link : (data : number) : string => {
-				return [...this.strings.get(CONSTANT.KEYS.LINK)!]
+				return Array.from(this.strings.get(CONSTANT.KEYS.LINK)!)
 					.filter(i => (i[0] & data) === i[0])
 					.map(i => i[1])
 					.join('|');
@@ -342,7 +342,7 @@ class Game {
 		},
 		pic : async (deck : Array<number> | Deck) : Promise<void> => {
 			
-			deck = deck instanceof Deck ? [...deck.main, ...deck.side, ...deck.extra] : deck;
+			deck = deck instanceof Deck ? deck.main.concat(deck.side, deck.extra) : deck;
 			const filter = (i : number, v : number, a : Array<number>) => {
 				const card = this.cards.get(i);
 				return a.indexOf(i) === v && card != undefined && card.pic === '';

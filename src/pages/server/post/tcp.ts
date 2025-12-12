@@ -424,7 +424,7 @@ class Tcp {
 							this.select_hint = 0;
 						}],
 						[MSG.SELECT_CARD, async () => {
-							const [_, cancelable, min, max, ct] = to_package<number>(buffer, data, new Array(5).fill(8), pos);
+							const [cancelable, min, max, ct] = to_package<number>(buffer, data, [-1].concat(new Array(4).fill(8)), pos);
 							const pack = to_package<number>(buffer, data, new Array(ct).fill([32, 8, 8, 8, 8]).flat(), pos + 5);
 							const result : Select_Cards = [];
 							for (let j = 0; j < ct; j ++) {
@@ -522,7 +522,7 @@ class Tcp {
 
 						}],
 						[MSG.MOVE, async () => {
-							const pack = to_package<number>(buffer, data, [32, ...new Array(8).fill(8), 32], pos);
+							const pack = to_package<number>(buffer, data, [32].concat(new Array(8).fill(8), [32]), pos);
 							const code = pack[0];
 							const from = {
 								player : to_player(pack[1]),
@@ -614,7 +614,7 @@ class Tcp {
 							})();
 						}],
 						[MSG.CHAINING, async () => {
-							const pack = to_package<number>(buffer, data, [32, ...new Array(7).fill(8), 32], pos);
+							const pack = to_package<number>(buffer, data, [32].concat(new Array(7).fill(8), [32]), pos);
 							const code = pack[0];
 							const player = to_player(pack[1]);
 							const loc = pack[2];
@@ -735,7 +735,7 @@ class Tcp {
 			],
 			[STOC.JOIN_GAME,
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
-					const pack = to_package<number>(buffer, data, [32, ...new Array(5).fill(8), -3, 32, 8, 8, 16], pos);
+					const pack = to_package<number>(buffer, data, [32].concat(new Array(5).fill(8), [-3, 32, 8, 8, 16]), pos);
 					connect.home.lflist = pack[0];
 					connect.home.rule = pack[1];
 					connect.home.mode = pack[2];
@@ -863,10 +863,20 @@ class Tcp {
 		},
 		ready : async (deck : Deck) : Promise<void> => {
 			const obj : { [key : number | string] : Message<number> } = {};
-			obj[0] = new Message([...deck.main, ...deck.extra].length, 32);
-			obj[1] = new Message([...deck.side].length, 32);
-			for (const [v, i] of [...deck.main, ...deck.extra, ...deck.side].entries()) {
-				obj[v + 2] = new Message(i, 32);
+			obj[0] = new Message((deck.main.length + deck.extra.length), 32);
+			obj[1] = new Message(deck.side.length, 32);
+			let v = 2;
+			for (const i of deck.main) {
+    			obj[v] = new Message(i, 32);
+				v ++;
+			}
+			for (const i of deck.extra) {
+				obj[v] = new Message(i, 32);
+				v ++;
+			}
+			for (const i of deck.side) {
+				obj[v] = new Message(i, 32);
+				v ++;
 			}
 			await this.send.on(CTOS.UPDATE_DECK, obj);
 			await this.send.on(CTOS.HS_READY);

@@ -337,7 +337,7 @@
 				code = typeof code === 'string' ? Number(code) : code;
 				const card : Card = mainGame.get.card(code);
 				if (card.is_token()) return;
-				const cards = [...deck.main, ...deck.extra, ...deck.side];
+				const cards = deck.main.concat(deck.extra, deck.side);
 				const ct = search.info.lflist ? mainGame.get.lflist(search.info.lflist, card.id) as number : mainGame.get.system(CONSTANT.KEYS.SETTING_CT_CARD) as number;
 				if (cards.filter(i => i === code).length >= ct) {
 					toast.error(mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_MAX, ct.toString()));
@@ -357,7 +357,7 @@
 				code = typeof code === 'string' ? Number(code) : code;
 				const card : Card = mainGame.get.card(code);
 				if (card.is_token()) return;
-				const cards = [...deck.main, ...deck.extra, ...deck.side];
+				const cards = deck.main.concat(deck.extra, deck.side);
 				const ct = search.info.lflist ? mainGame.get.lflist(search.info.lflist, card.id) as number : 3;
 				if (cards.filter(i => i === code).length >= ct) {
 					toast.error(mainGame.get.text(I18N_KEYS.DECK_RULE_DECK_MAX, ct.toString()));
@@ -491,7 +491,7 @@
 
 	onBeforeMount(async () : Promise<void> => {
 		const d = props.this_deck;
-		await mainGame.load.pic([...d.main, ...d.extra, ...d.side]);
+		await mainGame.load.pic(deck.main.concat(deck.extra, deck.side));
 		if (props.this_deck) {
 			deck.main = d.main;
 			deck.extra = d.extra;

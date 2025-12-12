@@ -55,7 +55,7 @@
 		confirm : () => {
 			if (page.selects.length < page.min)
 				props.cancel(false, page.selects);
-			props.confirm([page.selects.length, ...page.selects.map(i => (props.cards as Select_Cards).indexOf(i))]);
+			props.confirm([page.selects.length].concat(page.selects.map(i => (props.cards as Select_Cards).indexOf(i))));
 		},
 		cancel : () => {
 			page.selects.forEach(i => i.card?.select.off());

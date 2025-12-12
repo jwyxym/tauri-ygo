@@ -195,7 +195,7 @@
 				list.select = -1;
 				list.loading.push(v);
 				const deck = list.decks[v];
-				await mainGame.load.pic([...deck.extra, ...deck.main, ...deck.side]);
+				await mainGame.load.pic(deck.main.concat(deck.extra, deck.side));
 				setTimeout(() => {
 					list.select = v;
 					list.loading.splice(list.loading.indexOf(v), 1);
