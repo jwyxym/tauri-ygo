@@ -288,6 +288,10 @@
 				v-if = 'page.duel && connect.select.position.pos > 0 && connect.select.position.code > 0'
 			/>
 		</transition>
+		<Phase
+			v-if = 'page.duel && connect.deck_count.length > 0'
+			@update:phase = 'connect.phase = $event'
+		/>
 	</div>
 </template>
 <script setup lang = 'ts'>
@@ -315,6 +319,7 @@
 	import Duel from './duel.vue';
 	import RPS from './rps.vue';
 	import Avatar from './avatar.vue';
+	import Phase from './phase.vue';
 	import Card_List from './card_list/cards.vue';
 	import Chain_List from './card_list/chains.vue';
 	import Group_Select_List from './select_list/group.vue';
@@ -391,6 +396,7 @@
 		player : new Array(4).fill({ name : '' }) as Array<TCP.Player>,
 		deck_count : [] as Array<number>,
 		duel : {},
+		phase : {},
 		cards : [] as Array<number>,
 		chains : [] as Array<{ player : number; code : string | number; }>,
 		select : {
@@ -756,6 +762,8 @@
 			connect.is_first.chk = undefined;
 			connect.chat.send_list.length = 0;
 			connect.chat.send_key = -1;
+			connect.duel = {};
+			connect.phase = {};
 			for (const i of Object.values(connect.idle))
 				i.clear();
 		}

@@ -240,6 +240,7 @@ const QUERY = {
 };
 
 const PHASE = {
+	NONE : 0,
 	DRAW : 0x01,
 	STANDBY : 0x02,
 	MAIN1 : 0x04,
