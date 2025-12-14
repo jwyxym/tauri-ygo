@@ -78,13 +78,6 @@ const FILES = {
 	TEXTURE_BTN_SUMMON : ['btn_summon.png', 'btn_hover_summon.png'],
 	TEXTURE_BACK : ['backI.jpg', 'backII.jpg'],
 	TEXTURE_DECK : ['deck.png', 'deck_ex.png'],
-	TEXTURE_MENU : [
-		'menu_I.jpg',
-		'menu_II.jpg',
-		'menu_III.jpg',
-		'menu_IV.jpg',
-		'menu_V.jpg'
-	],
 	STRING_CONF : new Map([
 		['', 'strings.conf'],
 		[LANGUAGE.Zh_CN, 'strings-zh-CN.conf']
