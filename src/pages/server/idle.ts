@@ -1,4 +1,4 @@
-import Client_Card from './post/client_card';
+import Client_Card from './scene/client_card';
 
 class Idle {
 	array : Array<Client_Card>;

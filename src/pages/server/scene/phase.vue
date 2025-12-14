@@ -11,9 +11,9 @@
 </template>
 <script setup lang = 'ts'>
 	import { onBeforeMount, reactive } from 'vue';
-	import mainGame from '../../script/game';
-	import { PHASE } from './post/network';
-	import { I18N_KEYS } from '../../script/language/i18n';
+	import mainGame from '../../../script/game';
+	import { PHASE } from '../post/network';
+	import { I18N_KEYS } from '../../../script/language/i18n';
 
 	const page = reactive({
 		player : 0,

@@ -2,7 +2,7 @@ import Card, { TYPE } from '../../../script/card';
 import mainGame from '../../../script/game';
 import * as CONSTANT from '../../../script/constant';
 import gsap from '../../../script/gsap';
-import { COMMAND, EDESC, POS } from './network';
+import { COMMAND, EDESC, POS } from '../post/network';
 
 import * as CSS from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 

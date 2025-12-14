@@ -14,12 +14,12 @@
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { onBeforeMount, onMounted, onUnmounted, reactive, TransitionGroup, ref, watch } from 'vue';
+	import { onBeforeMount, onMounted, onUnmounted, reactive, TransitionGroup, watch } from 'vue';
 
-	import * as CONSTANT from '../../script/constant';
-	import mainGame from '../../script/game';
-	import { I18N_KEYS } from '../../script/language/i18n';
-	import toast from '../../script/toast';
+	import * as CONSTANT from '../../../script/constant';
+	import mainGame from '../../../script/game';
+	import { I18N_KEYS } from '../../../script/language/i18n';
+	import toast from '../../../script/toast';
 
 	const page = reactive({
 		height : 0,

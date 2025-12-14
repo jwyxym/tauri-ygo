@@ -29,7 +29,7 @@
 	import mainGame from '../../../script/game';
 	import { FILES } from '../../../script/constant';
 	import { POS } from '../post/network';
-	import Plaid from '../post/plaid';
+	import Plaid from '../scene/plaid';
 
 	import Button_List from '../../varlet/button_list.vue';
 

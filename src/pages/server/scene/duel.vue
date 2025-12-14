@@ -7,14 +7,14 @@
 	import * as THREE from 'three';
 	import * as CSS from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 	
-	import mainGame from '../../script/game';
-	import * as CONSTANT from '../../script/constant';
-	import { TYPE } from '../../script/card';
-	import { LOCATION, POS } from './post/network';
-	import Client_Card from './post/client_card';
-	import Plaid from './post/plaid';
-	import { Plaids } from './post/tcp';
-	import gsap from '../../script/gsap';
+	import mainGame from '../../../script/game';
+	import * as CONSTANT from '../../../script/constant';
+	import { TYPE } from '../../../script/card';
+	import { LOCATION, POS } from '../post/network';
+	import Client_Card from './client_card';
+	import Plaid from './plaid';
+	import { Plaids } from '../post/tcp';
+	import gsap from '../../../script/gsap';
 
 	interface Axis {
 		x : number,

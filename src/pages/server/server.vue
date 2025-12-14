@@ -316,10 +316,11 @@
 	import Picker from '../varlet/picker';
 
 	import Deck from '../deck/deck';
-	import Duel from './duel.vue';
-	import RPS from './rps.vue';
-	import Avatar from './avatar.vue';
-	import Phase from './phase.vue';
+	import Duel from './scene/duel.vue';
+	import RPS from './scene/rps.vue';
+	import Avatar from './scene/avatar.vue';
+	import Phase from './scene/phase.vue';
+	import Plaid from './scene/plaid';
 	import Card_List from './card_list/cards.vue';
 	import Chain_List from './card_list/chains.vue';
 	import Group_Select_List from './select_list/group.vue';
@@ -327,7 +328,6 @@
 	import Plaid_Select_List from './select_list/plaids.vue';
 	import Pos_Select_List from './select_list/pos.vue';
 	import { LOCATION } from './post/network';
-	import Plaid from './post/plaid';
 	import { Idle, EffectIdle } from './idle';
 
 	let tcp : Tcp | null = null;

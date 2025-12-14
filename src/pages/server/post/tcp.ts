@@ -10,8 +10,8 @@ import { I18N_KEYS } from '../../../script/language/i18n';
 import toast from '../../../script/toast';
 import Deck from '../../deck/deck';
 import { CTOS, STOC, LOCATION, MSG, ERROR, PLAYERCHANGE, HINT, QUERY, PHASE, COMMAND, EDESC, POS } from './network';
-import Client_Card from './client_card';
-import Plaid from './plaid';
+import Client_Card from '../scene/client_card';
+import Plaid from '../scene/plaid';
 import { Idle } from '../idle';
 
 interface Player {
