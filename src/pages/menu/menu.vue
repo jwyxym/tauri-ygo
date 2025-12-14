@@ -44,7 +44,7 @@
 			hour : '',
 			minute : '',
 			second : '',
-			interval : null as null | number
+			interval : null as null | NodeJS.Timeout
 		},
 		select : -1,
 		menu : [I18N_KEYS.MENU_SINGLE, I18N_KEYS.MENU_CONENCT, I18N_KEYS.MENU_DECK, I18N_KEYS.MENU_SETTING, I18N_KEYS.MENU_EXIT],
