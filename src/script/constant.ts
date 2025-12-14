@@ -105,7 +105,9 @@ const URL = {
 		]
 	]),
 	VERSION : 'https://web-api.gitcode.com/api/v2/projects/jwyxym%2Ftauri-ygo/releases?repoId=jwyxym%252Ftauri-ygo',
-	VERSION_HEAD : [['Referer', 'https://gitcode.com/']] as Array<[string, string]>
+	VERSION_HEAD : [['Referer', 'https://gitcode.com/']] as Array<[string, string]>,
+	MYCARD_NEWS : 'https://sapi.moecube.com:444/apps.json',
+	NEWS_URL : 'https://ygobbs2.com/t/'
 }
 
 const KEYS = {

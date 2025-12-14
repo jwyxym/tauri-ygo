@@ -1,19 +1,33 @@
 .menu {
 	color: white;
 	font-size: max(7vh, 16px);
-	h1 {
+	.time {
 		position: fixed;
-		color: white;
-		font-size: max(14vh, 48px);
 		transform: translate(10vw, 5vh);
-		text-shadow:
-			0 0 5px aqua,
-			0 0 10px aqua,
-			0 0 20px aqua,
-			0 0 40px aqua;
+		top: 0;
+		left: 0;
+		display: flex;
+		flex-direction: column;
+		align-content: center;
+		align-items: center;
+		span {
+			text-shadow:
+				0 0 5px aqua,
+				0 0 10px aqua,
+				0 0 20px aqua,
+				0 0 40px aqua;
+		}
+		span:nth-child(1) {
+			font-size: max(14vh, 48px);
+			+ span {
+				font-size: max(5vh, 12px);
+			}
+		}
 	}
 	.menu-items {
 		position: fixed;
+		top: 0;
+		left: 0;
 		transform: translateX(70vw);
 		height: 90vh;
 		display: grid;
@@ -30,6 +44,8 @@
 	}
 	.menu-pointer {
 		position: fixed;
+		top: 0;
+		left: 0;
 		text-shadow:
 			0 0 5px aqua,
 			0 0 10px aqua,

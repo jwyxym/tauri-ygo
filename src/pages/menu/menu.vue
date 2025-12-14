@@ -1,8 +1,11 @@
 <template>
 	<div class = 'menu font-menu'>
-		<h1>
-			{{ page.time.hour }} : {{ page.time.minute }} : {{ page.time.second }}
-		</h1>
+		<div class = 'time'>
+			<span>
+				{{ page.time.hour }} : {{ page.time.minute }} : {{ page.time.second }}
+			</span>
+			<span>{{ page.time.year }} - {{ page.time.month }} - {{ page.time.day }}</span>
+		</div>
 		<div class = 'menu-items'>
 			<span
 				v-for = '(i, v) in page.menu'
@@ -12,10 +15,11 @@
 			>{{ mainGame.get.text(i) }}</span>
 		</div>
 		<div class = 'menu-pointer'
-			:style = "{ '--x' : `${page.pointer[0]}px`, '--y' : `${page.pointer[1]}px` }"
+			:style = "{ '--x' : `${page.pointer[0] + 5}px`, '--y' : `${page.pointer[1]}px` }"
 		>
 			<span>&lt;</span>
 		</div>
+		<News/>
 	</div>
 </template>
 <script setup lang = 'ts'>
@@ -23,8 +27,9 @@
 
 	import mainGame from '../../script/game';
 	import { I18N_KEYS } from "../../script/language/i18n";
-
 	import position from "../../script/position";
+
+	import News from "./news.vue";
 
 	const props = defineProps(['select']);
 
@@ -33,6 +38,9 @@
 	const page = reactive({
 		time : {
 			y : -1,
+			year : '',
+			month : '',
+			day : '',
 			hour : '',
 			minute : '',
 			second : '',
@@ -96,18 +104,25 @@
 		window.addEventListener('keydown', page.keydown);
 		const time = () => {
 			const now = new Date();
+			const year = now.getFullYear().toString();
+			const month = (now.getMonth() + 1).toString();
+			const day = now.getDate().toString();
 			const hour = now.getHours().toString();
 			const minute = now.getMinutes().toString();
 			const second = now.getSeconds().toString();
+			page.time.year = `${year.length > 1 ? '' : '0'}${year}`;
+			page.time.month = `${month.length > 1 ? '' : '0'}${month}`;
+			page.time.day = `${day.length > 1 ? '' : '0'}${day}`;
 			page.time.hour = `${hour.length > 1 ? '' : '0'}${hour}`;
 			page.time.minute = `${minute.length > 1 ? '' : '0'}${minute}`;
 			page.time.second = `${second.length > 1 ? '' : '0'}${second}`;
-		}
+		};
 		time();
 		page.time.interval = setInterval(time, 1000);
 	})
 
-	onMounted(()=> {
+	onMounted(async () => {
+		await mainGame.sleep(200);
 		page.select = 0;
 	});
 
