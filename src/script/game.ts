@@ -340,15 +340,15 @@ class Game {
 		deck : async () : Promise<Array<Deck>> => {
 			return await fs.read.ydk();
 		},
-		pic : async (deck : Array<number> | Deck) : Promise<void> => {
-			
+		pic : async (deck : Array<number> | Deck) : Promise<number> => {
+			const data = Date.now();
 			deck = deck instanceof Deck ? deck.main.concat(deck.side, deck.extra) : deck;
 			const filter = (i : number, v : number, a : Array<number>) => {
 				const card = this.cards.get(i);
 				return a.indexOf(i) === v && card != undefined && card.pic === '';
 			}
 			deck = deck.filter(filter);
-			if (deck.length === 0) return;
+			if (deck.length === 0) return 0;
 			const load = (await this.get.expansions()).loading;
 			for (const i of load.filter(i => i.match(CONSTANT.REG.ZIP))) {
 				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(i, deck);
@@ -369,7 +369,7 @@ class Game {
 				}
 			}
 			deck = deck.filter(filter);
-			if (deck.length === 0) return;
+			if (deck.length === 0) return Date.now() - data;
 			const [pics, unknow] = await fs.read.pics(deck);
 			for (const i of pics) {
 				this.cards.get(i.code)!.update_pic(i.url!);
@@ -377,6 +377,7 @@ class Game {
 			for (const code of unknow) {
 				this.cards.get(code)!.update_pic(this.get.textures(CONSTANT.FILES.TEXTURE_UNKNOW) as string | undefined ?? '');
 			}
+			return Date.now() - data;
 		},
 		card : async () : Promise<void> => {
 			//读取servers.conf
@@ -867,8 +868,8 @@ class Game {
 		return CONSTANT.SYSTEM === 'windows';
 	};
 
-	sleep = async (time : number) : Promise<void> => {
-		return new Promise(resolve => setTimeout(resolve, time));
+	sleep = async (time : number, reduce : number = 0) : Promise<void> => {
+		return new Promise(resolve => setTimeout(resolve, Math.max(0, time - reduce)));
 	}
 };
 

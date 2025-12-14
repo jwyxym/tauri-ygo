@@ -368,7 +368,7 @@
 		},
 		exit : async () : Promise<void> => {
 			page.server = false;
-			await (new Promise(resolve => setTimeout(resolve, 200)));
+			await mainGame.sleep(200);
 			props.select.menu();
 		},
 		connect : async () : Promise<void> => {
@@ -640,7 +640,6 @@
 			if (connect.deck && connect.player.filter(i => i.ready).length === (connect.home.mode === 2 ? 4 : 2)) {
 				page.loading = true;
 				await tcp!.send.start();
-				await mainGame.load.pic(connect.deck);
 			} else if (!connect.deck)
 				toast.error(mainGame.get.text(I18N_KEYS.SERVER_DECK_ERROR))
 			else
@@ -827,13 +826,14 @@
 		if (![0, 1, 2].includes(n)) return;
 		const on = async () => {
 			page.server = false;
-			await (new Promise(resolve => setTimeout(resolve, 200)));
+			await mainGame.sleep(200);
 			page.wait = true;
 			page.loading = false;
 		};
 		const start = async () => {
 			page.wait = false;
-			await (new Promise(resolve => setTimeout(resolve, 200)));
+			console.log(connect.deck)
+			await mainGame.sleep(200, await mainGame.load.pic(connect.deck ?? []));
 			page.duel = true;
 			page.loading = false;
 		};
@@ -841,7 +841,7 @@
 			page.wait = false;
 			page.duel = false;
 			page.chat.chk = false;
-			await (new Promise(resolve => setTimeout(resolve, 200)));
+			await mainGame.sleep(200);
 			page.server = true;
 			connect.clear();
 			page.loading = false;

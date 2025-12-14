@@ -49,13 +49,19 @@
 </script>
 <style scoped lang = 'scss'>
 	.phase {
+		width: 100vw;
 		color: white;
 		position: fixed;
 		left: 50%;
 		top: 50%;
-		font-size: 20vh;
+		font-size: min(20vh, 102px);
 		transform: translate(-50%, -50%);
 		z-index: 10;
+		display: grid;
+		justify-content: center;
+		justify-items: center;
+		align-content: center;
+		align-items: center;
 	}
 
 	.self {
@@ -73,11 +79,11 @@
 		}
 
 		&-enter-from {
-			transform: translate(-200%, -50%);
+			transform: translate(-200vw, -50%);
 		}
 
 		&-leave-to {
-			transform: translate(200%, -50%);
+			transform: translate(200vw, -50%);
 		}
 
 		&-enter-to,
