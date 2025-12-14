@@ -9,6 +9,7 @@ import invoke, { Pic } from './post/invoke';
 
 import Deck from '../pages/deck/deck';
 import { I18N_KEYS } from './language/i18n';
+import SQL from './sql';
 
 interface File {
 	name : string;
@@ -99,9 +100,9 @@ class Fs {
 			let p = '';
 			let result : Array<Array<string | number>> | undefined = undefined;
 			try {
-				p = await path.join(CONSTANT.DIRS.CACHE, `${Math.random().toString().slice(2)}.cdb`)
-				if (await(this.write.file(p, file)))
-					result = await this.read.database(p);
+				const cdb = await SQL.find(file);
+				if (cdb)
+					result = cdb.values as Array<Array<string | number>>;
 			} catch (error) {
 				this.write.log(error);
 			} finally {
