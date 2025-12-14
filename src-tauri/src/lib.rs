@@ -354,10 +354,10 @@ async fn download(
 		loop {
 			let bytes_read = reader.read(&mut buffer)
 				.map_err(|e| e.to_string())?;
-			app.emit("download-progress", 8192).map_err(|e| e.to_string())?;
 			if bytes_read == 0 {
 				break;
 			}
+			app.emit("download-progress", 8192).map_err(|e| e.to_string())?;
 			file.write_all(&buffer[..bytes_read])
 				.map_err(|e| e.to_string())?;
 		}
