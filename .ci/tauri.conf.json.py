@@ -24,7 +24,8 @@ tauri_config = {
 		],
 		"security" : {
 			"csp" : {
-				"img-src" : "'self' asset: http: https: blob: data:"
+				"img-src" : "'self' asset: http: https: blob: data:",
+                "script-src" : "'self' 'wasm-unsafe-eval'"
 			},
 			"assetProtocol" : {
 				"enable" : True,
