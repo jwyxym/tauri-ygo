@@ -4,7 +4,9 @@
 	"version": "0.1.0",
 	"type": "module",
 	"scripts": {
-		"copy": "xcopy src-tauri\\android-custom\\ src-tauri\\gen\\android\\app\\src\\main /s /Y /e /I",
+		"copy:cmd": "xcopy src-tauri\\android-custom\\ src-tauri\\gen\\android\\app\\src\\main /s /Y /e /I",
+		"copy:sh": "cp -r src-tauri/android-custom/* src-tauri/gen/android/app/src/main/",
+		"icon": "npm run tauri icon -p src-tauri/icons/icon.jpg",
 		"dev": "vite",
 		"build": "vite build",
 		"preview": "vite preview",

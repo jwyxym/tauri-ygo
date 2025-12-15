@@ -1,0 +1,68 @@
+<div align = 'center'>
+<h1>Tauri YGO</h1>
+
+[![Rust](https://img.shields.io/badge/Rust-1.70+-orange.svg)](https://www.rust-lang.org/)
+[![Vue.js](https://img.shields.io/badge/Vue.js-3.x-brightgreen.svg)](https://vuejs.org/)
+[![Tauri](https://img.shields.io/badge/Tauri-v2.0-blue.svg)](https://tauri.app/)
+[![Java](https://img.shields.io/badge/Java-21+-yellow.svg)](https://www.oracle.com/java/)
+[![ndk](https://img.shields.io/badge/ndk-27-darkgreen.svg)](https://developer.android.com/ndk/downloads/)
+
+<p>
+本项目是一款基于 Tauri v2.0 框架的游戏王开源线上对战平台。通讯协议基于 YGOPro 标准，可以与任何其他基于此标准的客户端进行联机对战。
+</p>
+</div>
+
+<div>
+<h3>开发环境</h3>
+<p>
+<span>Node.js v22</span>
+
+<span>Rust 1.91</span>
+
+<span>Java 21（Android开发）</span>
+
+<span>NDK 27（Android开发）</span>
+</p>
+</div>
+
+<div>
+<h3>运行项目</h3>
+<h5>Clone 仓库</h5>
+
+```bash
+git clone https://github.com/jwyxym/tauri-ygo.git
+cd tauri-ygo
+```
+<h5>初始化tauri项目所需的config文件</h5>
+
+```bash
+cd .ci
+node tauri.conf.json.cjs
+```
+<h5>安装依赖</h5>
+
+```bash
+cd ..
+npm install
+```
+<h5>如果是安卓则需要初始化 kt 代码</h5>
+
+```bash
+npm run tauri android init
+npm run copy:sh # 如果是 Windows cmd 可以改用 npm run copy:cmd
+```
+<h5>Dev 模式</h5>
+
+```bash
+npm run tauri dev #如果是 Android 则改用 npm run tauri android dev
+```
+<h5>编译项目</h5>
+
+```bash
+#Android 的icon图标需要重新设置， 其他平台不用
+npm run icon
+
+#编译项目
+npm run tauri build #如果是 Android 则改用 npm run tauri android build
+```
+</div>

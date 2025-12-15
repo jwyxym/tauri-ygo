@@ -94,12 +94,11 @@ jobs:
 
     - name: Android copy
       run: |
-        npm run copy
+        npm run copy:cmd
 
     - name: Android icon
       run: |
-        copy src-tauri\icons\icon.jpg .\
-        npm run tauri icon -p icon.jpg
+        npm run icon
 
     - name: Android build
       shell: cmd
