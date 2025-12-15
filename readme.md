@@ -1,12 +1,12 @@
-<div align = 'center'>
-<h1>Tauri YGO</h1>
-
+<p align = 'center'>
+	<img width = '15%' align = 'center' src = './src-tauri/icons/icon.jpg' alt = 'logo'>
+</p>
+<h1 align = 'center'>Tauri YGO</h1>
 [![Rust](https://img.shields.io/badge/Rust-1.91-orange.svg)](https://www.rust-lang.org/)
 [![Vue.js](https://img.shields.io/badge/Vue.js-3.x-brightgreen.svg)](https://vuejs.org/)
 [![Tauri](https://img.shields.io/badge/Tauri-v2.0-blue.svg)](https://tauri.app/)
 [![Java](https://img.shields.io/badge/Java-21+-yellow.svg)](https://www.oracle.com/java/)
 [![ndk](https://img.shields.io/badge/ndk-27-darkgreen.svg)](https://developer.android.com/ndk/downloads/)
-</div>
 
 <div>
 	<p>
@@ -15,16 +15,15 @@
 </div>
 
 <div>
-<h3>开发环境</h3>
-<ul>
-	<li>Node.js v22</li>
-	<li>Rust 1.91</li>
-	<li>Java 21（Android开发）</li>
-	<li>NDK 27（Android开发）</li>
-</ul>
+	<h3>开发环境</h3>
+	<ul>
+		<li>Node.js v22</li>
+		<li>Rust 1.91</li>
+		<li>Java 21（Android开发）</li>
+		<li>NDK 27（Android开发）</li>
+	</ul>
 </div>
 
-<div>
 <h3>运行项目</h3>
 <h5>Clone 仓库</h5>
 
@@ -64,4 +63,3 @@ npm run icon
 #编译项目
 npm run tauri build #如果是 Android 则改用 npm run tauri android build
 ```
-</div>
