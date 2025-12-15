@@ -6,23 +6,22 @@
 [![Tauri](https://img.shields.io/badge/Tauri-v2.0-blue.svg)](https://tauri.app/)
 [![Java](https://img.shields.io/badge/Java-21+-yellow.svg)](https://www.oracle.com/java/)
 [![ndk](https://img.shields.io/badge/ndk-27-darkgreen.svg)](https://developer.android.com/ndk/downloads/)
+</div>
 
-<p>
-本项目是一款基于 Tauri v2.0 框架的游戏王开源线上对战平台。通讯协议基于 YGOPro 标准，可以与任何其他基于此标准的客户端进行联机对战。
-</p>
+<div>
+	<p>
+	本项目是一款基于 Tauri v2.0 框架的游戏王开源线上对战平台。通讯协议基于 YGOPro 标准，可以与任何其他基于此标准的客户端进行联机对战。
+	</p>
 </div>
 
 <div>
 <h3>开发环境</h3>
-<p>
-<span>Node.js v22</span>
-
-<span>Rust 1.91</span>
-
-<span>Java 21（Android开发）</span>
-
-<span>NDK 27（Android开发）</span>
-</p>
+<ul>
+	<li>Node.js v22</li>
+	<li>Rust 1.91</li>
+	<li>Java 21（Android开发）</li>
+	<li>NDK 27（Android开发）</li>
+</ul>
 </div>
 
 <div>

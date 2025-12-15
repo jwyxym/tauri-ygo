@@ -45,6 +45,7 @@
 
 	const page = reactive({
 		show : {
+			readme : false,
 			voice : false,
 			dialog : false,
 			menu : false,
@@ -90,14 +91,11 @@
 			page.show.voice = true;
 		}
 		const download = async () : Promise<void> => {
-			LoadingBar.start();
-			if (await fs.init()) {
-				LoadingBar.finish();
+			page.show.readme = true;
+			if (await fs.init())
 				await on(false);
-			} else {
-				LoadingBar.error();
+			else
 				await dialog();
-			}
 		}
 		const dialog = async () : Promise<void> => {
 			await Dialog({
