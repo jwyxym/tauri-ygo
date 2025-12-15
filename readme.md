@@ -1,7 +1,7 @@
 <div align = 'center'>
 <h1>Tauri YGO</h1>
 
-[![Rust](https://img.shields.io/badge/Rust-1.70+-orange.svg)](https://www.rust-lang.org/)
+[![Rust](https://img.shields.io/badge/Rust-1.91-orange.svg)](https://www.rust-lang.org/)
 [![Vue.js](https://img.shields.io/badge/Vue.js-3.x-brightgreen.svg)](https://vuejs.org/)
 [![Tauri](https://img.shields.io/badge/Tauri-v2.0-blue.svg)](https://tauri.app/)
 [![Java](https://img.shields.io/badge/Java-21+-yellow.svg)](https://www.oracle.com/java/)
