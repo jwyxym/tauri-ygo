@@ -259,7 +259,7 @@
 		right: 0;
 		top: 0;
 		width: 40vw;
-		height: 100vh;
+		height: var(---vh);
 		background-color: rgba(0, 0, 0, 0.5);
 		z-index: 1;
 		.var-input {

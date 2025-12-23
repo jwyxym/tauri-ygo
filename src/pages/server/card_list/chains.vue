@@ -1,6 +1,6 @@
 <template>
 	<div class = 'chain_list' ref = 'dom'>
-		<TransitionGroup class = 'list'  tag = 'div' name = 'move_up'>
+		<TransitionGroup tag = 'div' name = 'move_up'>
 			<div
 				v-for = '(i, v) in cards' :key = 'i.code'
 				:style = "{ '--color' : i.player ===  0 ? 'blue' : 'red' }"
@@ -19,6 +19,11 @@
 	
 	const props = defineProps(['cards']);
 
+	watch(() => { return props.cards; }, () => {
+		if (dom.value)
+			dom.value.children[0].scrollTop = dom.value.children[0].scrollHeight
+	});
+
 	defineExpose({ dom });
 </script>
 <style scoped lang = 'scss'>
@@ -28,8 +33,9 @@
 		top: 0;
 		width: 7vw;
 		min-width: 50px;
-		height: 100vh;
-		.list {
+		height: var(---vh);
+		> div {
+			scroll-behavior: smooth;
 			width: 100%;
 			height: 100%;
 			display: flex;
@@ -39,7 +45,7 @@
 			background-color: rgba(0, 0, 0, 0.5);
 			border: 1px white solid;
 			color: white;
-			div {
+			> div {
 				transition: all 0.15s ease;
 				width: 100%;
 				margin-left: 10%;
@@ -62,7 +68,7 @@
 
 		&-enter-from,
 		&-leave-to {
-			transform: translateY(100vh);
+			transform: translateY(var(---vh));
 		}
 
 		&-enter-to,

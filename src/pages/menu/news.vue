@@ -74,7 +74,7 @@
 				position: absolute;
 				max-width: 100%;
 				bottom: 5%;
-				-webkit-text-stroke: 2px black;
+				-webkit-text-stroke: 1px black;
 			}
 			&:hover {
 				cursor: pointer;

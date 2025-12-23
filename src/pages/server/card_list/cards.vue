@@ -35,7 +35,7 @@
 		top: 0;
 		width: 7vw;
 		min-width: 50px;
-		height: 100vh;
+		height: var(---vh);
 		color: white;
 		.list {
 			width: 100%;

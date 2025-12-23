@@ -49,7 +49,7 @@
 </script>
 <style scoped lang = 'scss'>
 	.phase {
-		width: 100vw;
+		width: var(---vw);
 		color: white;
 		position: fixed;
 		left: 50%;

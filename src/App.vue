@@ -118,8 +118,8 @@
 		position: relative;
 		.body {
 			overflow: hidden;
-			height: 97vh;
-			width: 97vw;
+			height: var(---vh);
+			width: var(---vw);
 			display: flex;
 			gap: 10%;
 			justify-content: flex-start;
