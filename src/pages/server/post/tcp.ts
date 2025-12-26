@@ -33,10 +33,17 @@ interface Select_Card {
 	ct : number;
 };
 
+interface Idles_Card {
+	card : Client_Card;
+	code : number;
+	seq ?: number;
+};
+
 type Chats = Array<Chat>;
 type Plaids = Array<{ plaid : Plaid; card ?: number; pos ?: number; }>;
 type Select_Cards = Array<Select_Card>;
 type Update_Cards = Array<{ card : Client_Card, code : number; }>;
+type Idles_Cards = Array<Idles_Card>;
 
 interface HostInfo {
 	lflist : number;
@@ -232,7 +239,7 @@ class Tcp {
 			const get_cards : Function | undefined = connect.duel.cards.get(is_xyz ? LOCATION.OVERLAY : loc);
 			if (get_cards) {
 				const cards : Array<Client_Card> = is_xyz ? get_cards(player, seq) : get_cards(player);
-				return is_xyz ? cards[ct >= 0 ? ct : cards.length - 1] : cards[seq];
+				return is_xyz ? cards[ct >= 0 ? ct : cards.length - 1] : cards[seq >= 0 ? seq : cards.length - 1];
 			}
 			return undefined;
 		};
@@ -390,24 +397,27 @@ class Tcp {
 									const loc = pack[j + 2];
 									const seq = pack[j + 3];
 									if (loc !== LOCATION.OVERLAY) {
-										const card : Client_Card | undefined = to_card(tp, loc, seq);
+										let card : Client_Card | undefined = to_card(tp, loc, seq);
 										if (card) {
 											const index = cards.indexOf(card);
 											if (index > -1)
 												cards.splice(index, 1);
 											codes.push({ card : card, code : code });
-											if (i === COMMAND.ACTIVATE) {
-												const desc = pack[j + 4];
-												const flag = (code & 0x80000000) > 0 ? EDESC.OPERATION : EDESC.NONE;
-												// code &= ((code & 0x80000000) > 0 ? 0x7fffffff : 0);
-												card.activatable.on({desc : desc, flag : flag});
+											const card_show = to_card(tp, loc, (loc & (LOCATION.HAND | LOCATION.ONFIELD)) > 0 ? seq : -1);
+											if (card_show) {
+												if (i === COMMAND.ACTIVATE) {
+													const desc = pack[j + 4];
+													const flag = (code & 0x80000000) > 0 ? EDESC.OPERATION : EDESC.NONE;
+													// code &= ((code & 0x80000000) > 0 ? 0x7fffffff : 0);
+													card_show.activatable.on({desc : desc, flag : flag});
+													if (idles.has(i))
+														idles.get(i)!(card, desc);
+													continue;
+												}
+												card_show.activatable.on(i);
 												if (idles.has(i))
-													idles.get(i)!(card, desc);
-												continue;
+													idles.get(i)!(card);
 											}
-											card.activatable.on(i);
-											if (idles.has(i))
-												idles.get(i)!(card);
 										}
 									}
 								}
@@ -654,33 +664,29 @@ class Tcp {
 										connect.duel.to.grave(from.player, {
 											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
 											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
-											zone : to.seq,
 											pos : to.pos
-										}, to.player);
+										}, to.seq, to.player);
 										break;
 									case LOCATION.REMOVED:
 										connect.duel.to.grave(from.player, {
 											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
 											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
-											zone : to.seq,
 											pos : to.pos
-										}, to.player);
+										}, to.seq, to.player);
 										break;
 									case LOCATION.DECK:
 										connect.duel.to.deck(from.player, {
 											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
 											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
-											zone : to.seq,
 											pos : to.pos
-										}, to.player);
+										}, to.seq, to.player);
 										break;
 									case LOCATION.EXTRA:
 										connect.duel.to.extra(from.player, {
 											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
 											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
-											zone : to.seq,
 											pos : to.pos
-										}, to.player);
+										}, to.seq, to.player);
 										break;
 									case LOCATION.OVERLAY:
 										connect.duel.to.overlay(from.player, {
@@ -1018,4 +1024,4 @@ class Tcp {
 }
 
 export default Tcp;
-export type { HostInfo, Player, Select_Card, Chats, Plaids, Select_Cards };
+export type { HostInfo, Player, Select_Card, Chats, Plaids, Select_Cards, Idles_Cards, Idles_Card };

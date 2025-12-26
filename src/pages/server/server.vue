@@ -288,6 +288,14 @@
 				v-if = 'page.duel && connect.select.position.pos > 0 && connect.select.position.code > 0'
 			/>
 		</transition>
+		<transition name = 'move_up'>
+			<Idles_Select_List
+				:cards = 'connect.select.idles.array'
+				:confirm = 'connect.select.idles.select'
+				:cancel = 'connect.select.idles.clear'
+				v-if = 'page.duel && connect.select.idles.array.length > 0'
+			/>
+		</transition>
 		<Phase
 			v-if = 'page.duel && connect.deck_count.length > 0'
 			@update:phase = 'connect.phase = $event'
@@ -303,7 +311,6 @@
 	import * as CONSTANT from '../../script/constant';
 	import fs from '../../script/fs';
 	import Tcp, * as TCP from './post/tcp';
-	import { Plaids, Select_Cards } from './post/tcp';
 	import toast from '../../script/toast';
 	import voice_input from './voice_input';
 
@@ -321,12 +328,14 @@
 	import Avatar from './scene/avatar.vue';
 	import Phase from './scene/phase.vue';
 	import Plaid from './scene/plaid';
+	import Client_Card from './scene/client_card';
 	import Card_List from './card_list/cards.vue';
 	import Chain_List from './card_list/chains.vue';
 	import Group_Select_List from './select_list/group.vue';
 	import Card_Select_List from './select_list/cards.vue';
 	import Plaid_Select_List from './select_list/plaids.vue';
 	import Pos_Select_List from './select_list/pos.vue';
+	import Idles_Select_List from './select_list/idles.vue';
 	import { LOCATION } from './post/network';
 	import { Idle, EffectIdle } from './idle';
 
@@ -426,10 +435,10 @@
 				max : 0,
 				cancelable : false,
 				list : {
-					unselected : [] as Select_Cards,
-					selected : [] as Select_Cards
+					unselected : [] as TCP.Select_Cards,
+					selected : [] as TCP.Select_Cards
 				},
-				on : (title : string, unselected : Select_Cards, selected : Select_Cards, min : number, max : number, cancelable : boolean) : void => {
+				on : (title : string, unselected : TCP.Select_Cards, selected : TCP.Select_Cards, min : number, max : number, cancelable : boolean) : void => {
 					connect.select.group.title = title;
 					connect.select.group.min = min;
 					connect.select.group.max = max;
@@ -441,12 +450,10 @@
 					connect.select.group.chk = true;
 				},
 				confirm : async (result : Array<number>) => {
-					console.log('confirm')
 					await tcp!.send.response(result);
 				},
 				cancel : async () => {
 					if (connect.select.group.cancelable)
-					console.log('cancel')
 						await tcp!.send.response(-1);
 				},
 				clear : () : void => {
@@ -467,8 +474,8 @@
 				min : 0,
 				max : 0,
 				cancelable : false,
-				array : [] as Select_Cards,
-				on : (title : string, array : Select_Cards, min : number, max : number, cancelable : boolean) : void => {
+				array : [] as TCP.Select_Cards,
+				on : (title : string, array : TCP.Select_Cards, min : number, max : number, cancelable : boolean) : void => {
 					connect.select.cards.title = title;
 					connect.select.cards.min = min;
 					connect.select.cards.max = max;
@@ -480,7 +487,7 @@
 					await mainGame.sleep(200);
 					await tcp!.send.response(result);
 				},
-				cancel : async (result : Select_Cards) => {
+				cancel : async (result : TCP.Select_Cards) => {
 					connect.select.cards.cancelable ? await (async () => {
 						await tcp!.send.response(-1);
 						connect.select.cards.clear();
@@ -505,8 +512,8 @@
 				min : 0,
 				chk_player : undefined as undefined | number,
 				pzone : false,
-				array : [] as Plaids,
-				on : (title : string, array : Plaids, place : number, ct : number) : void => {
+				array : [] as TCP.Plaids,
+				on : (title : string, array : TCP.Plaids, place : number, ct : number) : void => {
 					connect.select.plaids.title = title;
 					connect.select.plaids.min = ct;
 					connect.select.plaids.array = array;
@@ -574,6 +581,56 @@
 						no_cancle
 					);
 					return i !== undefined && tcp !== null ? i[0] : undefined;
+				}
+			},
+			idles : {
+				code : '',
+				array : [] as TCP.Idles_Cards,
+				push : (group : TCP.Idles_Cards, code : string) : void => {
+					connect.select.idles.code = code;
+					connect.select.idles.array = group;
+				},
+				clear : () : void => {
+					connect.select.idles.code = '';
+					connect.select.idles.array.length = 0;
+				},
+				select : async (i : TCP.Idles_Card) : Promise<void> => {
+					const card : Client_Card = i.card;
+					let code;
+					const key = connect.select.idles.code;
+					connect.select.idles.clear();
+					switch (key) {
+						case 'summon':
+							code = connect.idle.summon.array.indexOf(card) << 16;
+							break;
+						case 'spsummon':
+							code = (connect.idle.spsummon.array.indexOf(card) << 16) + 1;
+							break;
+						case 'mset':
+							code = (connect.idle.mset.array.indexOf(card) << 16) + 3;
+							break;
+						case 'sset':
+							code = (connect.idle.sset.array.indexOf(card) << 16) + 4;
+							break;
+						case 'activate':
+							const effects : Array<{
+								card : Client_Card,
+								desc : number
+							}> = connect.idle.activate.filter(card);
+							if (effects.length === 1)
+								code = (connect.idle.activate.index(effects[0].card, effects[0].desc) << 16) + 5;
+							else {
+								const i = await connect.select.option.on(effects.map(i => i.desc));
+								if (i !== undefined)
+									code = (connect.idle.activate.index(effects[i].card, effects[i].desc) << 16) + 5;
+							}
+							break;
+						case 'scale':
+							code = (connect.idle.activate.index(card, 1160) << 16) + 5;
+							break;
+					}
+					if (code !== undefined)
+						await connect.response(code);
 				}
 			}
 		},
@@ -832,7 +889,6 @@
 		};
 		const start = async () => {
 			page.wait = false;
-			console.log(connect.deck)
 			await mainGame.sleep(200, await mainGame.load.pic(connect.deck ?? []));
 			page.duel = true;
 			page.loading = false;
@@ -849,6 +905,20 @@
 			server.chat = '';
 		};
 		await [off, on, start][n]();
+	});
+
+	watch(() => { return page.chat.chk; }, (n : boolean) => {
+		if (n && chat.value !== null) {
+			const el : HTMLElement = chat.value.querySelector('.message')!;
+			el.scrollTop = el.scrollHeight;
+		}
+	});
+
+	watch(() => { return chat.value; }, (n : HTMLElement | null) => {
+		if (n) {
+			const el : HTMLElement = n.querySelector('.message')!;
+			el.scrollTop = el.scrollHeight;
+		}
 	});
 
 	const props = defineProps(['select']);

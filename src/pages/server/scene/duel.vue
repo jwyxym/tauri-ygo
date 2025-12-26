@@ -13,7 +13,7 @@
 	import { LOCATION, POS } from '../post/network';
 	import Client_Card from './client_card';
 	import Plaid from './plaid';
-	import { Plaids } from '../post/tcp';
+	import { Idles_Cards, Plaids } from '../post/tcp';
 	import gsap from '../../../script/gsap';
 
 	interface Axis {
@@ -95,9 +95,65 @@
 				}
 				return;
 			}
+			for (const tp of [0, 1])
+				for (const loc of [LOCATION.DECK, LOCATION.EXTRA, LOCATION.GRAVE, LOCATION.REMOVED]) {
+					cards = duel.cards.get(loc)!(tp);
+					ct = cards.findIndex(i => i.three.element.contains(target));
+					if (ct > -1) {
+						const card = cards[cards.length - 1];
+						const chk = hover.select !== card;
+						show_off();
+						if (chk) {
+							card.show.btn.on();
+							hover.select = card;
+						}
+						return;
+					}
+				}
+
 			show_off();
 		},
 		response : async (card : Client_Card, key : string) : Promise<void> => {
+			for (const tp of [0, 1])
+				for (const loc of [LOCATION.DECK, LOCATION.EXTRA, LOCATION.GRAVE, LOCATION.REMOVED]) {
+					const cards : Array<Client_Card> = duel.cards.get(loc)!(tp);
+					if (cards.includes(card)) {
+						let idle_cards : Array<Client_Card> = [];
+						switch (key) {
+							case 'summon':
+							idle_cards = props.connect.idle.summon.filter(cards);
+							break;
+						case 'spsummon':
+							idle_cards = props.connect.idle.spsummon.filter(cards);
+							break;
+						case 'mset':
+							idle_cards = props.connect.idle.mset.filter(cards);
+							break;
+						case 'sset':
+							idle_cards = props.connect.idle.sset.filter(cards);
+							break;
+						case 'activate':
+							idle_cards = props.connect.idle.activate.filter(cards, 'activate');
+							break;
+						case 'scale':
+							idle_cards = props.connect.idle.activate.filter(cards, 'scale');
+							break;
+						}
+						if (idle_cards.length > 0) {
+							const group : Idles_Cards = idle_cards.map(i => {
+								return {
+									card : i,
+									code : i.code,
+									seq : cards.indexOf(i)
+								};
+							});
+							if (loc === LOCATION.DECK)
+								group.forEach((i, v) => i.seq = v);
+							props.connect.select.idles.push(group, key);
+						}
+						return;
+					}
+				}
 			let code;
 			switch (key) {
 				case 'summon':
@@ -705,11 +761,12 @@
 				if (i.location === (LOCATION.SZONE | (5 << 16)))
 					i.location = LOCATION.FZONE;
 			},
-			none : async (tp : number, from_to : Array<Card_From> | Card_From, seq : number, to_tp : number = tp) => {
+			none : async (tp : number, from_to : Array<Card_From> | Card_From, to_tp : number = tp) => {
 				for (const i of Array.isArray(from_to) ? from_to as Array<Card_From> : [from_to as Card_From]) {
 					duel.to.chk(i);
-					const card = three.cards.map.get(i.location)![tp][i.seq];
-					three.create.send.to(card, to_tp, LOCATION.NONE, i.location, seq, i.pos);
+					const cards : Array<Client_Card> = three.cards.map.get(i.location)![tp];
+					const card = cards[i.seq >= 0 ? i.seq : cards.length - 1];
+					three.create.send.to(card, to_tp, LOCATION.NONE, i.location);
 					await mainGame.sleep(200);
 				}
 			},
@@ -745,14 +802,16 @@
 			},
 			fzone : async (tp : number, i : Card_From, to_tp : number = tp) => {
 				duel.to.chk(i);
-				const card = three.cards.map.get(i.location)![tp][i.seq];
+				const cards : Array<Client_Card> = three.cards.map.get(i.location)![tp];
+					const card = cards[i.seq >= 0 ? i.seq : cards.length - 1];
 				three.create.send.to(card, to_tp, LOCATION.FZONE, i.location, three.cards.map.get(LOCATION.FZONE)![tp].length, ((i.pos ?? 0) & POS.FACEDOWN) > 0 ? POS.FACEDOWN_ATTACK : POS.FACEUP_ATTACK);
 				await mainGame.sleep(150);
 			},
 			grave : async (tp : number, from_to : Array<Card_From> | Card_From, seq : number, to_tp : number = tp) => {
 				for (const i of Array.isArray(from_to) ? from_to as Array<Card_From> : [from_to as Card_From]) {
 					duel.to.chk(i);
-					const card = three.cards.map.get(i.location)![tp][i.seq];
+					const cards : Array<Client_Card> = three.cards.map.get(i.location)![tp];
+					const card = cards[i.seq >= 0 ? i.seq : cards.length - 1];
 					three.create.send.to(card, to_tp, LOCATION.GRAVE, i.location, seq, POS.FACEUP_ATTACK);
 					await mainGame.sleep(150);
 				}
@@ -760,7 +819,8 @@
 			removed : async (tp : number, from_to : Array<Card_From> | Card_From, seq : number, to_tp : number = tp) => {
 				for (const i of Array.isArray(from_to) ? from_to as Array<Card_From> : [from_to as Card_From]) {
 					duel.to.chk(i);
-					const card = three.cards.map.get(i.location)![tp][i.seq];
+					const cards : Array<Client_Card> = three.cards.map.get(i.location)![tp];
+					const card = cards[i.seq >= 0 ? i.seq : cards.length - 1];
 					three.create.send.to(card, to_tp, LOCATION.REMOVED, i.location, seq, ((i.pos ?? 0) & POS.FACEDOWN) > 0 ? POS.FACEDOWN_ATTACK : POS.FACEUP_ATTACK);
 					await mainGame.sleep(150);
 				}
@@ -768,7 +828,8 @@
 			pzone : async (tp : number, from_to : Array<Card_From> | Card_From, to_tp : number = tp) => {
 				for (const i of Array.isArray(from_to) ? from_to as Array<Card_From> : [from_to as Card_From]) {
 					duel.to.chk(i);
-					const card = three.cards.map.get(i.location)![tp][i.seq];
+					const cards : Array<Client_Card> = three.cards.map.get(i.location)![tp];
+					const card = cards[i.seq >= 0 ? i.seq : cards.length - 1];
 					const loc = LOCATION.PZONE | (i.zone << 16)
 					three.create.send.to(card, to_tp, loc, i.location, three.cards.map.get(loc)![tp].length, POS.FACEUP_ATTACK);
 					await mainGame.sleep(150);
@@ -777,7 +838,8 @@
 			deck : async (tp : number, from_to : Array<Card_From> | Card_From, seq : number, to_tp : number = tp) => {
 				for (const i of Array.isArray(from_to) ? from_to as Array<Card_From> : [from_to as Card_From]) {
 					duel.to.chk(i);
-					const card = three.cards.map.get(i.location)![tp][i.seq];
+					const cards : Array<Client_Card> = three.cards.map.get(i.location)![tp];
+					const card = cards[i.seq >= 0 ? i.seq : cards.length - 1];
 					three.create.send.to(card, to_tp, LOCATION.DECK, i.location, seq, POS.FACEDOWN_ATTACK);
 					await mainGame.sleep(150);
 				}
@@ -785,7 +847,8 @@
 			extra : async (tp : number, from_to : Array<Card_From> | Card_From, seq : number, to_tp : number = tp) => {
 				for (const i of Array.isArray(from_to) ? from_to as Array<Card_From> : [from_to as Card_From]) {
 					duel.to.chk(i);
-					const card = three.cards.map.get(i.location)![tp][i.seq];
+					const cards : Array<Client_Card> = three.cards.map.get(i.location)![tp];
+					const card = cards[i.seq >= 0 ? i.seq : cards.length - 1];
 					three.create.send.to(card, to_tp, LOCATION.DECK, i.location, seq, ((i.pos ?? POS.FACEDOWN) & POS.FACEDOWN) > 0 ? POS.FACEDOWN_ATTACK : POS.FACEUP_ATTACK);
 					await mainGame.sleep(150);
 				}
@@ -793,7 +856,8 @@
 			overlay : async (tp : number, from_to : Array<Card_From> | Card_From, to_tp : number = tp) => {
 				for (const i of Array.isArray(from_to) ? from_to as Array<Card_From> : [from_to as Card_From]) {
 					duel.to.chk(i);
-					const card = three.cards.map.get(i.location)![tp][i.seq];
+					const cards : Array<Client_Card> = three.cards.map.get(i.location)![tp];
+					const card = cards[i.seq >= 0 ? i.seq : cards.length - 1];
 					const loc = LOCATION.MZONE | (i.zone << 16)
 					const len = three.cards.map.get(loc)![tp].length - 1;
 					three.create.send.to(card, to_tp, loc, i.location, len, (three.cards.map.get(loc)![tp][len].pos() & POS.ATTACK) > 0 ? POS.FACEUP_DEFENSE : POS.FACEUP_ATTACK);
