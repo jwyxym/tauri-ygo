@@ -33,7 +33,7 @@
 		top: 0;
 		width: 7vw;
 		min-width: 50px;
-		height: var(---vh);
+		height: var(--vh);
 		> div {
 			scroll-behavior: smooth;
 			width: 100%;
@@ -68,7 +68,7 @@
 
 		&-enter-from,
 		&-leave-to {
-			transform: translateY(var(---vh));
+			transform: translateY(var(--vh));
 		}
 
 		&-enter-to,

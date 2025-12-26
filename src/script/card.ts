@@ -99,9 +99,9 @@ class Card {
 		this.race = row[8] as number;
 		this.attribute = row[9] as number;
 		this.category = row[10] as number;
-		this.name = row[11] as string;
-		this.desc = row[12] as string;
-		this.hint = row.slice(13, 29) as Array<string>;
+		this.name = row[row.length - 18] as string;
+		this.desc = row[row.length - 17] as string;
+		this.hint = row.slice(row.length - 16, row.length) as Array<string>;
 	};
 
 	clone = () : Card => {

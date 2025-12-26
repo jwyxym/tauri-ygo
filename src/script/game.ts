@@ -46,8 +46,8 @@ class Game {
 	i18n = CONSTANT.LANGUAGE.Zh_CN;
 	interval = -1;
 	interval_ct = 0;
-	unknown : Card = new Card(new Array(11).fill(0).concat(new Array(19).fill('')));
-	back : Card = new Card(new Array(11).fill(0).concat(new Array(19).fill('')));
+	unknown : Card = new Card(new Array(11).fill(0).concat(new Array(18).fill('')));
+	back : Card = new Card(new Array(11).fill(0).concat(new Array(18).fill('')));
 	font = document.createElement('style');
 
 	private lflist_now : string = '';

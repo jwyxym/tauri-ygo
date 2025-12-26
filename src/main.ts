@@ -12,6 +12,7 @@ const resize = () => {
 	document.documentElement.style.setProperty('--vw', `${window.innerWidth}px`);
 }
 
+resize();
 window.addEventListener('resize', resize);
 
 const app = createApp(App)

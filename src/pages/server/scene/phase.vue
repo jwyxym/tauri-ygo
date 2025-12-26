@@ -35,7 +35,7 @@
 			page.player = tp;
 			page.text = phase.map.get(text) ?? '';
 			page.show = true;
-			await mainGame.sleep(800);
+			await mainGame.sleep(400);
 			page.show = false;
 		}
 	};
@@ -49,7 +49,7 @@
 </script>
 <style scoped lang = 'scss'>
 	.phase {
-		width: var(---vw);
+		width: var(--vw);
 		color: white;
 		position: fixed;
 		left: 50%;
@@ -75,7 +75,7 @@
 	.move_in {
 		&-enter-active,
 		&-leave-active {
-			transition: transform 0.5s ease;
+			transition: transform 0.2s ease;
 		}
 
 		&-enter-from {

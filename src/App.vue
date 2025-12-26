@@ -2,7 +2,7 @@
 	<div class = 'main' @contextmenu = 'page.contextmenu'>
 		<starry-sky :stars-count = '1500' :distance = '800' id = 'back'/>
 		<Voice v-if = 'page.show.voice'></Voice>
-		<div class = 'body'>
+		<div>
 			<transition name = 'opacity'>
 				<Deck
 					v-if = 'page.show.deck'
@@ -116,10 +116,10 @@
 <style scoped lang = 'scss'> 
 	.main {
 		position: relative;
-		.body {
+		> div:last-child {
 			overflow: hidden;
-			height: var(---vh);
-			width: var(---vw);
+			height: calc(var(--vh) * 0.98);
+			width: calc(var(--vw) * 0.98);
 			display: flex;
 			gap: 10%;
 			justify-content: flex-start;

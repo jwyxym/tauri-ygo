@@ -109,7 +109,7 @@
 		left: 0;
 		top: 0;
 		width: 40vw;
-		height: var(---vh);
+		height: var(--vh);
 		white-space: pre-line;
 		background-color: rgba(0, 0, 0, 0.5);
 		display: flex;
