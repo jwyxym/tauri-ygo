@@ -57,7 +57,7 @@ class Fs {
 			if (!await this.exists(CONSTANT.FILES.ASSETS_ZIP) || chk_download) {
 				toast.info(mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_START));
 				const urls = Array.from(CONSTANT.URL.ASSETS.keys());
-				const res_time = await invoke.response_time(urls);
+				const res_time = await invoke.network.time(urls);
 				if (!res_time.error) {
 					const url = CONSTANT.URL.ASSETS.get(res_time.content!.url ?? urls[0])!;
 					if ((await this.write.from_url(url, CONSTANT.FILES.ASSETS_ZIP)).length === 0)
@@ -84,11 +84,11 @@ class Fs {
 	};
 
 	read = {
-		database : async (file : string | Array<string>) : Promise<Array<Array<string | number>> | undefined> => {
+		db : async (file : string | Array<string>) : Promise<Array<Array<string | number>> | undefined> => {
 			try {
 				const join = typeof file === 'string' ? path.join(this.path!, file as string) : path.join(this.path!, ...file);
 				const p = await join;
-				const entries = await invoke.read_db(await path.join(p));
+				const entries = await invoke.read.db(await path.join(p));
 				if (entries.error === undefined)
 					return entries.content!.map(i => [...i[0], ...i[1]]);
 			} catch (error) {
@@ -96,7 +96,7 @@ class Fs {
 			}
 			return undefined;
 		},
-		database_in_memory : async (file : Uint8Array<ArrayBuffer>) : Promise<Array<Array<string | number>> | undefined> => {
+		db_by_vecu8 : async (file : Uint8Array<ArrayBuffer>) : Promise<Array<Array<string | number>> | undefined> => {
 			let p = '';
 			let result : Array<Array<string | number>> | undefined = undefined;
 			try {
@@ -117,7 +117,7 @@ class Fs {
 			];
 			if (!mainGame.is_android())
 				folds.splice(0, 0, await path.join(this.path!, CONSTANT.DIRS.PIC));
-			const entries = await invoke.read_pics(folds, codes);
+			const entries = await invoke.read.pics(folds, codes);
 			if (entries.error === undefined) {
 				entries.content![0].forEach((_, v) => {
 					const i = entries.content![0][v]
@@ -135,7 +135,7 @@ class Fs {
 				[CONSTANT.REG.INI, new Map]
 			]);
 			try {
-				const entries = await invoke.read_zip(await path.join(this.path!, file), file_type.map(i => `${i}`));
+				const entries = await invoke.read.zip(await path.join(this.path!, file), file_type.map(i => `${i}`));
 				if (entries.error === undefined)
 					for (const [name, content] of entries.content!) {
 						if (name.match(CONSTANT.REG.PICTURE)) {
@@ -171,7 +171,7 @@ class Fs {
 		ydk : async () : Promise<Array<Deck>> => {
 			try {
 				const decks : Array<Deck> = [];
-				const reader = await invoke.read_texts(await path.join(this.path!, CONSTANT.DIRS.DECK), 'ydk');
+				const reader = await invoke.read.texts(await path.join(this.path!, CONSTANT.DIRS.DECK), 'ydk');
 				if (reader.error === undefined) {
 					reader.content!.forEach(i => {
 						const ydk = Deck.fromYdkString(i[1].content);
@@ -190,7 +190,7 @@ class Fs {
 		},
 		files : async (dir : string, type : Array<string> | string) : Promise<Array<File>> => {
 			try {
-				const entries = await invoke.read_files(await path.join(this.path!, dir), type);
+				const entries = await invoke.read.files(await path.join(this.path!, dir), type);
 
 				const result : Array<File> = [];
 				if (entries.error === undefined)
@@ -271,7 +271,7 @@ class Fs {
 			try {
 				const join = typeof file === 'string' ? path.join(this.path!, file as string) : path.join(this.path!, ...file);
 				const p = await join;
-				const entries = await invoke.modified_time(p);
+				const entries = await invoke.read.time(p);
 				if (entries.error === undefined)
 					return entries.content!;
 			} catch (error) {
@@ -356,7 +356,7 @@ class Fs {
 		},
 		from_url : async (url : string,  file : string) : Promise<string> => {
 			try {
-				const download = await invoke.download(url, this.path!, file);
+				const download = await invoke.network.download(url, this.path!, file);
 				if (download.error === undefined)
 					return download.content!;
 			} catch (error) {
@@ -368,7 +368,7 @@ class Fs {
 			try {
 				if (file.length > 0 && !file.endsWith('.ypk'))
 					file += '.ypk';
-				const download = await invoke.download(url, await path.join(this.path!, CONSTANT.DIRS.EXPANSION), file, '.ypk');
+				const download = await invoke.network.download(url, await path.join(this.path!, CONSTANT.DIRS.EXPANSION), file, '.ypk');
 				if (download.error === undefined) {
 					const p = await path.join(CONSTANT.DIRS.EXPANSION, download.content!);
 					return [p, download.content!];

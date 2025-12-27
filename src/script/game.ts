@@ -300,7 +300,7 @@ class Game {
 		ypk : async (path : string) : Promise<void> => {
 			const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(path);
 			for (const [_, v] of ypk.get(CONSTANT.REG.DATABASE) ?? new Map()) {
-				const db = await fs.read.database_in_memory(v as Uint8Array<ArrayBuffer>);
+				const db = await fs.read.db_by_vecu8(v as Uint8Array<ArrayBuffer>);
 				if (db !== undefined)
 					this.read.database(db);
 			}
@@ -422,7 +422,7 @@ class Game {
 				}
 			}
 			//读取cards.cdb
-			const database : Array<Array<string | number>> | undefined = await fs.read.database([CONSTANT.DIRS.DB, CONSTANT.FILES.DB.get(this.i18n)!]);
+			const database : Array<Array<string | number>> | undefined = await fs.read.db([CONSTANT.DIRS.DB, CONSTANT.FILES.DB.get(this.i18n)!]);
 			if (database !== undefined)
 				this.read.database(database);
 		},
@@ -433,7 +433,7 @@ class Game {
 			const load = expansion.loading;
 			//读取cdb
 			for (const i of files.filter(i => i.match(CONSTANT.REG.DATABASE))) {
-				const database : Array<Array<string | number>> | undefined = await fs.read.database(i);
+				const database : Array<Array<string | number>> | undefined = await fs.read.db(i);
 				if (database !== undefined)
 					this.read.database(database);
 			}
@@ -829,7 +829,7 @@ class Game {
 		},
 		version : {
 			game : async () : Promise<boolean> => {
-				const time = await invoke.game_version(CONSTANT.URL.VERSION, CONSTANT.URL.VERSION_HEAD);
+				const time = await invoke.network.version(CONSTANT.URL.VERSION, CONSTANT.URL.VERSION_HEAD);
 				const local = this.get.system(CONSTANT.KEYS.SETTING_DOWMLOAD_TIME);
 				if (time.error === undefined && typeof local === 'string') {
 					return new Date(time.content!) <= new Date(local);

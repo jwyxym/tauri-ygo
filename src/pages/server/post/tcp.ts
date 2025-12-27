@@ -89,7 +89,7 @@ class Tcp {
 	connect = async (address : string, name : string, pass : string, connect : Reactive<any>) : Promise<boolean> => {
 		try {
 			const get_srv = async () : Promise<string> => {
-				const srv = await invoke.get_srv(address);
+				const srv = await invoke.network.srv(address);
 				if (srv.error === undefined)
 					return `${srv.content!.target}:${srv.content!.port}`;
 				return address;
