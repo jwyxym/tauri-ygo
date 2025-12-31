@@ -287,17 +287,15 @@
 			}
 			download.chk = true;
 			toast.info(mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_START));
-			const d = {
-				start : await listen.download_start((i : number) => {
-					download.size = i;
-				}),
-				progress : await listen.download_progress((i : number) => {
-					download.progress += i;
-				})
-			};
+			const start = await listen.download.start((i : number) => {
+				download.size = i;
+			});
+			const progress = await listen.download.progress((i : number) => {
+				download.progress += i;
+			});
 			const path = await fs.write.ypk(url, name);
-			d.start();
-			d.progress();
+			start();
+			progress();
 			if (path.length == 2) {
 				mainGame.push.system(CONSTANT.KEYS.SETTING_LOADING_EXPANSION, path[1]);
 				const load = await mainGame.get.expansions();
@@ -309,6 +307,7 @@
 				toast.info(mainGame.get.text(I18N_KEYS.SETTING_DOWNLOAD_COMPELETE));
 			}
 			download.chk = false;
+			
 			setTimeout(() => {
 				download.size = -1;
 				download.progress = 0;

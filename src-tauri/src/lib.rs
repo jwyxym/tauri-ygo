@@ -7,8 +7,8 @@ use network::{Srv, Resp};
 use tauri::AppHandle;
 
 #[tauri::command]
-async fn unzip(path: String, file: String, chk: bool) -> Result<(), String> {
-	Ok(zip::unzip(path, file, chk).await.map_err(|e| e.to_string())?)
+async fn unzip(app: AppHandle, path: String, file: String, chk: bool) -> Result<(), String> {
+	Ok(zip::unzip(app, path, file, chk).await.map_err(|e| e.to_string())?)
 }
 
 #[tauri::command]
@@ -71,13 +71,7 @@ async fn network_time(urls: Vec<String>) -> Result<Vec<Resp>, String> {
 }
 
 #[tauri::command]
-async fn network_download(
-	app: AppHandle,
-	url: String,
-	path: String,
-	name: String,
-	ex_name: String,
-) -> Result<String, String> {
+async fn network_download(app: AppHandle, url: String, path: String, name: String, ex_name: String,) -> Result<String, String> {
 	Ok(network::download(app, url, path, name, ex_name).await.map_err(|e| e.to_string())?)
 }
 

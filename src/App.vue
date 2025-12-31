@@ -25,27 +25,36 @@
 					:select = 'page.select'
 				/>
 			</transition>
+			<transition name = 'opacity'>
+				<Loading
+					v-if = 'page.show.loading'
+					:now = 'page.loading.progress'
+					:all = 'page.loading.start'
+				/>
+			</transition>
 		</div>
 	</div>
 </template>
 <script setup lang = 'ts'>
 	import { reactive, onBeforeMount, onMounted } from "vue";
-	import { LoadingBar } from '@varlet/ui';
 
 	import YGOMenu from './pages/menu/menu.vue';
 	import Deck from './pages/deck/list.vue';
 	import Server from './pages/server/server.vue';
 	import Setting from './pages/setting/setting.vue';
+	import Loading from './pages/loading/loading.vue';
 	import Voice from './pages/voice/voice.vue';
 
 	import mainGame from './script/game';
 	import fs from './script/fs';
-	import { I18N_KEYS } from "./script/language/i18n";
+	import { I18N_KEYS } from './script/language/i18n';
 	import Dialog from './pages//varlet/dialog';
+	import listen from './script/post/listen';
 
 	const page = reactive({
 		show : {
 			readme : false,
+			loading : false,
 			voice : false,
 			dialog : false,
 			menu : false,
@@ -79,6 +88,10 @@
 				page.show.setting = true;
 			}
 		},
+		loading : {
+			progress : 0,
+			start : 0
+		},
 		contextmenu : (event : MouseEvent) : void => {
 			if (!import.meta.env.DEV) event.preventDefault();
 		}
@@ -86,16 +99,43 @@
 
 	onBeforeMount(async () : Promise<void> => {
 		const on = async (chk : boolean = true) : Promise<void> => {
+			page.show.loading = true;
+			const start = await listen.unzip.start((i : number) => {
+				page.loading.start = i - 1;
+			});
+			const progress = await listen.unzip.progress((i : number) => {
+				page.loading.progress = i;
+			});
 			await mainGame.init(chk);
+			start();
+			progress();
+			page.show.loading = false;
+			setTimeout(() => {
+				page.loading.start = 0;
+				page.loading.progress = 0;
+			}, 500);
 			page.show.menu = true;
 			page.show.voice = true;
 		}
 		const download = async () : Promise<void> => {
 			page.show.readme = true;
-			if (await fs.init())
+			page.show.loading = true;
+			const start = await listen.download.start((i : number) => {
+				page.loading.start = i;
+			});
+			const progress = await listen.download.progress((i : number) => {
+				page.loading.progress += i;
+			});
+			if (await fs.init()) {
+				start();
+				progress();
+				page.loading.start = 0;
+				page.loading.progress = 0;
 				await on(false);
-			else
+			} else {
+				page.show.loading = false;
 				await dialog();
+			}
 		}
 		const dialog = async () : Promise<void> => {
 			await Dialog({
@@ -222,8 +262,5 @@
 		--card-title-font-size: max(2.5vh, 10px) !important;
 		--card-subtitle-font-size: max(1.5vh, 6px) !important;
 		user-select: none;
-	}
-	body {
-		font-family: 'text' !important;
 	}
 </style>

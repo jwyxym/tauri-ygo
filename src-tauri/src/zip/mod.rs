@@ -5,12 +5,16 @@ use std::{
 };
 use anyhow::{Error, Result};
 use zip::ZipArchive;
+use tauri::{AppHandle, Emitter};
 
-pub async fn unzip(path: String, file: String, chk: bool) -> Result<(), Error> {
+pub async fn unzip(app: AppHandle, path: String, file: String, chk: bool) -> Result<(), Error> {
 	let file: File = File::open(file)?;
 	let mut archive: ZipArchive<File> = ZipArchive::new(file)?;
 
-	for i in 0..archive.len() {
+	let len: usize = archive.len();
+	app.emit("unzip-started", len)?;
+	for i in 0..len {
+		app.emit("unzip-progress", i)?;
 		if let Ok(mut file) = archive.by_index(i) {
 			let file_name: String = file.name().to_string();
 			let path: PathBuf = Path::new(&path).join(Path::new(&file_name));
