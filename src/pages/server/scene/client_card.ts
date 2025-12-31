@@ -13,6 +13,14 @@ interface Hover {
 	response : Function
 };
 
+interface Client_Card_Div {
+	img : HTMLImageElement;
+	atk : HTMLDivElement;
+	info : HTMLDivElement;
+	counter : HTMLDivElement;
+	btn : HTMLDivElement;
+};
+
 class Client_Card {
 	three : CSS.CSS3DObject;
 	code : number;
@@ -28,6 +36,7 @@ class Client_Card {
 	atk : number;
 	def : number;
 	scale : number;
+	div : Client_Card_Div;
 
 	constructor (src : string, size : {
 		width : number; height : number;
@@ -47,16 +56,23 @@ class Client_Card {
 		this.atk = 0;
 		this.def = 0;
 		this.scale = 0;
-		this.three = this.init.on(src, size, hover);
+		[this.three, this.div] = this.init.on(src, size, hover);
 	};
 
 	init = {
-		on : (src : string, size : { width : number; height : number; }, hover : Hover) : CSS.CSS3DObject => {
+		on : (src : string, size : { width : number; height : number; }, hover : Hover) : [CSS.CSS3DObject, Client_Card_Div] => {
 			const dom = document.createElement('div');
 			dom.style.opacity = '0';
-			for (const i of [this.init.img(src, size, hover), this.init.atk(size), this.init.info(size), this.init.btn(hover)])
+			const div = {
+				img : this.init.img(src, size, hover),
+				atk : this.init.atk(size),
+				info : this.init.info(size),
+				counter : this.init.counter(size),
+				btn : this.init.btn(hover),
+			};
+			for (const [_, i] of Object.entries(div))
 				dom.appendChild(i);
-			return new CSS.CSS3DObject(dom);
+			return [new CSS.CSS3DObject(dom), div];
 		},
 		img : (src : string, size : { width : number; height : number; }, hover : Hover) : HTMLImageElement => {
 			const child = document.createElement('img');
@@ -82,7 +98,7 @@ class Client_Card {
 				width : `${size.height}px`,
 				color : 'white',
 				textShadow : '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',
-				fontSize : '14px',
+				fontSize : '20px',
 				fontFamily : 'AtkDef',
 				display : 'flex',
 				justifyContent : 'center',
@@ -96,13 +112,14 @@ class Client_Card {
 			Object.assign(child.style, {
 				opacity : '0',
 				position : 'absolute',
-				bottom : '20px',
+				bottom : '32px',
 				left : '-10px',
 				height : '16px',
 				width : `${size.height}px`,
 				color : 'white',
 				textShadow : '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',
-				fontSize : '14px',
+				fontSize : '20px',
+				fontFamily : 'AtkDef',
 				display : 'flex',
 				gap : '2px',
 				alignItems: 'center',
@@ -137,6 +154,27 @@ class Client_Card {
 				div.appendChild(span);
 				child.appendChild(div);
 			}
+			return child;
+		},
+		counter : (size : { width : number; height : number; }) : HTMLDivElement => {
+			const child = document.createElement('div');
+			Object.assign(child.style, {
+				opacity : '1',
+				position : 'absolute',
+				bottom : '16px',
+				left : '-10px',
+				height : '16px',
+				width : `${size.height}px`,
+				color : 'white',
+				textShadow : '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',
+				fontSize : '20px',
+				fontFamily : 'AtkDef',
+				display : 'flex',
+				gap : '2px',
+				alignItems: 'center',
+				transition : 'all 0.2s ease',
+				userSelect: 'none'
+			});
 			return child;
 		},
 		btn : (hover : Hover) => {
@@ -221,7 +259,7 @@ class Client_Card {
 		type : (type : number) : void => {
 			this.type = type;
 			if ((this.type & TYPE.PENDULUM) === 0) {
-				const el : HTMLElement = this.three.element.children[2].querySelector('.scale')!;
+				const el : HTMLElement = this.div.info.querySelector('.scale')!;
 				if (el.style.display === 'flex') {
 					el.style.display = 'none';
 					el.querySelector('span')!.innerHTML = '';
@@ -281,80 +319,80 @@ class Client_Card {
 	}
 	add = {
 		xyz : (len : number) : void => {
-			let el : HTMLElement = this.three.element.children[2].querySelector('.rank')!;
+			let el : HTMLElement = this.div.info.querySelector('.rank')!;
 			el.style.display = 'flex';
 			el.querySelector('span')!.innerHTML = this.rank.toString();
-			el = this.three.element.children[2].querySelector('.overlay')!;
+			el = this.div.info.querySelector('.overlay')!;
 			el.style.display = 'flex';
 			el.querySelector('span')!.innerHTML = len.toString();
 		},
 		link : () : void => {
-			const el : HTMLElement = this.three.element.children[2].querySelector('.link')!;
+			const el : HTMLElement = this.div.info.querySelector('.link')!;
 			el.style.display = 'flex';
 			el.querySelector('span')!.innerHTML = this.link.toString();
 		},
 		tuner : () : void => {
-			const el : HTMLElement = this.three.element.children[2].querySelector('.tuner')!;
+			const el : HTMLElement = this.div.info.querySelector('.tuner')!;
 			el.style.display = 'flex';
-			(this.three.element.children[2] as HTMLElement).style.color = 'lightgreen';
+			(this.div.info as HTMLElement).style.color = 'lightgreen';
 		},
 		level : () : void => {
-			const el : HTMLElement = this.three.element.children[2].querySelector('.level')!;
+			const el : HTMLElement = this.div.info.querySelector('.level')!;
 			el.style.display = 'flex';
 			el.querySelector('span')!.innerHTML = this.level.toString();
 		},
 		pendulum : () : void => {
-			const el : HTMLElement = this.three.element.children[2].querySelector('.scale')!;
+			const el : HTMLElement = this.div.info.querySelector('.scale')!;
 			el.style.display = 'flex';
 			el.querySelector('span')!.innerHTML = this.scale.toString();
 		},
 		atk : () : void => {
-			this.three.element.children[1].innerHTML = this.is_link() ? this.atk.toString() : `${this.atk ?? 0}/${this.def ?? 0}`;
+			this.div.atk.innerHTML = this.is_link() ? this.atk.toString() : `${this.atk ?? 0}/${this.def ?? 0}`;
 		}
 	};
 
 	show = {
 		info : {
 			on : () : void => {
-				(this.three.element.children[2] as HTMLElement).style.opacity = '1';
+				(this.div.info as HTMLElement).style.opacity = '1';
 			},
 			off : () : void => {
-				(this.three.element.children[2] as HTMLElement).style.opacity = '0';
+				(this.div.info as HTMLElement).style.opacity = '0';
 			}
 		},
 		atk : {
 			on : () : void => {
-				(this.three.element.children[1] as HTMLElement).style.opacity = '1';
+				this.div.atk.style.opacity = '1';
 			},
 			off : () : void => {
-				(this.three.element.children[1] as HTMLElement).style.opacity = '0';
+				this.div.atk.style.opacity = '0';
 			}
 		},
 		btn : {
 			on : () : void => {
-				(this.three.element.children[3] as HTMLElement).style.display = 'flex';
+				this.div.btn.style.display = 'flex';
 				setTimeout(() => {
-					Object.assign((this.three.element.children[3] as HTMLElement).style, {
+					Object.assign(this.div.btn.style, {
 						opacity : '1',
 						top : '-50px'
 					});
 				}, 50);
 			},
 			off : () : void => {
-				Object.assign((this.three.element.children[3] as HTMLElement).style, {
+				Object.assign(this.div.btn.style, {
 					opacity : '0',
 					top : '0px'
 				});
 				setTimeout(() => {
-					(this.three.element.children[3] as HTMLElement).style.display = 'none';
+					this.div.btn.style.display = 'none';
 				}, 200);
 			},
 			chk : () : boolean => {
-				return (this.three.element.children[3] as HTMLElement).style.display === 'flex';
+				return this.div.btn.style.display === 'flex';
 			}
 		},
 		activate : () : void => {
-			const style = (this.three.element.children[0] as HTMLElement).style;
+			const style = this.div.img.style;
 			style.filter = 'brightness(1.5)';
 			setTimeout(() => {
 				style.filter = 'initial';
@@ -364,33 +402,33 @@ class Client_Card {
 
 	change = {
 		xyz : (len : number) : void => {
-			const el : HTMLElement = this.three.element.children[2].querySelector('.overlay')!;
+			const el : HTMLElement = this.div.info.querySelector('.overlay')!;
 			if (el.style.display === 'flex')
 				el.querySelector('span')!.innerHTML = len.toString();
 		}
 	};
 	remove = () : void => {
-		for (const el of Array.from(this.three.element.children[2].children) as Array<HTMLElement>) {
+		for (const el of Array.from(this.div.info.children) as Array<HTMLElement>) {
 			el.style.display = 'none';
 			el.querySelector('span')!.innerHTML = '';
 		}
-		(this.three.element.children[2] as HTMLElement).style.color = 'white';
+		(this.div.info as HTMLElement).style.color = 'white';
 	};
 
 	pos = () : number => {
-		const rotation = gsap.getProperty(this.three.element.children[0], "rotationZ") === 0;
-		const pos = (this.three.element.children[0] as HTMLImageElement).src === mainGame.get.textures(CONSTANT.FILES.TEXTURE_COVER) ?
+		const rotation = gsap.getProperty(this.div.img, "rotationZ") === 0;
+		const pos = (this.div.img as HTMLImageElement).src === mainGame.get.textures(CONSTANT.FILES.TEXTURE_COVER) ?
 			rotation ? POS.FACEDOWN_ATTACK : POS.FACEDOWN_DEFENSE : rotation ? POS.FACEUP_ATTACK : POS.FACEUP_DEFENSE;
 		return pos;
 	};
 
 	select = {
 		on : () => {
-			const style = (this.three.element.children[0] as HTMLElement).style;
+			const style = this.div.img.style;
 			style.boxShadow = '0 0 8px yellow';
 		},
 		off : () => {
-			const style = (this.three.element.children[0] as HTMLElement).style;
+			const style = this.div.img.style;
 			style.boxShadow = 'initial';
 		}
 	};
@@ -407,7 +445,7 @@ class Client_Card {
 					this.activatable.flag |= flags.get(i.desc) ?? COMMAND.ACTIVATE;
 				}
 			})();
-			const style = (this.three.element.children[0] as HTMLElement).style;
+			const style = this.div.img.style;
 			style.boxShadow = (this.activatable.flag & (COMMAND.ACTIVATE + COMMAND.SPSUMMON + COMMAND.PSUMMON + COMMAND.SCALE)) > 0 ?
 				'0 0 8px yellow' : this.activatable.flag > 0 ? '0 0 8px rgba(119, 166, 255, 1)' : 'initial';
 			if (show_btn) {
@@ -426,16 +464,16 @@ class Client_Card {
 				for (const [_, i] of Object.entries(COMMAND)) {
 					if (!map.has(i))
 						continue;
-					const btn = this.three.element.children[3].querySelector(`.${map.get(i)!}`)! as HTMLElement;
+					const btn = this.div.btn.querySelector(`.${map.get(i)!}`)! as HTMLElement;
 					btn.style.display = (this.activatable.flag & i) === i ? 'initial' : 'none';
 				}
 			}
 		},
 		clear : () => {
 			this.activatable.flag = 0;
-			const style = (this.three.element.children[0] as HTMLElement).style;
+			const style = this.div.img.style;
 			style.boxShadow = 'initial';
-			(Array.from(this.three.element.children[3].children) as Array<HTMLElement>).forEach(btn => {
+			(Array.from(this.div.btn.children) as Array<HTMLElement>).forEach(btn => {
 				btn.style.display = 'none';
 			});
 		},

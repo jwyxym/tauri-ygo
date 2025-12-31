@@ -39,19 +39,19 @@
 	const hover = {
 		on : (card : Client_Card, _ : MouseEvent) : void => {
 			if (duel.cards.get(LOCATION.HAND)!(0).includes(card) && hover.select !== card) {
-				(card.three.element.children[0] as HTMLElement).style.transform = 'translateY(-30px)';
+				card.div.img.style.transform = 'translateY(-30px)';
 				card.three.position.setZ(duel.cards.get(LOCATION.HAND)!(0).indexOf(card) * three.create.hand_gap + 0.1 + three.create.float);
 			} else if (duel.cards.get(LOCATION.HAND)!(1).includes(card)) {
-				(card.three.element.children[0] as HTMLElement).style.transform = 'translateY(-30px)';
+				card.div.img.style.transform = 'translateY(-30px)';
 				card.three.position.setZ(duel.cards.get(LOCATION.HAND)!(1).indexOf(card) * three.create.hand_gap + 0.1);
 			}
 		},
 		end : (card : Client_Card, _ : MouseEvent) : void => {
 			if (duel.cards.get(LOCATION.HAND)!(0).includes(card) && hover.select !== card) {
-				(card.three.element.children[0] as HTMLElement).style.transform = 'translateY(0)';
+				card.div.img.style.transform = 'translateY(0)';
 				card.three.position.setZ(duel.cards.get(LOCATION.HAND)!(0).indexOf(card) * three.create.hand_gap + three.create.float);
 			} else if (duel.cards.get(LOCATION.HAND)!(1).includes(card)) {
-				(card.three.element.children[0] as HTMLElement).style.transform = 'translateY(0)';
+				card.div.img.style.transform = 'translateY(0)';
 				card.three.position.setZ(duel.cards.get(LOCATION.HAND)!(1).indexOf(card) * three.create.hand_gap);
 			}
 		},
@@ -64,7 +64,7 @@
 					return;
 				hover.select.show.btn.off();
 				if ((duel.cards.get(LOCATION.HAND)!(0) as Array<Client_Card>).includes(hover.select)) {
-					(hover.select.three.element.children[0] as HTMLElement).style.transform = 'translateY(0)';
+					hover.select.div.img.style.transform = 'translateY(0)';
 					hover.select.three.position.setZ(duel.cards.get(LOCATION.HAND)!(0).indexOf(hover.select) * three.create.hand_gap + three.create.float);
 				}
 				hover.select = undefined;
@@ -76,7 +76,7 @@
 				const chk = hover.select !== card;
 				show_off();
 				if (chk) {
-					(card.three.element.children[0] as HTMLElement).style.transform = 'translateY(-30px)';
+					card.div.img.style.transform = 'translateY(-30px)';
 					card.three.position.setZ(duel.cards.get(LOCATION.HAND)!(0).indexOf(card) * three.create.hand_gap + 0.1 + three.create.float);
 					card.show.btn.on();
 					hover.select = card;
@@ -598,7 +598,7 @@
 						duration : 0.2
 					})
 				const pic = target.pic ?? three.src.unknown;
-				const img = target.three.element.children[0] as HTMLImageElement;
+				const img = target.div.img;
 				switch (pos) {
 					case POS.FACEDOWN_ATTACK:
 						if (img.src !== three.src.cover)
@@ -626,7 +626,7 @@
 			const set = () => {
 				if (owner === 1)
 					target.three.rotation.set(0, 0, Math.PI);
-				const el = target.three.element.children[0] as HTMLImageElement;
+				const el = target.div.img;
 				switch (pos) {
 					case POS.FACEDOWN_ATTACK:
 						el.src = three.src.cover;
@@ -925,11 +925,11 @@
 
 			// await duel.draw(0, 8);
 			// await duel.draw(1, 8);
-			// await duel.to.mzone(0, {
-			// 	location : LOCATION.DECK,
-			// 	seq : 0,
-			// 	zone : 0
-			// })
+			await duel.to.mzone(0, {
+				location : LOCATION.DECK,
+				seq : 0,
+				zone : 0
+			})
 
 			// duel.cards.get(LOCATION.ONFIELD)!(2).forEach((card : Client_Card) => {
 			// 	card.activatable.on({flag : 0, desc : 1160});
