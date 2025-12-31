@@ -90,7 +90,7 @@ class Fs {
 				const p = await join;
 				const entries = await invoke.read.db(await path.join(p));
 				if (entries.error === undefined)
-					return entries.content!.map(i => [...i[0], ...i[1]]);
+					return entries.content!.map(i => (i[0] as Array<number | string>).concat(i[1]));
 			} catch (error) {
 				this.write.log(error);
 			}

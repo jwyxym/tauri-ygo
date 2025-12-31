@@ -28,7 +28,7 @@ class SQLiteReader {
 		try {
 			result = operation(db);
 		} catch (e) {
-			fs.write.log(e)
+			fs.write.log(e);
 		} finally {
 			db.close();
 		}
