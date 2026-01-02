@@ -925,11 +925,11 @@
 
 			// await duel.draw(0, 8);
 			// await duel.draw(1, 8);
-			await duel.to.mzone(0, {
-				location : LOCATION.DECK,
-				seq : 0,
-				zone : 0
-			})
+			// await duel.to.mzone(0, {
+			// 	location : LOCATION.DECK,
+			// 	seq : 0,
+			// 	zone : 0
+			// })
 
 			// duel.cards.get(LOCATION.ONFIELD)!(2).forEach((card : Client_Card) => {
 			// 	card.activatable.on({flag : 0, desc : 1160});
