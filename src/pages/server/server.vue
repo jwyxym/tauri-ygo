@@ -254,6 +254,7 @@
 				:confirm = 'connect.select.group.confirm'
 				:cancel = 'connect.select.group.cancel'
 				v-if = 'page.duel && connect.select.group.chk'
+				ref = 'select'
 			/>
 		</transition>
 		<transition name = 'move_up'>
@@ -266,6 +267,7 @@
 				:cancel = 'connect.select.cards.cancel'
 				v-if = 'page.duel && connect.select.cards.array.length > 0'
 				v-show = 'connect.select.cards.show'
+				ref = 'select'
 			/>
 		</transition>
 		<transition name = 'move_up'>
@@ -277,6 +279,7 @@
 				:cancel = 'connect.select.plaids.cancel'
 				v-if = 'page.duel && connect.select.plaids.array.length > 0'
 				v-show = 'connect.select.plaids.show'
+				ref = 'select'
 			/>
 		</transition>
 		<transition name = 'move_up'>
@@ -286,6 +289,7 @@
 				:pos = 'connect.select.position.pos'
 				:confirm = 'connect.select.position.select'
 				v-if = 'page.duel && connect.select.position.pos > 0 && connect.select.position.code > 0'
+				ref = 'select'
 			/>
 		</transition>
 		<transition name = 'move_up'>
@@ -294,11 +298,12 @@
 				:confirm = 'connect.select.idles.select'
 				:cancel = 'connect.select.idles.clear'
 				v-if = 'page.duel && connect.select.idles.array.length > 0'
+				ref = 'select'
 			/>
 		</transition>
 		<Phase
 			v-if = 'page.duel && connect.deck_count.length > 0'
-			@update:phase = 'connect.phase = $event'
+			:phase = 'connect.phase'
 		/>
 	</div>
 </template>
@@ -336,13 +341,14 @@
 	import Plaid_Select_List from './select_list/plaids.vue';
 	import Pos_Select_List from './select_list/pos.vue';
 	import Idles_Select_List from './select_list/idles.vue';
-	import { LOCATION } from './post/network';
+	import * as NETWORK from './post/network';
 	import { Idle, EffectIdle } from './idle';
 
 	let tcp : Tcp | null = null;
 	const chat = ref<HTMLElement | null>(null);
 	const info = ref<HTMLElement | null>(null);
 	const float_buttons : Ref<{ dom: HTMLElement } | null> = ref(null);
+	const select = ref<Array<HTMLElement> | null>(null);
 
 	const page = reactive({
 		server : false,
@@ -405,7 +411,51 @@
 		player : new Array(4).fill({ name : '' }) as Array<TCP.Player>,
 		deck_count : [] as Array<number>,
 		duel : {},
-		phase : {},
+		phase : {
+			player : -1,
+			phase : -1,
+			ep : false,
+			bp : false,
+			main : false,
+			on : async (player : number, phase : number) : Promise<void> => {
+				connect.phase.player = player;
+				connect.phase.phase = phase;
+				await mainGame.sleep(800);
+			},
+			clear : () : void => {
+				connect.phase.player = -1;
+				connect.phase.phase = -1;
+				connect.phase.ep = false;
+				connect.phase.bp = false;
+				connect.phase.main = false;
+			},
+			select : async () : Promise<void> => {
+				if (select.value !== null || tcp === null
+					|| (tcp !== null && tcp.msg !== NETWORK.MSG.SELECT_BATTLECMD && tcp.msg !== NETWORK.MSG.SELECT_IDLECMD)
+				)
+					return;
+				const arr : Array<[number, string]> = [];
+				if (connect.phase.bp)
+					arr.push([6, mainGame.get.text(I18N_KEYS.DUEL_PHASE_BATTLE)]);
+				if (connect.phase.main)
+					arr.push([2, mainGame.get.text(I18N_KEYS.DUEL_PHASE_MAIN2)]);
+				if (connect.phase.ep)
+					arr.push([3 + (tcp.msg - 10) * 4, mainGame.get.text(I18N_KEYS.DUEL_PHASE_END)]);
+				if (arr.length === 0)
+					return;
+				const i = await Picker(
+						[arr.map(i => { return { text : i[1] }; })],
+						mainGame.get.text(I18N_KEYS.DUEL_PHASE_CHANGE),
+						false
+					);
+				if (i !== undefined && tcp !== null) {
+					connect.phase.ep = false;
+					connect.phase.bp = false;
+					connect.phase.main = false;
+					await tcp!.send.response(arr[i[0]][0]);
+				}
+			}
+		},
 		cards : [] as Array<number>,
 		chains : [] as Array<{ player : number; code : string | number; }>,
 		select : {
@@ -524,7 +574,7 @@
 				},
 				confirm : async (result : { loc : number, seq : number; player : number}) => {
 					if (connect.select.plaids.chk_player !== undefined
-						&& result.loc === LOCATION.MZONE
+						&& result.loc === NETWORK.LOCATION.MZONE
 						&& [5, 6].includes(result.seq)
 						&& result.player !== connect.select.plaids.chk_player
 					)
@@ -534,14 +584,14 @@
 							seq : result.seq === 5 ? 6 : 5
 						};
 					else if (connect.select.plaids.pzone
-						&& result.loc === LOCATION.SZONE
+						&& result.loc === NETWORK.LOCATION.SZONE
 						&& [0, 4].includes(result.seq)
 					)
 						result.seq = result.seq === 0 ? 6 : 7;
-					else if (result.loc === LOCATION.FZONE)
+					else if (result.loc === NETWORK.LOCATION.FZONE)
 						result = {
 							player : result.player,
-							loc : LOCATION.SZONE,
+							loc : NETWORK.LOCATION.SZONE,
 							seq : 5
 						};
 
@@ -818,8 +868,8 @@
 			connect.is_first.chk = undefined;
 			connect.chat.send_list.length = 0;
 			connect.chat.send_key = -1;
+			connect.phase.clear();
 			connect.duel = {};
-			connect.phase = {};
 			for (const i of Object.values(connect.idle))
 				i.clear();
 		}

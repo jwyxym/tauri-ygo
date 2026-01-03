@@ -77,6 +77,8 @@ class Tcp {
 	select_hint : number;
 	last_select_hint : number;
 	turn_player : number;
+	msg : number;
+	stoc : number;
 
 	constructor () {
 		this.cid = 'xiaoye';
@@ -84,6 +86,8 @@ class Tcp {
 		this.select_hint = 0;
 		this.last_select_hint = 0;
 		this.turn_player = 0;
+		this.msg = 0;
+		this.stoc = 0;
 	}
 
 	connect = async (address : string, name : string, pass : string, connect : Reactive<any>) : Promise<boolean> => {
@@ -158,8 +162,11 @@ class Tcp {
 				}
 				const len = data.getUint16(pos, true);
 				const proto = data.getUint8(pos + 2);
+				this.stoc = proto;
+				if (proto !== STOC.GAME_MSG)
+					this.msg = 0;
 				const func = funcs.get(proto);
-				console.log('0x'+proto.toString(16))
+				// console.log('0x'+proto.toString(16))
 				if (func)
 					await func(buffer, data, len, connect, pos);
 				pos += len + 2;
@@ -422,7 +429,9 @@ class Tcp {
 									}
 								}
 							}
-							const pack = to_package<number>(buffer, data, [8, 8, 8], p);
+							const pack = to_package<number>(buffer, data, new Array(3).fill(8), p);
+							connect.phase.bp = !!pack[0];
+							connect.phase.ep = !!pack[1];
 							cards.forEach(i => i.activatable.clear());
 							await mainGame.load.pic(codes.map(i => i.code));
 							for (const i of codes)
@@ -604,12 +613,10 @@ class Tcp {
 							const pack = to_package<number>(buffer, data, [8], pos);
 							this.turn_player = to_player(pack[0]);
 							await connect.phase.on(this.turn_player, PHASE.NONE);
-							await mainGame.sleep(500);
 						}],
 						[MSG.NEW_PHASE, async () => {
 							const [phase] = to_package<number>(buffer, data, [16], pos);
 							await connect.phase.on(this.turn_player, phase);
-							await mainGame.sleep(500);
 						}],
 						[MSG.MOVE, async () => {
 							const pack = to_package<number>(buffer, data, [32].concat(new Array(8).fill(8), [32]), pos);
@@ -745,8 +752,9 @@ class Tcp {
 						}]
 					]);
 					const cur_msg : number = to_package<number>(buffer, data, [8], pos)[0];
+					this.msg = cur_msg;
 					pos += 1;
-					console.log(cur_msg)
+					// console.log(cur_msg)
 					if (connect.select.group.chk && cur_msg !== MSG.SELECT_UNSELECT_CARD)
 						connect.select.group.clear();
 					if (msg_funcs.has(cur_msg))
@@ -819,7 +827,7 @@ class Tcp {
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					const pack = to_package<number>(buffer, data, new Array(6).fill(16), pos);
 					connect.deck_count = pack;
-					console.log(connect.deck_count)
+					// console.log(connect.deck_count)
 				}
 			],
 			[STOC.JOIN_GAME,
