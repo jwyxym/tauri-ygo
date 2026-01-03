@@ -10,7 +10,7 @@
 	</transition>
 </template>
 <script setup lang = 'ts'>
-	import { onBeforeMount, reactive } from 'vue';
+	import { reactive, watch } from 'vue';
 	import mainGame from '../../../script/game';
 	import { PHASE } from '../post/network';
 	import { I18N_KEYS } from '../../../script/language/i18n';
@@ -40,11 +40,12 @@
 		}
 	};
 
-	onBeforeMount(() => {
-		emit('update:phase', phase);
-	});
+	const props = defineProps(['phase']);
 
-	const emit = defineEmits(['update:phase']);
+	watch(() => { return props.phase.phase; }, async () => {
+		if (props.phase.player > -1 && props.phase.phase > -1)
+			await phase.on(props.phase.player, props.phase.phase);
+	});
 
 </script>
 <style scoped lang = 'scss'>

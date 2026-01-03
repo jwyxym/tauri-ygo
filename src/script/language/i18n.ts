@@ -155,6 +155,7 @@ const I18N_KEYS = {
 	DUEL_PHASE_BATTLE : 0,
 	DUEL_PHASE_MAIN2 : 0,
 	DUEL_PHASE_END : 0,
+	DUEL_PHASE_CHANGE : 0,
 };
 
 Object.entries(I18N_KEYS).forEach((i, v) => {

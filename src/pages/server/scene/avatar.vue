@@ -51,7 +51,6 @@
 	}, { immediate : true });
 
 	watch(() => { return props.time_player; }, (n) => {
-		console.log(props.tp, n)
 		if (!countdown.value) return;
 		props.tp === n ? countdown.value.start() : countdown.value.pause();
 	}, { immediate : true });
