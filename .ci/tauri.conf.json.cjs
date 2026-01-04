@@ -56,7 +56,7 @@ if (os === 'linux')
 	else
 		tauriConfig.bundle.targets = ['deb', 'rpm'];
 
-if (os === 'windows' || os === 'linux' || os === 'macos')
+if (os === 'windows' || os === 'macos' || (os === 'linux' && pack !== 'appimage'))
 	tauriConfig.bundle.resources = [
 		"assets.zip"
 	];
