@@ -358,7 +358,7 @@ jobs:
         path: .\build\tauri-ygo.AppImage
 
   create-release:
-    needs: [build-android, build-windows, build-macos]
+    needs: [build-android, build-windows, build-macos, build-linux]
     runs-on: ubuntu-latest
     permissions:
       contents: write
