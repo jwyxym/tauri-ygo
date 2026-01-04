@@ -2,7 +2,8 @@ const fs = require('fs');
 const path = require('path');
 
 const os = process.argv[2] || '';
-const version = process.argv[3] || '0.1.0';
+const pack = process.argv[3] || '';
+const version = process.argv[4] || '0.1.0';
 
 const tauriConfig = {
 	$schema: "https://schema.tauri.app/config/2",
@@ -49,11 +50,16 @@ const tauriConfig = {
 	}
 };
 
-if (os === 'windows' || os === 'linux' || os === 'macos') {
+if (os === 'linux')
+	if (pack === 'appimage') 
+		tauriConfig.bundle.targets = ['appimage'];
+	else
+		tauriConfig.bundle.targets = ['deb', 'rpm'];
+
+if (os === 'windows' || os === 'linux' || os === 'macos')
 	tauriConfig.bundle.resources = [
 		"assets.zip"
 	];
-}
 
 const configPath = path.join(__dirname, '../src-tauri/tauri.conf.json');
 fs.writeFileSync(configPath, JSON.stringify(tauriConfig, null, 4), 'utf-8');

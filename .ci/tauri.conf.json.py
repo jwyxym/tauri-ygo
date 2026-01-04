@@ -2,7 +2,9 @@ import json
 import sys
 
 os = sys.argv[1] if len(sys.argv) >= 2 else ''
-version = sys.argv[2] if len(sys.argv) >= 3 else '0.1.0'
+pack = sys.argv[2] if len(sys.argv) >= 3 else ''
+version = sys.argv[3] if len(sys.argv) >= 4 else '0.1.0'
+
 tauri_config = {
 	"$schema" : "https://schema.tauri.app/config/2",
 	"productName" : "tauri-ygo",
@@ -25,7 +27,7 @@ tauri_config = {
 		"security" : {
 			"csp" : {
 				"img-src" : "'self' asset: http: https: blob: data:",
-                "script-src" : "'self' 'wasm-unsafe-eval'"
+				"script-src" : "'self' 'wasm-unsafe-eval'"
 			},
 			"assetProtocol" : {
 				"enable" : True,
@@ -47,11 +49,18 @@ tauri_config = {
 		]
 	}
 }
+
+if os == 'linux':
+	if pack == 'appimage':
+		tauri_config["bundle"]["targets"] = ['appimage']
+	else:
+		tauri_config["bundle"]["targets"] = ['deb', 'rpm']
+
 if os == 'windows' or os == 'linux' or os == 'macos':
-    tauri_config["bundle"]["resources"] = [
+	tauri_config["bundle"]["resources"] = [
 		"assets.zip"
 	]
 
 path = './src-tauri/tauri.conf.json'
 with open(path, 'w', encoding = 'utf-8') as f :
-    json.dump(tauri_config, f, indent = 4)
+	json.dump(tauri_config, f, indent = 4)
