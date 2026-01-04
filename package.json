@@ -6,10 +6,16 @@
 	"scripts": {
 		"copy:cmd": "xcopy src-tauri\\android-custom\\ src-tauri\\gen\\android\\app\\src\\main /s /Y /e /I",
 		"copy:sh": "cp -r src-tauri/android-custom/* src-tauri/gen/android/app/src/main/",
+		"json:android": "node .ci/tauri.conf.json.cjs android",
+		"json:windows": "node .ci/tauri.conf.json.cjs windows",
 		"icon": "npm run tauri icon -p src-tauri/icons/icon.jpg",
 		"dev": "vite",
 		"build": "vite build",
 		"preview": "vite preview",
+		"tauri:dev": "tauri dev",
+		"tauri:build": "tauri build",
+		"tauri:android:dev": "tauri android dev",
+		"tauri:android:build": "tauri android build",
 		"tauri": "tauri"
 	},
 	"dependencies": {

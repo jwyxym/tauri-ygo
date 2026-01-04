@@ -7,60 +7,32 @@ on:
     
 jobs:
   build-android:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
 
-    - name: Install wget and unzip
-      shell: powershell
-      run: |
-        Set-ExecutionPolicy Bypass -Scope Process -Force
-        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-        choco install wget unzip -y
-
-    - name: Install Java21
-      shell: cmd
-      run: |
-        wget https://download.oracle.com/java/21/latest/jdk-21_windows-x64_bin.zip
-        unzip jdk-21_windows-x64_bin.zip -d java21
-    
-    - name: Rename Java21Dir
-      shell: pwsh
-      run: |
-        $folders = Get-ChildItem -Path './java21' -Directory
-
-        if ($folders.Count -gt 0) {
-          $oldPath = Join-Path './java21' $folders[0].Name
-          Rename-Item -Path $oldPath -NewName "java"
-        }
-
-    - name: Install Python
-      uses: actions/setup-python@v4
+    - name: Setup Java 21
+      uses: actions/setup-java@v4
       with:
-        python-version: '3.13'
+        distribution: 'temurin'
+        java-version: '21'
 
-    - name: Install Android sdk
-      shell: cmd
-      run: |
-        mkdir android-sdk
-        cd android-sdk
-        mkdir platform-tools
-        wget https://dl.google.com/android/repository/commandlinetools-win-13114758_latest.zip
-        set ANDROID_SDK_ROOT=%cd%
-        mkdir cmdline-tools
-        unzip commandlinetools-win-13114758_latest.zip -d cmdline-tools
-        cd cmdline-tools
-        ren cmdline-tools latest
-        .\latest\bin\sdkmanager.bat "platform-tools" "build-tools;34.0.0" "platforms;android-34"
+    - name: Setup Android SDK and NDK
+      uses: android-actions/setup-android@v3
+      with:
+        accept-android-sdk-license: true
 
-    - name: Install Android ndk r27
-      shell: cmd
+    - name: Set Android Environment
       run: |
-        wget https://googledownloads.cn/android/repository/android-ndk-r27d-windows.zip
-        unzip android-ndk-r27d-windows.zip
+        echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+        echo "ANDROID_NDK_HOME=$ANDROID_NDK_ROOT" >> $GITHUB_ENV
+        echo "NDK_HOME=$ANDROID_NDK_ROOT" >> $GITHUB_ENV
+        echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+        echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
+        echo "$ANDROID_SDK_ROOT/build-tools/34.0.0" >> $GITHUB_PATH
 
     - name: Install Node.js
       uses: actions/setup-node@v4
@@ -73,60 +45,51 @@ jobs:
         toolchain: 1.88.0
 
     - name: Write Tauri Config
-      shell: cmd
+      shell: bash
       run: |
-        cd .ci
-        python tauri.conf.json.py android
+        npm run json:android
 
     - name: NPM Init
-      shell: cmd
+      shell: bash
       run: |
         npm install
     
     - name: Android Init
-      shell: cmd
-      env:
-        JAVA_HOME: ${{ github.workspace }}\java21\java
-        ANDROID_HOME: ${{ github.workspace }}\android-sdk
-        NDK_HOME: ${{ github.workspace }}\android-ndk-r27d
+      shell: bash
       run: |
         npm run tauri android init
 
     - name: Android copy
+      shell: bash
       run: |
-        npm run copy:cmd
+        npm run copy:sh
 
     - name: Android icon
+      shell: bash
       run: |
         npm run icon
 
     - name: Android build
-      shell: cmd
-      env:
-        JAVA_HOME: ${{ github.workspace }}\java21\java
-        NDK_HOME: ${{ github.workspace }}\android-ndk-r27d
+      shell: bash
       run: |
         npm run tauri android build
 
     - name: Decode Keystore File
-      shell: pwsh
+      shell: bash
       run: |
-        $base64String = "${{ secrets.KEYSTORE_FILE }}"
-        $cleanBase64 = $base64String -replace "`r`n|`n|\s", ""
-        $bytes = [System.Convert]::FromBase64String($cleanBase64)
-        [System.IO.File]::WriteAllBytes("tauri-ygo.jks", $bytes)
+        echo "${{ secrets.KEYSTORE_FILE }}" | base64 -d > tauri-ygo.jks
 
     - name: Sign apk
-      shell: cmd
+      shell: bash
       run: |
         mkdir build
-        "%ANDROID_HOME%\build-tools\34.0.0\apksigner.bat" sign --ks ./tauri-ygo.jks --ks-key-alias ${{ secrets.KEY_ALIAS }} --key-pass pass:${{ secrets.KEYSTORE_PASSWORD }} --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} --out .\build\tauri-ygo.apk .\src-tauri\gen\android\app\build\outputs\apk\universal\release\app-universal-release-unsigned.apk
+        apksigner sign --ks ./tauri-ygo.jks --ks-key-alias ${{ secrets.KEY_ALIAS }} --key-pass pass:${{ secrets.KEYSTORE_PASSWORD }} --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} --out ./build/tauri-ygo.apk ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk
 
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
         name: tauri-ygo.apk
-        path: .\build\tauri-ygo.apk
+        path: ./build/tauri-ygo.apk
 
   build-windows:
     runs-on: windows-latest
@@ -144,12 +107,6 @@ jobs:
       uses: dtolnay/rust-toolchain@master
       with:
         toolchain: 1.88.0
-
-    - name: Install Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.13'
-
 
     - name: Install wget and unzip
       shell: powershell
@@ -176,8 +133,7 @@ jobs:
       shell: cmd
       run: |
         xcopy .ci src-tauri /s /Y /e /I
-        cd .ci
-        python tauri.conf.json.py windows
+        npm run json:windows
 
     - name: NPM Init
       shell: cmd

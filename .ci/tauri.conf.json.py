@@ -52,6 +52,6 @@ if os == 'windows':
 		"assets.zip"
 	]
 
-path = '../src-tauri/tauri.conf.json'
+path = './src-tauri/tauri.conf.json'
 with open(path, 'w', encoding = 'utf-8') as f :
     json.dump(tauri_config, f, indent = 4)
