@@ -47,7 +47,7 @@ tauri_config = {
 		]
 	}
 }
-if os == 'windows':
+if os == 'windows' or os == 'linux' or os == 'macos':
     tauri_config["bundle"]["resources"] = [
 		"assets.zip"
 	]

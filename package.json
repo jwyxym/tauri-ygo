@@ -8,6 +8,8 @@
 		"copy:sh": "cp -r src-tauri/android-custom/* src-tauri/gen/android/app/src/main/",
 		"json:android": "node .ci/tauri.conf.json.cjs android",
 		"json:windows": "node .ci/tauri.conf.json.cjs windows",
+		"json:linux": "node .ci/tauri.conf.json.cjs linux",
+		"json:macos": "node .ci/tauri.conf.json.cjs macos",
 		"icon": "npm run tauri icon -p src-tauri/icons/icon.jpg",
 		"dev": "vite",
 		"build": "vite build",

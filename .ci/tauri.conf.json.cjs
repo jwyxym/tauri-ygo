@@ -49,7 +49,7 @@ const tauriConfig = {
 	}
 };
 
-if (os === 'windows') {
+if (os === 'windows' || os === 'linux' || os === 'macos') {
 	tauriConfig.bundle.resources = [
 		"assets.zip"
 	];
