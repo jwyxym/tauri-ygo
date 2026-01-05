@@ -54,7 +54,7 @@ jobs:
     - name: Setup Android SDK and NDK
       uses: android-actions/setup-android@v3
       with:
-        accept-android-sdk-license: true
+        accept-android-sdk-licenses: true
 
     - name: Set Android Environment
       run: |
