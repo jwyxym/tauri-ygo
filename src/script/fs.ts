@@ -115,7 +115,7 @@ class Fs {
 			const folds = [
 				await path.join(this.path!, CONSTANT.DIRS.EXPANSION, CONSTANT.DIRS.PIC)
 			];
-			if (!mainGame.is_android())
+			if (!mainGame.is_pic_zip())
 				folds.splice(0, 0, await path.join(this.path!, CONSTANT.DIRS.PIC));
 			const entries = await invoke.read.pics(folds, codes);
 			if (entries.error === undefined) {
@@ -261,7 +261,7 @@ class Fs {
 					const p = await join;
 					return convertFileSrc(p);
 				}
-				return mainGame.is_android() ? await read_to_blob() : await read_to_src();
+				return !!mainGame.get.system(CONSTANT.KEYS.SETTING_SELECT_VOICE) ? await read_to_blob() : await read_to_src();
 			} catch (error) {
 				this.write.log(error);
 			}

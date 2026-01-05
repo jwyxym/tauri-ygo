@@ -110,6 +110,8 @@ class Game {
 						this.read.system_conf(line);
 					}
 				}
+				if (!this.system.has(CONSTANT.KEYS.SETTING_VOICE_BACK_BGM))
+					this.push.system(CONSTANT.KEYS.SETTING_VOICE_BACK_BGM, 0);
 				if (!this.system.has(CONSTANT.KEYS.SETTING_CT_CARD))
 					this.push.system(CONSTANT.KEYS.SETTING_CT_CARD, 3);
 				if (!this.system.has(CONSTANT.KEYS.SETTING_CT_DECK_MAIN))
@@ -120,13 +122,23 @@ class Game {
 					this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_SIDE, 15);
 				if (!this.system.has(CONSTANT.KEYS.SETTING_SERVER_PLAYER_NAME))
 					this.push.system(CONSTANT.KEYS.SETTING_SERVER_PLAYER_NAME, '今晚有宵夜吗');
+				if (!this.system.has(CONSTANT.KEYS.SETTING_SELECT_SORT))
+					this.push.system(CONSTANT.KEYS.SETTING_SELECT_SORT, this.is_windows() ? 0 : 1);
+				if (!this.system.has(CONSTANT.KEYS.SETTING_SELECT_SLIDER))
+					this.push.system(CONSTANT.KEYS.SETTING_SELECT_SLIDER, this.is_windows() ? 0 : 1);
+				if (!this.system.has(CONSTANT.KEYS.SETTING_SELECT_VOICE))
+					this.push.system(CONSTANT.KEYS.SETTING_SELECT_VOICE, this.is_windows() ? 0 : 1);
 			} else {
 				this.push.system(CONSTANT.KEYS.SETTING_DOWMLOAD_TIME, new Date().toISOString());
+				this.push.system(CONSTANT.KEYS.SETTING_VOICE_BACK_BGM, 0);
 				this.push.system(CONSTANT.KEYS.SETTING_CT_CARD, 3);
 				this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_MAIN, 60);
 				this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_EX, 15);
 				this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_SIDE, 15);
 				this.push.system(CONSTANT.KEYS.SETTING_SERVER_PLAYER_NAME, '今晚有宵夜吗');
+				this.push.system(CONSTANT.KEYS.SETTING_SELECT_SORT, this.is_windows() ? 0 : 1);
+				this.push.system(CONSTANT.KEYS.SETTING_SELECT_SLIDER, this.is_windows() ? 0 : 1);
+				this.push.system(CONSTANT.KEYS.SETTING_SELECT_VOICE, this.is_windows() ? 0 : 1);
 				await fs.write.system();
 			}
 
@@ -171,8 +183,11 @@ class Game {
 					CONSTANT.KEYS.SETTING_LOADING_EXPANSION,
 				].includes(key)
 			) {
-				return (value ?? '').split('&&').filter(i => i !== '');
-			} else if (key === CONSTANT.KEYS.SETTING_VOICE_BACK_BGM || obj_key[0].startsWith('SETTING_CT_')) {
+				return value?.split('&&').filter(i => i !== '') ?? [];
+			} else if (key === CONSTANT.KEYS.SETTING_VOICE_BACK_BGM
+				|| obj_key[0].startsWith('SETTING_CT_')
+				|| obj_key[0].startsWith('SETTING_SELECT_')
+			) {
 				return isNaN(number) ? 0 : number;
 			} else if (obj_key[0].startsWith('SETTING_CHK_')) {
 				return !!number;
@@ -359,7 +374,7 @@ class Game {
 				}
 				deck = deck.filter(filter);
 			}
-			if (this.is_android()) {
+			if (this.is_pic_zip()) {
 				deck = deck.filter(filter);
 				const ypk : Map<RegExp, Map<string, Blob | Uint8Array | string>> = await fs.read.zip(CONSTANT.FILES.PIC_ZIP, deck);
 				for (const code of deck) {
@@ -866,6 +881,10 @@ class Game {
 
 	is_windows = () : boolean => {
 		return CONSTANT.SYSTEM === 'windows';
+	};
+
+	is_pic_zip = () : boolean => {
+		return this.is_android();
 	};
 
 	sleep = async (time : number, reduce : number = 0) : Promise<void> => {

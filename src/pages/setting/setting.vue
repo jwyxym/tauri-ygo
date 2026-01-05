@@ -123,7 +123,7 @@
 							<div>
 								{{ `${mainGame.get.text(I18N_KEYS.SETTING_VOICE_BACK_BGM)} : ${setting.sound.toFixed(2)}` }}
 								<var-slider
-									v-if = 'mainGame.is_android()'
+									v-if = 'mainGame.get.system(CONSTANT.KEYS.SETTING_SELECT_SORT) === 1'
 									v-model = 'setting.sound'
 									label-visible = 'never'
 									:step = '0.01'
@@ -132,7 +132,7 @@
 									@end = 'items.sound_change_over'
 								/>
 								<slider
-									v-if = '!mainGame.is_android()'
+									v-if = 'mainGame.get.system(CONSTANT.KEYS.SETTING_SELECT_SORT) === 0'
 									v-model = 'setting.sound'
 									color = '#397bfe'
 									track-color = 'white'
