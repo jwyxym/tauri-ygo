@@ -260,8 +260,6 @@ jobs:
         mkdir -p ./build
         DMG_FILES=(./src-tauri/target/release/bundle/dmg/*.dmg)
         cp "${DMG_FILES[0]}" ./build/tauri-ygo.dmg
-        APP_FILES=(./src-tauri/target/release/bundle/macos/*.app)
-        cp "${APP_FILES[0]}" ./build/tauri-ygo.app
 
     - name: Upload File
       uses: actions/upload-artifact@v4
@@ -273,7 +271,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: tauri-ygo-macos-${{ matrix.target }}.app
-        path: ./build/tauri-ygo.app
+        path: ./src-tauri/target/release/bundle/macos/
 
   build-linux:
     name: build-linux-${{ matrix.target }}
