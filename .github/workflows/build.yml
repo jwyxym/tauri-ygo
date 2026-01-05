@@ -298,6 +298,13 @@ jobs:
       with:
         workspaces: './src-tauri -> target'
 
+    - name: Download assets
+      uses: robinraju/release-downloader@v1.10
+      with:
+        tag: assets-latest
+        fileName: "assets.zip"
+        out-file-path: "./src-tauri/"
+        
     - name: Install system dependencies
       run: |
         sudo apt-get update
@@ -316,12 +323,25 @@ jobs:
 
     - name: Write Tauri Config
       run: |
-        cp -r .ci/* src-tauri/
-        npm run json:linux:deb
+        npm run json:linux:appimage
 
     - name: NPM Init
       run: |
         npm install
+
+    - name: Linux build
+      run: |
+        npm run tauri:build
+
+    - name: Copy
+      run: |
+        DMG_FILES=(./src-tauri/target/release/bundle/appimage/*.AppImage)
+        cp "${DMG_FILES[0]}" ./build/tauri-ygo.AppImage
+
+    - name: Write Tauri Config
+      run: |
+        cp -r .ci/* src-tauri/
+        npm run json:linux:deb
 
     - name: Linux build
       run: |
@@ -334,20 +354,6 @@ jobs:
         cp "${DEB_FILES[0]}" ./build/tauri-ygo.deb
         RPM_FILES=(./src-tauri/target/release/bundle/rpm/*.rpm)
         cp "${RPM_FILES[0]}" ./build/tauri-ygo.rpm
-
-    - name: Write Tauri Config
-      run: |
-        cp -r .ci/* src-tauri/
-        npm run json:linux:appimage
-
-    - name: Linux build
-      run: |
-        npm run tauri:build
-
-    - name: Copy
-      run: |
-        DMG_FILES=(./src-tauri/target/release/bundle/appimage/*.AppImage)
-        cp "${DMG_FILES[0]}" ./build/tauri-ygo.AppImage
 
     - name: Upload File
       uses: actions/upload-artifact@v4
