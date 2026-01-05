@@ -267,6 +267,12 @@ jobs:
         name: tauri-ygo-macos-${{ matrix.target }}.dmg
         path: ./build/tauri-ygo.dmg
 
+    - name: Upload File
+      uses: actions/upload-artifact@v4
+      with:
+        name: tauri-ygo-macos-${{ matrix.target }}.app
+        path: ./src-tauri/target/release/bundle/macos/tauri-ygo.app
+
   build-linux:
     name: build-linux-${{ matrix.target }}
     runs-on: ${{ matrix.run-on }}
@@ -304,7 +310,7 @@ jobs:
         tag: assets-latest
         fileName: "assets.zip"
         out-file-path: "./src-tauri/"
-        
+
     - name: Install system dependencies
       run: |
         sudo apt-get update
@@ -489,8 +495,28 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/tauri-ygo-macos-x86_64.app/tauri-ygo.app
+          asset_name: tauri-ygo-macos-x86_64.app
+          asset_content_type: application/octet-stream
+
+      - name: Upload
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./build/tauri-ygo-macos-aarch64.dmg/tauri-ygo.dmg
           asset_name: tauri-ygo-macos-aarch64.dmg
+          asset_content_type: application/octet-stream
+
+      - name: Upload
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/tauri-ygo-macos-aarch64.app/tauri-ygo.app
+          asset_name: tauri-ygo-macos-aarch64.app
           asset_content_type: application/octet-stream
 
       - name: Upload
