@@ -342,8 +342,9 @@ jobs:
 
     - name: Copy
       run: |
-        DMG_FILES=(./src-tauri/target/release/bundle/appimage/*.AppImage)
-        cp "${DMG_FILES[0]}" ./build/tauri-ygo.AppImage
+        mkdir -p ./build
+        APPIMAGE_FILES=(./src-tauri/target/release/bundle/appimage/*.AppImage)
+        cp "${APPIMAGE_FILES[0]}" ./build/tauri-ygo.AppImage
 
     - name: Write Tauri Config
       run: |
@@ -356,7 +357,6 @@ jobs:
 
     - name: Copy
       run: |
-        mkdir -p ./build
         DEB_FILES=(./src-tauri/target/release/bundle/deb/*.deb)
         cp "${DEB_FILES[0]}" ./build/tauri-ygo.deb
         RPM_FILES=(./src-tauri/target/release/bundle/rpm/*.rpm)
