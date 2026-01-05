@@ -6,6 +6,9 @@ import { COMMAND, EDESC, POS } from '../post/network';
 
 import * as CSS from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 
+const key = '';
+const child = document.getElementById('');
+
 interface Hover {
 	on : Function;
 	end : Function;
@@ -38,6 +41,29 @@ class Client_Card {
 	scale : number;
 	div : Client_Card_Div;
 
+	counter_function (counter : number) {
+		const counter_div = document.createElement('div');
+		counter_div.classList.add(key);
+		Object.assign(counter_div.style, {
+			height : '100%',
+			display : 'flex',
+			opacity : '0',
+			transition : 'all 0.1s ease'
+		});
+		const img = document.createElement('img');
+		img.src = ''
+		img.style.height = '100%';
+		counter_div.appendChild(img);
+		const span = document.createElement('span');
+		counter_div.appendChild(span);
+		child.appendChild(counter_div);
+		if (counter > 0) {
+			counter_div.style.opacity = '1';
+		} else {
+			counter_div.style.opacity = '0';
+			counter_div.remove();
+		}
+	}
 	constructor (src : string, size : {
 		width : number; height : number;
 	}, hover : Hover) {
