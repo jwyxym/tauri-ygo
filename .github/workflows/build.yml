@@ -343,8 +343,7 @@ jobs:
     - name: Copy
       run: |
         mkdir -p ./build
-        APPIMAGE_FILES=(./src-tauri/target/release/bundle/appimage/*.AppImage)
-        cp "${APPIMAGE_FILES[0]}" ./build/tauri-ygo.AppImage
+        cp ./src-tauri/target/release/bundle/appimage/*.AppImage ./build/tauri-ygo.AppImage
 
     - name: Write Tauri Config
       run: |
@@ -357,10 +356,8 @@ jobs:
 
     - name: Copy
       run: |
-        DEB_FILES=(./src-tauri/target/release/bundle/deb/*.deb)
-        cp "${DEB_FILES[0]}" ./build/tauri-ygo.deb
-        RPM_FILES=(./src-tauri/target/release/bundle/rpm/*.rpm)
-        cp "${RPM_FILES[0]}" ./build/tauri-ygo.rpm
+        cp ./src-tauri/target/release/bundle/deb/*.deb ./build/tauri-ygo.deb
+        cp ./src-tauri/target/release/bundle/rpm/*.rpm ./build/tauri-ygo.rpm
 
     - name: Upload File
       uses: actions/upload-artifact@v4
