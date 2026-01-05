@@ -35,25 +35,33 @@ cd tauri-ygo
 <h5>初始化tauri项目所需的config文件</h5>
 
 ```bash
-cd .ci
-node tauri.conf.json.cjs
+# dev模式或编译android
+npm run json:android
+# 编译windows
+npm run json:windows
 ```
+
 <h5>安装依赖</h5>
 
 ```bash
-cd ..
 npm install
 ```
 <h5>如果是安卓则需要初始化 kt 代码</h5>
 
 ```bash
-npm run tauri android init
-npm run copy:sh # 如果是 Windows cmd 可以改用 npm run copy:cmd
+npm run tauri:android:init
+# Linux
+npm run copy:sh
+# Windows cmd
+npm run copy:cmd
 ```
 <h5>Dev 模式</h5>
 
 ```bash
-npm run tauri dev #如果是 Android 则改用 npm run tauri android dev
+#调试Windows
+npm run tauri:dev
+#调试Android 需以管理员权限运行
+npm run tauri:android:dev
 ```
 <h5>编译项目</h5>
 
@@ -61,6 +69,8 @@ npm run tauri dev #如果是 Android 则改用 npm run tauri android dev
 #Android 的icon图标需要重新设置， 其他平台不用
 npm run icon
 
-#编译项目
-npm run tauri build #如果是 Android 则改用 npm run tauri android build
+#编译Windows
+npm run tauri:build
+#编译Android
+npm run tauri:android:build
 ```

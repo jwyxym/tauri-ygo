@@ -52,7 +52,7 @@ class Deck extends YGOProDeck {
 				if (line === '!side') {
 					current = deck.side;
 				}
-				if (line.match(/^\d+$/)) {
+				if (line.match(REG.NUMBER)) {
 					current.push(parseInt(line, 10));
 				}
 			}

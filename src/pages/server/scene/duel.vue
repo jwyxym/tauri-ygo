@@ -3,18 +3,19 @@
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { ref, onMounted, Ref, onUnmounted } from 'vue';
+	import { ref, onMounted, Ref, onUnmounted, watch } from 'vue';
 	import * as THREE from 'three';
 	import * as CSS from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 	
 	import mainGame from '../../../script/game';
 	import * as CONSTANT from '../../../script/constant';
 	import { TYPE } from '../../../script/card';
+	import gsap from '../../../script/gsap';
 	import { LOCATION, POS } from '../post/network';
+	import { Idles_Cards, Plaids } from '../post/tcp';
 	import Client_Card from './client_card';
 	import Plaid from './plaid';
-	import { Idles_Cards, Plaids } from '../post/tcp';
-	import gsap from '../../../script/gsap';
+	import Btn from './btn';
 
 	interface Axis {
 		x : number,
@@ -55,10 +56,8 @@
 				card.three.position.setZ(duel.cards.get(LOCATION.HAND)!(1).indexOf(card) * three.create.hand_gap);
 			}
 		},
-		click : (e : MouseEvent) : void => {
+		click : async (e : MouseEvent) : Promise<void> => {
 			const target = e.target as HTMLElement;
-			let cards : Array<Client_Card>;
-			let ct : number;
 			const show_off = () => {
 				if (hover.select === undefined)
 					return;
@@ -69,6 +68,13 @@
 				}
 				hover.select = undefined;
 			}
+			if (three.btn !== undefined && three.btn.three.element.contains(target)) {
+				show_off();
+				await props.connect.phase.select();
+				return;
+			}
+			let cards : Array<Client_Card>;
+			let ct : number;
 			cards = duel.cards.get(LOCATION.HAND)!(0);
 			ct = cards.findIndex(i => i.three.element.contains(target));
 			if (ct > -1) {
@@ -196,6 +202,7 @@
 		scene : new THREE.Scene(),
 		camera : new THREE.PerspectiveCamera(),
 		plaids : [] as Array<Plaid>,
+		btn : undefined as undefined | Btn,
 		src : {
 			unknown : mainGame.get.textures(CONSTANT.FILES.TEXTURE_UNKNOW) as string | undefined ?? '',
 			cover : mainGame.get.textures(CONSTANT.FILES.TEXTURE_COVER) as string | undefined ?? ''
@@ -490,6 +497,12 @@
 				three.create.send.back(plaid.three, { x : x, y : y, z : 0 });
     			three.scene.add(plaid.three);
 				three.plaids.push(plaid);
+			},
+			btn : () : void => {
+				const btn = new Btn(three.create.size);
+				three.create.send.back(btn.three, { x : 2, y : 0, z : 0 });
+    			three.scene.add(btn.three);
+				three.btn = btn;
 			}
 		},
 		move : (target : CSS.CSS3DObject, from : number, owner : number, x : number, y : number, z : number) => {
@@ -898,6 +911,7 @@
 			for (let y = -2; y < 3; y++)
 				if (y !== 0 || x % 2 !== 0)
     				three.add.plaid(x, y);
+		three.add.btn();
 
 		const deck_axis : Array<Position | undefined> = [
 			{ loc : LOCATION.DECK, owner : 0 },
@@ -925,11 +939,11 @@
 
 			// await duel.draw(0, 8);
 			// await duel.draw(1, 8);
-			await duel.to.mzone(0, {
-				location : LOCATION.DECK,
-				seq : 0,
-				zone : 0
-			})
+			// await duel.to.mzone(0, {
+			// 	location : LOCATION.DECK,
+			// 	seq : 0,
+			// 	zone : 0
+			// })
 
 			// duel.cards.get(LOCATION.ONFIELD)!(2).forEach((card : Client_Card) => {
 			// 	card.activatable.on({flag : 0, desc : 1160});
@@ -946,6 +960,10 @@
 
 	const props = defineProps(['connect']);
 	const emit = defineEmits(['update:duel']);
+
+	watch(() => { return props.connect.phase.phase; }, async (n) => {
+		await three.btn?.phase(n);
+	});
 
 </script>
 <style scoped lang = 'scss'>

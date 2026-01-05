@@ -501,12 +501,12 @@
 	});
 
 	onMounted(() : void => {
-		if (mainGame.is_android()) {
+		if (mainGame.get.system(CONSTANT.KEYS.SETTING_SELECT_SORT) === 1) {
 			for (const i of [main, extra, side]) {
 				Sortable.create(i.value!.children[0], {
 					animation : 150,
 					draggable : '.card'
-				})
+				});
 			}
 		}
 		deck.size.resize();
@@ -534,7 +534,7 @@
 			search.info.forbidden = [];
 	});
 
-	if (!mainGame.is_android()) {
+	if (mainGame.get.system(CONSTANT.KEYS.SETTING_SELECT_SORT) === 0) {
 		watch(() => { return main_card; }, () => {
 			if (main_card.value === null || main.value === null) return;
 			swapy.main === undefined ? swapy.main = swapy.create(main.value) : swapy.main.update();

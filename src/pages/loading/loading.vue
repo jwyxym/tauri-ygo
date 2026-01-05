@@ -1,7 +1,7 @@
 <template>
 	<div class = 'loading'>
 		<var-loading/>
-		<span v-show = 'all > 0'>{{ now }}/{{ all }}</span>
+		<span v-show = 'all > 0'>{{ Math.min((now / all) * 100, 99.99).toFixed(2) }}%</span>
 	</div>
 </template>
 <script setup lang = 'ts'>
