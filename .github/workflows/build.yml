@@ -487,14 +487,20 @@ jobs:
           asset_name: tauri-ygo-macos-x86_64.dmg
           asset_content_type: application/octet-stream
 
+      - name: zip
+        run: |
+          cd build
+          zip -r tauri-ygo-macos-x86_64.app.zip tauri-ygo-macos-x86_64.app/
+          zip -r tauri-ygo-macos-aarch64.app.zip tauri-ygo-macos-aarch64.app/
+
       - name: Upload
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/tauri-ygo-macos-x86_64.app/tauri-ygo.app
-          asset_name: tauri-ygo-macos-x86_64.app
+          asset_path: ./build/tauri-ygo-macos-x86_64.app.zip
+          asset_name: tauri-ygo-macos-x86_64.app.zip
           asset_content_type: application/octet-stream
 
       - name: Upload
@@ -513,8 +519,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/tauri-ygo-macos-aarch64.app/tauri-ygo.app
-          asset_name: tauri-ygo-macos-aarch64.app
+          asset_path: ./build/tauri-ygo-macos-aarch64.app.zip
+          asset_name: tauri-ygo-macos-aarch64.app.zip
           asset_content_type: application/octet-stream
 
       - name: Upload
