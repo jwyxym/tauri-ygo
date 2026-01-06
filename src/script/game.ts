@@ -110,6 +110,8 @@ class Game {
 						this.read.system_conf(line);
 					}
 				}
+				if (!this.system.has(CONSTANT.KEYS.SETTING_SERVER_PLAYER_NAME))
+					this.push.system(CONSTANT.KEYS.SETTING_SERVER_PLAYER_NAME, '今晚有宵夜吗');
 				if (!this.system.has(CONSTANT.KEYS.SETTING_VOICE_BACK_BGM))
 					this.push.system(CONSTANT.KEYS.SETTING_VOICE_BACK_BGM, 0);
 				if (!this.system.has(CONSTANT.KEYS.SETTING_CT_CARD))
@@ -120,8 +122,8 @@ class Game {
 					this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_EX, 15);
 				if (!this.system.has(CONSTANT.KEYS.SETTING_CT_DECK_SIDE))
 					this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_SIDE, 15);
-				if (!this.system.has(CONSTANT.KEYS.SETTING_SERVER_PLAYER_NAME))
-					this.push.system(CONSTANT.KEYS.SETTING_SERVER_PLAYER_NAME, '今晚有宵夜吗');
+				if (!this.system.has(CONSTANT.KEYS.SETTING_CT_CLICK_TIME))
+					this.push.system(CONSTANT.KEYS.SETTING_CT_CLICK_TIME, this.is_windows() ? 150 : 200);
 				if (!this.system.has(CONSTANT.KEYS.SETTING_SELECT_SORT))
 					this.push.system(CONSTANT.KEYS.SETTING_SELECT_SORT, this.is_windows() ? 0 : 1);
 				if (!this.system.has(CONSTANT.KEYS.SETTING_SELECT_SLIDER))
@@ -130,12 +132,13 @@ class Game {
 					this.push.system(CONSTANT.KEYS.SETTING_SELECT_VOICE, this.is_windows() ? 0 : 1);
 			} else {
 				this.push.system(CONSTANT.KEYS.SETTING_DOWMLOAD_TIME, new Date().toISOString());
+				this.push.system(CONSTANT.KEYS.SETTING_SERVER_PLAYER_NAME, '今晚有宵夜吗');
 				this.push.system(CONSTANT.KEYS.SETTING_VOICE_BACK_BGM, 0);
 				this.push.system(CONSTANT.KEYS.SETTING_CT_CARD, 3);
 				this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_MAIN, 60);
 				this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_EX, 15);
 				this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_SIDE, 15);
-				this.push.system(CONSTANT.KEYS.SETTING_SERVER_PLAYER_NAME, '今晚有宵夜吗');
+				this.push.system(CONSTANT.KEYS.SETTING_CT_CLICK_TIME, this.is_windows() ? 150 : 200);
 				this.push.system(CONSTANT.KEYS.SETTING_SELECT_SORT, this.is_windows() ? 0 : 1);
 				this.push.system(CONSTANT.KEYS.SETTING_SELECT_SLIDER, this.is_windows() ? 0 : 1);
 				this.push.system(CONSTANT.KEYS.SETTING_SELECT_VOICE, this.is_windows() ? 0 : 1);

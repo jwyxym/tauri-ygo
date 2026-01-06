@@ -77,6 +77,27 @@
 			if (e.key === 'Escape' && !props.deck.remove.block)
 				props.unshow();
 		},
+		touchstart : (e : TouchEvent) => {
+			const target : HTMLElement = e.target as HTMLElement;
+			page.block = Array.from(document.getElementsByClassName('Vue-Toastification__container')).findIndex(i => i.contains(target)) > -1;
+			page.x = e.touches[0].clientX;
+		},
+		touchend : (e : TouchEvent) => {
+			const target : HTMLElement = e.target as HTMLElement;
+			if (!props.deck.remove.block && !page.block) {
+				const ct : number = page.x - e.changedTouches[0].clientX;
+				if (ct > 50)
+					props.unshow();
+				else if (Math.abs(ct) < 50 && dom.value && !dom.value.contains(target)
+					&& props.except.findIndex((i : HTMLElement | null) => i && i.contains(target)) === -1
+					&& !target.classList.contains('var-icon-close-circle')
+					&& !target.classList.contains('var-icon')
+				)
+					props.unshow();
+			}
+			page.x = 0;
+			page.block = false;
+		},
 		mousedown : (e : MouseEvent) => {
 			if (e.button === 0) {
 				const target : HTMLElement = e.target as HTMLElement;
@@ -110,12 +131,16 @@
 	});
 
 	onMounted(() => {
+		window.addEventListener('touchstart', page.touchstart);
+		window.addEventListener('touchend', page.touchend);
 		window.addEventListener('mousedown', page.mousedown);
 		window.addEventListener('mouseup', page.mouseup);
 		window.addEventListener('keydown', page.keydown);
 	});
 
 	onUnmounted(() => {
+		window.removeEventListener('touchstart', page.touchstart);
+		window.removeEventListener('touchend', page.touchend);
 		window.removeEventListener('mousedown', page.mousedown);
 		window.removeEventListener('mouseup', page.mouseup);
 		window.removeEventListener('keydown', page.keydown);

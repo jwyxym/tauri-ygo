@@ -42,3 +42,10 @@
 		}
 	}
 }
+
+.move_left {
+	&-enter-active,
+	&-leave-active {
+		transition: transform 0.2s ease;
+	}
+}

@@ -83,7 +83,7 @@
 							ref = 'cards'
 							:key = 'i'
 						>
-								<div :data-swapy-item = "swapy.random('main_card', v, i)" @click = 'cardinfo.on(i)'>
+								<div :data-swapy-item = "swapy.random('main_card', v, i)" @click = 'cardinfo.on(i)' @contextmenu = 'deck.remove.main(i)'>
 									<img :src = 'mainGame.get.card(i).pic' ref = 'main_card' :alt = 'i.toString()'></img>
 									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
 										<template #value>
@@ -112,7 +112,7 @@
 							ref = 'cards'
 							:key = 'i'
 						>
-								<div :data-swapy-item = "swapy.random('extra_card', v, i)" @click = 'cardinfo.on(i)'>
+								<div :data-swapy-item = "swapy.random('extra_card', v, i)" @click = 'cardinfo.on(i)' @contextmenu = 'deck.remove.main(i)'>
 									<img :src = 'mainGame.get.card(i).pic' ref = 'extra_card' :alt = 'i.toString()'></img>
 									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
 										<template #value>
@@ -141,7 +141,7 @@
 							:key = 'i'
 							ref = 'cards'
 						>
-								<div :data-swapy-item = "swapy.random('side_card', v, i)" @click = 'cardinfo.on(i)'>
+								<div :data-swapy-item = "swapy.random('side_card', v, i)" @click = 'cardinfo.on(i)' @contextmenu = 'deck.remove.side(i)'>
 									<img :src = 'mainGame.get.card(i).pic' ref = 'side_card' :alt = 'i.toString()'></img>
 									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
 										<template #value>
@@ -424,7 +424,7 @@
 		on : async (i : string | number) : Promise<void> => {
 			if (cardinfo.card !== '' && `${cardinfo.card }` !== `${i}`) {
 				cardinfo.card = '';
-				await mainGame.sleep(500);
+				await mainGame.sleep(200);
 			}
 			cardinfo.card = i;
 		},

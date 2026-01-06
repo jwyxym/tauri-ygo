@@ -149,6 +149,7 @@
 	import Input from '@/pages/ui/input.vue';
 	import Button from '@/pages/ui/button.vue';
 	import Select from '@/pages/ui/select.vue';
+import { KEYS } from '@/script/constant';
 
 	const dom = ref<HTMLElement | null>(null);
 	const props = defineProps(['deck', 'search', 'cardinfo', 'add', 'except', 'unshow']);
@@ -187,7 +188,7 @@
 							page.card.chk_dbclick(false);
 							page.card.chk_dbclick = undefined;
 						}
-					}, 150);
+					}, mainGame.get.system(KEYS.SETTING_CT_CLICK_TIME) as number);
 					if (await promise)
 						props.add(id);
 					else
@@ -196,6 +197,27 @@
 			},
 			chk_dbclick : undefined as undefined | true | ((value: boolean | PromiseLike<boolean>) => void),
 			mousedown_card : 0
+		},
+		touchstart : (e : TouchEvent) => {
+			const target : HTMLElement = e.target as HTMLElement;
+			page.block = Array.from(document.getElementsByClassName('Vue-Toastification__container')).findIndex(i => i.contains(target)) > -1;
+			page.x = e.touches[0].clientX;
+		},
+		touchend : (e : TouchEvent) => {
+			const target : HTMLElement = e.target as HTMLElement;
+			if (!props.deck.remove.block && !page.block) {
+				const ct : number = page.x - e.changedTouches[0].clientX;
+				if (ct > 50)
+					props.unshow();
+				else if (Math.abs(ct) < 50 && dom.value && !dom.value.contains(target)
+					&& props.except.findIndex((i : HTMLElement | null) => i && i.contains(target)) === -1
+					&& !target.classList.contains('var-icon-close-circle')
+					&& !target.classList.contains('var-icon')
+				)
+					props.unshow();
+			}
+			page.x = 0;
+			page.block = false;
 		},
 		mousedown : (e : MouseEvent) => {
 			if (e.button === 0) {
@@ -290,6 +312,8 @@
 	});
 
 	onMounted(async () => {
+		window.addEventListener('touchstart', page.touchstart);
+		window.addEventListener('touchend', page.touchend);
 		window.addEventListener('mousedown', page.mousedown);
 		window.addEventListener('mouseup', page.mouseup);
 		window.addEventListener("resize", page.size);
@@ -299,6 +323,8 @@
 	});
 
 	onUnmounted(() => {
+		window.removeEventListener('touchstart', page.touchstart);
+		window.removeEventListener('touchend', page.touchend);
 		window.removeEventListener('mousedown', page.mousedown);
 		window.removeEventListener('mouseup', page.mouseup);
 		window.removeEventListener("resize", page.size);
