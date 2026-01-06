@@ -443,6 +443,17 @@ class Client_Card {
 			setTimeout(() => {
 				style.filter = 'initial';
 			}, 600);
+		},
+		counter : {
+			off : () : void => {
+				Array.from(this.div.counter.children).forEach(el => {
+					(el as HTMLElement).style.opacity = '0';
+					setTimeout(() => {
+						const span : HTMLSpanElement = el.querySelector('span')!;
+						span.innerText = '0';
+					}, 100);
+				});
+			}
 		}
 	};
 
