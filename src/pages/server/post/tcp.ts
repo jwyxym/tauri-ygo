@@ -444,7 +444,7 @@ class Tcp {
 						[MSG.SELECT_OPTION, async () => {
 							const [ct] = to_package<number>(buffer, data, [-1, 8], pos);
 							const descs = to_package<number>(buffer, data, new Array(ct).fill(32), pos + 2);
-							const i = await connect.select.option.on(descs, this.select_hint, true);
+							const i = await connect.select.option.on(descs, !!this.select_hint ? this.select_hint : undefined, true);
 							if (i !== undefined)
 								await this.send.response(i);
 							this.select_hint = 0;

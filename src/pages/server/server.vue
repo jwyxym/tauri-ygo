@@ -624,10 +624,10 @@
 				}
 			},
 			option : {
-				on : async (desc : Array<number>, title : string = mainGame.get.strings.system(555), no_cancle : boolean = false) : Promise<number | undefined> => {
+				on : async (desc : Array<number>, title : number = 555, no_cancle : boolean = false) : Promise<number | undefined> => {
 					const i = await Picker(
-						[desc.map(i => { return { text : mainGame.get.strings.system(i) }; })],
-						title,
+						[desc.map(i => { return { text : mainGame.get.desc(i) }; })],
+						mainGame.get.strings.system(title),
 						no_cancle
 					);
 					return i !== undefined && tcp !== null ? i[0] : undefined;
