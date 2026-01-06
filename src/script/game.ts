@@ -309,6 +309,11 @@ class Game {
 		avatar : (tp : number) : string => {
 			return this.textures.get(`avatar${(this.get.system(CONSTANT.KEYS.SETTING_AVATAR) as Array<string>)[tp] ?? 0}.png`) ?? '';
 		},
+		counter : (counter : number) : string => {
+			return this.get.textures(`counter-${counter.toString(16)}.png`) as string | undefined
+				?? this.get.textures('counter-0.png') as string | undefined
+					?? '';
+		}
 	}
 
 	load = {

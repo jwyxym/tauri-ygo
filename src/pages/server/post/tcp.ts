@@ -749,6 +749,18 @@ class Tcp {
 								}
 							}
 							await connect.duel.draw(tp, ct);
+						}],
+						[MSG.ADD_COUNTER, async () => {
+							const pack = to_package<number>(buffer, data, [16, 8, 8, 8, 16], pos);
+							const card : Client_Card | undefined = to_card(pack[1], pack[2], pack[3]);
+							if (card)
+								card.add.counter(pack[0], pack[4]);
+						}],
+						[MSG.REMOVE_COUNTER, async () => {
+							const pack = to_package<number>(buffer, data, [16, 8, 8, 8, 16], pos);
+							const card : Client_Card | undefined = to_card(pack[1], pack[2], pack[3]);
+							if (card)
+								card.add.counter(pack[0], - pack[4]);
 						}]
 					]);
 					const cur_msg : number = to_package<number>(buffer, data, [8], pos)[0];
