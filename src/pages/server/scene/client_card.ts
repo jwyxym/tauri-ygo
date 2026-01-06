@@ -6,9 +6,6 @@ import { COMMAND, EDESC, POS } from '../post/network';
 
 import * as CSS from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 
-const key = '';
-const child = document.getElementById('');
-
 interface Hover {
 	on : Function;
 	end : Function;
@@ -41,29 +38,6 @@ class Client_Card {
 	scale : number;
 	div : Client_Card_Div;
 
-	counter_function (counter : number) {
-		const counter_div = document.createElement('div');
-		counter_div.classList.add(key);
-		Object.assign(counter_div.style, {
-			height : '100%',
-			display : 'flex',
-			opacity : '0',
-			transition : 'all 0.1s ease'
-		});
-		const img = document.createElement('img');
-		img.src = ''
-		img.style.height = '100%';
-		counter_div.appendChild(img);
-		const span = document.createElement('span');
-		counter_div.appendChild(span);
-		child.appendChild(counter_div);
-		if (counter > 0) {
-			counter_div.style.opacity = '1';
-		} else {
-			counter_div.style.opacity = '0';
-			counter_div.remove();
-		}
-	}
 	constructor (src : string, size : {
 		width : number; height : number;
 	}, hover : Hover) {
@@ -374,6 +348,52 @@ class Client_Card {
 		},
 		atk : () : void => {
 			this.div.atk.innerHTML = this.is_link() ? this.atk.toString() : `${this.atk ?? 0}/${this.def ?? 0}`;
+		},
+		counter : async (counter : number, ct : number) : Promise<void> => {
+			//查找是否已有div
+			const el : HTMLElement | null = this.div.counter.querySelector(`.counter-${counter}`);
+			//如果存在则变化数量
+			if (el) {
+				const span : HTMLSpanElement = el.querySelector('span')!;
+				//数量最少为0
+				const count : number = Math.max(0, ct + Number(span.innerText));
+				span.style.opacity = '0';
+				await mainGame.sleep(200);
+				span.innerText = count.toString();
+				span.style.opacity = '1';
+				if (!count) {
+					await mainGame.sleep(400);
+					el.style.opacity = '0';
+				}
+			//如果不存在则增加
+			} else {
+				if (ct <= 0)
+					return;
+				const div = document.createElement('div');
+				//为指示物div设置class，class为指示物编号
+				div.classList.add(`counter-${counter}`);
+				Object.assign(div.style, {
+					height : '100%',
+					display : 'flex',
+					opacity : '0',
+					transition : 'all 0.2s ease'
+				});
+				//指示物图标
+				const img = document.createElement('img');
+				// img.src = mainGame.get.textures() as string | undefined ?? '';
+				img.style.height = '100%';
+
+				//指示物数量
+				const span = document.createElement('span');
+				span.style.transition = 'all 0.1s ease';
+				span.innerText = ct.toString();
+
+				div.appendChild(img);
+				div.appendChild(span);
+				this.div.counter.appendChild(div);
+
+				div.style.opacity = '1';
+			}
 		}
 	};
 
