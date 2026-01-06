@@ -358,11 +358,11 @@ class Client_Card {
 				//数量最少为0
 				const count : number = Math.max(0, ct + Number(span.innerText));
 				span.style.opacity = '0';
-				await mainGame.sleep(200);
+				await mainGame.sleep(150);
 				span.innerText = count.toString();
 				span.style.opacity = '1';
 				if (!count) {
-					await mainGame.sleep(400);
+					await mainGame.sleep(250);
 					el.style.opacity = '0';
 				}
 			//如果不存在则增加
