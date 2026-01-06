@@ -52,6 +52,7 @@
 				:deck = 'deck'
 				:search = 'search'
 				:cardinfo = 'cardinfo'
+				:add = 'deck.push.main'
 				:except = '[
 					...(cards ?? []),
 					float_buttons?.dom,
@@ -257,6 +258,7 @@
 					toast.info(mainGame.get.text(I18N_KEYS.DECK_SAVE_COMPELETE));
 				if (props.this_deck.new)
 					props.update(deck.name);
+				deck.show.setting.unselect();
 			} else {
 				toast.error(rule);
 			}

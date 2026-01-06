@@ -31,10 +31,12 @@
 				<template #image>
 					<div class = 'image'>
 						<img
-							v-lazy = 'card.pic'
+							:src = 'card.pic'
 							:id = 'card.id.toString()'
 							:alt = 'card.id.toString()'
-							@click = 'cardinfo.on(card.id)'
+							@contextmenu = 'add(card.id)'
+							@mousedown = 'page.card.mousedown($event, card.id)'
+							@mouseup = 'page.card.mouseup($event, card.id)'
 						/>
 						<var-badge type = 'primary' v-show = 'deck.get_ct(card.id) < 3'>
 							<template #value>
@@ -44,7 +46,7 @@
 					</div>
 				</template>
 			</var-card>
-			<var-back-top :duration = '800'/>
+			<var-back-top :duration = '800' ref = 'back_top'/>
 		</var-list>
 		<transition name = 'move_right'>
 			<div class = 'search_setting' v-if = 'page.setting.chk'>
@@ -149,17 +151,9 @@
 	import Select from '@/pages/ui/select.vue';
 
 	const dom = ref<HTMLElement | null>(null);
-	const props = defineProps(['deck', 'search', 'cardinfo', 'except', 'unshow']);
+	const props = defineProps(['deck', 'search', 'cardinfo', 'add', 'except', 'unshow']);
 
 	const page = reactive({
-		click : (e : MouseEvent) => {
-			if (dom.value && !dom.value.contains(e.target as HTMLElement)
-				&& props.except.findIndex((i : HTMLElement | null) => i && i.contains(e.target as HTMLElement)) === -1
-				&& !(e.target as HTMLElement).classList.contains('var-icon-close-circle')
-				&& !props.deck.remove.block
-			)
-				props.unshow();
-		},
 		keydown : (e : KeyboardEvent) => {
 			if (e.key === 'Escape' && !props.deck.remove.block)
 				props.unshow();
@@ -168,6 +162,66 @@
 			if (event.key === 'Enter')
 				await page.on();
 		},
+		card : {
+			mousedown : (e : MouseEvent, id : number) => {
+				if (e.button === 0) {
+					page.card.mousedown_card = id;
+					if (page.card.chk_dbclick && typeof page.card.chk_dbclick !== 'boolean') {
+						page.card.chk_dbclick(true);
+						page.card.chk_dbclick = true;
+					}
+				}
+			},
+			mouseup : async (e : MouseEvent, id : number) => {
+				if (e.button === 0) {
+					if (page.card.chk_dbclick || page.card.mousedown_card !== id) {
+						page.card.chk_dbclick = undefined;
+						page.card.mousedown_card = 0;
+						return;
+					}
+					const promise = new Promise<boolean>((resolve) => {
+						page.card.chk_dbclick = resolve;
+					});
+					setTimeout(() => {
+						if (page.card.chk_dbclick && typeof page.card.chk_dbclick !== 'boolean') {
+							page.card.chk_dbclick(false);
+							page.card.chk_dbclick = undefined;
+						}
+					}, 150);
+					if (await promise)
+						props.add(id);
+					else
+						props.cardinfo.on(id);
+				}
+			},
+			chk_dbclick : undefined as undefined | true | ((value: boolean | PromiseLike<boolean>) => void),
+			mousedown_card : 0
+		},
+		mousedown : (e : MouseEvent) => {
+			if (e.button === 0) {
+				const target : HTMLElement = e.target as HTMLElement;
+				page.block = Array.from(document.getElementsByClassName('Vue-Toastification__container')).findIndex(i => i.contains(target)) > -1;
+				page.x = e.clientX;
+			}
+		},
+		mouseup : (e : MouseEvent) => {
+			const target : HTMLElement = e.target as HTMLElement;
+			if (e.button === 0 && !props.deck.remove.block && !page.block) {
+				const ct : number = page.x - e.clientX;
+				if (ct < -50)
+					props.unshow();
+				else if (Math.abs(ct) < 50 && dom.value && !dom.value.contains(target)
+					&& props.except.findIndex((i : HTMLElement | null) => i && i.contains(target)) === -1
+					&& !target.classList.contains('var-icon-close-circle')
+					&& !target.classList.contains('var-icon')
+				)
+					props.unshow();
+			}
+			page.x = 0;
+			page.block = false;
+		},
+		block : false,
+		x : 0,
 		select_height : 0,
 		height : 0,
 		width : 0,
@@ -236,7 +290,8 @@
 	});
 
 	onMounted(async () => {
-		document.addEventListener('click', page.click);
+		window.addEventListener('mousedown', page.mousedown);
+		window.addEventListener('mouseup', page.mouseup);
 		window.addEventListener("resize", page.size);
 		window.addEventListener('keydown', page.keydown);
 		page.size();
@@ -244,7 +299,8 @@
 	});
 
 	onUnmounted(() => {
-		document.removeEventListener('click', page.click);
+		window.removeEventListener('mousedown', page.mousedown);
+		window.removeEventListener('mouseup', page.mouseup);
 		window.removeEventListener("resize", page.size);
 		window.removeEventListener('keydown', page.keydown);
 	});

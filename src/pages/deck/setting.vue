@@ -7,11 +7,21 @@
 			v-model = 'deck.name'
 		/>
 		<div class = 'btn'>
-			<Button icon_name = 'save' @click = 'deck.save'></Button>
-			<Button icon_name = 'share' @click = 'deck.copy'></Button>
-			<Button icon_name = 'sort' @click = 'deck.sort'></Button>
-			<Button icon_name = 'disrupt' @click = 'deck.disrupt'></Button>
-			<Button icon_name = 'clear' @click = 'deck.clear'></Button>
+			<div
+				v-for = "i in [
+					{ icon : 'save', key : I18N_KEYS.DECK_SETTING_SAVE, func : deck.save },
+					{ icon : 'share', key : I18N_KEYS.DECK_SETTING_SHARE, func : deck.copy },
+					{ icon : 'sort', key : I18N_KEYS.DECK_SETTING_SORT, func : deck.sort },
+					{ icon : 'disrupt', key : I18N_KEYS.DECK_SETTING_DISRUPT, func : deck.disrupt },
+					{ icon : 'clear', key : I18N_KEYS.DECK_SETTING_CLEAR, func : deck.clear },
+				]"
+			>
+				<Button
+					:icon_name = 'i.icon'
+					:content = 'mainGame.get.text(i.key)'
+					@click = 'i.func'
+				/>
+			</div>
 		</div>
 	</div>
 </template>
@@ -60,7 +70,7 @@
 		right: 25vw;
 		top: 25vh;
 		width: 50vw;
-		height: 50vh;
+		height: calc(60px + max(100px, 40vh));
 		display: flex;
 		flex-direction: column;
 		align-content: center;
@@ -72,16 +82,21 @@
 		.var-input {
 			margin-top: 15px;
 			width: 90%;
-			height: 80px;
+			height: 60px;
 		}
 		.btn {
-			height: calc(100% - 115px);
+			height: max(100px, 40vh);
 			width: 90%;
 			display: flex;
-			gap: 10px;
+			flex-wrap: wrap;
 			overflow-y: auto;
 			&::-webkit-scrollbar {
 				display: none;
+			}
+			> div {
+				flex: 1;
+				min-width: 85px;
+				height: 30px;
 			}
 		}
 	}

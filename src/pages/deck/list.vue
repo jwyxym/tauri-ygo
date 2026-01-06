@@ -99,16 +99,16 @@
 	import { reactive, onBeforeMount, TransitionGroup } from 'vue';
 	import { writeText } from '@tauri-apps/plugin-clipboard-manager';
 
-	import mainGame from '../../script/game';
-	import { I18N_KEYS } from '../../script/language/i18n';
-	import toast from '../../script/toast';
-	import fs from '../../script/fs';
+	import mainGame from '@/script/game';
+	import { I18N_KEYS } from '@/script/language/i18n';
+	import toast from '@/script/toast';
+	import fs from '@/script/fs';
 
-	import Button from '../ui/button.vue';
+	import Button from '@/pages/ui/button.vue';
+	import Input from '@/pages/ui/input.vue';
+	import Button_List from '@/pages/ui/button_list.vue';
+	import Dialog from '@/pages/ui/dialog';
 	import DeckPage from './deck.vue';
-	import Input from '../ui/input.vue';
-	import Button_List from '../ui/button_list.vue';
-	import Dialog from '../ui/dialog';
 
 	import Deck from './deck';
 	

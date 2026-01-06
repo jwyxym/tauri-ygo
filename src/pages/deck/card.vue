@@ -38,9 +38,9 @@
 </template>
 <script setup lang = 'ts'>
 	import { reactive, watch, ref, onUnmounted, onMounted } from 'vue';
-	import mainGame from '../../script/game';
-	import * as CONSTANT from '../../script/constant';
-	import { CardInfo, Info } from '../../script/card';
+	import mainGame from '@/script/game';
+	import * as CONSTANT from '@/script/constant';
+	import { CardInfo, Info } from '@/script/card';
 	const dom = ref<HTMLElement | null>(null);
 	const cardinfo = reactive({
 		pic : '',
@@ -73,18 +73,35 @@
 	}, { immediate : true });
 
 	const page = {
-		click : (e : MouseEvent) => {
-			if (dom.value && !dom.value.contains(e.target as HTMLElement)
-				&& props.except.findIndex((i : HTMLElement | null) => i && i.contains(e.target as HTMLElement)) === -1
-				&& !(e.target as HTMLElement).classList.contains('var-icon-close-circle')
-				&& !props.deck.remove.block
-			)
-				props.unshow();
-		},
 		keydown : (e : KeyboardEvent) => {
 			if (e.key === 'Escape' && !props.deck.remove.block)
 				props.unshow();
 		},
+		mousedown : (e : MouseEvent) => {
+			if (e.button === 0) {
+				const target : HTMLElement = e.target as HTMLElement;
+				page.block = Array.from(document.getElementsByClassName('Vue-Toastification__container')).findIndex(i => i.contains(target)) > -1;
+				page.x = e.clientX;
+			}
+		},
+		mouseup : (e : MouseEvent) => {
+			const target : HTMLElement = e.target as HTMLElement;
+			if (e.button === 0 && !props.deck.remove.block && !page.block) {
+				const ct : number = page.x - e.clientX;
+				if (ct > 50)
+					props.unshow();
+				else if (Math.abs(ct) < 50 && dom.value && !dom.value.contains(target)
+					&& props.except.findIndex((i : HTMLElement | null) => i && i.contains(target)) === -1
+					&& !target.classList.contains('var-icon-close-circle')
+					&& !target.classList.contains('var-icon')
+				)
+					props.unshow();
+			}
+			page.x = 0;
+			page.block = false;
+		},
+		block : false,
+		x : 0,
 		buttons : (mainGame.get.textures(CONSTANT.FILES.TEXTURE_DECK) as Array<string | undefined>)?.filter(i => i !== undefined) ?? []
 	};
 
@@ -93,12 +110,14 @@
 	});
 
 	onMounted(() => {
-		window.addEventListener('click', page.click);
+		window.addEventListener('mousedown', page.mousedown);
+		window.addEventListener('mouseup', page.mouseup);
 		window.addEventListener('keydown', page.keydown);
 	});
 
 	onUnmounted(() => {
-		window.removeEventListener('click', page.click);
+		window.removeEventListener('mousedown', page.mousedown);
+		window.removeEventListener('mouseup', page.mouseup);
 		window.removeEventListener('keydown', page.keydown);
 	});
 </script>
