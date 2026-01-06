@@ -10,7 +10,7 @@ interface Hover {
 	on : Function;
 	end : Function;
 	click : Function;
-	response : Function
+	response : Function;
 };
 
 interface Client_Card_Div {
@@ -68,7 +68,7 @@ class Client_Card {
 				atk : this.init.atk(size),
 				info : this.init.info(size),
 				counter : this.init.counter(size),
-				btn : this.init.btn(hover),
+				btn : this.init.btn(hover)
 			};
 			for (const [_, i] of Object.entries(div))
 				dom.appendChild(i);
@@ -112,7 +112,7 @@ class Client_Card {
 			Object.assign(child.style, {
 				opacity : '0',
 				position : 'absolute',
-				bottom : '32px',
+				bottom : '40px',
 				left : '-10px',
 				height : '16px',
 				width : `${size.height}px`,
@@ -161,7 +161,7 @@ class Client_Card {
 			Object.assign(child.style, {
 				opacity : '1',
 				position : 'absolute',
-				bottom : '16px',
+				bottom : '20px',
 				left : '-10px',
 				height : '16px',
 				width : `${size.height}px`,
@@ -169,8 +169,6 @@ class Client_Card {
 				textShadow : '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',
 				fontSize : '20px',
 				fontFamily : 'AtkDef',
-				display : 'flex',
-				gap : '2px',
 				alignItems: 'center',
 				transition : 'all 0.2s ease',
 				userSelect: 'none'
@@ -353,18 +351,34 @@ class Client_Card {
 			//查找是否已有div
 			const el : HTMLElement | null = this.div.counter.querySelector(`.counter-${counter.toString(16)}`);
 			//如果存在则变化数量
+			const sort = () : void => {
+				let v = 0;
+				(Array.from(this.div.counter.children) as Array<HTMLElement>).forEach(i => {
+					const span : HTMLSpanElement = i.querySelector('span')!;
+					const count : number = Math.max(0, ct + Number(span.innerText));
+					if (isNaN(count) || !!count) {
+						i.style.transform = `translateX(${v * 28}px)`;
+						v ++;
+					}
+				});
+			}
 			if (el) {
 				const span : HTMLSpanElement = el.querySelector('span')!;
 				//数量最少为0
-				const count : number = Math.max(0, ct + Number(span.innerText));
+				let count : number = Math.max(0, ct + Number(span.innerText));
+				if (isNaN(count))
+					count = 0;
 				span.style.opacity = '0';
 				await mainGame.sleep(150);
 				span.innerText = count.toString();
 				span.style.opacity = '1';
-				if (!count) {
+				if (el.style.opacity === '1' && !count) {
 					await mainGame.sleep(250);
 					el.style.opacity = '0';
+				} else if (el.style.opacity === '0' && !!count) {
+					el.style.opacity = '1';
 				}
+				sort();
 			//如果不存在则增加
 			} else {
 				if (ct <= 0)
@@ -374,6 +388,8 @@ class Client_Card {
 				div.classList.add(`counter-${counter.toString(16)}`);
 				Object.assign(div.style, {
 					height : '100%',
+					width : '28px',
+					position : 'absolute',
 					display : 'flex',
 					opacity : '0',
 					transition : 'all 0.2s ease'
@@ -391,7 +407,8 @@ class Client_Card {
 				div.appendChild(img);
 				div.appendChild(span);
 				this.div.counter.appendChild(div);
-
+				sort();
+				await mainGame.sleep(100);
 				div.style.opacity = '1';
 			}
 		}
