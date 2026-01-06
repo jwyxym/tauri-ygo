@@ -486,7 +486,6 @@ class Client_Card {
 			el.style.display = 'none';
 			el.querySelector('span')!.innerHTML = '';
 		}
-		(this.div.info as HTMLElement).style.color = 'white';
 	};
 
 	pos = () : number => {

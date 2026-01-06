@@ -418,6 +418,8 @@
 					three.rotate(target, from, owner, pos);
 					if (ct > 0)
 						three.cards.map.get(from)![owner][0].change.xyz(three.cards.map.get(from)![owner].length - 1);
+					if (location !== from)
+						target.show.counter.off();
 					if ((location & LOCATION.MZONE) === LOCATION.MZONE && seq >= three.cards.map.get(location)![owner].length - 1) {
 						if ((from & LOCATION.MZONE) === 0)
 							target.remove();
