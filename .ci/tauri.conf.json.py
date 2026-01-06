@@ -53,11 +53,10 @@ tauri_config = {
 if os == 'linux':
 	if pack == 'appimage':
 		tauri_config["bundle"]["targets"] = ['appimage']
-		tauri_config["bundle"]["resources"] = [
-			"assets.zip"
-		]
-	else:
-		tauri_config["bundle"]["targets"] = ['deb', 'rpm']
+	elif pack == 'deb':
+		tauri_config["bundle"]["targets"] = ['deb']
+	elif pack == 'rpm':
+		tauri_config["bundle"]["targets"] = ['rpm']
 
 if os == 'windows' or os == 'macos' or (os == 'linux' and pack != 'appimage'):
 	tauri_config["bundle"]["resources"] = [

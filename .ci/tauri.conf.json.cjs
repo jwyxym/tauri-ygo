@@ -53,8 +53,10 @@ const tauriConfig = {
 if (os === 'linux')
 	if (pack === 'appimage') 
 		tauriConfig.bundle.targets = ['appimage'];
-	else
-		tauriConfig.bundle.targets = ['deb', 'rpm'];
+	else if (pack === 'deb') 
+		tauriConfig.bundle.targets = ['deb'];
+	else if (pack === 'rpm') 
+		tauriConfig.bundle.targets = ['rpm'];
 
 if (os === 'windows' || os === 'macos' || (os === 'linux' && pack !== 'appimage'))
 	tauriConfig.bundle.resources = [

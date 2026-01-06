@@ -160,7 +160,6 @@ jobs:
     - name: Write Tauri Config
       shell: cmd
       run: |
-        xcopy .ci src-tauri /s /Y /e /I
         npm run json:windows
 
     - name: NPM Init
@@ -244,7 +243,6 @@ jobs:
 
     - name: Write Tauri Config
       run: |
-        cp -r .ci/* src-tauri/
         npm run json:macos
 
     - name: NPM Init
@@ -336,7 +334,7 @@ jobs:
       run: |
         npm install
 
-    - name: Linux build
+    - name: Build AppImage
       run: |
         npm run tauri:build
 
@@ -347,29 +345,21 @@ jobs:
 
     - name: Write Tauri Config
       run: |
-        cp -r .ci/* src-tauri/
         npm run json:linux:deb
 
-    - name: Linux build
+    - name: Build Deb
       run: |
         npm run tauri:build
 
     - name: Copy
       run: |
         cp ./src-tauri/target/release/bundle/deb/*.deb ./build/tauri-ygo.deb
-        cp ./src-tauri/target/release/bundle/rpm/*.rpm ./build/tauri-ygo.rpm
 
     - name: Upload File
       uses: actions/upload-artifact@v4
       with:
         name: tauri-ygo-linux-${{ matrix.target }}.deb
         path: ./build/tauri-ygo.deb
-
-    - name: Upload File
-      uses: actions/upload-artifact@v4
-      with:
-        name: tauri-ygo-linux-${{ matrix.target }}.rpm
-        path: ./build/tauri-ygo.rpm
 
     - name: Upload File
       uses: actions/upload-artifact@v4
@@ -539,16 +529,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/tauri-ygo-linux-x86_64.rpm/tauri-ygo.rpm
-          asset_name: tauri-ygo-linux-x86_64.rpm
-          asset_content_type: application/octet-stream
-
-      - name: Upload
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./build/tauri-ygo-linux-x86_64.AppImage/tauri-ygo.AppImage
           asset_name: tauri-ygo-linux-x86_64.AppImage
           asset_content_type: application/octet-stream
@@ -561,16 +541,6 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./build/tauri-ygo-linux-aarch64.deb/tauri-ygo.deb
           asset_name: tauri-ygo-linux-aarch64.deb
-          asset_content_type: application/octet-stream
-
-      - name: Upload
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/tauri-ygo-linux-aarch64.rpm/tauri-ygo.rpm
-          asset_name: tauri-ygo-linux-aarch64.rpm
           asset_content_type: application/octet-stream
 
       - name: Upload
