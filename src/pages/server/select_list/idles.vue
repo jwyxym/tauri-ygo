@@ -6,10 +6,10 @@
 		</div>
 		<var-checkbox-group v-model = 'page.selects' :max = '1'>
 			<TransitionGroup class = 'list'  tag = 'div' name = 'scale'>
-				<div v-for = 'i in page.list' class = 'pics'>
+				<div v-for = '(i, v) in page.list' class = 'pics'>
 					<div class = 'pic' @click = 'page.select(i)'>
 						<img :src = 'mainGame.get.card(i.code).pic'/>
-						<span>[{{ i.seq }}]</span>
+						<span>[{{ i.seq ?? v }}]</span>
 					</div>
 					<var-checkbox :checked-value = 'i' @change = 'page.select(i, false)'></var-checkbox>
 				</div>
@@ -29,13 +29,14 @@
 		list : [] as Idles_Cards,
 		selects : [] as Idles_Cards,
 		show : true,
-		confirm : () => {
+		confirm : async () => {
 			if (page.selects.length < 1)
-				props.cancel(false, page.selects);
-			props.confirm(page.selects[0]);
+				await props.cancel();
+			else
+				await props.confirm(page.selects[0]);
 		},
-		cancel : () => {
-			props.cancel(page.selects);
+		cancel : async () => {
+			await props.cancel();
 		},
 		select : (i : Idles_Card, chk : boolean = true) => {
 			const ct = page.selects.indexOf(i);

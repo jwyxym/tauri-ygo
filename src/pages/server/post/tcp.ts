@@ -543,15 +543,18 @@ class Tcp {
 							const count = pack[0];
 							const array = new Array(count).fill([8, 8, 32, 8, 8, 8, 8, 32]).flat();
 							pack = to_package<number>(buffer, data, array, pos + 11);
-							const cards : Array<Client_Card> = connect.duel.cards.get(LOCATION.ALL)!(2).filter((i : Client_Card) => i.activatable.flag > 0);
+							connect.duel.cards.get(LOCATION.ALL)!(2)
+								.filter((i : Client_Card) => i.activatable.flag > 0)
+									.forEach((i : Client_Card) => i.activatable.clear());
 							for (const i of Object.values(connect.idle))
 								(i as Idle).clear();
 							const codes : Update_Cards = [];
+							const arr : Idles_Cards = [];
+							let cancelable = true;
 							for (let j = 0; j < count; j ++) {
 								const i = j * 8;
 								if (i + 7 >= pack.length) break;
 								const forced = pack[i + 1];
-								const flag = pack[i] | (forced << 8);
 								const code = pack[i + 2];
 								const tp = to_player(pack[i + 3]);
 								const loc = pack[i + 4];
@@ -562,20 +565,20 @@ class Tcp {
 									const card : Client_Card | undefined = to_card(tp, loc, seq, ct)
 									if (card) {
 										codes.push({ card : card, code : code });
+										arr.push({ card : card, code : code })
 										idles.get(COMMAND.ACTIVATE)!(card, desc);
-										const index = cards.indexOf(card);
-										if (index > -1)
-											cards.splice(index, 1);
-										card.activatable.on({desc : desc, flag : flag}, false);
+										if (cancelable)
+											cancelable = !forced;
 									}
 								}
 							}
-							cards.forEach(i => i.activatable.clear());
 							await mainGame.load.pic(codes.map(i => i.code));
 							for (const i of codes)
 								await i.card.update.code(i.code);
 							if (connect.idle.activate.length() === 0)
 								this.send.response(-1);
+							else
+								connect.select.idles.push(arr, 'activate', cancelable);
 						}],
 						[MSG.SELECT_PLACE, async () => {
 							const pack = to_package<number>(buffer, data, [8, 8, 32], pos);

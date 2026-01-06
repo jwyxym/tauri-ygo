@@ -296,8 +296,9 @@
 			<Idles_Select_List
 				:cards = 'connect.select.idles.array'
 				:confirm = 'connect.select.idles.select'
-				:cancel = 'connect.select.idles.clear'
+				:cancel = 'connect.select.idles.cancel'
 				v-if = 'page.duel && connect.select.idles.array.length > 0'
+				v-show = 'connect.select.idles.show'
 				ref = 'select'
 			/>
 		</transition>
@@ -388,7 +389,7 @@
 		},
 		connect : async () : Promise<void> => {
 			page.loading = true;
-			if (await tcp!.connect(server.address ?? '', server.name ?? '', server.pass ?? '', connect)) {
+			if (await tcp?.connect(server.address ?? '', server.name ?? '', server.pass ?? '', connect)) {
 				mainGame.push.system(CONSTANT.KEYS.SETTING_SERVER_ADDRESS, server.address);
 				mainGame.push.system(CONSTANT.KEYS.SETTING_SERVER_PLAYER_NAME, server.name);
 				mainGame.push.system(CONSTANT.KEYS.SETTING_SERVER_PASS, server.pass);
@@ -398,7 +399,7 @@
 			}
 		},
 		disconnect : async () : Promise<void> => {
-			await tcp!.disconnect(connect);
+			await tcp?.disconnect(connect);
 		}
 	});
 
@@ -452,7 +453,7 @@
 					connect.phase.ep = false;
 					connect.phase.bp = false;
 					connect.phase.main = false;
-					await tcp!.send.response(arr[i[0]][0]);
+					await tcp?.send.response(arr[i[0]][0]);
 				}
 			}
 		},
@@ -469,7 +470,7 @@
 					connect.select.position.pos = pos;
 				},
 				select : async (result : number) : Promise<void> => {
-					await tcp!.send.response(result);
+					await tcp?.send.response(result);
 					connect.select.position.clear();
 				},
 				clear : () : void => {
@@ -500,11 +501,11 @@
 					connect.select.group.chk = true;
 				},
 				confirm : async (result : Array<number>) => {
-					await tcp!.send.response(result);
+					await tcp?.send.response(result);
 				},
 				cancel : async () => {
 					if (connect.select.group.cancelable)
-						await tcp!.send.response(-1);
+						await tcp?.send.response(-1);
 				},
 				clear : () : void => {
 					connect.select.group.list.unselected.forEach(i => i.card?.select.off());
@@ -535,11 +536,11 @@
 				confirm : async (result : Array<number>) => {
 					connect.select.cards.clear();
 					await mainGame.sleep(200);
-					await tcp!.send.response(result);
+					await tcp?.send.response(result);
 				},
 				cancel : async (result : TCP.Select_Cards) => {
 					connect.select.cards.cancelable ? await (async () => {
-						await tcp!.send.response(-1);
+						await tcp?.send.response(-1);
 						connect.select.cards.clear();
 					})() : await (async () => {
 						connect.select.cards.show = false;
@@ -595,15 +596,15 @@
 							seq : 5
 						};
 
-					result.player = tcp!.to.player!(result.player);
+					result.player = tcp?.to.player!(result.player);
 					connect.select.plaids.clear();
 					await mainGame.sleep(200);
-					await tcp!.send.response(result);
+					await tcp?.send.response(result);
 				},
 				cancel : async (cancelable : boolean, result : Array<Plaid>) => {
 					cancelable ? await (async () => {
-						await tcp!.send.response({
-							player : tcp!.to.player!(0),
+						await tcp?.send.response({
+							player : tcp?.to.player!(0),
 							loc : 0,
 							seq : 0
 						});
@@ -635,14 +636,28 @@
 			},
 			idles : {
 				code : '',
+				cancelable : true,
+				show : true,
 				array : [] as TCP.Idles_Cards,
-				push : (group : TCP.Idles_Cards, code : string) : void => {
+				push : (group : TCP.Idles_Cards, code : string, cancelable : boolean = false) : void => {
+					connect.select.idles.cancelable = cancelable;
 					connect.select.idles.code = code;
 					connect.select.idles.array = group;
 				},
 				clear : () : void => {
 					connect.select.idles.code = '';
 					connect.select.idles.array.length = 0;
+					connect.select.idles.cancelable = true;
+				},
+				cancel : async () => {
+					if (connect.select.idles.cancelable) {
+						await tcp?.send.response(-1);
+						connect.select.idles.clear();
+					} else {
+						connect.select.idles.show = false;
+						await mainGame.sleep(250);
+						connect.select.idles.show = true;
+					}
 				},
 				select : async (i : TCP.Idles_Card) : Promise<void> => {
 					const card : Client_Card = i.card;
@@ -666,10 +681,12 @@
 							const effects : Array<{
 								card : Client_Card,
 								desc : number
-							}> = connect.idle.activate.filter(card);
-							if (effects.length === 1)
-								code = (connect.idle.activate.index(effects[0].card, effects[0].desc) << 16) + 5;
-							else {
+							}> = connect.idle.activate.array.filter(i => i.card === card && i.desc !== 1160);
+							if (effects.length === 1) {
+								code = connect.idle.activate.array.findIndex(i => i.card === card);
+								if (tcp?.msg === NETWORK.MSG.SELECT_IDLECMD)
+									code = (code << 16) + 5;
+							} else {
 								const i = await connect.select.option.on(effects.map(i => i.desc));
 								if (i !== undefined)
 									code = (connect.idle.activate.index(effects[i].card, effects[i].desc) << 16) + 5;
@@ -701,7 +718,7 @@
 				if (server.chat === '') return;
 				connect.chat.send_list.push(server.chat);
 				connect.chat.send_key = connect.chat.send_list.length;
-				await tcp!.send.chat(server.chat);
+				await tcp?.send.chat(server.chat);
 				server.chat = '';
 			},
 			press : async (event : KeyboardEvent) : Promise<void> => {
@@ -727,7 +744,7 @@
 				connect.chat.send_key = connect.chat.send_list.length;
 			},
 			robot : async () : Promise<void> => {
-				await tcp!.send.chat('/ai');
+				await tcp?.send.chat('/ai');
 			}
 		},
 		home : {
@@ -746,7 +763,7 @@
 		start : async () : Promise<void> => {
 			if (connect.deck && connect.player.filter(i => i.ready).length === (connect.home.mode === 2 ? 4 : 2)) {
 				page.loading = true;
-				await tcp!.send.start();
+				await tcp?.send.start();
 			} else if (!connect.deck)
 				toast.error(mainGame.get.text(I18N_KEYS.SERVER_DECK_ERROR))
 			else
@@ -755,9 +772,9 @@
 		ready : async (deck : Deck | undefined) : Promise<void> => {
 			deck ? await (async () => {
 				if (connect.player[connect.self]?.ready)
-					await tcp!.send.un_ready();
-				await tcp!.send.ready(deck);
-			})() : await tcp!.send.un_ready();
+					await tcp?.send.un_ready();
+				await tcp?.send.ready(deck);
+			})() : await tcp?.send.un_ready();
 		},
 		rule : async (deck : Deck | undefined) : Promise<string | boolean> => {
 			if (deck) {
@@ -774,17 +791,17 @@
 		},
 		kick : async (v : number) : Promise<void> => {
 			if (connect.self !== v)
-				await tcp!.send.kick(v);
+				await tcp?.send.kick(v);
 		},
 		to : {
 			duelist : async () : Promise<void> => {
 				if (connect.self >= 4 || connect.home.mode === 2) {
-					await tcp!.send.to_duelist();
+					await tcp?.send.to_duelist();
 				}
 			},
 			watcher : async () : Promise<void> => {
 				if (connect.self < 4) {
-					await tcp!.send.to_watcher();
+					await tcp?.send.to_watcher();
 				}
 			},
 		},
@@ -792,7 +809,7 @@
 			chk : false,
 			result : [0, 0],
 			select : async (v : number) : Promise<void> => {
-				await tcp!.send.rps(v);
+				await tcp?.send.rps(v);
 			},
 			off : () : void => {
 				connect.rps.chk = false;
@@ -805,7 +822,7 @@
 				connect.is_first.selecting = true;
 			},
 			select : async (v : number) : Promise<void> => {
-				await tcp!.send.select_tp(v);
+				await tcp?.send.select_tp(v);
 				connect.is_first.chk = v === 1;
 				connect.is_first.selecting = false;
 			},
@@ -827,12 +844,12 @@
 			sset : new Idle(),
 		},
 		response : async (v : number) : Promise<void> => {
-			await tcp!.send.response(v);
+			await tcp?.send.response(v);
 		},
 		surrender : async () : Promise<void> => {
 			await Dialog({
 				title : mainGame.get.text(I18N_KEYS.SERVER_SURRENDER),
-				onConfirm : tcp!.send.surrender
+				onConfirm : tcp?.send.surrender
 			});
 		},
 		win : async (title : string, message : string) : Promise<void> => {
