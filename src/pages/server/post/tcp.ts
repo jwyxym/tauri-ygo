@@ -708,6 +708,14 @@ class Tcp {
 											pos : to.pos
 										}, to.player);
 										break;
+									case LOCATION.HAND:
+										connect.duel.to.hand(from.player, {
+											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
+											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
+											zone : to.seq,
+											pos : to.pos
+										}, to.player);
+										break;
 								}
 							})();
 						}],

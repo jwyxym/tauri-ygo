@@ -879,6 +879,15 @@
 					await mainGame.sleep(150);
 				}
 			},
+			hand : async (tp : number, from_to : Array<Card_From> | Card_From, to_tp : number = tp) => {
+				for (const i of Array.isArray(from_to) ? from_to as Array<Card_From> : [from_to as Card_From]) {
+					duel.to.chk(i);
+					const cards : Array<Client_Card> = three.cards.map.get(i.location)![tp];
+					const card = cards[i.seq >= 0 ? i.seq : cards.length - 1];
+					three.create.send.to(card, to_tp, LOCATION.HAND, i.location);
+					await mainGame.sleep(150);
+				}
+			}
 		},
 		add : {
 			card : async (owner : number, loc : number, seq : number, code : number) => {
