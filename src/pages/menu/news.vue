@@ -33,16 +33,18 @@
 	});
 
 	onMounted(async () => {
-		const data = await http.get<Array<{
-			id : string;
-			news : {
-				["zh-CN"] : Array<swipe>;
-			};
-		}>>(URL.MYCARD_NEWS);
-		if (data) {
-			const news = data.filter(i => i.id === 'ygopro' && i.news);
-			if (news.length > 0)
-				page.swipe = news[0].news["zh-CN"].slice(0, 8);
+		if (!import.meta.env.DEV) {
+			const data = await http.get<Array<{
+				id : string;
+				news : {
+					["zh-CN"] : Array<swipe>;
+				};
+			}>>(URL.MYCARD_NEWS);
+			if (data) {
+				const news = data.filter(i => i.id === 'ygopro' && i.news);
+				if (news.length > 0)
+					page.swipe = news[0].news["zh-CN"].slice(0, 8);
+			}
 		}
 		page.show = true;
 	});
