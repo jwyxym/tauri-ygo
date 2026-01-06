@@ -312,23 +312,23 @@
 	import { ref, Ref, reactive, onBeforeMount, onMounted, computed, watch, TransitionGroup, onUnmounted } from 'vue';
 	import { ConversationBlock } from 'conversation-vue';
 
-	import mainGame from '../../script/game';
-	import { I18N_KEYS } from '../../script/language/i18n';
-	import * as CONSTANT from '../../script/constant';
-	import fs from '../../script/fs';
+	import mainGame from '@/script/game';
+	import { I18N_KEYS } from '@/script/language/i18n';
+	import * as CONSTANT from '@/script/constant';
+	import fs from '@/script/fs';
+	import toast from '@/script/toast';
 	import Tcp, * as TCP from './post/tcp';
-	import toast from '../../script/toast';
 	import voice_input from './voice_input';
 
-	import Select from '../varlet/select.vue';
-	import Button from '../varlet/button.vue';
-	import Input from '../varlet/input.vue';
-	import AutoInput from '../varlet/auto_input.vue';
-	import Dialog from '../varlet/dialog';
-	import Float_Buttons from '../varlet/float_buttons.vue';
-	import Picker from '../varlet/picker';
+	import Select from '@/pages/ui/select.vue';
+	import Button from '@/pages/ui/button.vue';
+	import Input from '@/pages/ui/input.vue';
+	import AutoInput from '@/pages/ui/auto_input.vue';
+	import Dialog from '@/pages/ui/dialog';
+	import Float_Buttons from '@/pages/ui/float_buttons.vue';
+	import Picker from '@/pages/ui/picker';
+	import Deck from '@/pages/deck/deck';
 
-	import Deck from '../deck/deck';
 	import Duel from './scene/duel.vue';
 	import RPS from './scene/rps.vue';
 	import Avatar from './scene/avatar.vue';

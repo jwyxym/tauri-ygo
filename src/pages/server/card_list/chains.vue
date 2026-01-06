@@ -13,8 +13,8 @@
 </template>
 <script setup lang = 'ts'>
 	import { ref, TransitionGroup, reactive, watch } from 'vue';
-	import mainGame from '../../../script/game';
-	import { I18N_KEYS } from '../../../script/language/i18n';
+	import mainGame from '@/script/game';
+	import { I18N_KEYS } from '@/script/language/i18n';
 	const dom = ref<HTMLElement | null>(null);
 	
 	const props = defineProps(['cards']);

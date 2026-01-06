@@ -1,5 +1,5 @@
-import toast from "../../script/toast";
-import fs from "../../script/fs";
+import toast from "@/script/toast";
+import fs from "@/script/fs";
 
 declare global {
 	interface SpeechRecognition extends EventTarget {

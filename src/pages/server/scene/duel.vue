@@ -7,12 +7,12 @@
 	import * as THREE from 'three';
 	import * as CSS from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 	
-	import mainGame from '../../../script/game';
-	import * as CONSTANT from '../../../script/constant';
-	import { TYPE } from '../../../script/card';
-	import gsap from '../../../script/gsap';
-	import { LOCATION, POS } from '../post/network';
-	import { Idles_Cards, Plaids } from '../post/tcp';
+	import mainGame from '@/script/game';
+	import * as CONSTANT from '@/script/constant';
+	import { TYPE } from '@/script/card';
+	import gsap from '@/script/gsap';
+	import { LOCATION, POS } from '@/pages/server/post/network';
+	import { Idles_Cards, Plaids } from '@/pages/server/post/tcp';
 	import Client_Card from './client_card';
 	import Plaid from './plaid';
 	import Btn from './btn';

@@ -10,7 +10,7 @@
 </template>
 <script setup lang = 'ts'>
 	import { watch, reactive, ref, TransitionGroup } from 'vue';
-	import mainGame from '../../../script/game';
+	import mainGame from '@/script/game';
 	const dom = ref<HTMLElement | null>(null);
 
 	const page = reactive({

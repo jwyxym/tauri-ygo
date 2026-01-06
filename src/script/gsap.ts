@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import pos from './position';
-import { POS } from '../pages/server/post/network';
+import { POS } from '@/pages/server/post/network';
 
 class Gsap {
 	timeline = (vars : gsap.TimelineVars = {}) : gsap.core.Timeline => {

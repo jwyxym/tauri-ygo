@@ -29,12 +29,12 @@
 </template>
 <script setup lang = 'ts'>
 	import { ref, reactive, TransitionGroup, watch, onBeforeMount } from 'vue';
-	import mainGame from '../../../script/game';
-	import { I18N_KEYS } from '../../../script/language/i18n';
-	import { Select_Cards, Select_Card } from '../post/tcp';
-	import { LOCATION } from '../post/network';
+	import mainGame from '@/script/game';
+	import { I18N_KEYS } from '@/script/language/i18n';
+	import { Select_Cards, Select_Card } from '@/pages/server/post/tcp';
+	import { LOCATION } from '@/pages/server/post/network';
 
-	import Button from '../../varlet/button.vue';
+	import Button from '@/pages/ui/button.vue';
 
 	const page = reactive({
 		selected_list : [] as Select_Cards,

@@ -20,10 +20,10 @@
 </template>
 <script setup lang = 'ts'>
 	import { ref, reactive, TransitionGroup, onBeforeMount } from 'vue';
-	import mainGame from '../../../script/game';
-	import { Idles_Cards, Idles_Card } from '../post/tcp';
+	import mainGame from '@/script/game';
+	import { Idles_Cards, Idles_Card } from '@/pages/server/post/tcp';
 
-	import Button_List from '../../varlet/button_list.vue';
+	import Button_List from '@/pages/ui/button_list.vue';
 
 	const page = reactive({
 		list : [] as Idles_Cards,

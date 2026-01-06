@@ -13,7 +13,7 @@
 </template>
 <script setup lang = 'ts'>
 	import { onMounted, ref, Ref } from 'vue';
-	import mainGame from '../../script/game';
+	import mainGame from '@/script/game';
 	
 	import voice from './voice';
 

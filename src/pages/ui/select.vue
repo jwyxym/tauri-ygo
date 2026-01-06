@@ -21,9 +21,9 @@
 </template>
 <script setup lang = 'ts'>
 	import { reactive, Reactive, onBeforeMount } from 'vue'
-	import mainGame from '../../script/game';
-	import * as CONSTANT from '../../script/constant';
-	import { I18N_KEYS } from '../../script/language/i18n';
+	import mainGame from '@/script/game';
+	import * as CONSTANT from '@/script/constant';
+	import { I18N_KEYS } from '@/script/language/i18n';
 	const props = defineProps(['name']);
 
 	interface items {

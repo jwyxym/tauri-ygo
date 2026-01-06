@@ -26,12 +26,12 @@
 </template>
 <script setup lang = 'ts'>
 	import { ref, reactive, TransitionGroup, onBeforeMount } from 'vue';
-	import mainGame from '../../../script/game';
-	import { FILES } from '../../../script/constant';
-	import { POS } from '../post/network';
-	import Plaid from '../scene/plaid';
+	import mainGame from '@/script/game';
+	import { FILES } from '@/script/constant';
 
-	import Button_List from '../../varlet/button_list.vue';
+	import { POS } from '@/pages/server/post/network';
+	import Plaid from '@/pages/server/scene/plaid';
+	import Button_List from '@/pages/ui/button_list.vue';
 
 	const page = reactive({
 		title : '',

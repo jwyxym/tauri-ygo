@@ -71,10 +71,11 @@
 </template>
 <script setup lang = 'ts'>
 	import { ref, reactive, TransitionGroup, onBeforeMount } from 'vue';
-	import mainGame from '../../../script/game';
-	import { FILES } from '../../../script/constant';
-    import { POS } from '../post/network';
-	import Button from '../../varlet/button.vue';
+	import mainGame from '@/script/game';
+	import { FILES } from '@/script/constant';
+	
+	import Button from '@/pages/ui/button.vue';
+    import { POS } from '@/pages/server/post/network';
 
 	const page = reactive({
 		title : '',

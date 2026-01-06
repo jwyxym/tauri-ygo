@@ -11,8 +11,8 @@ import Zh_CN from './language/Zh-CN';
 import TAURI_STR from './language/string';
 
 
-import voice from '../pages/voice/voice';
-import Deck from '../pages/deck/deck';
+import voice from '@/pages/voice/voice';
+import Deck from '@/pages/deck/deck';
 
 class Game {
 	strings : Map<string, Map<number, string>> = new Map([

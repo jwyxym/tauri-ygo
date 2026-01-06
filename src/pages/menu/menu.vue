@@ -25,9 +25,9 @@
 <script setup lang = 'ts'>
 	import { ref, Ref, onMounted, reactive, watch, onUnmounted, onBeforeMount } from "vue";
 
-	import mainGame from '../../script/game';
-	import { I18N_KEYS } from "../../script/language/i18n";
-	import position from "../../script/position";
+	import mainGame from '@/script/game';
+	import { I18N_KEYS } from "@/script/language/i18n";
+	import position from "@/script/position";
 
 	import News from "./news.vue";
 

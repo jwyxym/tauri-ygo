@@ -226,16 +226,16 @@
 	import { reactive, onBeforeMount, onMounted, watch, TransitionGroup } from 'vue';
 	import slider from 'vue3-slider';
 	
-	import mainGame from '../../script/game';
-	import { I18N_KEYS } from '../../script/language/i18n';
-	import * as CONSTANT from '../../script/constant';
-	import fs from '../../script/fs';
-	import listen from '../../script/post/listen';
+	import mainGame from '@/script/game';
+	import { I18N_KEYS } from '@/script/language/i18n';
+	import * as CONSTANT from '@/script/constant';
+	import fs from '@/script/fs';
+	import listen from '@/script/post/listen';
+	import toast from '@/script/toast';
 
-	import toast from '../../script/toast';
-	import Dialog from '../varlet/dialog';
-	import Input from '../varlet/input.vue';
-	import Button_List from '../varlet/button_list.vue';
+	import Dialog from '@/pages/ui/dialog';
+	import Input from '@/pages/ui/input.vue';
+	import Button_List from '@/pages/ui/button_list.vue';
 
 	const page = reactive({
 		show : false,

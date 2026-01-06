@@ -1,6 +1,6 @@
 import { fetch } from '@tauri-apps/plugin-http';
 
-import fs from '../fs';
+import fs from '@/script/fs';
 
 class Http {
 	cache : Map<string, any> = new Map();

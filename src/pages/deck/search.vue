@@ -140,13 +140,13 @@
 </template>
 <script setup lang = 'ts'>
 	import { ref, onUnmounted, onMounted, reactive, watch } from 'vue';
-	import mainGame from '../../script/game';
-	import { I18N_KEYS } from '../../script/language/i18n';
-	import Input from '../varlet/input.vue';
-	import Button from '../varlet/button.vue';
-	import Select from '../varlet/select.vue';
-	import Card from '../../script/card';
-	import toast from '../../script/toast';
+	import mainGame from '@/script/game';
+	import { I18N_KEYS } from '@/script/language/i18n';
+	import Card from '@/script/card';
+	import toast from '@/script/toast';
+	import Input from '@/pages/ui/input.vue';
+	import Button from '@/pages/ui/button.vue';
+	import Select from '@/pages/ui/select.vue';
 
 	const dom = ref<HTMLElement | null>(null);
 	const props = defineProps(['deck', 'search', 'cardinfo', 'except', 'unshow']);

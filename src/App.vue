@@ -48,7 +48,7 @@
 	import mainGame from './script/game';
 	import fs from './script/fs';
 	import { I18N_KEYS } from './script/language/i18n';
-	import Dialog from './pages//varlet/dialog';
+	import Dialog from './pages/ui/dialog';
 	import listen from './script/post/listen';
 
 	const page = reactive({

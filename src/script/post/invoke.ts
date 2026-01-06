@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import fs from '../fs';
+import fs from '@/script/fs';
 
 interface Srv {
 	priority : number;

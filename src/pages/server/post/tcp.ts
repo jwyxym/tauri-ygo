@@ -1,18 +1,20 @@
 import * as tcp from '@kuyoonjo/tauri-plugin-tcp';
 import { Reactive } from 'vue';
 
-import mainGame from '../../../script/game';
-import fs from '../../../script/fs';
-import * as CONSTANT from '../../../script/constant';
-import invoke from '../../../script/post/invoke';
+import mainGame from '@/script/game';
+import fs from '@/script/fs';
+import * as CONSTANT from '@/script/constant';
+import invoke from '@/script/post/invoke';
+import { I18N_KEYS } from '@/script/language/i18n';
+import toast from '@/script/toast';
+
+import Client_Card from '@/pages/server/scene/client_card';
+import Plaid from '@/pages/server/scene/plaid';
+import { Idle } from '@/pages/server/idle';
+import Deck from '@/pages/deck/deck';
+
 import Message from './message';
-import { I18N_KEYS } from '../../../script/language/i18n';
-import toast from '../../../script/toast';
-import Deck from '../../deck/deck';
 import { CTOS, STOC, LOCATION, MSG, ERROR, PLAYERCHANGE, HINT, QUERY, PHASE, COMMAND, EDESC, POS } from './network';
-import Client_Card from '../scene/client_card';
-import Plaid from '../scene/plaid';
-import { Idle } from '../idle';
 
 interface Player {
 	name : string;

@@ -104,11 +104,11 @@
 	import toast from '../../script/toast';
 	import fs from '../../script/fs';
 
-	import Button from '../varlet/button.vue';
+	import Button from '../ui/button.vue';
 	import DeckPage from './deck.vue';
-	import Input from '../varlet/input.vue';
-	import Button_List from '../varlet/button_list.vue';
-	import Dialog from '../varlet/dialog';
+	import Input from '../ui/input.vue';
+	import Button_List from '../ui/button_list.vue';
+	import Dialog from '../ui/dialog';
 
 	import Deck from './deck';
 	

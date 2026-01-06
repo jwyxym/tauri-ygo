@@ -161,18 +161,18 @@
 	import Sortable from 'sortablejs';
 	import { writeText } from '@tauri-apps/plugin-clipboard-manager';
 
-	import mainGame from '../../script/game';
-	import * as CONSTANT from '../../script/constant';
-	import { I18N_KEYS } from "../../script/language/i18n";
-	import Card, { Search } from '../../script/card';
-	import toast from '../../script/toast';
-	import fs from '../../script/fs';
+	import mainGame from '@/script/game';
+	import * as CONSTANT from '@/script/constant';
+	import { I18N_KEYS } from "@/script/language/i18n";
+	import Card, { Search } from '@/script/card';
+	import toast from '@/script/toast';
+	import fs from '@/script/fs';
 
-	import Dialog from '../varlet/dialog';
+	import Dialog from '@/pages/ui/dialog';
+	import Float_Buttons from '@/pages/ui/float_buttons.vue';
 	import Card_Drawer from './card.vue';
 	import Deck_Setting from './setting.vue';
 	import Deck_Search from './search.vue';
-	import Float_Buttons from '../varlet/float_buttons.vue';
 
 	import Deck from './deck';
 

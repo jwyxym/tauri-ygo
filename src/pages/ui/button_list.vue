@@ -6,8 +6,8 @@
 </template>
 <script setup lang = 'ts'>
 	import Button from'./button.vue';
-	import mainGame from '../../script/game';
-	import * as CONSTANT from '../../script/constant';
+	import mainGame from '@/script/game';
+	import * as CONSTANT from '@/script/constant';
 
 	defineProps(['confirm', 'cancel', 'loading']);
 </script>

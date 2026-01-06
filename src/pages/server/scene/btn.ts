@@ -1,8 +1,8 @@
 import * as CSS from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 
-import mainGame from '../../../script/game';
-import { I18N_KEYS } from '../../../script/language/i18n';
-import { PHASE } from '../post/network';
+import mainGame from '@/script/game';
+import { I18N_KEYS } from '@/script/language/i18n';
+import { PHASE } from '@/pages/server/post/network';
 
 class Btn {
 	three : CSS.CSS3DObject;

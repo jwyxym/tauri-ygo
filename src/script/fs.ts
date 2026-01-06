@@ -6,10 +6,10 @@ import * as CONSTANT from './constant';
 import toast from './toast';
 import mainGame from './game';
 import invoke, { Pic } from './post/invoke';
-
-import Deck from '../pages/deck/deck';
 import { I18N_KEYS } from './language/i18n';
 import SQL from './sql';
+
+import Deck from '@/pages/deck/deck';
 
 interface File {
 	name : string;

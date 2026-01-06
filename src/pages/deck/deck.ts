@@ -1,8 +1,8 @@
 import YGOProDeck, { YGOProDeckLike } from 'ygopro-deck-encode';
-import fs from '../../script/fs';
-import { REG } from '../../script/constant';
-import { I18N_KEYS } from '../../script/language/i18n';
-import mainGame from '../../script/game';
+import fs from '@/script/fs';
+import { REG } from '@/script/constant';
+import { I18N_KEYS } from '@/script/language/i18n';
+import mainGame from '@/script/game';
 
 class Deck extends YGOProDeck {
 	new : boolean;

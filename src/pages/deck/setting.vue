@@ -17,10 +17,10 @@
 </template>
 <script setup lang = 'ts'>
 	import { ref, onUnmounted, onMounted } from 'vue';
-	import mainGame from '../../script/game';
-	import { I18N_KEYS } from '../../script/language/i18n';
-	import Input from '../varlet/input.vue';
-	import Button from '../varlet/button.vue';
+	import mainGame from '@/script/game';
+	import { I18N_KEYS } from '@/script/language/i18n';
+	import Input from '@/pages/ui/input.vue';
+	import Button from '@/pages/ui/button.vue';
 
 	const dom = ref<HTMLElement | null>(null);
 	const props = defineProps(['deck', 'except', 'unshow']);

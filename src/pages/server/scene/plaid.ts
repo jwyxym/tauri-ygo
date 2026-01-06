@@ -1,8 +1,9 @@
 import * as CSS from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 
-import mainGame from '../../../script/game';
-import { I18N_KEYS } from '../../../script/language/i18n';
-import { LOCATION } from '../post/network';
+import mainGame from '@/script/game';
+import { I18N_KEYS } from '@/script/language/i18n';
+
+import { LOCATION } from '@/pages/server/post/network';
 
 class Plaid {
 	three : CSS.CSS3DObject;
