@@ -350,9 +350,8 @@ class Client_Card {
 			this.div.atk.innerHTML = this.is_link() ? this.atk.toString() : `${this.atk ?? 0}/${this.def ?? 0}`;
 		},
 		counter : async (counter : number, ct : number) : Promise<void> => {
-			const id : string = `counter-${counter.toString(16)}`;
 			//查找是否已有div
-			const el : HTMLElement | null = this.div.counter.querySelector('.' + id);
+			const el : HTMLElement | null = this.div.counter.querySelector(`.counter-${counter.toString(16)}`);
 			//如果存在则变化数量
 			if (el) {
 				const span : HTMLSpanElement = el.querySelector('span')!;
@@ -372,7 +371,7 @@ class Client_Card {
 					return;
 				const div = document.createElement('div');
 				//为指示物div设置class，class为指示物编号
-				div.classList.add(id);
+				div.classList.add(`counter-${counter.toString(16)}`);
 				Object.assign(div.style, {
 					height : '100%',
 					display : 'flex',
@@ -381,7 +380,7 @@ class Client_Card {
 				});
 				//指示物图标
 				const img = document.createElement('img');
-				img.src = mainGame.get.textures(id + '.png') as string | undefined ?? '';
+				img.src = mainGame.get.counter(counter);
 				img.style.height = '100%';
 
 				//指示物数量
