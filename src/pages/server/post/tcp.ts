@@ -778,6 +778,12 @@ class Tcp {
 							}
 							await connect.duel.draw(tp, ct);
 						}],
+						[MSG.DAMAGE, async () => {
+							const pack = to_package<number>(buffer, data, [8, 32], pos);
+							const tp = to_player(pack[0]);
+							const ct = pack[1];
+							connect.lp.lose(tp, ct);
+						}],
 						[MSG.ADD_COUNTER, async () => {
 							const pack = to_package<number>(buffer, data, [16, 8, 8, 8, 16], pos);
 							const card : Client_Card | undefined = to_card(pack[1], pack[2], pack[3]);
