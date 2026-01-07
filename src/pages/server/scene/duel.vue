@@ -418,45 +418,39 @@
 					three.rotate(target, from, owner, pos);
 					if (ct > 0)
 						three.cards.map.get(from)![owner][0].change.xyz(three.cards.map.get(from)![owner].length - 1);
-					if (location !== from)
-						target.show.counter.off();
-					if ((location & LOCATION.MZONE) === LOCATION.MZONE && seq >= three.cards.map.get(location)![owner].length - 1) {
-						if ((from & LOCATION.MZONE) === 0)
-							target.remove();
-						if (target.is_link())
-							target.add.link();
-						else if (target.is_xyz())
-							target.add.xyz(three.cards.map.get(location)![owner].length - 1);
-						else {
-							if (target.is_tuner())
-								target.add.tuner();
-							target.add.level();
-						}
-						target.add.atk();
-						target.show.info.on();
-						target.show.atk.on();
+
+					//如果卡片被送到场上（且不为超量素材）
+					if ((location & LOCATION.ONFIELD) > 0 && seq >= three.cards.map.get(location)![owner].length - 1) {
+						const len = three.cards.map.get(location)![owner].length - 1;
+						target.show.info.on(len, !!(location & (LOCATION.PZONE)));
+						if ((location & (LOCATION.MZONE)) === LOCATION.MZONE)
+							target.show.atk.on();
+						//如果不是位置移动则取除指示物
+						if ((location & (LOCATION.ONFIELD)) !== (from & (LOCATION.ONFIELD)))
+							target.show.counter.off();
+						
 						three.cards.map.get(location)![owner].slice(0, -1).forEach(card => {
 							card.show.info.off();
 							card.show.atk.off();
+							card.show.counter.off();
+							//超量素材和怪兽方向垂直
 							three.rotate(card, location, owner, (pos & POS.ATTACK) > 0 ? POS.FACEUP_DEFENSE : POS.FACEUP_ATTACK);
 						});
-					} else if ((location & LOCATION.MZONE) === LOCATION.MZONE) {
-						if ((from & LOCATION.MZONE) === LOCATION.MZONE)
-							target.remove();
+					//超量素材
+					} else if ((location & LOCATION.ONFIELD) > 0) {
+						target.show.info.off();
+						target.show.atk.off();
+						target.show.counter.off();
+						//更新超量怪兽的素材数量
 						const len = three.cards.map.get(location)![owner].length - 1;
 						three.cards.map.get(location)![owner][len].change.xyz(len);
-					} else if ((location & LOCATION.PZONE) === LOCATION.PZONE) {
-						if ((from & LOCATION.MZONE) === LOCATION.MZONE) {
-							target.show.atk.off();
-							target.show.info.off();
-							target.remove();
-						}
-						target.add.pendulum();
-						target.show.info.on();
+					//其他
 					} else {
 						target.show.info.off();
 						target.show.atk.off();
+						target.show.counter.off();
 					}
+
 					three.sort(owner, from);
 					three.sort(owner, location);
 				},

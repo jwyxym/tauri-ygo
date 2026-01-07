@@ -36,6 +36,9 @@ class Client_Card {
 	atk : number;
 	def : number;
 	scale : number;
+	overlay : number;
+	is_pendulum : boolean;
+	show_info : boolean;
 	div : Client_Card_Div;
 
 	constructor (src : string, size : {
@@ -56,6 +59,9 @@ class Client_Card {
 		this.atk = 0;
 		this.def = 0;
 		this.scale = 0;
+		this.overlay = -1;
+		this.is_pendulum = false;
+		this.show_info = false;
 		[this.three, this.div] = this.init.on(src, size, hover);
 	};
 
@@ -110,7 +116,7 @@ class Client_Card {
 		info : (size : { width : number; height : number; }) : HTMLDivElement => {
 			const child = document.createElement('div');
 			Object.assign(child.style, {
-				opacity : '0',
+				opacity : '1',
 				position : 'absolute',
 				bottom : '40px',
 				left : '-10px',
@@ -120,9 +126,6 @@ class Client_Card {
 				textShadow : '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',
 				fontSize : '20px',
 				fontFamily : 'AtkDef',
-				display : 'flex',
-				gap : '2px',
-				alignItems: 'center',
 				transition : 'all 0.2s ease',
 				userSelect: 'none'
 			});
@@ -138,19 +141,21 @@ class Client_Card {
 				div.classList.add(key);
 				Object.assign(div.style, {
 					height : '100%',
-					display : 'none'
+					width : '28px',
+					position : 'absolute',
+					display : 'flex',
+					opacity : '0',
+					transition : 'all 0.2s ease'
 				});
 				const img = document.createElement('img');
 				img.src = mainGame.get.textures(src) as string | undefined ?? '';
 				img.style.height = '100%';
 				div.appendChild(img);
 				const span = document.createElement('span');
+				span.style.transition = 'all 0.1s ease';
 				span.innerText = '';
 				if (key === 'tuner')
-					span.style.display = 'none';
-				else if (key === 'scale') {
-					div.style.margin = `0 ${size.height / 2 - 16}px`;
-				}
+					span.style.color = 'lightgreen';
 				div.appendChild(span);
 				child.appendChild(div);
 			}
@@ -256,13 +261,8 @@ class Client_Card {
 		},
 		type : (type : number) : void => {
 			this.type = type;
-			if ((this.type & TYPE.PENDULUM) === 0) {
-				const el : HTMLElement = this.div.info.querySelector('.scale')!;
-				if (el.style.display === 'flex') {
-					el.style.display = 'none';
-					el.querySelector('span')!.innerHTML = '';
-				}
-			}
+			this.change.type();
+			this.change.atk();
 		},
 		level : (level : number) : void => {
 			this.level = level;
@@ -281,6 +281,7 @@ class Client_Card {
 		},
 		atk : (atk : number) : void => {
 			this.atk = atk;
+			this.change.atk();
 		},
 		def : (def : number) : void => {
 			this.def = def;
@@ -304,7 +305,7 @@ class Client_Card {
 		this.def = 0;
 		this.scale = 0;
 		this.activatable.clear();
-		this.remove();
+		this.show.info.off();
 	};
 	is_xyz = () : boolean => {
 		return this.rank !== undefined && this.rank > 0;
@@ -316,37 +317,6 @@ class Client_Card {
 		return this.type !== undefined && ((this.type & TYPE.TUNER) === TYPE.TUNER);
 	}
 	add = {
-		xyz : (len : number) : void => {
-			let el : HTMLElement = this.div.info.querySelector('.rank')!;
-			el.style.display = 'flex';
-			el.querySelector('span')!.innerHTML = this.rank.toString();
-			el = this.div.info.querySelector('.overlay')!;
-			el.style.display = 'flex';
-			el.querySelector('span')!.innerHTML = len.toString();
-		},
-		link : () : void => {
-			const el : HTMLElement = this.div.info.querySelector('.link')!;
-			el.style.display = 'flex';
-			el.querySelector('span')!.innerHTML = this.link.toString();
-		},
-		tuner : () : void => {
-			const el : HTMLElement = this.div.info.querySelector('.tuner')!;
-			el.style.display = 'flex';
-			(this.div.info as HTMLElement).style.color = 'lightgreen';
-		},
-		level : () : void => {
-			const el : HTMLElement = this.div.info.querySelector('.level')!;
-			el.style.display = 'flex';
-			el.querySelector('span')!.innerHTML = this.level.toString();
-		},
-		pendulum : () : void => {
-			const el : HTMLElement = this.div.info.querySelector('.scale')!;
-			el.style.display = 'flex';
-			el.querySelector('span')!.innerHTML = this.scale.toString();
-		},
-		atk : () : void => {
-			this.div.atk.innerHTML = this.is_link() ? this.atk.toString() : `${this.atk ?? 0}/${this.def ?? 0}`;
-		},
 		counter : async (counter : number, ct : number) : Promise<void> => {
 			//查找是否已有div
 			const el : HTMLElement | null = this.div.counter.querySelector(`.counter-${counter.toString(16)}`);
@@ -416,15 +386,60 @@ class Client_Card {
 
 	show = {
 		info : {
-			on : () : void => {
-				(this.div.info as HTMLElement).style.opacity = '1';
+			on : async (ct : number = -1, is_pendulum : boolean = false) : Promise<void> => {
+				this.show_info = true;
+				this.is_pendulum = is_pendulum;
+				(Array.from(this.div.info.children) as Array<HTMLDivElement>).forEach((i : HTMLDivElement) => {
+					i.style.opacity = '0';
+				});
+				await mainGame.sleep(200);
+				const elements : Array<HTMLDivElement> = [];
+				if (is_pendulum) {
+					const el : HTMLDivElement = this.div.info.querySelector('.scale')!;
+					el.querySelector('span')!.innerText = this.scale.toString();
+					elements.push(el);
+				} else if (this.is_link()) {
+					const el : HTMLDivElement = this.div.info.querySelector('.link')!;
+					el.querySelector('span')!.innerText = this.link.toString();
+					elements.push(el);
+				} else if (this.is_xyz()) {
+					const el1 : HTMLDivElement = this.div.info.querySelector('.rank')!;
+					el1.querySelector('span')!.innerText = this.rank.toString();
+					elements.push(el1);
+					const el2 : HTMLDivElement = this.div.info.querySelector('.overlay')!;
+					if (ct > -1)
+						this.overlay = ct;
+					el2.querySelector('span')!.innerText = `${this.overlay > -1 ? this.overlay : ''}`;
+					elements.push(el2);
+				} else if (this.is_tuner()) {
+					const el : HTMLDivElement = this.div.info.querySelector('.tuner')!;
+					el.querySelector('span')!.innerText = this.level.toString();
+					elements.push(el);
+				} else {
+					const el : HTMLDivElement = this.div.info.querySelector('.level')!;
+					el.querySelector('span')!.innerText = this.level.toString();
+					elements.push(el);
+				}
+				elements.forEach((i, v) => {
+					i.style.transform = `translateX(${v * 28}px)`;
+					setTimeout(() => i.style.opacity = '1', 200);
+				});
 			},
 			off : () : void => {
-				(this.div.info as HTMLElement).style.opacity = '0';
+				this.overlay = -1;
+				this.show_info = false;
+				this.is_pendulum = false;
+				(Array.from(this.div.info.children) as Array<HTMLDivElement>).forEach((i : HTMLDivElement) => {
+					if (i.style.opacity === '1') {
+						i.style.opacity = '0';
+						i.style.transform = 'initial';
+					}
+				});
 			}
 		},
 		atk : {
 			on : () : void => {
+				this.div.atk.innerText = this.is_link() ? this.atk.toString() : `${this.atk ?? 0}/${this.def ?? 0}`;
 				this.div.atk.style.opacity = '1';
 			},
 			off : () : void => {
@@ -475,16 +490,66 @@ class Client_Card {
 	};
 
 	change = {
-		xyz : (len : number) : void => {
+		xyz : async (ct : number = -1) : Promise<void> => {
+			if (ct > -1)
+				this.overlay = ct;
 			const el : HTMLElement = this.div.info.querySelector('.overlay')!;
-			if (el.style.display === 'flex')
-				el.querySelector('span')!.innerHTML = len.toString();
-		}
-	};
-	remove = () : void => {
-		for (const el of Array.from(this.div.info.children) as Array<HTMLElement>) {
-			el.style.display = 'none';
-			el.querySelector('span')!.innerHTML = '';
+			if (el.style.opacity === '1') {
+				const span = el.querySelector('span')!;
+				span.style.opacity = '0';
+				await mainGame.sleep(150);
+				span.querySelector('span')!.innerText = `${this.overlay > -1 ? this.overlay : ''}`;
+				span.style.opacity = '1';
+			}
+		},
+		atk : async () : Promise<void>=> {
+			const el = this.div.atk;
+			const text = this.is_link() ? this.atk.toString() : `${this.atk ?? 0}/${this.def ?? 0}`;
+			if (el.style.opacity === '1') {
+				el.style.opacity = '0';
+				await mainGame.sleep(200);
+				el.innerText = text;
+				el.style.opacity = '1';
+			} else
+				el.innerText = text;
+		},
+		type : async () : Promise<void>=> {
+			const info = this.div.info;
+			if (this.show_info) {
+				(Array.from(info.children) as Array<HTMLDivElement>).forEach((i : HTMLDivElement) => {
+					i.style.opacity = '0';
+				});
+				await mainGame.sleep(200);
+				const elements : Array<HTMLDivElement> = [];
+				if (this.is_pendulum) {
+					const el : HTMLDivElement = this.div.info.querySelector('.scale')!;
+					el.querySelector('span')!.innerText = this.scale.toString();
+					elements.push(el);
+				} else if (this.is_link()) {
+					const el : HTMLDivElement = info.querySelector('.link')!;
+					el.querySelector('span')!.innerText = this.link.toString();
+					elements.push(el);
+				} else if (this.is_xyz()) {
+					const el1 : HTMLDivElement = info.querySelector('.rank')!;
+					el1.querySelector('span')!.innerText = this.rank.toString();
+					elements.push(el1);
+					const el2 : HTMLDivElement = info.querySelector('.overlay')!;
+					el2.querySelector('span')!.innerText = `${this.overlay > -1 ? this.overlay : ''}`;
+					elements.push(el2);
+				} else if (this.is_tuner()) {
+					const el : HTMLDivElement = info.querySelector('.tuner')!;
+					el.querySelector('span')!.innerText = this.level.toString();
+					elements.push(el);
+				} else {
+					const el : HTMLDivElement = info.querySelector('.level')!;
+					el.querySelector('span')!.innerText = this.level.toString();
+					elements.push(el);
+				}
+				elements.forEach((i, v) => {
+					i.style.transform = `translateX(${v * 28}px)`;
+					setTimeout(() => i.style.opacity = '1', 200);
+				});
+			}
 		}
 	};
 
