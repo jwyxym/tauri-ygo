@@ -284,8 +284,8 @@ class Tcp {
 		const idles = new Map([
 			[COMMAND.ACTIVATE, connect.idle.activate.push],
 			// [COMMAND.ATTACK, 'attack'],
-			// [COMMAND.MSET, 'mset'],
-			// [COMMAND.SSET, 'sset'],
+			[COMMAND.MSET, connect.idle.mset.push],
+			[COMMAND.SSET, connect.idle.sset.push],
 			// [COMMAND.REPOS, 'pos_attack'],
 			// [COMMAND.REPOS, 'pos_defence'],
 			[COMMAND.SUMMON, connect.idle.summon.push],

@@ -422,7 +422,9 @@
 					//如果卡片被送到场上（且不为超量素材）
 					if ((location & LOCATION.ONFIELD) > 0 && seq >= three.cards.map.get(location)![owner].length - 1) {
 						const len = three.cards.map.get(location)![owner].length - 1;
-						target.show.info.on(len, !!(location & (LOCATION.PZONE)));
+						if ((location & (LOCATION.MZONE + LOCATION.PZONE)) > 0)
+							target.show.info.on(len, !!(location & (LOCATION.PZONE)));
+
 						if ((location & (LOCATION.MZONE)) === LOCATION.MZONE)
 							target.show.atk.on();
 						//如果不是位置移动则取除指示物
