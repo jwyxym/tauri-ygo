@@ -4,7 +4,7 @@ import { Reactive } from 'vue';
 import mainGame from '@/script/game';
 import fs from '@/script/fs';
 import * as CONSTANT from '@/script/constant';
-import invoke from '@/script/post/invoke';
+import invoke from '@/script/tauri-api/invoke';
 import { I18N_KEYS } from '@/script/language/i18n';
 import toast from '@/script/toast';
 

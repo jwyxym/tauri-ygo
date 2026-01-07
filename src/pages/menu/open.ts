@@ -1,6 +1,5 @@
 import * as Opener from '@tauri-apps/plugin-opener';
-
-import fs from './fs';
+import fs from '@/script/fs'
 
 class Open {
 	url = async (url : string) => {

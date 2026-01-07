@@ -14,8 +14,9 @@
 	import { onMounted, reactive } from 'vue';
 
 	import { URL } from '@/script/constant';
-	import open from '@/script/open';
-	import http from '@/script/post/http';
+	import http from '@/script/tauri-api/http';
+
+	import open from './open';
 
 	interface swipe {
 		url : string;

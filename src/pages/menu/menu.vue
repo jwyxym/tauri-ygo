@@ -27,9 +27,9 @@
 
 	import mainGame from '@/script/game';
 	import { I18N_KEYS } from "@/script/language/i18n";
-	import position from "@/script/position";
 
 	import News from "./news.vue";
+	import position from "./position";
 
 	const props = defineProps(['select']);
 

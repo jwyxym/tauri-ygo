@@ -4,7 +4,7 @@ import { fetch } from '@tauri-apps/plugin-http';
 
 import fs from './fs';
 import * as CONSTANT from './constant';
-import invoke from './post/invoke';
+import invoke from './tauri-api/invoke';
 import Card, { Search } from './card';
 import { I18N_KEYS } from './language/i18n';
 import Zh_CN from './language/Zh-CN';

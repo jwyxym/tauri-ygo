@@ -1,5 +1,5 @@
-import { Reactive } from "vue";
-import fs from './fs'
+import { Reactive } from 'vue';
+import fs from '@/script/fs'
 
 interface Axis {
 	bottom : number;

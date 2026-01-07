@@ -49,7 +49,7 @@
 	import fs from './script/fs';
 	import { I18N_KEYS } from './script/language/i18n';
 	import Dialog from './pages/ui/dialog';
-	import listen from './script/post/listen';
+	import listen from './script/tauri-api/listen';
 
 	const page = reactive({
 		show : {

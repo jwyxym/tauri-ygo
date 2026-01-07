@@ -230,7 +230,7 @@
 	import { I18N_KEYS } from '@/script/language/i18n';
 	import * as CONSTANT from '@/script/constant';
 	import fs from '@/script/fs';
-	import listen from '@/script/post/listen';
+	import listen from '@/script/tauri-api/listen';
 	import toast from '@/script/toast';
 
 	import Dialog from '@/pages/ui/dialog';
