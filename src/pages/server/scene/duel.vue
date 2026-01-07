@@ -893,7 +893,36 @@
 			deck : async (tp : number) : Promise<void> => {
 				const ct = three.sort(tp, LOCATION.DECK, true);
 				await mainGame.sleep(ct);
-			}
+			},
+			hand  : async (tp : number, hands : Array<number>) : Promise<void> => {
+				const sort = (a : Array<Client_Card>, b : Array<number>) : Array<Client_Card> => {
+					const groups = new Map<number, Array<Client_Card>>();
+					a.forEach(i => {
+						if (!groups.has(i.code))
+							groups.set(i.code, []);
+						groups.get(i.code)!.push(i);
+					});
+					
+					const pointers = new Map();
+					groups.forEach((_, code) => pointers.set(code, 0));
+					
+					const result : Array<Client_Card> = [];
+					b.forEach(code => {
+						const group = groups.get(code);
+						const pointer = pointers.get(code);
+						
+						if (group && pointer < group.length) {
+							result.push(group[pointer]);
+							pointers.set(code, pointer + 1);
+						}
+					});
+					
+					return result;
+				}
+				three.cards.map.get(LOCATION.HAND)![tp] = sort(three.cards.map.get(LOCATION.HAND)![tp], hands)
+				const ct = three.sort(tp, LOCATION.HAND);
+				await mainGame.sleep(ct);
+			},
 		}
 	};
 

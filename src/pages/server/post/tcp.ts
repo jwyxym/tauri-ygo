@@ -621,6 +621,11 @@ class Tcp {
 						[MSG.SHUFFLE_DECK, async () => {
 						}],
 						[MSG.SHUFFLE_HAND, async () => {
+							const pack = to_package<number>(buffer, data, [8, 8], pos);
+							const tp = to_player(pack[0]);
+							const ct = pack[1];
+							const hands = to_package<number>(buffer, data, new Array(ct).fill(32), pos + 2);
+							await connect.duel.sort.hand(tp, hands);
 						}],
 						[MSG.REFRESH_DECK, async () => {
 						}],
