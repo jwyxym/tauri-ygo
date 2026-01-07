@@ -19,10 +19,12 @@
 				</div>
 			</div>
 		</div>
+		<strong :class = "{ 'damage_show' : page.lp.show, 'damage_move' : page.lp.move }">{{ page.lp.damage }}</strong>
 	</div>
 </template>
 <script setup lang = 'ts'>
 	import { reactive, watch, ref } from 'vue';
+	import mainGame from '@/script/game';
 
 	interface VarCountdown extends HTMLElement {
 		start : Function;
@@ -34,6 +36,9 @@
 		lp : {
 			from : 0,
 			to : 0,
+			damage : 0,
+			show : false,
+			move : false,
 		},
 		time : 0
 	});
@@ -41,7 +46,18 @@
 
 	const props = defineProps(['src', 'name', 'lp', 'color', 'position', 'time', 'time_player', 'tp']);
 
-	watch(() => { return props.lp; }, (n) => {
+	watch(() => { return props.lp; }, async (n) => {
+		page.lp.damage = page.lp.to - n;
+		page.lp.move = page.lp.damage > 0;
+		if (page.lp.move) {
+			await mainGame.sleep(150);
+			page.lp.show = page.lp.move;
+			await mainGame.sleep(150);
+			page.lp.move = false;
+			await mainGame.sleep(150);
+			page.lp.show = false;
+		}
+		page.lp.damage = 0;
 		page.lp.from = page.lp.to;
 		page.lp.to = n;
 	}, { immediate : true });
@@ -93,20 +109,44 @@
 				}
 			}
 		}
+		> strong {
+			color: white;
+			font-size: 16px;
+			position: absolute;
+			left: 0;
+			top: 0;
+			opacity: 0;
+			transition: all 0.15s ease;
+		}
 	}
 	.avatar_self {
 		bottom: 10px;
 		left: 10px;
-		background: linear-gradient(to right, red, transparent);
+		background: linear-gradient(to right, blue, transparent);
+		> strong {
+			transform: translate(60px, 30px);
+		}
+		.damage_move {
+			transform: translate(60px, -30px) !important;
+		}
 	}
 	.avatar_oppo {
 		top: 10px;
 		right: 10px;
-		background: linear-gradient(to left, blue, transparent);
+		background: linear-gradient(to left, red, transparent);
 		flex-direction: row-reverse;
 		.text{
 			display: flex;
 			justify-content: right;
 		}
+		> strong {
+			transform: translate(100px, 30px);
+		}
+		.damage_move {
+			transform: translate(100px, 60px) !important;
+		}
+	}
+	.damage_show {
+		opacity: 1 !important;
 	}
 </style>

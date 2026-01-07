@@ -421,7 +421,7 @@
 			on : async (player : number, phase : number) : Promise<void> => {
 				connect.phase.player = player;
 				connect.phase.phase = phase;
-				await mainGame.sleep(800);
+				await mainGame.sleep(400);
 			},
 			clear : () : void => {
 				connect.phase.player = -1;
@@ -860,6 +860,7 @@
 			});
 		},
 		clear : () => {
+			connect.is_first.selecting = false;
 			connect.select.cards.clear();
 			connect.select.plaids.clear();
 			connect.select.position.clear();

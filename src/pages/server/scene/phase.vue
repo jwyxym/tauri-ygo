@@ -1,13 +1,14 @@
 <template>
-	<transition name = 'move_in'>
-		<div
-			class = 'phase font-title'
-			:class = "{ 'oppo' : page.player === 0, 'self' : page.player === 1 }"
-			v-if = 'page.show'
-		>
-			{{ page.text }}
-		</div>
-	</transition>
+	<div
+		class = 'phase font-title'
+		:class = "{
+			'oppo' : page.player === 0,
+			'self' : page.player === 1,
+			'show' : page.show
+		}"
+	>
+		{{ page.text }}
+	</div>
 </template>
 <script setup lang = 'ts'>
 	import { reactive, watch } from 'vue';
@@ -35,7 +36,7 @@
 			page.player = tp;
 			page.text = phase.map.get(text) ?? '';
 			page.show = true;
-			await mainGame.sleep(400);
+			await mainGame.sleep(250);
 			page.show = false;
 		}
 	};
@@ -50,7 +51,7 @@
 </script>
 <style scoped lang = 'scss'>
 	.phase {
-		width: var(--vw);
+		width: 0;
 		color: white;
 		position: fixed;
 		left: 50%;
@@ -63,6 +64,11 @@
 		justify-items: center;
 		align-content: center;
 		align-items: center;
+		overflow-x: hidden;
+		transition: all 0.15s ease;
+	}
+	.show {
+		width: var(--vw) !important;
 	}
 
 	.self {
@@ -71,25 +77,5 @@
 
 	.oppo {
 		background: linear-gradient(to right, blue, transparent);
-	}
-
-	.move_in {
-		&-enter-active,
-		&-leave-active {
-			transition: transform 0.2s ease;
-		}
-
-		&-enter-from {
-			transform: translate(-200vw, -50%);
-		}
-
-		&-leave-to {
-			transform: translate(200vw, -50%);
-		}
-
-		&-enter-to,
-		&-leave-from {
-			transform: translate(-50%, -50%);
-		}
 	}
 </style>
