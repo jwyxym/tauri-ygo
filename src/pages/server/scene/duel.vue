@@ -414,7 +414,7 @@
 				field : (target : Client_Card, owner : number, location : number, from : number, seq : number, pos : number = POS.NONE) : void => {
 					const [x, y, z] = three.axis.computed(owner, location, seq);
 					const ct = three.cards.change(target, owner, from, location, seq);
-					three.move(target.three, from, owner, x, y, z!);
+					three.move(target.three, from, owner, x, y, z);
 					three.rotate(target, from, owner, pos);
 					if (ct > 0)
 						three.cards.map.get(from)![owner][0].change.xyz(three.cards.map.get(from)![owner].length - 1);
@@ -527,9 +527,7 @@
 						duration : 0.05
 					}, 0.15)
 				}
-				tl.then(() => {
-					tl.kill();
-				});
+				tl.then(() => tl.kill());
 			}
 			!!from ? move() : target.position.set(x, y, z);
 			if (from === LOCATION.HAND) {
@@ -595,9 +593,7 @@
 				});
 				result += 50;
 			}
-			tl.then(() => {
-				tl.kill();
-			});
+			tl.then(() => tl.kill());
 			return result;
 		},
 		rotate : (target : Client_Card, from : number, owner : number, pos : number = POS.NONE) => {
@@ -630,9 +626,7 @@
 						gsap.pos(img, pos, tl);
 						break;
 				}
-				tl.then(() => {
-					tl.kill();
-				});
+				tl.then(() => tl.kill());
 			};
 			const set = () => {
 				if (owner === 1)
@@ -693,7 +687,7 @@
 				const group : Array<Client_Card> = [];
 				for (const p of tp === 2 ? [0, 1] : [tp])
 					for (let i = 0; i < 7; i ++) {
-						const len = three.cards.map.get(LOCATION.MZONE)![tp].length;
+						const len = three.cards.map.get(LOCATION.MZONE | (i << 16))![tp].length;
 						group.push(three.cards.map.get(LOCATION.MZONE | (i << 16))![p][len - 1]);
 					}
 				return group.filter(i => i !== undefined);
@@ -705,7 +699,7 @@
 				const group : Array<Client_Card> = [];
 				for (const p of tp === 2 ? [0, 1] : [tp])
 					for (let i = 0; i < 5; i ++) {
-						const len = three.cards.map.get(LOCATION.SZONE)![tp].length;
+						const len = three.cards.map.get(LOCATION.SZONE | (i << 16))![tp].length;
 						group.push(three.cards.map.get(LOCATION.SZONE | (i << 16))![p][len - 1]);
 					}
 				group.push(...duel.cards.get(LOCATION.FZONE)!(tp));
@@ -715,7 +709,7 @@
 				const group : Array<Client_Card> = [];
 				for (const p of tp === 2 ? [0, 1] : [tp])
 					for (const i of [0, 4]) {
-						const len = three.cards.map.get(LOCATION.SZONE)![p].length;
+						const len = three.cards.map.get(LOCATION.SZONE | (i << 16))![p].length;
 						group.push(three.cards.map.get(LOCATION.SZONE | (i << 16))![p][len - 1]);
 					}
 				return group.filter(i => i !== undefined);
@@ -925,6 +919,27 @@
 				const ct = three.sort(tp, LOCATION.HAND);
 				await mainGame.sleep(ct);
 			},
+		},
+		attack : async (
+			attacker : { owner : number; location : number; seq : number; },
+			defender ?: { owner : number; location : number; seq : number; }
+		) => {
+			const cards = three.cards.map.get(attacker.location | (attacker.seq << 16))![attacker.owner];
+			const a = {
+				card : cards[cards.length - 1],
+				loc : three.axis.computed(attacker.owner, attacker.location | (attacker.seq << 16), cards.length - 1)
+			};
+			const d = defender ? (() => {
+				const cards = three.cards.map.get(defender.location | (defender.seq << 16))![defender.owner];
+				return {
+					card : cards[cards.length - 1],
+					loc : three.axis.computed(defender.owner, defender.location | (defender.seq << 16), cards.length - 1)
+				};
+			})() : {
+				loc : [0, -3, 10]
+			};
+			const tl = gsap.attack(a, d, three.create.size);
+			tl.then(() => tl.kill());
 		}
 	};
 
