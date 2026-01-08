@@ -936,10 +936,11 @@
 					loc : three.axis.computed(defender.owner, defender.location | (defender.seq << 16), cards.length - 1)
 				};
 			})() : {
-				loc : [0, -3, 10]
+				loc : [0, 3.5 * (three.create.size.height + three.create.gap) * (!!attacker.owner ? - 1 : 1), 10]
 			};
-			const tl = gsap.attack(a, d, three.create.size);
+			const [tl, time] = gsap.attack(a, d, three.create.size);
 			tl.then(() => tl.kill());
+			await mainGame.sleep(time);
 		}
 	};
 

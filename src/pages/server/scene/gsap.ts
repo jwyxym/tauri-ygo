@@ -16,9 +16,9 @@ class Gsap {
 	attack = (
 		a : { card : Client_Card, loc : Array<number> },
 		d : { card ?: Client_Card, loc : Array<number> },
-		size : { width : number; height : number; }
-	) : gsap.core.Timeline => {
-		const tl = this.timeline();
+		size : { width : number; height : number; },
+		tl : gsap.core.Timeline = this.timeline()
+	) : [gsap.core.Timeline, number] => {
 		const direct = {
 			x : d.loc[0] > a.loc[0] ? -1 : 1,
 			y : d.loc[1] > a.loc[1] ? -1 : 1
@@ -112,7 +112,7 @@ class Gsap {
 				duration : 0.1,
 			}, time);
 		}
-		return tl;
+		return [tl, time * 1000];
 	};
 
 	opacity = (el : HTMLElement, to : number, complete : Function = () => {}) : gsap.core.Tween => {
