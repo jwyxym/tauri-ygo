@@ -795,6 +795,17 @@ class Tcp {
 							const card : Client_Card | undefined = to_card(pack[1], pack[2], pack[3]);
 							if (card)
 								card.add.counter(pack[0], - pack[4]);
+						}],
+						[MSG.ATTACK, async () => {
+							const pack = to_package<number>(buffer, data, [8, 8, 8, -1, 8, 8, 8], pos);
+							await connect.duel.attack(
+								{ owner : pack[0], location : pack[1], seq : pack[2] },
+								{ owner : pack[3], location : pack[4], seq : pack[5] }
+							);
+						}],
+						[MSG.BATTLE, async () => {
+						}],
+						[MSG.ATTACK_DISABLED, async () => {
 						}]
 					]);
 					const cur_msg : number = to_package<number>(buffer, data, [8], pos)[0];

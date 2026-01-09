@@ -922,14 +922,14 @@
 		},
 		attack : async (
 			attacker : { owner : number; location : number; seq : number; },
-			defender ?: { owner : number; location : number; seq : number; }
+			defender : { owner : number; location : number; seq : number; }
 		) => {
 			const cards = three.cards.map.get(attacker.location | (attacker.seq << 16))![attacker.owner];
 			const a = {
 				card : cards[cards.length - 1],
 				loc : three.axis.computed(attacker.owner, attacker.location | (attacker.seq << 16), cards.length - 1)
 			};
-			const d = defender ? (() => {
+			const d = !!defender.location ? (() => {
 				const cards = three.cards.map.get(defender.location | (defender.seq << 16))![defender.owner];
 				return {
 					card : cards[cards.length - 1],

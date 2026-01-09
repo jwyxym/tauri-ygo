@@ -16,7 +16,6 @@ class Idle {
 	};
 
 	index = (card : Client_Card) : number => {
-		console.log(this.array)
 		return this.array.indexOf(card);
 	};
 
