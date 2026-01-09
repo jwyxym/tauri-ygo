@@ -17,6 +17,7 @@ class Gsap {
 		a : { card : Client_Card, loc : Array<number> },
 		d : { card ?: Client_Card, loc : Array<number> },
 		size : { width : number; height : number; },
+		attack : number,
 		tl : gsap.core.Timeline = this.timeline()
 	) : [gsap.core.Timeline, number] => {
 		const direct = {
@@ -26,29 +27,32 @@ class Gsap {
 		const y = a.loc[1] - d.loc[1];
 		const x = a.loc[0] - d.loc[0] + size.width * direct.x;
 		let time = 0;
+		//同y轴的怪兽发生战斗(额外怪兽区)
 		if (y === 0) {
 			tl.to(a.card.three.rotation, {
-				z : Math.PI / - 2,
+				z : Math.PI / (2 * direct.x),
 				duration : 0.1,
 			}, time);
 			if (d.card)
 				tl.to(d.card.three.rotation, {
-					z : Math.PI / 2,
+					z : Math.PI / (2 * - direct.x),
 					duration : 0.1,
 				}, time);
 			time += 0.1;
+		//非同y轴的怪兽发生战斗
 		} else {
 			tl.to(a.card.three.rotation, {
-				z : Math.atan(- x / y),
+				z : Math.atan(- x / y) + (!!attack ? Math.PI * direct.y : 0),
 				duration : 0.1,
 			}, time);
 			if (d.card)
 				tl.to(d.card.three.rotation, {
-					z : Math.atan(- x / y) + Math.PI * direct.y,
+					z : Math.atan(- x / y) + (!attack ? Math.PI * direct.y : 0),
 					duration : 0.1,
 				}, time);
 			time += 0.1;
 		}
+		//抬起动作
 		let move : {
 			x ?: string | number,
 			y ?: string | number,
@@ -65,6 +69,7 @@ class Gsap {
 			});
 		tl.to(a.card.three.position, move, time);
 		time += 0.1;
+		//攻击
 		move = {
 			x : d.loc[0] + size.width * direct.x,
 			z : d.loc[2] + 1,
@@ -76,6 +81,7 @@ class Gsap {
 			});
 		tl.to(a.card.three.position, move, time);
 		time += 0.2;
+		//受击
 		if (d.card) {
 			const move = {
 				x : `+= ${40 * - direct.x}`,
@@ -86,10 +92,11 @@ class Gsap {
 					y : `+= ${40 * - direct.y}`
 				});
 			tl.to(d.card.three.position, move, time);
+			time += 0.1;
 		}
-		time += 0.1;
+		//攻击的卡回到原位
 		tl.to(a.card.three.rotation, {
-			z : 0,
+			z : !!attack ? Math.PI * direct.y : 0,
 			duration : 0.1,
 		}, time);
 		tl.to(a.card.three.position, {
@@ -99,9 +106,10 @@ class Gsap {
 			duration : 0.2,
 		}, time);
 		time += 0.1;
+		//受击的卡回到原位
 		if (d.card) {
 			tl.to(d.card.three.rotation, {
-				z : y === 0 ? Math.PI : 0,
+				z : !attack ? Math.PI * direct.y : 0,
 				duration : 0.1,
 			}, time);
 			time += 0.1;
