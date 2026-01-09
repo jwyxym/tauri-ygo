@@ -528,9 +528,14 @@ class Tcp {
 							for (const i of codes)
 								await i.card.update.code(i.code);
 							if (connect.idle.activate.length() === 0)
-								this.send.response(-1);
-							else
+								await this.send.response(-1);
+							else {
+								const promise = new Promise<void>((resolve) => {
+									connect.promise = resolve;
+								});
 								connect.select.idles.push(arr, 'activate', this.event + mainGame.get.strings.system(203), cancelable);
+								await promise;
+							}
 						}],
 						[MSG.SELECT_PLACE, async () => {
 							const pack = to_package<number>(buffer, data, [8, 8, 32], pos);

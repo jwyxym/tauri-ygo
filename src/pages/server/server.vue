@@ -408,6 +408,7 @@
 		state : 0,
 		is_host : false,
 		self : -1,
+		promise : undefined as (() => void) | undefined,
 		chk_deck : undefined as ((value: string | boolean | PromiseLike<string | boolean>) => void) | undefined,
 		deck : undefined as Deck | undefined,
 		player : new Array(4).fill({ name : '' }) as Array<TCP.Player>,
@@ -652,6 +653,8 @@
 					connect.select.idles.array.length = 0;
 					connect.select.idles.cancelable = true;
 					connect.select.idles.title = '';
+					if (connect.promise)
+						connect.promise();
 				},
 				cancel : async () => {
 					if (connect.select.idles.cancelable) {
