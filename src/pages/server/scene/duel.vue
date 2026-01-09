@@ -854,7 +854,7 @@
 					duel.to.chk(i);
 					const cards : Array<Client_Card> = three.cards.map.get(i.location)![tp];
 					const card = cards[i.seq >= 0 ? i.seq : cards.length - 1];
-					three.create.send.to(card, to_tp, LOCATION.DECK, i.location, seq, ((i.pos ?? POS.FACEDOWN) & POS.FACEDOWN) > 0 ? POS.FACEDOWN_ATTACK : POS.FACEUP_ATTACK);
+					three.create.send.to(card, to_tp, LOCATION.EXTRA, i.location, seq, ((i.pos ?? POS.FACEDOWN) & POS.FACEDOWN) > 0 ? POS.FACEDOWN_ATTACK : POS.FACEUP_ATTACK);
 					await mainGame.sleep(150);
 				}
 			},
