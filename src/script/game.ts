@@ -305,7 +305,9 @@ class Game {
 			const card =  mainGame.get.card(code);
 			return card === this.unknown ? this.get.text(I18N_KEYS.UNKNOW).toString() : card.hint[offset];
 		},
-		name : (id : number) : string => {
+		name : (id : number | undefined) : string => {
+			if (id === undefined)
+				return this.get.text(I18N_KEYS.UNKNOW).toString()
 			const card = mainGame.get.card(id);
 			return card === this.unknown ? this.get.text(I18N_KEYS.UNKNOW).toString() : card.name;
 		},

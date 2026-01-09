@@ -294,6 +294,7 @@
 		</transition>
 		<transition name = 'move_up'>
 			<Idles_Select_List
+				:title = 'connect.select.idles.title'
 				:cards = 'connect.select.idles.array'
 				:confirm = 'connect.select.idles.select'
 				:cancel = 'connect.select.idles.cancel'
@@ -635,11 +636,13 @@
 				}
 			},
 			idles : {
+				title : '',
 				code : '',
 				cancelable : true,
 				show : true,
 				array : [] as TCP.Idles_Cards,
-				push : (group : TCP.Idles_Cards, code : string, cancelable : boolean = false) : void => {
+				push : (group : TCP.Idles_Cards, code : string, title : string = mainGame.get.strings.system(560), cancelable : boolean = false) : void => {
+					connect.select.idles.title = title;
 					connect.select.idles.cancelable = cancelable;
 					connect.select.idles.code = code;
 					connect.select.idles.array = group;
@@ -648,6 +651,7 @@
 					connect.select.idles.code = '';
 					connect.select.idles.array.length = 0;
 					connect.select.idles.cancelable = true;
+					connect.select.idles.title = '';
 				},
 				cancel : async () => {
 					if (connect.select.idles.cancelable) {
@@ -703,10 +707,7 @@
 		},
 		lp : {
 			ct : new Array(2).fill(0),
-			lose : (tp : number, lp : number) => {
-				connect.lp.ct[tp] -= lp;
-			},
-			cover : (tp : number, lp : number) => {
+			change : (tp : number, lp : number) => {
 				connect.lp.ct[tp] += lp;
 			}
 		},

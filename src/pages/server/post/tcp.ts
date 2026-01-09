@@ -76,20 +76,26 @@ interface CTOS_JoinGame {
 class Tcp {
 	cid : string;
 	address : string;
+	event : string;
 	select_hint : number;
 	last_select_hint : number;
 	turn_player : number;
 	msg : number;
 	stoc : number;
+	chain_code : number;
+	attack_code : number;
 
 	constructor () {
 		this.cid = 'xiaoye';
 		this.address = '';
+		this.event = '';
 		this.select_hint = 0;
 		this.last_select_hint = 0;
 		this.turn_player = 0;
 		this.msg = 0;
 		this.stoc = 0;
+		this.chain_code = 0;
+		this.attack_code = 0;
 	}
 
 	connect = async (address : string, name : string, pass : string, connect : Reactive<any>) : Promise<boolean> => {
@@ -309,6 +315,7 @@ class Tcp {
 							const [type, player, content] = to_package<number>(buffer, data, [8, 8, 32], pos);
 							switch (type) {
 								case HINT.EVENT:
+									this.event = mainGame.get.desc(content);
 									break;
 								case HINT.MESSAGE:
 									hint(mainGame.get.desc(content));
@@ -523,7 +530,7 @@ class Tcp {
 							if (connect.idle.activate.length() === 0)
 								this.send.response(-1);
 							else
-								connect.select.idles.push(arr, 'activate', cancelable);
+								connect.select.idles.push(arr, 'activate', this.event + mainGame.get.strings.system(203), cancelable);
 						}],
 						[MSG.SELECT_PLACE, async () => {
 							const pack = to_package<number>(buffer, data, [8, 8, 32], pos);
@@ -636,6 +643,7 @@ class Tcp {
 						}],
 						[MSG.NEW_PHASE, async () => {
 							const [phase] = to_package<number>(buffer, data, [16], pos);
+							this.attack_code = 0;
 							await connect.phase.on(this.turn_player, phase);
 						}],
 						[MSG.MOVE, async () => {
@@ -734,9 +742,41 @@ class Tcp {
 								}
 							})();
 						}],
+						[MSG.POS_CHANGE, async () => {
+							this.event = mainGame.get.strings.system(1600);
+						}],
+						[MSG.SET, async () => {
+							this.event = mainGame.get.strings.system(1601);
+						}],
+						[MSG.SWAP, async () => {
+							this.event = mainGame.get.strings.system(1602);
+						}],
+						[MSG.SUMMONING, async () => {
+							const [code] = to_package<number>(buffer, data, [32], pos);
+							this.event = mainGame.get.strings.system(1603, mainGame.get.name(code));
+						}],
+						[MSG.SUMMONED, async () => {
+							this.event = mainGame.get.strings.system(1604);
+						}],
+						[MSG.SPSUMMONING, async () => {
+							const [code] = to_package<number>(buffer, data, [32], pos);
+							this.event = mainGame.get.strings.system(1605, mainGame.get.name(code));
+						}],
+						[MSG.SPSUMMONED, async () => {
+							this.event = mainGame.get.strings.system(1606);
+						}],
+						[MSG.FLIPSUMMONING, async () => {
+							const pack = to_package<number>(buffer, data, [32].concat(new Array(4).fill(8)), pos);
+							const code = pack[0];
+							this.event = mainGame.get.strings.system(1607, mainGame.get.name(code));
+						}],
+						[MSG.FLIPSUMMONED, async () => {
+							this.event = mainGame.get.strings.system(1608);
+						}],
 						[MSG.CHAINING, async () => {
 							const pack = to_package<number>(buffer, data, [32].concat(new Array(7).fill(8), [32]), pos);
 							const code = pack[0];
+							this.chain_code = code;
 							const player = to_player(pack[1]);
 							const loc = pack[2];
 							const seq = pack[3];
@@ -753,16 +793,20 @@ class Tcp {
 						}],
 						[MSG.CHAINED, async () => {
 							const [ct] = to_package<number>(buffer, data, [8], pos);
+							this.event = mainGame.get.strings.system(1609, mainGame.get.name(this.chain_code));
 							// console.log(connect.chains[ct - 1]);
 						}],
 						[MSG.CHAIN_SOLVING, async () => {
 							const [ct] = to_package<number>(buffer, data, [8], pos);
 							connect.chains.splice(ct - 1, 1);
+							if (!connect.chains.length)
+								this.chain_code = 0;
 						}],
 						[MSG.DRAW, async () => {
 							const pack = to_package<number>(buffer, data, [8, 8], pos);
 							const tp = to_player(pack[0]);
 							const ct = pack[1];
+							this.event = mainGame.get.strings.system(1611 + tp, ct);
 							if (tp === 0) {
 								const cards : Array<Client_Card> = connect.duel.cards.get(LOCATION.DECK)!(tp);
 								const codes = to_package<number>(buffer, data, new Array(ct).fill(32), pos + 2);
@@ -782,7 +826,15 @@ class Tcp {
 							const pack = to_package<number>(buffer, data, [8, 32], pos);
 							const tp = to_player(pack[0]);
 							const ct = pack[1];
-							connect.lp.lose(tp, ct);
+							this.event = mainGame.get.strings.system(1613 + tp, ct);
+							connect.lp.change(tp, - ct);
+						}],
+						[MSG.RECOVER, async () => {
+							const pack = to_package<number>(buffer, data, [8, 32], pos);
+							const tp = to_player(pack[0]);
+							const ct = pack[1];
+							this.event = mainGame.get.strings.system(1615 + tp, ct);
+							connect.lp.change(tp, ct);
 						}],
 						[MSG.ADD_COUNTER, async () => {
 							const pack = to_package<number>(buffer, data, [16, 8, 8, 8, 16], pos);
@@ -798,6 +850,9 @@ class Tcp {
 						}],
 						[MSG.ATTACK, async () => {
 							const pack = to_package<number>(buffer, data, [8, 8, 8, -1, 8, 8, 8], pos);
+							const card : Client_Card | undefined = to_card(pack[1], pack[2], pack[3]);
+							this.attack_code = card?.code ?? 0;
+							this.event = mainGame.get.strings.system(!!pack[4] ? 1619 : 1620, mainGame.get.name(card?.code));
 							await connect.duel.attack(
 								{ owner : pack[0], location : pack[1], seq : pack[2] },
 								{ owner : pack[3], location : pack[4], seq : pack[5] }
@@ -806,6 +861,7 @@ class Tcp {
 						[MSG.BATTLE, async () => {
 						}],
 						[MSG.ATTACK_DISABLED, async () => {
+							this.event = mainGame.get.strings.system(1621, mainGame.get.name(this.attack_code));
 						}]
 					]);
 					const cur_msg : number = to_package<number>(buffer, data, [8], pos)[0];

@@ -2,7 +2,7 @@
 	<div class = 'select_list' ref = 'dom' :class = "{ 'unshow' : !page.show }">
 		<div class = 'title'>
 			<var-switch v-model = 'page.show'/>
-			{{ mainGame.get.strings.system(560) }}
+			{{ title }}
 		</div>
 		<var-checkbox-group v-model = 'page.selects' :max = '1'>
 			<TransitionGroup class = 'list'  tag = 'div' name = 'scale'>
@@ -57,7 +57,7 @@
 		page.list = props.cards;
 	});
 
-	const props = defineProps(['cards', 'confirm', 'cancel']);
+	const props = defineProps(['title', 'cards', 'confirm', 'cancel']);
 	defineExpose({ dom });
 </script>
 <style scoped lang = 'scss'>
