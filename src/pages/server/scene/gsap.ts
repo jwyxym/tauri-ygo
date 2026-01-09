@@ -18,6 +18,7 @@ class Gsap {
 		d : { card ?: Client_Card, loc : Array<number> },
 		size : { width : number; height : number; },
 		attack : number,
+		gap : number,
 		tl : gsap.core.Timeline = this.timeline()
 	) : [gsap.core.Timeline, number] => {
 		const direct = {
@@ -25,7 +26,7 @@ class Gsap {
 			y : d.loc[1] > a.loc[1] ? -1 : 1
 		};
 		const y = a.loc[1] - d.loc[1];
-		const x = a.loc[0] - d.loc[0] + size.width * direct.x;
+		const x = a.loc[0] - d.loc[0] + size.width * ((4 - Math.abs(gap)) / 5) * direct.x;
 		let time = 0;
 		//同y轴的怪兽发生战斗(额外怪兽区)
 		if (y === 0) {
@@ -71,7 +72,7 @@ class Gsap {
 		time += 0.1;
 		//攻击
 		move = {
-			x : d.loc[0] + size.width * direct.x,
+			x : d.loc[0] + size.width * ((4 - Math.abs(gap)) / 5) * direct.x,
 			z : d.loc[2] + 1,
 			duration : 0.2,
 		};

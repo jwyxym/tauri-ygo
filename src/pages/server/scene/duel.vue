@@ -938,7 +938,7 @@
 			})() : {
 				loc : [0, 3.5 * (three.create.size.height + three.create.gap) * (!!attacker.owner ? - 1 : 1), 10]
 			};
-			const [tl, time] = gsap.attack(a, d, three.create.size, attacker.owner);
+			const [tl, time] = gsap.attack(a, d, three.create.size, attacker.owner, (attacker.seq > 4 ? attacker.seq - 4 : attacker.seq) - (defender.seq > 4 ? defender.seq - 4 : defender.seq));
 			tl.then(() => tl.kill());
 			await mainGame.sleep(time);
 		}
