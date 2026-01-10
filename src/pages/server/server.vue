@@ -251,7 +251,7 @@
 				:min = 'connect.select.group.min'
 				:max = 'connect.select.group.max'
 				:list = 'connect.select.group.list'
-				:confirm = 'connect.select.group.confirm'
+				:confirm = 'connect.response'
 				:cancel = 'connect.select.group.cancel'
 				v-if = 'page.duel && connect.select.group.chk'
 				ref = 'select'
@@ -502,9 +502,6 @@
 					connect.select.group.cancelable = cancelable;
 					connect.select.group.chk = true;
 				},
-				confirm : async (result : Array<number>) => {
-					await tcp?.send.response(result);
-				},
 				cancel : async () => {
 					if (connect.select.group.cancelable)
 						await tcp?.send.response(-1);
@@ -706,6 +703,17 @@
 					if (code !== undefined)
 						await connect.response(code);
 				}
+			},
+			yes_no : async (title : string) : Promise<number> => {
+				let result = 0;
+				await Dialog({
+					title : title,
+					closeOnClickOverlay : false,
+					onConfirm : () => {
+						result ++;
+					}
+				});
+				return result;
 			}
 		},
 		lp : {

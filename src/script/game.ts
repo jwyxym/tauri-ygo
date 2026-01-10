@@ -13,6 +13,7 @@ import TAURI_STR from './language/string';
 
 import voice from '@/pages/voice/voice';
 import Deck from '@/pages/deck/deck';
+import { LOCATION } from '@/pages/server/post/network';
 
 class Game {
 	strings : Map<string, Map<number, string>> = new Map([
@@ -43,6 +44,7 @@ class Game {
 	bgm : Map<string, string> = new Map;
 	version = 0x1362;
 	max_card_id = 0x0fffffff;
+	max_string_id = 2047;
 	i18n = CONSTANT.LANGUAGE.Zh_CN;
 	interval = -1;
 	interval_ct = 0;
@@ -167,6 +169,14 @@ class Game {
 		return false;
 	};
 
+	replace = (value : string, replace : Array<string | number> | string | number) : string => {
+		replace = typeof replace === 'object' ? replace : [replace];
+		for (const str of replace) {
+			value = value.replace(typeof str === 'string' ? '%ls' : '%d', `${str}`);
+		}
+		return value;
+	};
+
 	get = {
 		text : (key : number, replace : string | number | Array<string> | Array<number> | Array<string | number> = []) : string => {
 			switch (this.i18n) {
@@ -233,7 +243,7 @@ class Game {
 				}
 				return 3;
 			} else {
-				const name = Array.from(this.lflist).find(i => i[1].hash === key) ?? [this.get.text(I18N_KEYS.UNKNOW).toString()];
+				const name = Array.from(this.lflist).find(i => i[1].hash === key) ?? [this.get.text(I18N_KEYS.UNKNOW)];
 				return name[0];
 			}
 		},
@@ -242,15 +252,11 @@ class Game {
 		},
 		strings : {
 			system : (key : number, replace : Array<string | number> | string | number = []) : string => {
-				let value = this.strings.get(CONSTANT.KEYS.SYSTEM)!.get(key) ?? this.get.text(I18N_KEYS.UNKNOW).toString();
-				replace = typeof replace === 'object' ? replace : [replace];
-				for (const str of replace) {
-					value = value.replace(typeof str === 'string' ? '%ls' : '%d', `${str}`);
-				}
-				return value;
+				const value = this.strings.get(CONSTANT.KEYS.SYSTEM)!.get(key) ?? this.get.text(I18N_KEYS.UNKNOW);
+				return this.replace(value, replace);
 			},
 			victory : (key : number, replace : Array<string | number> | string | number = []) : string => {
-				let value = this.strings.get(CONSTANT.KEYS.VICTORY)!.get(key) ?? this.get.text(I18N_KEYS.UNKNOW).toString();
+				let value = this.strings.get(CONSTANT.KEYS.VICTORY)!.get(key) ?? this.get.text(I18N_KEYS.UNKNOW);
 				replace = typeof replace === 'object' ? replace : [replace];
 				for (const str of replace) {
 					value = value.replace(typeof str === 'string' ? '%ls' : '%d', `${str}`);
@@ -297,19 +303,25 @@ class Game {
 				return this.strings.get(CONSTANT.KEYS.SETCODE)?.get(i) ?? `0x${i.toString(16)}`;
 			}
 		},
-		desc : (data : number) : string => {
-			if (data < (128 << 4))
-				return this.get.strings.system(data);
-			const code = (data >> 4) & 0x0fffffff;
+		desc : (data : number, replace : Array<string | number> | string | number = []) : string => {
+			if (data <= this.max_string_id)
+				return this.get.strings.system(data, replace);
+			const code = (data >> 4) & this.max_card_id;
 			const offset = data & 0xf;
 			const card =  mainGame.get.card(code);
-			return card === this.unknown ? this.get.text(I18N_KEYS.UNKNOW).toString() : card.hint[offset];
+			return card === this.unknown ? this.get.text(I18N_KEYS.UNKNOW)
+				: this.replace(card.hint[offset], replace);
+		},
+		location : (loc : number, seq : number) : string => {
+			if (loc === LOCATION.SZONE)
+				return this.get.strings.system(seq < 5 ? 1003 : seq === 5 ? 1008 : 1009);
+			return this.get.strings.system(1000 + Object.entries(LOCATION).findIndex((_, i) => i === loc));
 		},
 		name : (id : number | undefined) : string => {
 			if (id === undefined)
-				return this.get.text(I18N_KEYS.UNKNOW).toString()
+				return this.get.text(I18N_KEYS.UNKNOW);
 			const card = mainGame.get.card(id);
-			return card === this.unknown ? this.get.text(I18N_KEYS.UNKNOW).toString() : card.name;
+			return card === this.unknown ? this.get.text(I18N_KEYS.UNKNOW) : card.name;
 		},
 		avatar : (tp : number) : string => {
 			return this.textures.get(`avatar${(this.get.system(CONSTANT.KEYS.SETTING_AVATAR) as Array<string>)[tp] ?? 0}.png`) ?? '';
