@@ -1003,6 +1003,9 @@
 
 		window.addEventListener('resize', three.resize);
 		window.addEventListener('click', hover.click);
+
+		if (props.connect.promise)
+			props.connect.promise();
 	});
 
 	onUnmounted(() => {

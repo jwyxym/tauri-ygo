@@ -247,6 +247,8 @@ class Client_Card {
 			this.code = code;
 			this.alias = card.alias;
 			this.pic = card.pic;
+			if ((this.pos() & POS.FACEUP) > 0)
+				this.div.img.src = this.pic;
 			this.type = card.type;
 			this.level = (card.is_xyz() || card.is_link()) ? 0 : card.level;
 			this.rank = card.is_xyz() ? card.level : 0;

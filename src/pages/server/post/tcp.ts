@@ -163,7 +163,7 @@ class Tcp {
 		const listen = async (buffer : Uint8Array<ArrayBuffer>) : Promise<void> => {
 			const data = new DataView(buffer.buffer);
 			let pos = 0
-			while (pos < buffer.byteLength - 3) {
+			while (buffer.byteLength - pos > 2) {
 				if (data.getUint8(pos) === 0) {
 					pos ++;
 					continue;
@@ -351,9 +351,14 @@ class Tcp {
 							}
 						}],
 						[MSG.START, async () => {
-							const pack = to_package<number>(buffer, data, [8, -1, 32, 32], pos);
+							console.log('START')
+							const pack = to_package<number>(buffer, data, [8, -1, 32, 32, 16, 16, 16, 16], pos);
 							connect.is_first.chk =  (pack[0] & 0xf) === 0;
+							console.log(pack[0])
 							connect.lp.ct = [pack[1], pack[2]];
+							const decks =[pack[3], pack[4], 0, pack[5], pack[6], 0];
+							if (!connect.deck_count.length && decks.reduce((a, b) => a + b, 0))
+								connect.deck_count = decks;
 						}],
 						[MSG.WIN, async () => {
 							const [player, type] = to_package<number>(buffer, data, [8, 8], pos);
@@ -365,7 +370,7 @@ class Tcp {
 							const pack = to_package<number>(buffer, data, [8, 8], pos);
 							const tp = to_player(pack[0]);
 							const location = pack[1];
-							const cards = connect.duel.cards.get(location);
+							const cards = connect.duel.cards?.get(location) ?? undefined;
 							if (cards === undefined)
 								return;
 							pos += 2;
@@ -535,6 +540,7 @@ class Tcp {
 								});
 								connect.select.idles.push(arr, 'activate', this.event + mainGame.get.strings.system(203), cancelable);
 								await promise;
+								connect.promise = undefined;
 							}
 						}],
 						[MSG.SELECT_PLACE, async () => {
@@ -813,7 +819,7 @@ class Tcp {
 							const ct = pack[1];
 							this.event = mainGame.get.strings.system(1611 + tp, ct);
 							if (tp === 0) {
-								const cards : Array<Client_Card> = connect.duel.cards.get(LOCATION.DECK)!(tp);
+								const cards : Array<Client_Card> = connect.duel.cards?.get(LOCATION.DECK)!(tp) ?? [];
 								const codes = to_package<number>(buffer, data, new Array(ct).fill(32), pos + 2);
 								await mainGame.load.pic(codes);
 								let i = 1;
@@ -867,6 +873,132 @@ class Tcp {
 						}],
 						[MSG.ATTACK_DISABLED, async () => {
 							this.event = mainGame.get.strings.system(1621, mainGame.get.name(this.attack_code));
+						}],
+						[MSG.RELOAD_FIELD, async () => {
+							console.log('RELOAD_FIELD')
+							let p = pos + 1;
+							let pack : Array<number>;
+							const decks : Array<number> = new Array(6).fill(0);
+							const cards : {
+								mzone : Array<[number, Array<{
+									location : number;
+									seq : number;
+									zone : number;
+									pos ?: number;
+								}>]>;
+									szone : Array<[number, Array<{
+									location : number;
+									seq : number;
+									zone : number;
+									pos ?: number;
+								}>]>;
+								hands : Array<[number, number]>;
+								grave : Array<[number, Array<{
+									location : number;
+									seq : number;
+								}>, number]>;
+								removed : Array<[number, Array<{
+									location : number;
+									seq : number;
+								}>, number]>;
+								extra : Array<[number, Array<{
+									location : number;
+									seq : number;
+								}>, number]>;
+							} = {
+								mzone : [],
+								szone : [],
+								hands : [],
+								grave : [],
+								removed : [],
+								extra : []
+							};
+							for (let tp = 0; tp < 2; tp ++) {
+								pack = to_package<number>(buffer, data, [32], p);
+								connect.lp.ct[tp] = pack[0];
+								p += 4;
+								for(let i = 0; i < 7; i ++)
+									if (!!to_package<number>(buffer, data, [8], p)[0]) {
+										pack = to_package<number>(buffer, data, [8, 8], p);
+										cards.mzone.push([tp, new Array(pack[1]).fill({
+											location : LOCATION.DECK,
+											zone : i,
+											seq : 0
+										})]);
+										cards.mzone.push([tp, [{
+											location : LOCATION.DECK,
+											zone : i,
+											seq : 0,
+											pos : pack[0]
+										}]]);
+										p += 3;
+									} else
+										p ++;
+								
+								for(let i = 0; i < 8; i ++)
+									if (!!to_package<number>(buffer, data, [8], p)[0]) {
+										pack = to_package<number>(buffer, data, [8], p);
+										cards.szone.push([tp, [{
+											location : LOCATION.DECK,
+											zone : i,
+											seq : 0,
+											pos : pack[0]
+										}]]);
+										p += 2;
+									} else
+										p ++;
+								
+								pack = to_package<number>(buffer, data, new Array(6).fill(8), p);
+								p += 6;
+								decks[3 * tp + 0] = pack.slice(0, 4).reduce((a, b) => a + b, 0) + pack[5];
+								decks[3 * tp + 1] = pack[4];
+								cards.hands.push([tp, pack[1]]);
+								cards.grave.push([tp, new Array(pack[2]).fill({
+									location : LOCATION.DECK,
+									seq : 0,
+								}), 0]);
+								cards.removed.push([tp, new Array(pack[3]).fill({
+									location : LOCATION.DECK,
+									seq : 0
+								}), 0]);
+								cards.extra.push([tp, new Array(pack[5]).fill({
+									location : LOCATION.DECK,
+									seq : 0,
+									pos : POS.FACEUP_ATTACK
+								}), pack[4]]);
+							}
+							console.log(decks, cards, connect.state);
+							connect.deck_count = decks;
+							// connect.state = 2;
+							const promise = new Promise<void>((resolve) => {
+								connect.promise = resolve;
+							});
+							await promise;
+							connect.promise = undefined;
+							for (const i of cards.mzone)
+								await connect.duel.to.mzone(...i);
+							for (const i of cards.szone)
+								await connect.duel.to.szone(...i);
+							for (const i of cards.hands)
+								await connect.duel.draw(...i);
+							for (const i of cards.grave)
+								await connect.duel.to.grave(...i);
+							for (const i of cards.removed)
+								await connect.duel.to.removed(...i);
+							for (const i of cards.extra)
+								await connect.duel.to.extra(...i);
+
+
+							const [chains] = to_package<number>(buffer, data, [8], p);
+							p ++;
+							for(let i = 0; i < chains; i ++) {
+								pack = to_package<number>(buffer, data, [32].concat(new Array(7).fill(8), [32]), p);
+								p += 15;
+								this.chain_code = pack[0];
+								connect.chains.push({ player : to_player(pack[1]), code : this.chain_code });
+							}
+							if (!!chains)
+								this.event = mainGame.get.strings.system(1609, mainGame.get.name(this.chain_code));
 						}]
 					]);
 					const cur_msg : number = to_package<number>(buffer, data, [8], pos)[0];
@@ -977,7 +1109,6 @@ class Tcp {
 			[STOC.DUEL_START,
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					connect.state = 2;
-					connect.rps.chk = true;
 				}
 			],
 			[STOC.TIME_LIMIT,
