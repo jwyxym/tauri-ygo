@@ -234,6 +234,7 @@ class Client_Card {
 
 	update = {
 		code : async (code : number) : Promise<void> => {
+			console.log(this.code, code)
 			if (code === 0) {
 				this.clear();
 				return;

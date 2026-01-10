@@ -135,17 +135,16 @@ class Tcp {
 
 	listen = async (connect : Reactive<any>) : Promise<void> => {
 		const messages = {
-			array : [] as Array<Uint8Array<ArrayBuffer>>,
+			array : new Uint8Array() as Uint8Array<ArrayBuffer>,
+			pos : 0,
 			on : false,
 			process : async (chk : boolean = false) : Promise<void> => {
-				if ((!chk && messages.on) || messages.array.length === 0) {
-					messages.on = messages.array.length !== 0;
+				if ((!chk && messages.on) || messages.array.length <= messages.pos) {
+					messages.on = messages.array.length > messages.pos;
 					return;
 				}
 				messages.on = true;
-				const message = messages.array.shift();
-				if (message)
-					await listen(message);
+				await listen();
 				messages.process(true);
 			}
 		};
@@ -155,29 +154,40 @@ class Tcp {
 					connect.state = 0;
 					this.address = '';
 				} else if (x.payload.event.message) {
-					messages.array.push(new Uint8Array(x.payload.event.message.data))
+					messages.array = new Uint8Array([...messages.array, ...x.payload.event.message.data]);
 					messages.process();
 				}
 			}
 		});
-		const listen = async (buffer : Uint8Array<ArrayBuffer>) : Promise<void> => {
-			const data = new DataView(buffer.buffer);
-			let pos = 0
-			while (buffer.byteLength - pos > 2) {
-				if (data.getUint8(pos) === 0) {
-					pos ++;
-					continue;
+		const listen = async () : Promise<void> => {
+			let buffer = messages.array.buffer;
+			let data = new DataView(buffer);
+			let length = buffer.byteLength;
+			while (true) {
+				if (length - messages.pos > 2) {
+					if (data.getUint8(messages.pos) === 0) {
+						messages.pos ++;
+						continue;
+					}
+					const len = data.getUint16(messages.pos, true);
+					const proto = data.getUint8(messages.pos + 2);
+					this.stoc = proto;
+					if (proto !== STOC.GAME_MSG)
+						this.msg = 0;
+					const func = funcs.get(proto);
+					// console.log('0x'+proto.toString(16), messages.pos, len)
+					if (func)
+						await func(buffer, data, len, connect, messages.pos);
+					messages.pos += len + 2;
+				} else if (length === messages.pos) {
+					break;
+				} else {
+					buffer = messages.array.buffer;
+					data = new DataView(buffer);
+					if (buffer.byteLength === length)
+						break;
+					length = buffer.byteLength;
 				}
-				const len = data.getUint16(pos, true);
-				const proto = data.getUint8(pos + 2);
-				this.stoc = proto;
-				if (proto !== STOC.GAME_MSG)
-					this.msg = 0;
-				const func = funcs.get(proto);
-				// console.log('0x'+proto.toString(16))
-				if (func)
-					await func(buffer, data, len, connect, pos);
-				pos += len + 2;
 			}
 		};
 
@@ -251,10 +261,11 @@ class Tcp {
 
 		const to_card = (player : number, loc : number, seq : number, ct : number = -1) : Client_Card | undefined => {
 			const is_xyz = (loc & LOCATION.OVERLAY) > 0;
+			const is_onfield = (loc & (LOCATION.MZONE + LOCATION.SZONE)) > 0;
 			const get_cards : Function | undefined = connect.duel.cards.get(is_xyz ? LOCATION.OVERLAY : loc);
 			if (get_cards) {
-				const cards : Array<Client_Card> = is_xyz ? get_cards(player, seq) : get_cards(player);
-				return is_xyz ? cards[ct >= 0 ? ct : cards.length - 1] : cards[seq >= 0 ? seq : cards.length - 1];
+				const cards : Array<Client_Card> = is_xyz || is_onfield ? get_cards(player, seq) : get_cards(player);
+				return is_xyz ? cards[ct >= 0 ? ct : cards.length - 1] : is_onfield && seq >= 0 ? cards[0] : cards[seq >= 0 ? seq : cards.length - 1];
 			}
 			return undefined;
 		};
@@ -351,10 +362,8 @@ class Tcp {
 							}
 						}],
 						[MSG.START, async () => {
-							console.log('START')
 							const pack = to_package<number>(buffer, data, [8, -1, 32, 32, 16, 16, 16, 16], pos);
 							connect.is_first.chk =  (pack[0] & 0xf) === 0;
-							console.log(pack[0])
 							connect.lp.ct = [pack[1], pack[2]];
 							const decks =[pack[3], pack[4], 0, pack[5], pack[6], 0];
 							if (!connect.deck_count.length && decks.reduce((a, b) => a + b, 0))
@@ -389,7 +398,7 @@ class Tcp {
 							const loc = pack[1];
 							const seq = pack[2];
 							const flag = pack[3];
-							const card = to_card(player, loc, seq)
+							const card = to_card(player, loc, seq);
 							if (card)
 								await update_card(buffer, data, flag, card, pos + 11);
 						}],
@@ -679,11 +688,11 @@ class Tcp {
 							if (card)
 								await card.update.code(code);
 							from.loc === 0 ? await (async () => {
-								connect.duel.add.card(to.player, to.loc, to.seq, code);
+								await connect.duel.add.card(to.player, to.loc, to.seq, code);
 							})() : await (async () => {
 								switch (to.loc) {
 									case LOCATION.NONE:
-										connect.duel.to.none(from.player, {
+										await connect.duel.to.none(from.player, {
 											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
 											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
 											zone : to.seq,
@@ -691,7 +700,7 @@ class Tcp {
 										}, to.player);
 										break;
 									case LOCATION.MZONE:
-										connect.duel.to.mzone(from.player, {
+										await connect.duel.to.mzone(from.player, {
 											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
 											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
 											zone : to.seq,
@@ -699,7 +708,7 @@ class Tcp {
 										}, to.player);
 										break;
 									case LOCATION.SZONE:
-										connect.duel.to.szone(from.player, {
+										await connect.duel.to.szone(from.player, {
 											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
 											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
 											zone : to.seq,
@@ -707,35 +716,35 @@ class Tcp {
 										}, to.player);
 										break;
 									case LOCATION.GRAVE:
-										connect.duel.to.grave(from.player, {
+										await connect.duel.to.grave(from.player, {
 											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
 											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
 											pos : to.pos
 										}, to.seq, to.player);
 										break;
 									case LOCATION.REMOVED:
-										connect.duel.to.grave(from.player, {
+										await connect.duel.to.grave(from.player, {
 											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
 											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
 											pos : to.pos
 										}, to.seq, to.player);
 										break;
 									case LOCATION.DECK:
-										connect.duel.to.deck(from.player, {
+										await connect.duel.to.deck(from.player, {
 											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
 											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
 											pos : to.pos
 										}, to.seq, to.player);
 										break;
 									case LOCATION.EXTRA:
-										connect.duel.to.extra(from.player, {
+										await connect.duel.to.extra(from.player, {
 											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
 											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
 											pos : to.pos
 										}, to.seq, to.player);
 										break;
 									case LOCATION.OVERLAY:
-										connect.duel.to.overlay(from.player, {
+										await connect.duel.to.overlay(from.player, {
 											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
 											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
 											zone : to.seq,
@@ -743,7 +752,7 @@ class Tcp {
 										}, to.player);
 										break;
 									case LOCATION.HAND:
-										connect.duel.to.hand(from.player, {
+										await connect.duel.to.hand(from.player, {
 											location : is_xyz ? LOCATION.MZONE | (from.seq << 16) : is_onfield ? from.loc | (from.seq << 16) : from.loc,
 											seq : is_xyz ? from.ct : is_onfield ? -1 : from.seq,
 											zone : to.seq,
@@ -805,7 +814,6 @@ class Tcp {
 						[MSG.CHAINED, async () => {
 							const [ct] = to_package<number>(buffer, data, [8], pos);
 							this.event = mainGame.get.strings.system(1609, mainGame.get.name(this.chain_code));
-							// console.log(connect.chains[ct - 1]);
 						}],
 						[MSG.CHAIN_SOLVING, async () => {
 							const [ct] = to_package<number>(buffer, data, [8], pos);
@@ -875,7 +883,6 @@ class Tcp {
 							this.event = mainGame.get.strings.system(1621, mainGame.get.name(this.attack_code));
 						}],
 						[MSG.RELOAD_FIELD, async () => {
-							console.log('RELOAD_FIELD')
 							let p = pos + 1;
 							let pack : Array<number>;
 							const decks : Array<number> = new Array(6).fill(0);
@@ -967,9 +974,7 @@ class Tcp {
 									pos : POS.FACEUP_ATTACK
 								}), pack[4]]);
 							}
-							console.log(decks, cards, connect.state);
 							connect.deck_count = decks;
-							// connect.state = 2;
 							const promise = new Promise<void>((resolve) => {
 								connect.promise = resolve;
 							});
@@ -1004,7 +1009,7 @@ class Tcp {
 					const cur_msg : number = to_package<number>(buffer, data, [8], pos)[0];
 					this.msg = cur_msg;
 					pos += 1;
-					// console.log(cur_msg)
+					console.log(cur_msg)
 					if (connect.select.group.chk && cur_msg !== MSG.SELECT_UNSELECT_CARD)
 						connect.select.group.clear();
 					if (msg_funcs.has(cur_msg))
@@ -1077,7 +1082,6 @@ class Tcp {
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
 					const pack = to_package<number>(buffer, data, new Array(6).fill(16), pos);
 					connect.deck_count = pack;
-					// console.log(connect.deck_count)
 				}
 			],
 			[STOC.JOIN_GAME,

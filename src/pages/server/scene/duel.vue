@@ -683,26 +683,36 @@
 					return three.cards.map.get(LOCATION.REMOVED)!.flat();
 				return three.cards.map.get(LOCATION.REMOVED)![tp];
 			}],
-			[LOCATION.MZONE, (tp : number) : Array<Client_Card> => {
+			[LOCATION.MZONE, (tp : number, seq : number = -1) : Array<Client_Card> => {
 				const group : Array<Client_Card> = [];
 				for (const p of tp === 2 ? [0, 1] : [tp])
-					for (let i = 0; i < 7; i ++) {
-						const len = three.cards.map.get(LOCATION.MZONE | (i << 16))![tp].length;
-						group.push(three.cards.map.get(LOCATION.MZONE | (i << 16))![p][len - 1]);
+					if (seq <= -1)
+						for (let i = 0; i < 7; i ++) {
+							const len = three.cards.map.get(LOCATION.MZONE | (i << 16))![tp].length;
+							group.push(three.cards.map.get(LOCATION.MZONE | (i << 16))![p][len - 1]);
+						}
+					else {
+						const len = three.cards.map.get(LOCATION.MZONE | (seq << 16))![tp].length;
+						group.push(three.cards.map.get(LOCATION.MZONE | (seq << 16))![p][len - 1]);
 					}
 				return group.filter(i => i !== undefined);
 			}],
 			[LOCATION.OVERLAY, (tp : number, seq : number) : Array<Client_Card> => {
 				return three.cards.map.get(LOCATION.MZONE | (seq << 16))![tp].slice(0, -1);
 			}],
-			[LOCATION.SZONE, (tp : number) : Array<Client_Card> => {
+			[LOCATION.SZONE, (tp : number, seq : number = -1) : Array<Client_Card> => {
 				const group : Array<Client_Card> = [];
 				for (const p of tp === 2 ? [0, 1] : [tp])
-					for (let i = 0; i < 5; i ++) {
-						const len = three.cards.map.get(LOCATION.SZONE | (i << 16))![tp].length;
-						group.push(three.cards.map.get(LOCATION.SZONE | (i << 16))![p][len - 1]);
+					if (seq <= -1) {
+						for (let i = 0; i < 5; i ++) {
+							const len = three.cards.map.get(LOCATION.SZONE | (i << 16))![tp].length;
+							group.push(three.cards.map.get(LOCATION.SZONE | (i << 16))![p][len - 1]);
+						}
+						group.push(...duel.cards.get(LOCATION.FZONE)!(tp));
+					} else {
+						const len = three.cards.map.get(LOCATION.SZONE | (seq << 16))![tp].length;
+						group.push(three.cards.map.get(LOCATION.SZONE | (seq << 16))![p][len - 1]);
 					}
-				group.push(...duel.cards.get(LOCATION.FZONE)!(tp));
 				return group.filter(i => i !== undefined);
 			}],
 			[LOCATION.PZONE, (tp : number) : Array<Client_Card> => {
