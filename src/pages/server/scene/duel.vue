@@ -56,18 +56,19 @@
 				card.three.position.setZ(duel.cards.get(LOCATION.HAND)!(1).indexOf(card) * three.create.hand_gap);
 			}
 		},
+		show_off : () : void => {
+			if (hover.select === undefined)
+				return;
+			hover.select.show.btn.off();
+			if ((duel.cards.get(LOCATION.HAND)!(0) as Array<Client_Card>).includes(hover.select)) {
+				hover.select.div.img.style.transform = 'translateY(0)';
+				hover.select.three.position.setZ(duel.cards.get(LOCATION.HAND)!(0).indexOf(hover.select) * three.create.hand_gap + three.create.float);
+			}
+			hover.select = undefined;
+		},
 		click : async (e : MouseEvent) : Promise<void> => {
 			const target = e.target as HTMLElement;
-			const show_off = () => {
-				if (hover.select === undefined)
-					return;
-				hover.select.show.btn.off();
-				if ((duel.cards.get(LOCATION.HAND)!(0) as Array<Client_Card>).includes(hover.select)) {
-					hover.select.div.img.style.transform = 'translateY(0)';
-					hover.select.three.position.setZ(duel.cards.get(LOCATION.HAND)!(0).indexOf(hover.select) * three.create.hand_gap + three.create.float);
-				}
-				hover.select = undefined;
-			}
+			const show_off = hover.show_off;
 			if (three.btn !== undefined && three.btn.three.element.contains(target)) {
 				show_off();
 				await props.connect.phase.select();
@@ -925,6 +926,7 @@
 					
 					return result;
 				}
+				hover.show_off();
 				three.cards.map.get(LOCATION.HAND)![tp] = sort(three.cards.map.get(LOCATION.HAND)![tp], hands)
 				const ct = three.sort(tp, LOCATION.HAND);
 				await mainGame.sleep(ct);
@@ -1027,6 +1029,7 @@
 	const emit = defineEmits(['update:duel']);
 
 	watch(() => { return props.connect.phase.phase; }, async (n) => {
+		hover.show_off();
 		await three.btn?.phase(n);
 	});
 
