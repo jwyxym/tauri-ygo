@@ -935,12 +935,13 @@ class Tcp {
 								p += 4;
 								for(let i = 0; i < 7; i ++)
 									if (!!to_package<number>(buffer, data, [8], p)[0]) {
-										pack = to_package<number>(buffer, data, [8, 8], p);
-										cards.mzone.push([tp, new Array(pack[1]).fill({
-											location : LOCATION.DECK,
-											zone : i,
-											seq : 0
-										})]);
+										pack = to_package<number>(buffer, data, [8, 8], p + 1);
+										if (pack[1]> 0)
+											cards.mzone.push([tp, new Array(pack[1]).fill({
+												location : LOCATION.DECK,
+												zone : i,
+												seq : 0
+											})]);
 										cards.mzone.push([tp, [{
 											location : LOCATION.DECK,
 											zone : i,
@@ -953,7 +954,7 @@ class Tcp {
 								
 								for(let i = 0; i < 8; i ++)
 									if (!!to_package<number>(buffer, data, [8], p)[0]) {
-										pack = to_package<number>(buffer, data, [8], p);
+										pack = to_package<number>(buffer, data, [8], p + 1);
 										cards.szone.push([tp, [{
 											location : LOCATION.DECK,
 											zone : i,
