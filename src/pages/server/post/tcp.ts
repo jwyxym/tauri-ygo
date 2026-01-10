@@ -278,10 +278,19 @@ class Tcp {
 			return undefined;
 		};
 
-		const update_card = async (buffer : Uint8Array<ArrayBuffer>, data : DataView, flag : number, card : Client_Card, p : number) : Promise<void> => {
+		const to_cards = (player : number, loc : number, seq : number = -1) : Array<Client_Card> => {
+			const is_xyz = (loc & LOCATION.OVERLAY) > 0;
+			const is_onfield = (loc & (LOCATION.MZONE + LOCATION.SZONE)) > 0;
+			const get_cards : Function | undefined = connect.duel.cards.get(is_xyz ? LOCATION.OVERLAY : loc);
+			if (get_cards)
+				return is_xyz || is_onfield ? get_cards(player, seq) : get_cards(player);
+			return [];
+		};
+
+		const update_card = async (buffer : Uint8Array<ArrayBuffer>, data : DataView, flag : number, card : Client_Card, tp : number, location : number, seq : number, p : number) : Promise<void> => {
 			if (flag === 0)
 				card.clear();
-			else
+			else {
 				for (const i of [
 					[QUERY.CODE, card.update.code],
 					[QUERY.POSITION, () => {}],
@@ -296,14 +305,54 @@ class Tcp {
 					[QUERY.BASE_ATTACK, () => {}],
 					[QUERY.BASE_DEFENSE, () => {}],
 					[QUERY.REASON, () => {}],
-					[QUERY.REASON_CARD, () => {}],
-					[QUERY.EQUIP_CARD, () => {}],
+					[QUERY.REASON_CARD, () => {}]
 				] as Array<[number, Function]>)
 					if ((flag & i[0]) === i[0]) {
-						const pack = to_package(buffer, data, [32], p);
+						const pack = to_package<number>(buffer, data, [32], p);
 						await i[1](pack[0]);
 						p += 4;
 					}
+				if ((flag & QUERY.EQUIP_CARD) === QUERY.EQUIP_CARD) {
+
+					p += 4;
+				}
+				if ((flag & QUERY.TARGET_CARD) === QUERY.TARGET_CARD) {
+					const [ct] = to_package<number>(buffer, data, [32], p);
+					p += 4 * (ct + 1);
+				}
+				if ((flag & QUERY.OVERLAY_CARD) === QUERY.OVERLAY_CARD) {
+					const [ct] = to_package<number>(buffer, data, [32], p);
+					p += 4;
+					const pack = to_package<number>(buffer, data, new Array(ct).fill(32), p);
+					await mainGame.load.pic(pack);
+					p += 4 * ct;
+					const overlays = to_cards(tp, location, seq);
+					for (let i = 0; i < overlays.length; i ++) {
+						const overlay = overlays[i];
+						const code = pack[i];
+						if (code)
+							await overlay.update.code(code);
+						else break;
+					}
+				}
+				for (const i of [
+					[QUERY.OWNER, () => {}],
+					[QUERY.STATUS, () => {}],
+					[QUERY.LSCALE, () => {}],
+					[QUERY.RSCALE, card.update.scale]
+				] as Array<[number, Function]>)
+					if ((flag & i[0]) === i[0]) {
+						const pack = to_package<number>(buffer, data, [32], p);
+						await i[1](pack[0]);
+						p += 4;
+					}
+				if ((flag & QUERY.LINK) === QUERY.LINK) {
+					const pack = to_package<number>(buffer, data, [32, 32], p);
+					card.update.link(pack[0]);
+					p += 8;
+				}
+			}
+
 		};
 
 		const idles = new Map([
@@ -387,16 +436,18 @@ class Tcp {
 							const pack = to_package<number>(buffer, data, [8, 8], pos);
 							const tp = to_player(pack[0]);
 							const location = pack[1];
-							const cards = connect.duel.cards?.get(location) ?? undefined;
-							if (cards === undefined)
+							const to_cards = connect.duel.cards.get(location);
+							if (to_cards === undefined)
 								return;
 							pos += 2;
-							for (const card of (cards(tp) as Array<Client_Card>)){
+							const cards : Array<Client_Card> = to_cards(tp);
+							for (let seq = 0; seq < cards.length; seq ++){
+								const card = cards[seq];
 								const [len] = to_package<number>(buffer, data, [32], pos);
 								if(len === undefined || len <= 8)
 									break;
 								const [flag] : Array<number> = to_package(buffer, data, [32], pos + 4);
-								await update_card(buffer, data, flag, card, pos + 8);
+								await update_card(buffer, data, flag, card, tp, location, seq, pos + 8);
 								pos += len;
 							}
 						}],
@@ -409,7 +460,7 @@ class Tcp {
 							const flag = pack[4];
 							const card = to_card(player, loc, seq);
 							if (card && len > 8)
-								await update_card(buffer, data, flag, card, pos + 11);
+								await update_card(buffer, data, flag, card, player, loc, seq, pos + 11);
 						}],
 						[MSG.SELECT_BATTLECMD, async () => {
 						}],
