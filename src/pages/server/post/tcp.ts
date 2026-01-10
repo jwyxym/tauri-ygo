@@ -397,9 +397,10 @@ class Tcp {
 							const player = to_player(pack[0]);
 							const loc = pack[1];
 							const seq = pack[2];
-							const flag = pack[3];
+							const len = pack[3];
+							const flag = pack[4];
 							const card = to_card(player, loc, seq);
-							if (card)
+							if (card && len > 8)
 								await update_card(buffer, data, flag, card, pos + 11);
 						}],
 						[MSG.SELECT_BATTLECMD, async () => {

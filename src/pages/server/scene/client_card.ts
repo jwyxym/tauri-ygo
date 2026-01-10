@@ -234,7 +234,6 @@ class Client_Card {
 
 	update = {
 		code : async (code : number) : Promise<void> => {
-			console.log(this.code, code)
 			if (code === 0) {
 				this.clear();
 				return;
@@ -268,7 +267,7 @@ class Client_Card {
 			this.change.atk();
 		},
 		level : (level : number) : void => {
-			this.level = level;
+			this.level = level & 0xffff;
 		},
 		rank : (rank : number) : void => {
 			this.rank = rank;
