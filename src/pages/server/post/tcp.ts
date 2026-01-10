@@ -170,15 +170,23 @@ class Tcp {
 						continue;
 					}
 					const len = data.getUint16(messages.pos, true);
-					const proto = data.getUint8(messages.pos + 2);
-					this.stoc = proto;
-					if (proto !== STOC.GAME_MSG)
-						this.msg = 0;
-					const func = funcs.get(proto);
-					// console.log('0x'+proto.toString(16), messages.pos, len)
-					if (func)
-						await func(buffer, data, len, connect, messages.pos);
-					messages.pos += len + 2;
+					if (messages.pos + len + 2 > length) {
+						buffer = messages.array.buffer;
+						data = new DataView(buffer);
+						if (buffer.byteLength === length)
+							break;
+						length = buffer.byteLength;
+					} else {
+						const proto = data.getUint8(messages.pos + 2);
+						this.stoc = proto;
+						if (proto !== STOC.GAME_MSG)
+							this.msg = 0;
+						const func = funcs.get(proto);
+						// console.log('0x'+proto.toString(16), messages.pos, len)
+						if (func)
+							await func(buffer, data, len, connect, messages.pos);
+						messages.pos += len + 2;
+					}
 				} else if (length === messages.pos) {
 					break;
 				} else {
@@ -858,13 +866,13 @@ class Tcp {
 						}],
 						[MSG.ADD_COUNTER, async () => {
 							const pack = to_package<number>(buffer, data, [16, 8, 8, 8, 16], pos);
-							const card : Client_Card | undefined = to_card(pack[1], pack[2], pack[3]);
+							const card : Client_Card | undefined = to_card(to_player(pack[1]), pack[2], pack[3]);
 							if (card)
 								card.add.counter(pack[0], pack[4]);
 						}],
 						[MSG.REMOVE_COUNTER, async () => {
 							const pack = to_package<number>(buffer, data, [16, 8, 8, 8, 16], pos);
-							const card : Client_Card | undefined = to_card(pack[1], pack[2], pack[3]);
+							const card : Client_Card | undefined = to_card(to_player(pack[1]), pack[2], pack[3]);
 							if (card)
 								card.add.counter(pack[0], - pack[4]);
 						}],
