@@ -138,9 +138,9 @@ class Gsap {
 			duration : 0.1,
 		}, 0);
 		return tl;
-	}
+	};
 
-	turn = (el : HTMLImageElement, pic : string | undefined, tl : gsap.core.Timeline = this.timeline()) : gsap.core.Timeline => {
+	turn = (el : HTMLImageElement, pic : string | undefined, tl : gsap.core.Timeline = this.timeline(), time : number = 0) : [gsap.core.Timeline, number] => {
 		tl.set(el, {
 			rotationY : 0
 		})
@@ -150,16 +150,57 @@ class Gsap {
 			onComplete: () => {
 				el.src = pic ?? '';
 			}
-		}, 0);
+		}, time);
+		time += 0.125;
 		tl.set(el, {
 			rotationY : -90
-		}, 0.125)
+		}, time)
 		tl.to(el, {
 			rotationY : 0,
 			duration : 0.1
-		}, 0.125);
-		return tl;
-	}
+		}, time);
+		time += 0.1;
+		return [tl, time];
+	};
+
+	confirm = {
+		hand : (cards : Array<Client_Card>, cover : string, tl : gsap.core.Timeline = this.timeline() ) : [gsap.core.Timeline, number] => {
+			let time = 0;
+			for (const card of cards) {
+				let [_, v] = this.turn(card.div.img, card.div.img.src, tl, time);
+				time = v;
+				tl.to(card.three.rotation, {
+					z : 0,
+					duration : 0.1,
+				}, time);
+				time += 0.1;
+				const x = card.three.position.x;
+				const y = card.three.position.y;
+				tl.to(card.three.position, {
+					x : 0,
+					y : -200,
+					z : '+=250',
+					duration : 0.1,
+				}, time);
+				time += 0.4;
+				tl.to(card.three.position, {
+					x : x,
+					y : y,
+					z : '-=250',
+					duration : 0.1,
+				}, time);
+				time += 0.1;
+				tl.to(card.three.rotation, {
+					z : Math.PI,
+					duration : 0.1,
+				}, time);
+				time += 0.1;
+				[_, v] = this.turn(card.div.img, cover, tl, time);
+				time = v;
+			}
+			return [tl, time * 1000];
+		},
+	};
 };
 
 export default new Gsap();

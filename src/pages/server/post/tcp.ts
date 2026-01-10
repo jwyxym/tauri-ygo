@@ -419,7 +419,7 @@ class Tcp {
 							}
 						}],
 						[MSG.START, async () => {
-							const pack = to_package<number>(buffer, data, [8, -8, 32, 32, 16, 16, 16, 16], pos);
+							const pack = to_package<number>(buffer, data, [8, - 8, 32, 32, 16, 16, 16, 16], pos);
 							connect.is_first.chk =  (pack[0] & 0xf) === 0;
 							connect.lp.ct = [pack[1], pack[2]];
 							const decks =[pack[3], pack[4], 0, pack[5], pack[6], 0];
@@ -521,7 +521,7 @@ class Tcp {
 								await i.card.update.code(i.code);
 						}],
 						[MSG.SELECT_EFFECTYN, async () => {
-							const pack = to_package<number>(buffer, data, [-8, 32, 8, 8, 8, -8, 32], pos);
+							const pack = to_package<number>(buffer, data, [- 8, 32, 8, 8, 8, - 8, 32], pos);
 							const code = pack[0];
 							const player = pack[1];
 							const loc = pack[2];
@@ -537,11 +537,11 @@ class Tcp {
 							this.send.response(await connect.select.yes_no(title));
 						}],
 						[MSG.SELECT_YESNO, async () => {
-							const [desc] = to_package<number>(buffer, data, [-8, 32], pos);
+							const [desc] = to_package<number>(buffer, data, [- 8, 32], pos);
 							this.send.response(await connect.select.yes_no(mainGame.get.desc(desc)));
 						}],
 						[MSG.SELECT_OPTION, async () => {
-							const [ct] = to_package<number>(buffer, data, [-8, 8], pos);
+							const [ct] = to_package<number>(buffer, data, [- 8, 8], pos);
 							const descs = to_package<number>(buffer, data, new Array(ct).fill(32), pos + 2);
 							const i = await connect.select.option.on(descs, !!this.select_hint ? this.select_hint : undefined, true);
 							if (i !== undefined)
@@ -549,7 +549,7 @@ class Tcp {
 							this.select_hint = 0;
 						}],
 						[MSG.SELECT_CARD, async () => {
-							const [cancelable, min, max, ct] = to_package<number>(buffer, data, [-8].concat(new Array(4).fill(8)), pos);
+							const [cancelable, min, max, ct] = to_package<number>(buffer, data, [- 8].concat(new Array(4).fill(8)), pos);
 							const pack = to_package<number>(buffer, data, new Array(ct).fill([32, 8, 8, 8, 8]).flat(), pos + 5);
 							const result : Select_Cards = [];
 							const codes : Update_Cards = [];
@@ -581,7 +581,7 @@ class Tcp {
 							this.select_hint = 0;
 						}],
 						[MSG.SELECT_CHAIN, async () => {
-							let pack = to_package<number>(buffer, data, [-8, 8, 8, -32, -32], pos);
+							let pack = to_package<number>(buffer, data, [- 8, 8, 8, - 32, - 32], pos);
 							const count = pack[0];
 							const array = new Array(count).fill([8, 8, 32, 8, 8, 8, 8, 32]).flat();
 							pack = to_package<number>(buffer, data, array, pos + 11);
@@ -653,7 +653,7 @@ class Tcp {
 							connect.select.plaids.on(title, connect.duel.plaid.get(place), place, ct);
 						}],
 						[MSG.SELECT_POSITION, async () => {
-							const pack = to_package<number>(buffer, data, [-8, 32, 8], pos);
+							const pack = to_package<number>(buffer, data, [- 8, 32, 8], pos);
 							const code = pack[0];
 							const position = pack[1];
 							[POS.FACEUP_ATTACK, POS.FACEUP_DEFENSE, POS.FACEDOWN_ATTACK, POS.FACEDOWN_DEFENSE]
@@ -661,7 +661,7 @@ class Tcp {
 									: connect.select.position.on(mainGame.get.strings.system(561), code, position);
 						}],
 						[MSG.SELECT_UNSELECT_CARD, async () => {
-							let pack = to_package<number>(buffer, data, [-8].concat(new Array(4).fill(8)), pos);
+							let pack = to_package<number>(buffer, data, [- 8].concat(new Array(4).fill(8)), pos);
 							const cancelable = !!(pack[0] + pack[1]);
 							const min = pack[2];
 							const max = pack[3];
@@ -720,15 +720,35 @@ class Tcp {
 						[MSG.CONFIRM_DECKTOP, async () => {
 						}],
 						[MSG.CONFIRM_CARDS, async () => {
+							console.log('CONFIRM_CARDS')
+							const [ct] = to_package<number>(buffer, data, [- 16, 8], pos);
+							const pack = to_package<number>(buffer, data, new Array(ct).fill([32, 8, 8, 8]).flat(), pos + 3);
+							const cards : Array<Client_Card> = [];
+							const codes : Array<number> = [];
+							for (let i = 0; i < pack.length; i += 4) {
+								const card = to_card(to_player(pack[i + 1]), pack[i + 2], pack[i + 3]);
+								if (card) {
+									cards.push(card);
+									codes.push(pack[0]);
+								}
+							}
+							await mainGame.load.pic(codes);
+							for (let i = 0; i < cards.length; i ++)
+								await cards[i].update.code(codes[i]);
+							await connect.duel.confirm.hand(cards);
 						}],
 						[MSG.SHUFFLE_DECK, async () => {
+							const pack = to_package<number>(buffer, data, [8], pos);
+							const tp = to_player(pack[0]);
+							await connect.duel.sort.deck(tp);
 						}],
 						[MSG.SHUFFLE_HAND, async () => {
 							const pack = to_package<number>(buffer, data, [8, 8], pos);
 							const tp = to_player(pack[0]);
 							const ct = pack[1];
 							const hands = to_package<number>(buffer, data, new Array(ct).fill(32), pos + 2);
-							await connect.duel.sort.hand(tp, hands);
+							if (tp === 0)
+								await connect.duel.sort.hand(tp, hands);
 						}],
 						[MSG.REFRESH_DECK, async () => {
 						}],
@@ -944,7 +964,7 @@ class Tcp {
 								card.add.counter(pack[0], - pack[4]);
 						}],
 						[MSG.ATTACK, async () => {
-							const pack = to_package<number>(buffer, data, [8, 8, 8, -8, 8, 8, 8], pos);
+							const pack = to_package<number>(buffer, data, [8, 8, 8, - 8, 8, 8, 8], pos);
 							const card : Client_Card | undefined = to_card(pack[1], pack[2], pack[3]);
 							this.attack_code = card?.code ?? 0;
 							this.event = mainGame.get.strings.system(!!pack[4] ? 1619 : 1620, mainGame.get.name(card?.code));
@@ -1095,7 +1115,7 @@ class Tcp {
 			],
 			[STOC.ERROR_MSG,
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
-					const pack = to_package<number>(buffer, data, [8, -24, 32], pos);
+					const pack = to_package<number>(buffer, data, [8, - 24, 32], pos);
 					const [msg, code] = pack;
 					switch (msg) {
 						case ERROR.DECKERROR:
@@ -1163,7 +1183,7 @@ class Tcp {
 			],
 			[STOC.JOIN_GAME,
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
-					const pack = to_package<number>(buffer, data, [32].concat(new Array(5).fill(8), [-24, 32, 8, 8, 16]), pos);
+					const pack = to_package<number>(buffer, data, [32].concat(new Array(5).fill(8), [- 24, 32, 8, 8, 16]), pos);
 					connect.home.lflist = pack[0];
 					connect.home.rule = pack[1];
 					connect.home.mode = pack[2];
@@ -1194,7 +1214,7 @@ class Tcp {
 			],
 			[STOC.TIME_LIMIT,
 				async (buffer : Uint8Array<ArrayBuffer>, data : DataView, len : number, connect : Reactive<any>, pos : number) => {
-					const pack = to_package<number>(buffer, data, [8, -8, 16], pos);
+					const pack = to_package<number>(buffer, data, [8, - 8, 16], pos);
 					connect.time.to(pack[0], pack[1]);
 					if(to_player(pack[0]) === 0)
 						this.send.on(CTOS.TIME_CONFIRM);

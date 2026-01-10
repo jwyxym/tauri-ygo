@@ -206,7 +206,9 @@
 		btn : undefined as undefined | Btn,
 		src : {
 			unknown : mainGame.get.textures(CONSTANT.FILES.TEXTURE_UNKNOW) as string | undefined ?? '',
-			cover : mainGame.get.textures(CONSTANT.FILES.TEXTURE_COVER) as string | undefined ?? ''
+			cover : mainGame.get.textures(CONSTANT.FILES.TEXTURE_COVER) as string | undefined
+				?? mainGame.get.textures(CONSTANT.FILES.TEXTURE_UNKNOW) as string | undefined
+					?? ''
 		},
 		resize : () => {
 			three.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -953,6 +955,14 @@
 			const [tl, time] = gsap.attack(a, d, three.create.size, attacker.owner, (attacker.seq > 4 ? attacker.seq - 4 : attacker.seq) - (defender.seq > 4 ? defender.seq - 4 : defender.seq));
 			tl.then(() => tl.kill());
 			await mainGame.sleep(time);
+		},
+		confirm : {
+			hand : async (cards : Array<Client_Card>) : Promise<void> => {
+				const [tl, ct] = gsap.confirm.hand(cards, three.src.cover ?? three.src.unknown);
+				tl.then(() => tl.kill());
+				await mainGame.sleep(ct);
+				await mainGame.sleep(three.sort(1, LOCATION.HAND));
+			}
 		}
 	};
 
