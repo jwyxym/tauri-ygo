@@ -262,15 +262,20 @@ class Client_Card {
 			this.alias = code;
 		},
 		type : (type : number) : void => {
+			if (this.type === type) return;
 			this.type = type;
 			this.change.type();
 			this.change.atk();
 		},
 		level : (level : number) : void => {
+			if (this.level === level) return;
 			this.level = level & 0xffff;
+			this.change.type();
 		},
 		rank : (rank : number) : void => {
+			if (this.rank === rank) return;
 			this.rank = rank;
+			this.change.type();
 		},
 		attribute : (attribute : number) : void => {
 			this.attribute = attribute;
@@ -279,17 +284,24 @@ class Client_Card {
 			this.race = race;
 		},
 		link : (link : number) : void => {
+			if (this.link === link) return;
 			this.link = link;
+			this.change.type();
 		},
 		atk : (atk : number) : void => {
+			if (this.atk === atk) return;
 			this.atk = atk;
 			this.change.atk();
 		},
 		def : (def : number) : void => {
+			if (this.def === def) return;
 			this.def = def;
+			this.change.atk();
 		},
 		scale : (scale : number) : void => {
+			if (this.scale === scale) return;
 			this.scale = scale;
+			this.change.type();
 		}
 	};
 	clear = () : void => {
