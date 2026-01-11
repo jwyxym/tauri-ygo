@@ -385,6 +385,7 @@
 			},
 			send : {
 				to : (target : Client_Card, owner : number, location : number, from : number = 0, seq : number = 0, pos : number = POS.NONE) : void => {
+					target.update.loc([LOCATION.PZONE, LOCATION.FZONE].includes(location) ? LOCATION.SZONE : location);
 					switch (location) {
 						case LOCATION.NONE:
 							three.create.send.none(target, owner, from);

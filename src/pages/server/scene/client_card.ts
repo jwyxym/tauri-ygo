@@ -1,7 +1,7 @@
 import Card, { TYPE } from '@/script/card';
 import mainGame from '@/script/game';
 import * as CONSTANT from '@/script/constant';
-import { COMMAND, EDESC, POS } from '@/pages/server/post/network';
+import { COMMAND, EDESC, LOCATION, POS } from '@/pages/server/post/network';
 import gsap from './gsap';
 
 import * as CSS from 'three/examples/jsm/renderers/CSS3DRenderer.js';
@@ -38,6 +38,7 @@ class Client_Card {
 	scale : number;
 	overlay : number;
 	pos : number;
+	loc : number;
 	is_pendulum : boolean;
 	show_info : boolean;
 	div : Client_Card_Div;
@@ -62,6 +63,7 @@ class Client_Card {
 		this.scale = 0;
 		this.overlay = -1;
 		this.pos = POS.NONE;
+		this.loc = LOCATION.NONE;
 		this.is_pendulum = false;
 		this.show_info = false;
 		[this.three, this.div] = this.init.on(src, size, hover);
@@ -308,6 +310,10 @@ class Client_Card {
 		pos : (pos : number) : void => {
 			if (this.pos === pos) return;
 			this.pos = pos;
+		},
+		loc : (loc : number) : void => {
+			if (this.loc === loc) return;
+			this.loc = loc;
 		}
 	};
 	clear = () : void => {
@@ -569,7 +575,9 @@ class Client_Card {
 					i.style.transform = `translateX(${v * 28}px)`;
 					setTimeout(() => i.style.opacity = '1', 200);
 				});
-			}
+			} else
+				if ((this.type & TYPE.PENDULUM) > 0 && (this.loc & LOCATION.SZONE) > 0)
+					this.show.info.on(0, true);
 		},
 		pos : async () : Promise<void>=> {
 
