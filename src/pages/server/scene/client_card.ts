@@ -532,6 +532,8 @@ class Client_Card {
 		atk : async () : Promise<void>=> {
 			const el = this.div.atk;
 			const text = this.is_link() ? this.atk.toString() : `${this.atk ?? 0}/${this.def ?? 0}`;
+			if (el.innerText === text)
+				return;
 			if (el.style.opacity === '1') {
 				el.style.opacity = '0';
 				await mainGame.sleep(200);
