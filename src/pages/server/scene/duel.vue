@@ -990,6 +990,13 @@
 				card.show.info.on(len);
 				card.show.atk.on();
 			}
+			three.cards.map.get(loc)![tp].slice(0, -1).forEach(card => {
+				card.show.info.off();
+				card.show.atk.off();
+				card.show.counter.off();
+				//超量素材和怪兽方向垂直
+				three.rotate(card, loc, tp, (pos & POS.ATTACK) > 0 ? POS.FACEUP_DEFENSE : POS.FACEUP_ATTACK);
+			});
 			three.rotate(card, loc, tp, pos);
 			await mainGame.sleep(200);
 		}
