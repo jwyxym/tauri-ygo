@@ -191,6 +191,9 @@
 				case 'scale':
 					code = (props.connect.idle.activate.index(card, 1160) << 16) + 5;
 					break;
+				case 'attack':
+					code = (props.connect.idle.attack.index(card) << 16) + 1;
+					break;
 			}
 			if (code !== undefined)
 				await props.connect.response(code);
@@ -480,7 +483,7 @@
 		},
 		add : {
 			card : (owner : number, location : number, seq : number = 0, pic : string | undefined = undefined) : Client_Card => {
-				const card = three.create.card(pic ?? three.src.cover ?? three.src.unknown);
+				const card = three.create.card(pic ?? three.src.cover);
 				if (location === LOCATION.MZONE || location === LOCATION.SZONE)
 					location |= seq << 16;
 				three.create.send.to(card, owner, location, 0, three.cards.map.get(location)![owner].length);
@@ -963,8 +966,8 @@
 			await mainGame.sleep(time);
 		},
 		confirm : {
-			hand : async (cards : Array<Client_Card>) : Promise<void> => {
-				const [tl, ct] = gsap.confirm.hand(cards, three.src.cover ?? three.src.unknown);
+			hand : async (cards : Array<Client_Card>, codes : Array<number>) : Promise<void> => {
+				const [tl, ct] = gsap.confirm.hand(cards, codes.map(i => mainGame.get.card(i).pic), three.src.cover);
 				tl.then(() => tl.kill());
 				await mainGame.sleep(ct);
 				await mainGame.sleep(three.sort(1, LOCATION.HAND));

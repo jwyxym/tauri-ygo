@@ -854,6 +854,7 @@
 			activate : new EffectIdle(),
 			mset : new Idle(),
 			sset : new Idle(),
+			attack : new Idle(),
 		},
 		response : async (v : number) : Promise<void> => {
 			await tcp?.send.response(v);

@@ -356,7 +356,7 @@ class Tcp {
 
 		const idles = new Map([
 			[COMMAND.ACTIVATE, connect.idle.activate.push],
-			// [COMMAND.ATTACK, 'attack'],
+			[COMMAND.ATTACK, connect.idle.attack.push],
 			[COMMAND.MSET, connect.idle.mset.push],
 			[COMMAND.SSET, connect.idle.sset.push],
 			// [COMMAND.REPOS, 'pos_attack'],
@@ -480,11 +480,10 @@ class Tcp {
 								await update_card(buffer, data, flag, card, player, loc, seq, pos + 11);
 						}],
 						[MSG.SELECT_BATTLECMD, async () => {
-						}],
-						[MSG.SELECT_IDLECMD, async () => {
 							let p = pos + 1;
-							const arr = [COMMAND.SUMMON, COMMAND.SPSUMMON, COMMAND.REPOS, COMMAND.MSET, COMMAND.SSET, COMMAND.ACTIVATE];
+							const arr = [COMMAND.ACTIVATE, COMMAND.ATTACK];
 							const cards : Array<Client_Card> = connect.duel.cards.get(LOCATION.ALL)!(2).filter((i : Client_Card) => i.activatable.flag > 0);
+							cards.forEach(i => i.activatable.clear());
 							for (const i of Object.values(connect.idle))
 								(i as Idle).clear();
 							const codes : Update_Cards = [];
@@ -506,9 +505,58 @@ class Tcp {
 									if (loc !== LOCATION.OVERLAY) {
 										let card : Client_Card | undefined = to_card(tp, loc, seq);
 										if (card) {
-											const index = cards.indexOf(card);
-											if (index > -1)
-												cards.splice(index, 1);
+											codes.push({ card : card, code : code });
+											const card_show = to_card(tp, loc, (loc & (LOCATION.HAND | LOCATION.ONFIELD)) > 0 ? seq : -1);
+											if (card_show) {
+												if (i === COMMAND.ACTIVATE) {
+													const desc = pack[j + 4];
+													const flag = (code & 0x80000000) > 0 ? EDESC.OPERATION : EDESC.NONE;
+													card_show.activatable.on({desc : desc, flag : flag});
+													if (idles.has(i))
+														idles.get(i)!(card, desc);
+													continue;
+												}
+												card_show.activatable.on(i);
+												if (idles.has(i))
+													idles.get(i)!(card);
+											}
+										}
+									}
+								}
+							}
+							const pack = to_package<number>(buffer, data, new Array(2).fill(8), p);
+							connect.phase.main = !!pack[0];
+							connect.phase.ep = !!pack[1];
+							await mainGame.load.pic(codes.map(i => i.code));
+							for (const i of codes)
+								await i.card.update.code(i.code);
+						}],
+						[MSG.SELECT_IDLECMD, async () => {
+							let p = pos + 1;
+							const arr = [COMMAND.SUMMON, COMMAND.SPSUMMON, COMMAND.REPOS, COMMAND.MSET, COMMAND.SSET, COMMAND.ACTIVATE];
+							const cards : Array<Client_Card> = connect.duel.cards.get(LOCATION.ALL)!(2).filter((i : Client_Card) => i.activatable.flag > 0);
+							cards.forEach(i => i.activatable.clear());
+							for (const i of Object.values(connect.idle))
+								(i as Idle).clear();
+							const codes : Update_Cards = [];
+							for (const i of arr) {
+								const [ct] = to_package<number>(buffer, data, [8], p);
+								p += 1;
+								if (ct <= 0) continue;
+								if (ct === undefined) break;
+								const array = new Array(ct).fill(i === COMMAND.ACTIVATE ? [32, 8, 8, 8, 32] : [32, 8, 8, 8])
+								const pack = to_package<number>(buffer, data, array.flat(), p);
+								p += ((i === COMMAND.ACTIVATE ? 11 : 7) * ct);
+								const step = i === COMMAND.ACTIVATE ? 5 : 4;
+								for (let j = 0; j < step * ct; j += step) {
+									if (j + step - 1 >= pack.length) break;
+									let code = pack[j];
+									const tp = to_player(pack[j + 1]);
+									const loc = pack[j + 2];
+									const seq = pack[j + 3];
+									if (loc !== LOCATION.OVERLAY) {
+										let card : Client_Card | undefined = to_card(tp, loc, seq);
+										if (card) {
 											codes.push({ card : card, code : code });
 											const card_show = to_card(tp, loc, (loc & (LOCATION.HAND | LOCATION.ONFIELD)) > 0 ? seq : -1);
 											if (card_show) {
@@ -532,7 +580,6 @@ class Tcp {
 							const pack = to_package<number>(buffer, data, new Array(3).fill(8), p);
 							connect.phase.bp = !!pack[0];
 							connect.phase.ep = !!pack[1];
-							cards.forEach(i => i.activatable.clear());
 							await mainGame.load.pic(codes.map(i => i.code));
 							for (const i of codes)
 								await i.card.update.code(i.code);
@@ -583,6 +630,8 @@ class Tcp {
 								const card : Client_Card | undefined = to_card(obj.tp, obj.loc, obj.seq, obj.ct);
 								if (card) {
 									obj.card = card;
+									if (!obj.code)
+										obj.code = obj.card.code;
 									codes.push({ card : card, code : obj.code });
 								}
 								result.push(obj);
@@ -749,9 +798,7 @@ class Tcp {
 								}
 							}
 							await mainGame.load.pic(codes);
-							for (let i = 0; i < cards.length; i ++)
-								await cards[i].update.code(codes[i]);
-							await connect.duel.confirm.hand(cards);
+							await connect.duel.confirm.hand(cards, codes);
 						}],
 						[MSG.SHUFFLE_DECK, async () => {
 							const pack = to_package<number>(buffer, data, [8], pos);
@@ -981,12 +1028,12 @@ class Tcp {
 						}],
 						[MSG.ATTACK, async () => {
 							const pack = to_package<number>(buffer, data, [8, 8, 8, - 8, 8, 8, 8], pos);
-							const card : Client_Card | undefined = to_card(pack[1], pack[2], pack[3]);
+							const card : Client_Card | undefined = to_card(to_player(pack[0]), pack[1], pack[2]);
 							this.attack_code = card?.code ?? 0;
 							this.event = mainGame.get.strings.system(!!pack[4] ? 1619 : 1620, mainGame.get.name(card?.code));
 							await connect.duel.attack(
-								{ owner : pack[0], location : pack[1], seq : pack[2] },
-								{ owner : pack[3], location : pack[4], seq : pack[5] }
+								{ owner : to_player(pack[0]), location : pack[1], seq : pack[2] },
+								{ owner : to_player(pack[3]), location : pack[4], seq : pack[5] }
 							);
 						}],
 						[MSG.BATTLE, async () => {
@@ -1032,7 +1079,8 @@ class Tcp {
 								removed : [],
 								extra : []
 							};
-							for (let tp = 0; tp < 2; tp ++) {
+							for (let j = 0; j < 2; j ++) {
+								const tp = to_player(j);
 								pack = to_package<number>(buffer, data, [32], p);
 								connect.lp.ct[tp] = pack[0];
 								p += 4;

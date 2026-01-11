@@ -43,12 +43,12 @@ class Gsap {
 		//非同y轴的怪兽发生战斗
 		} else {
 			tl.to(a.card.three.rotation, {
-				z : Math.atan(- x / y) + (!!attack ? Math.PI * direct.y : 0),
+				z : Math.atan(- x / y) + (!!attack ? Math.PI : 0),
 				duration : 0.1,
 			}, time);
 			if (d.card)
 				tl.to(d.card.three.rotation, {
-					z : Math.atan(- x / y) + (!attack ? Math.PI * direct.y : 0),
+					z : Math.atan(- x / y) + (!attack ? Math.PI: 0),
 					duration : 0.1,
 				}, time);
 			time += 0.1;
@@ -97,7 +97,7 @@ class Gsap {
 		}
 		//攻击的卡回到原位
 		tl.to(a.card.three.rotation, {
-			z : !!attack ? Math.PI * direct.y : 0,
+			z : !!attack ? Math.PI : 0,
 			duration : 0.1,
 		}, time);
 		tl.to(a.card.three.position, {
@@ -110,7 +110,7 @@ class Gsap {
 		//受击的卡回到原位
 		if (d.card) {
 			tl.to(d.card.three.rotation, {
-				z : !attack ? Math.PI * direct.y : 0,
+				z : !attack ? Math.PI : 0,
 				duration : 0.1,
 			}, time);
 			time += 0.1;
@@ -164,10 +164,11 @@ class Gsap {
 	};
 
 	confirm = {
-		hand : (cards : Array<Client_Card>, cover : string, tl : gsap.core.Timeline = this.timeline() ) : [gsap.core.Timeline, number] => {
+		hand : (cards : Array<Client_Card>, codes : Array<string>, cover : string, tl : gsap.core.Timeline = this.timeline() ) : [gsap.core.Timeline, number] => {
 			let time = 0;
-			for (const card of cards) {
-				let [_, v] = this.turn(card.div.img, card.div.img.src, tl, time);
+			for (const [i, card] of cards.entries()) {
+				console.log(codes[i])
+				let [_, v] = this.turn(card.div.img, codes[i], tl, time);
 				time = v;
 				tl.to(card.three.rotation, {
 					z : 0,
