@@ -934,7 +934,12 @@ class Tcp {
 							this.event = mainGame.get.strings.system(1601);
 						}],
 						[MSG.SWAP, async () => {
+							const pack = to_package<number>(buffer, data, [- 32, 8, 8, 8, - 8, - 32, 8, 8, 8], pos);
 							this.event = mainGame.get.strings.system(1602);
+							await connect.duel.swap(
+								{ tp : to_player(pack[0]), loc : pack[1], seq : pack[2]},
+								{ tp : to_player(pack[3]), loc : pack[4], seq : pack[5]}
+							);
 						}],
 						[MSG.SUMMONING, async () => {
 							const [code] = to_package<number>(buffer, data, [32], pos);

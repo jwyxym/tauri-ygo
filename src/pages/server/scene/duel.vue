@@ -999,6 +999,25 @@
 			});
 			three.rotate(card, loc, tp, pos);
 			await mainGame.sleep(200);
+		},
+		swap : async (
+			a : { tp : number; loc : number; seq : number; },
+			b : { tp : number; loc : number; seq : number; }
+		) : Promise<void> => {
+			const group_a = three.cards.map.get(a.loc | (a.seq << 16))![a.tp];
+			three.cards.map.get(a.loc | (a.seq << 16))![a.tp] = three.cards.map.get(b.loc | (b.seq << 16))![b.tp];
+			three.cards.map.get(b.loc | (b.seq << 16))![b.tp] = group_a;
+			three.cards.map.get(b.loc | (b.seq << 16))![b.tp].forEach((card, v) => {
+				const [x, y, z] = three.axis.computed(b.tp, b.loc | (b.seq << 16), v);
+				three.move(card.three, a.loc, a.tp, x, y, z);
+				three.rotate(card, a.loc, a.tp);
+			});
+			three.cards.map.get(a.loc | (a.seq << 16))![a.tp].forEach((card, v) => {
+				const [x, y, z] = three.axis.computed(a.tp, a.loc | (a.seq << 16), v);
+				three.move(card.three, b.loc, b.tp, x, y, z);
+				three.rotate(card, b.loc, b.tp);
+			});
+			await mainGame.sleep(200);
 		}
 	};
 
