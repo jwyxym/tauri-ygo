@@ -578,9 +578,6 @@ class Client_Card {
 			} else
 				if ((this.type & TYPE.PENDULUM) > 0 && (this.loc & LOCATION.SZONE) > 0)
 					this.show.info.on(0, true);
-		},
-		pos : async () : Promise<void>=> {
-
 		}
 	};
 
