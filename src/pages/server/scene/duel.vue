@@ -432,11 +432,13 @@
 					//如果卡片被送到场上（且不为超量素材）
 					if ((location & LOCATION.ONFIELD) > 0 && seq >= three.cards.map.get(location)![owner].length - 1) {
 						const len = three.cards.map.get(location)![owner].length - 1;
-						if ((location & (LOCATION.MZONE + LOCATION.PZONE)) > 0)
-							target.show.info.on(len, !!(location & (LOCATION.PZONE)));
+						if (!!(pos & POS.FACEUP)) {
+							if (!!(location & (LOCATION.MZONE + LOCATION.PZONE)))
+								target.show.info.on(len, !!(location & (LOCATION.PZONE)));
 
-						if ((location & (LOCATION.MZONE)) === LOCATION.MZONE)
-							target.show.atk.on();
+							if ((location & (LOCATION.MZONE)) === LOCATION.MZONE)
+								target.show.atk.on();
+						}
 						//如果不是位置移动则取除指示物
 						if ((location & (LOCATION.ONFIELD)) !== (from & (LOCATION.ONFIELD)))
 							target.show.counter.off();
@@ -979,8 +981,15 @@
 			}
 		},
 		repos : async (card : Client_Card, tp : number, loc : number, pos : number) : Promise<void> => {
-			if (!!(pos & POS.FACEDOWN))
+			if (!!(pos & POS.FACEDOWN)) {
 				card.show.counter.off();
+				card.show.atk.off();
+				card.show.info.off();
+			} else {
+				const len = three.cards.map.get(loc)![tp].length - 1;
+				card.show.info.on(len);
+				card.show.atk.on();
+			}
 			three.rotate(card, loc, tp, pos);
 			await mainGame.sleep(200);
 		}
