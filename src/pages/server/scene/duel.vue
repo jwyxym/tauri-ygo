@@ -620,6 +620,7 @@
 					case POS.FACEDOWN_ATTACK:
 						if (img.src !== three.src.cover)
 							gsap.turn(img, three.src.cover, tl);
+						gsap.pos(img, pos, tl);
 						break;
 					case POS.FACEDOWN_DEFENSE:
 						if (img.src !== three.src.cover)
@@ -629,6 +630,7 @@
 					case POS.FACEUP_ATTACK:
 						if (img.src !== pic)
 							gsap.turn(img, pic, tl);
+						gsap.pos(img, pos, tl);
 						break;
 					case POS.FACEUP_DEFENSE:
 						if (img.src !== pic)
@@ -975,6 +977,12 @@
 				await mainGame.sleep(ct);
 				await mainGame.sleep(three.sort(1, LOCATION.HAND));
 			}
+		},
+		repos : async (card : Client_Card, tp : number, loc : number, pos : number) : Promise<void> => {
+			if (!!(pos & POS.FACEDOWN))
+				card.show.counter.off();
+			three.rotate(card, loc, tp, pos);
+			await mainGame.sleep(200);
 		}
 	};
 
@@ -1031,9 +1039,7 @@
 			// 	zone : 0
 			// })
 
-			// duel.cards.get(LOCATION.ONFIELD)!(2).forEach((card : Client_Card) => {
-			// 	card.activatable.on({flag : 0, desc : 1160});
-			// });
+			
 
 		window.addEventListener('resize', three.resize);
 		window.addEventListener('click', hover.click);

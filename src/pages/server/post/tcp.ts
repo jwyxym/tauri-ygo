@@ -921,6 +921,13 @@ class Tcp {
 							})();
 						}],
 						[MSG.POS_CHANGE, async () => {
+							const pack = to_package<number>(buffer, data, [32].concat(new Array(5).fill(8)), pos);
+							const code = pack[0];
+							const card : Client_Card | undefined = to_card(to_player(pack[1]), pack[2], pack[3]);
+							if (card) {
+								await card.update.code(code);
+								await connect.duel.repos(card, to_player(pack[1]), pack[2], pack[5]);
+							}
 							this.event = mainGame.get.strings.system(1600);
 						}],
 						[MSG.SET, async () => {
@@ -947,6 +954,9 @@ class Tcp {
 							const pack = to_package<number>(buffer, data, [32].concat(new Array(4).fill(8)), pos);
 							const code = pack[0];
 							this.event = mainGame.get.strings.system(1607, mainGame.get.name(code));
+							const card : Client_Card | undefined = to_card(to_player(pack[1]), pack[2], pack[3]);
+							if (card)
+								await connect.duel.repos(card, to_player(pack[1]), pack[2], pack[4]);
 						}],
 						[MSG.FLIPSUMMONED, async () => {
 							this.event = mainGame.get.strings.system(1608);
