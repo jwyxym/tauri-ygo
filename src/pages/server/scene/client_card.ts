@@ -206,6 +206,7 @@ class Client_Card {
 				['sset', CONSTANT.FILES.TEXTURE_BTN_SSET],
 				['pos_attack', CONSTANT.FILES.TEXTURE_BTN_POS_ATTACK],
 				['pos_defence', CONSTANT.FILES.TEXTURE_BTN_POS_DEFENCE],
+				['filp', CONSTANT.FILES.TEXTURE_BTN_FILP],
 				['summon', CONSTANT.FILES.TEXTURE_BTN_SUMMON],
 				['psummon', CONSTANT.FILES.TEXTURE_BTN_PSUMMON],
 				['spsummon', CONSTANT.FILES.TEXTURE_BTN_SPSUMMON],
@@ -228,7 +229,7 @@ class Client_Card {
 					img.src = srcs[0];
 				});
 				img.addEventListener('click', async () => {
-					await hover.response(this, key);
+					await hover.response(this, ['pos_attack', 'pos_defence', 'filp'].includes(key) ? 'repos' : key);
 				});
 				child.appendChild(img);
 			}
@@ -613,8 +614,7 @@ class Client_Card {
 					[COMMAND.ATTACK, 'attack'],
 					[COMMAND.MSET, 'mset'],
 					[COMMAND.SSET, 'sset'],
-					[COMMAND.REPOS, 'pos_attack'],
-					[COMMAND.REPOS, 'pos_defence'],
+					[COMMAND.REPOS, 'repos'],
 					[COMMAND.SUMMON, 'summon'],
 					[COMMAND.PSUMMON, 'psummon'],
 					[COMMAND.SPSUMMON, 'spsummon'],
@@ -623,7 +623,14 @@ class Client_Card {
 				for (const [_, i] of Object.entries(COMMAND)) {
 					if (!map.has(i))
 						continue;
-					const btn = this.div.btn.querySelector(`.${map.get(i)!}`)! as HTMLElement;
+					const btn = this.div.btn.querySelector(`.${i === COMMAND.REPOS ? (() => {
+						if ((this.pos & POS.FACEDOWN) > 0)
+							return 'filp';
+						if ((this.pos & POS.ATTACK) > 0)
+							return 'pos_defence';
+						if ((this.pos & POS.DEFENSE) > 0)
+							return 'pos_attack';
+					})() : map.get(i)!}`)! as HTMLElement;
 					btn.style.display = (this.activatable.flag & i) === i ? 'initial' : 'none';
 				}
 			}

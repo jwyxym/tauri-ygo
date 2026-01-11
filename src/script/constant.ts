@@ -73,6 +73,7 @@ const FILES = {
 	TEXTURE_BTN_SSET : ['btn_sset.png', 'btn_hover_sset.png'],
 	TEXTURE_BTN_POS_ATTACK : ['btn_pos_attack.png', 'btn_hover_pos_attack.png'],
 	TEXTURE_BTN_POS_DEFENCE : ['btn_pos_defence.png', 'btn_hover_pos_defence.png'],
+	TEXTURE_BTN_FILP : ['btn_flip.png', 'btn_hover_flip.png'],
 	TEXTURE_BTN_SCALE : ['btn_scale.png', 'btn_hover_scale.png'],
 	TEXTURE_BTN_PSUMMON : ['btn_psummon.png', 'btn_hover_psummon.png'],
 	TEXTURE_BTN_SPSUMMON : ['btn_spsummon.png', 'btn_hover_spsummon.png'],

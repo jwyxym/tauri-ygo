@@ -169,6 +169,9 @@
 				case 'spsummon':
 					code = (props.connect.idle.spsummon.index(card) << 16) + 1;
 					break;
+				case 'repos':
+					code = (props.connect.idle.repos.index(card) << 16) + 2;
+					break;
 				case 'mset':
 					code = (props.connect.idle.mset.index(card) << 16) + 3;
 					break;
