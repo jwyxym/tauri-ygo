@@ -461,7 +461,7 @@
 				},
 				hand : (target : Client_Card, owner : number, from : number = 0) : void => {
 					const ct = three.cards.change(target, owner, from, LOCATION.HAND, undefined);
-					three.rotate(target, from, owner, POS.FACEUP_ATTACK);
+					three.rotate(target, from, owner, !!owner ? POS.FACEDOWN_ATTACK : POS.FACEUP_ATTACK);
 					three.sort(owner, LOCATION.HAND);
 					target.show.info.off();
 					target.show.atk.off();
@@ -650,6 +650,7 @@
 						break;
 				}
 			};
+			target.update.pos(pos);
 			!!from ? move() : set();
 		}
 	}
@@ -712,7 +713,11 @@
 							group.push(three.cards.map.get(LOCATION.SZONE | (i << 16))![p][len - 1]);
 						}
 						group.push(...duel.cards.get(LOCATION.FZONE)!(tp));
-					} else {
+					} else if (seq === 5)
+						return three.cards.map.get(LOCATION.FZONE)![tp];
+					else {
+						if (seq === 6) seq = 0;
+						else if (seq === 7) seq = 4;
 						const len = three.cards.map.get(LOCATION.SZONE | (seq << 16))![tp].length;
 						group.push(three.cards.map.get(LOCATION.SZONE | (seq << 16))![p][len - 1]);
 					}
@@ -756,7 +761,7 @@
 						})();
 					if (cards) {
 						const card = cards[cards.length - 1];
-						array.push({ plaid : i, card : card?.code, pos : card?.pos() });
+						array.push({ plaid : i, card : card?.code, pos : card?.pos });
 						continue;
 					}
 					array.push({ plaid : i });
@@ -878,7 +883,7 @@
 					const card = cards[i.seq >= 0 ? i.seq : cards.length - 1];
 					const loc = LOCATION.MZONE | (i.zone << 16)
 					const len = three.cards.map.get(loc)![tp].length - 1;
-					three.create.send.to(card, to_tp, loc, i.location, len, (three.cards.map.get(loc)![tp][len].pos() & POS.ATTACK) > 0 ? POS.FACEUP_DEFENSE : POS.FACEUP_ATTACK);
+					three.create.send.to(card, to_tp, loc, i.location, len, (three.cards.map.get(loc)![tp][len].pos & POS.ATTACK) > 0 ? POS.FACEUP_DEFENSE : POS.FACEUP_ATTACK);
 					await mainGame.sleep(150);
 				}
 			},

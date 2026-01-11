@@ -37,6 +37,7 @@ class Client_Card {
 	def : number;
 	scale : number;
 	overlay : number;
+	pos : number;
 	is_pendulum : boolean;
 	show_info : boolean;
 	div : Client_Card_Div;
@@ -60,6 +61,7 @@ class Client_Card {
 		this.def = 0;
 		this.scale = 0;
 		this.overlay = -1;
+		this.pos = POS.NONE;
 		this.is_pendulum = false;
 		this.show_info = false;
 		[this.three, this.div] = this.init.on(src, size, hover);
@@ -247,7 +249,7 @@ class Client_Card {
 			this.code = code;
 			this.alias = card.alias;
 			this.pic = card.pic;
-			if ((this.pos() & POS.FACEUP) > 0)
+			if ((this.pos & POS.FACEUP) > 0)
 				this.div.img.src = this.pic;
 			this.type = card.type;
 			this.level = (card.is_xyz() || card.is_link()) ? 0 : card.level;
@@ -302,6 +304,10 @@ class Client_Card {
 			if (this.scale === scale) return;
 			this.scale = scale;
 			this.change.type();
+		},
+		pos : (pos : number) : void => {
+			if (this.pos === pos) return;
+			this.pos = pos;
 		}
 	};
 	clear = () : void => {
@@ -564,14 +570,10 @@ class Client_Card {
 					setTimeout(() => i.style.opacity = '1', 200);
 				});
 			}
-		}
-	};
+		},
+		pos : async () : Promise<void>=> {
 
-	pos = () : number => {
-		const rotation = gsap.getProperty(this.div.img, "rotationZ") === 0;
-		const pos = (this.div.img as HTMLImageElement).src === mainGame.get.textures(CONSTANT.FILES.TEXTURE_COVER) ?
-			rotation ? POS.FACEDOWN_ATTACK : POS.FACEDOWN_DEFENSE : rotation ? POS.FACEUP_ATTACK : POS.FACEUP_DEFENSE;
-		return pos;
+		}
 	};
 
 	select = {

@@ -352,7 +352,6 @@ class Tcp {
 					p += 8;
 				}
 			}
-
 		};
 
 		const idles = new Map([
@@ -433,22 +432,40 @@ class Tcp {
 							connect.win(mainGame.get.text(key), message);
 						}],
 						[MSG.UPDATE_DATA, async () => {
-							const pack = to_package<number>(buffer, data, [8, 8], pos);
+							let p = pos;
+							const pack = to_package<number>(buffer, data, [8, 8], p);
 							const tp = to_player(pack[0]);
 							const location = pack[1];
 							const to_cards = connect.duel.cards.get(location);
 							if (to_cards === undefined)
 								return;
-							pos += 2;
-							const cards : Array<Client_Card> = to_cards(tp);
-							for (let seq = 0; seq < cards.length; seq ++){
-								const card = cards[seq];
-								const [len] = to_package<number>(buffer, data, [32], pos);
-								if(len === undefined || len <= 8)
-									break;
-								const [flag] : Array<number> = to_package(buffer, data, [32], pos + 4);
-								await update_card(buffer, data, flag, card, tp, location, seq, pos + 8);
-								pos += len;
+							p += 2;
+							if ((location & LOCATION.SZONE + LOCATION.MZONE) > 0) {
+								const ct = location === LOCATION.MZONE ? 7 : 8;
+								for (let seq = 0; seq < ct; seq ++){
+									const card = to_card(tp, location, seq);
+									const [len] = to_package<number>(buffer, data, [32], p);
+									if (len === undefined)
+										break;
+									if (len > 8 && card) {
+										const [flag] : Array<number> = to_package(buffer, data, [32], p + 4);
+										await update_card(buffer, data, flag, card, tp, location, seq, p + 8);
+									}
+									p += len;
+								}
+							} else {
+								const cards : Array<Client_Card> = to_cards(tp);
+								for (let seq = 0; seq < cards.length; seq ++){
+									const card = cards[seq];
+									const [len] = to_package<number>(buffer, data, [32], p);
+									if (len === undefined)
+										break;
+									if (len > 8) {
+										const [flag] : Array<number> = to_package(buffer, data, [32], p + 4);
+										await update_card(buffer, data, flag, card, tp, location, seq, p + 8);
+									}
+									p += len;
+								}
 							}
 						}],
 						[MSG.UPDATE_CARD, async () => {
@@ -720,7 +737,6 @@ class Tcp {
 						[MSG.CONFIRM_DECKTOP, async () => {
 						}],
 						[MSG.CONFIRM_CARDS, async () => {
-							console.log('CONFIRM_CARDS')
 							const [ct] = to_package<number>(buffer, data, [- 16, 8], pos);
 							const pack = to_package<number>(buffer, data, new Array(ct).fill([32, 8, 8, 8]).flat(), pos + 3);
 							const cards : Array<Client_Card> = [];
