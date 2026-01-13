@@ -36,17 +36,26 @@
 				}
 			}
 		}
-		.deck_show {
+		.deck {
 			width: 60%;
 			height: 100%;
 			overflow: hidden;
 			mask: radial-gradient(circle, white 0%, white 20%, transparent 100%);
 			-webkit-mask: radial-gradient(circle, white 0%, white 20%, transparent 100%);
-			.deck {
+			> div {
 				display: grid;
 				justify-items: center;
 				height: 100%;
 				width: 100%;
+				.deck_name {
+					height: 10px;
+					z-index: 1;
+					span {
+						color: white;
+						font-size: 10vh;
+						white-space: nowrap;
+					}
+				}
 				.cards {
 					width: 100%;
 					.card {
@@ -58,17 +67,10 @@
 							height: 100%;
 						}
 					}
-					.deck_name {
-						span {
-							color: white;
-							font-size: 10vh;
-							white-space: nowrap;
-						}
-					}
 				}
 			}
 		}
-		.deck_button {
+		.btn {
 			position: absolute;
 			display: flex;
 			flex-direction: row-reverse;
