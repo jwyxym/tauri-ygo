@@ -86,13 +86,7 @@
 			const target : HTMLElement = e.target as HTMLElement;
 			if (!props.deck.remove.block && !page.block) {
 				const ct : number = page.x - e.changedTouches[0].clientX;
-				if (ct > 50)
-					props.unshow();
-				else if (Math.abs(ct) < 50 && dom.value && !dom.value.contains(target)
-					&& props.except.findIndex((i : HTMLElement | null) => i && i.contains(target)) === -1
-					&& !target.classList.contains('var-icon-close-circle')
-					&& !target.classList.contains('var-icon')
-				)
+				if (ct > - 10 && page.except(target))
 					props.unshow();
 			}
 			page.x = 0;
@@ -109,17 +103,17 @@
 			const target : HTMLElement = e.target as HTMLElement;
 			if (e.button === 0 && !props.deck.remove.block && !page.block) {
 				const ct : number = page.x - e.clientX;
-				if (ct > 50)
-					props.unshow();
-				else if (Math.abs(ct) < 50 && dom.value && !dom.value.contains(target)
-					&& props.except.findIndex((i : HTMLElement | null) => i && i.contains(target)) === -1
-					&& !target.classList.contains('var-icon-close-circle')
-					&& !target.classList.contains('var-icon')
-				)
+				if (ct > - 10 && page.except(target))
 					props.unshow();
 			}
 			page.x = 0;
 			page.block = false;
+		},
+		except : (target : HTMLElement) : boolean => {
+			return dom.value !== null && !dom.value.contains(target)
+				&& props.except.findIndex((i : HTMLElement | null) => i && i.contains(target)) === -1
+				&& !target.classList.contains('var-icon-close-circle')
+				&& !target.classList.contains('var-icon');
 		},
 		block : false,
 		x : 0,
