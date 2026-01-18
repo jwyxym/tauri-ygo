@@ -122,15 +122,24 @@
 			side : [] as CardPics,
 			on : undefined as undefined | NodeJS.Timeout ,
 			card : undefined as undefined | CardPic,
+			sort : (a : CardPic, b : CardPic) : number => a.index - b.index,
+			resort : (arr : CardPics) => {
+				arr = arr.sort(page.move.sort);
+				arr.forEach((i, v) => {
+					console.log(v, i)
+					if (i.index !== v)
+						i.index = v;
+				});
+			},
 			start : (target : HTMLElement, x : number, y : number) => {
 				const v : number = cards.value?.findIndex(i => i.contains(target)) ?? -1;
 				if (v < 0) return;
+				cards.value![v].style.transition = 'none';
 				page.move.x = x;
 				page.move.y = y;
-				const sort = (a : CardPic, b : CardPic) : number => a.index - b.index;
-				page.move.main = page.deck.main.slice().sort(sort);
-				page.move.extra = page.deck.extra.slice().sort(sort);
-				page.move.side = page.deck.side.slice().sort(sort);
+				page.move.main = page.deck.main.slice().sort(page.move.sort);
+				page.move.extra = page.deck.extra.slice().sort(page.move.sort);
+				page.move.side = page.deck.side.slice().sort(page.move.sort);
 				page.move.card = page.move.main.concat(page.move.extra, page.move.side).find(i => target.id === i.key);
 				[page.deck.main, page.deck.extra, page.deck.side].forEach((i, v) => {
 					if (i.includes(page.move.card!))
@@ -187,29 +196,38 @@
 							});
 							page.move.card!.index = index;
 						}
+						const decks = [page.move.main, page.move.extra, page.move.side];
 						if (pic_y < page.size.main) {
 							const index = pic_y * 10 + pic_x;
+							if (page.move.index.deck > -1 && page.move.index.deck !== 0)
+								page.move.resort(decks[page.move.index.deck]);
 							page.move.index.deck = 0;
 							sort(page.move.main, index);
 						} else if (pic_y < page.size.main + page.size.extra) {
 							const index = (pic_y - page.size.main) * 10 + pic_x;
+							if (page.move.index.deck > -1 && page.move.index.deck !== 1)
+								page.move.resort(decks[page.move.index.deck]);
 							page.move.index.deck = 1;
 							sort(page.move.extra, index);
 						} else {
 							const index = (pic_y - page.size.main - page.size.extra) * 10 + pic_x;
+							if (page.move.index.deck > -1 && page.move.index.deck !== 2)
+								page.move.resort(decks[page.move.index.deck]);
 							page.move.index.deck = 2;
 							sort(page.move.side, index);
 						}
 					}
 				}
 			},
-			end : async () : Promise<void> => {
+			end : async (target : HTMLElement) : Promise<void> => {
 				if (page.move.index.deck !== page.move.index.from && page.move.index.deck >= 0 && page.move.index.from >= 0) {
 					const decks = [page.deck.main, page.deck.extra, page.deck.side];
 					decks[page.move.index.deck].push(page.move.card!);
 					const ct = decks[page.move.index.from].indexOf(page.move.card!);
 					decks[page.move.index.from].splice(ct, 1);
+					page.move.resort(decks[page.move.index.from]);
 					page.size.resize();
+					setTimeout(() => target.style.transition = 'all 0.1s ease', 110);
 				}
 				await mainGame.sleep(100);
 				page.move.card = undefined;
@@ -233,8 +251,8 @@
 			mousemove : (e : MouseEvent) => {
 				page.move.move(e.clientX, e.clientY);
 			},
-			mouseup : async () : Promise<void> => {
-				await page.move.end();
+			mouseup : async (e : MouseEvent) : Promise<void> => {
+				await page.move.end(e.target as HTMLElement);
 			}
 		}
 	});
@@ -283,7 +301,7 @@
 			.box {
 				height: var(--box_height);
 				width: 100%;
-				transition: all 0.1s ease;
+				transition: all 0.2s ease;
 				border: white 2px solid;
 			}
 			.card {
@@ -297,7 +315,7 @@
 				background-image: var(--url);
 				z-index: 0;
 				background-size: cover;
-				transition: all 0.2s ease;
+				transition: all 0.1s ease;
 			}
 			.show {
 				opacity: 1;
