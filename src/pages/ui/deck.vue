@@ -34,21 +34,21 @@
 				}"
 				ref = 'cards'
 			></div>
-			<span ref = 'main_title'>{{ page.deck.main.length }}</span>
+			<span ref = 'main_title'>{{ page.title.main }}&nbsp;:&nbsp;{{ page.deck.main.length }}</span>
 			<div class = 'box'
 				ref = 'main'
 				:style = "{
 					'--box_height' : `${page.size.main * page.size.height}px`
 				}"
 			></div>
-			<span ref = 'extra_title'>{{ page.deck.extra.length }}</span>
+			<span ref = 'extra_title'>{{ page.title.extra }}&nbsp;:&nbsp;{{ page.deck.extra.length }}</span>
 			<div class = 'box'
 				ref = 'extra'
 				:style = "{
 					'--box_height' : `${ page.size.extra * page.size.height}px`
 				}"
 			></div>
-			<span ref = 'side_title'>{{ page.deck.side.length }}</span>
+			<span ref = 'side_title'>{{ page.title.side }}&nbsp;:&nbsp;{{ page.deck.side.length }}</span>
 			<div class = 'box'
 				ref = 'side'
 				:style = "{
@@ -62,6 +62,7 @@
 	import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 	import mainGame from '@/script/game';
 	import Deck from '@/pages/deck/deck';
+	import { I18N_KEYS } from '@/script/language/i18n';
 
 	const deck = ref<HTMLElement | null>(null);
 	const main = ref<HTMLElement | null>(null);
@@ -80,6 +81,11 @@
 			main : [] as CardPics,
 			extra : [] as CardPics,
 			side : [] as CardPics,
+		},
+		title : {
+			main : '',
+			extra : '',
+			side : ''
 		},
 		size : {
 			count : 10,
@@ -242,6 +248,9 @@
 		for (let i = 0; i < props.deck.side.length; i++)
 			page.deck.side.push({ code : props.deck.side[i], index : i, y : 0, loc : 0, key : props.deck.main[i].toString() + i + Math.random()});
 		
+		page.title.main = mainGame.get.text(I18N_KEYS.DECK_MAIN);
+		page.title.extra = mainGame.get.text(I18N_KEYS.DECK_EXTRA);
+		page.title.side = mainGame.get.text(I18N_KEYS.DECK_SIDE);
 		page.size.resize();
 		window.addEventListener("resize", page.size.resize);
 		window.addEventListener("mousedown", page.move.mousedown);
