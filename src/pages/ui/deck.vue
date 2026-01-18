@@ -26,7 +26,7 @@
 				:id = 'i.key'
 				:class = "{ 'hover' : page.move.card === i, 'show' : !!i.loc }"
 				:style = "{
-					'--position_x' :  `${(i.index % 10) * page.size.width}px`,
+					'--position_x' :  `${(i.index % 10) * page.size.width + 2}px`,
 					'--position_y' :  `${(Math.trunc(i.index / 10) + i.y) * page.size.height + i.loc}px`,
 					'--hover_x' :  `${page.move.x}px`,
 					'--hover_y' :  `${page.move.y}px`,
@@ -95,11 +95,11 @@
 				
 				const extra_y = page.size.main;
 				const side_y = extra_y + page.size.extra;
-				const loc = main_title.value!.getBoundingClientRect().height + 1;
+				const loc = main_title.value!.getBoundingClientRect().height + 2;
 				await mainGame.sleep(100);
 				page.deck.main.forEach(i => { i.y = 0; i.loc = loc; }); 
-				page.deck.extra.forEach(i => { i.y = extra_y; i.loc = loc * 2; }); 
-				page.deck.side.forEach(i => { i.y = side_y; i.loc = loc * 3; });
+				page.deck.extra.forEach(i => { i.y = extra_y; i.loc = loc * 2 + 4; }); 
+				page.deck.side.forEach(i => { i.y = side_y; i.loc = loc * 3 + 6; });
 			}
 		},
 		move : {
@@ -275,7 +275,7 @@
 				height: var(--box_height);
 				width: 100%;
 				transition: all 0.1s ease;
-				border: white 1px solid;
+				border: white 2px solid;
 			}
 			.card {
 				position: absolute;
