@@ -38,31 +38,57 @@
 			<div class = 'box'
 				ref = 'main'
 				:style = "{
-					'--box_height' : `${page.size.main * page.size.height}px`
+					'--box_height' : `${page.size.main * page.size.height}px`,
 				}"
-			></div>
+				:class = "{
+					'can_in' : page.move.color.deck === 0 && page.move.color.err === true && page.move.card,
+					'can_not_in' : page.move.color.deck === 0 && page.move.color.err !== true && page.move.card
+				}"
+			>
+				<span>
+					{{ typeof page.move.color.err === 'string' ? page.move.color.err : '' }}
+				</span>
+			</div>
 			<span ref = 'extra_title'>{{ page.title.extra }}&nbsp;:&nbsp;{{ page.deck.extra.length }}</span>
 			<div class = 'box'
 				ref = 'extra'
 				:style = "{
 					'--box_height' : `${ page.size.extra * page.size.height}px`
 				}"
-			></div>
+				:class = "{
+					'can_in' : page.move.color.deck === 1 && page.move.color.err === true && page.move.card,
+					'can_not_in' : page.move.color.deck === 1 && page.move.color.err !== true && page.move.card
+				}"
+			>
+				<span>
+					{{ typeof page.move.color.err === 'string' ? page.move.color.err : '' }}
+				</span>
+			</div>
 			<span ref = 'side_title'>{{ page.title.side }}&nbsp;:&nbsp;{{ page.deck.side.length }}</span>
 			<div class = 'box'
 				ref = 'side'
 				:style = "{
 					'--box_height' : `${page.size.side * page.size.height}px`
 				}"
-			></div>
+				:class = "{
+					'can_in' : page.move.color.deck === 2 && page.move.color.err === true && page.move.card,
+					'can_not_in' : page.move.color.deck === 2 && page.move.color.err !== true && page.move.card
+				}"
+			>
+				<span>
+					{{ typeof page.move.color.err === 'string' ? page.move.color.err : '' }}
+				</span>
+			</div>
 		</div>
 	</main>
 </template>
 <script setup lang = 'ts'>
 	import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 	import mainGame from '@/script/game';
-	import Deck from '@/pages/deck/deck';
+	import * as CONSTANT from '@/script/constant';
 	import { I18N_KEYS } from '@/script/language/i18n';
+	import Card from '@/script/card';
+	import Deck from '@/pages/deck/deck';
 
 	const deck = ref<HTMLElement | null>(null);
 	const main = ref<HTMLElement | null>(null);
@@ -117,6 +143,10 @@
 				deck : -1,
 				from : -1
 			},
+			color : {
+				deck : -1,
+				err : true as boolean | string
+			},
 			main : [] as CardPics,
 			extra : [] as CardPics,
 			side : [] as CardPics,
@@ -126,10 +156,36 @@
 			resort : (arr : CardPics) => {
 				arr = arr.sort(page.move.sort);
 				arr.forEach((i, v) => {
-					console.log(v, i)
 					if (i.index !== v)
 						i.index = v;
 				});
+			},
+			check : (code : number | string, deck : 0 | 1 | 2) : boolean | string => {
+				const card : Card = mainGame.get.card(code);
+				if (card.is_token())
+					return mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_TYPE);
+				const cards = page.deck.main.concat(page.deck.extra, page.deck.side);
+				const ct = props.lflist ? mainGame.get.lflist(props.lflist, card.id) as number : mainGame.get.system(CONSTANT.KEYS.SETTING_CT_CARD) as number;
+				if (cards.filter(i => i.code === code).length >= ct)
+					return mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_MAX, ct.toString());
+				switch (deck) {
+					case 0:
+						if (page.deck.main.length >= 60)
+							return mainGame.get.text(I18N_KEYS.DECK_RULE_DECK_MAX, mainGame.get.system(CONSTANT.KEYS.SETTING_CT_DECK_MAIN) as number);
+						else if (card.is_ex())
+							return mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_TYPE);
+						return true;
+					case 1:
+						if (page.deck.extra.length >= 15)
+							return mainGame.get.text(I18N_KEYS.DECK_RULE_DECK_MAX, mainGame.get.system(CONSTANT.KEYS.SETTING_CT_DECK_EX) as number);
+						else if (!card.is_ex())
+							return mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_TYPE);
+						return true;
+					case 2:
+						if (page.deck.side.length >= 15)
+							return mainGame.get.text(I18N_KEYS.DECK_RULE_DECK_MAX, mainGame.get.system(CONSTANT.KEYS.SETTING_CT_DECK_SIDE) as number);
+						return true;
+				}
 			},
 			start : (target : HTMLElement, x : number, y : number) => {
 				const v : number = cards.value?.findIndex(i => i.contains(target)) ?? -1;
@@ -198,18 +254,42 @@
 						}
 						const decks = [page.move.main, page.move.extra, page.move.side];
 						if (pic_y < page.size.main) {
+							const err = page.move.check(page.move.card.code, 0);
+							if (page.move.color.deck !== 0)
+								page.move.color = {
+									deck : 0,
+									err : err
+								};
+							if (typeof err === 'string' || !err)
+								return;
 							const index = pic_y * 10 + pic_x;
 							if (page.move.index.deck > -1 && page.move.index.deck !== 0)
 								page.move.resort(decks[page.move.index.deck]);
 							page.move.index.deck = 0;
 							sort(page.move.main, index);
 						} else if (pic_y < page.size.main + page.size.extra) {
+							const err = page.move.check(page.move.card.code, 1);
+							if (page.move.color.deck !== 1)
+								page.move.color = {
+									deck : 1,
+									err : err
+								};
+							if (typeof err === 'string' || !err)
+								return;
 							const index = (pic_y - page.size.main) * 10 + pic_x;
 							if (page.move.index.deck > -1 && page.move.index.deck !== 1)
 								page.move.resort(decks[page.move.index.deck]);
 							page.move.index.deck = 1;
 							sort(page.move.extra, index);
 						} else {
+							const err = page.move.check(page.move.card.code, 2);
+							if (page.move.color.deck !== 2)
+								page.move.color = {
+									deck : 2,
+									err : err
+								};
+							if (typeof err === 'string' || !err)
+								return;
 							const index = (pic_y - page.size.main - page.size.extra) * 10 + pic_x;
 							if (page.move.index.deck > -1 && page.move.index.deck !== 2)
 								page.move.resort(decks[page.move.index.deck]);
@@ -227,9 +307,13 @@
 					decks[page.move.index.from].splice(ct, 1);
 					page.move.resort(decks[page.move.index.from]);
 					page.size.resize();
-					setTimeout(() => target.style.transition = 'all 0.1s ease', 110);
 				}
+				setTimeout(() => target.style.transition = 'all 0.1s ease', 150);
 				await mainGame.sleep(100);
+				page.move.color = {
+					deck : -1,
+					err : true
+				};
 				page.move.card = undefined;
 				page.move.x = 0;
 				page.move.y = 0;
@@ -284,7 +368,7 @@
 		window.removeEventListener("mouseup", page.move.mouseup);
 	});
 
-	const props = defineProps<{ height: number; deck: Deck; }>();
+	const props = defineProps<{ height: number; deck: Deck; lflist ?: string }>();
 </script>
 <style scoped lang = 'scss'>
 	main {
@@ -303,6 +387,32 @@
 				width: 100%;
 				transition: all 0.2s ease;
 				border: white 2px solid;
+				user-select: none;
+				color: rgba($color: red, $alpha: 0);
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				&::after {
+					content: '';
+					background: rgba(255, 255, 255, 0);
+				}
+			}
+			.can_in {
+				border: blue 2px solid;
+			}
+			.can_not_in {
+				border: red 2px solid;
+				color: red;
+				position: relative;
+				&::after {
+					position: absolute;
+					top: 50%;
+					left: 50%;
+					transform: translate(-50%, -50%);
+					width: 100%;
+					height: 100%;
+					background: rgba(255, 255, 255, 0.3);
+				}
 			}
 			.card {
 				position: absolute;
@@ -326,7 +436,6 @@
 				top: 0;
 				transform: translate(var(--hover_x), var(--hover_y));
 				z-index: 1;
-				transition: none;
 			}
 		}
 		&::-webkit-scrollbar {
