@@ -88,6 +88,7 @@
 	import * as CONSTANT from '@/script/constant';
 	import { I18N_KEYS } from '@/script/language/i18n';
 	import Card from '@/script/card';
+	import toast from '@/script/toast';
 	import Deck from '@/pages/deck/deck';
 
 	const deck = ref<HTMLElement | null>(null);
@@ -107,6 +108,49 @@
 			main : [] as CardPics,
 			extra : [] as CardPics,
 			side : [] as CardPics,
+			add : (code : number, deck : 0 | 1 | 2, index ?: number) => {
+				const err = page.deck.check(code, deck);
+				if (typeof err === 'string') {
+					toast.error(err);
+					return;
+				}
+				const decks = [page.deck.main, page.deck.extra, page.deck.side];
+				index = index ?? decks[deck].length;
+				decks[deck].push({
+					code : code,
+					index : index,
+					y : 0,
+					loc : 0,
+					key : code.toString() + index + Math.random()
+				});
+			},
+			check : (code : number | string, deck : 0 | 1 | 2) : true | string => {
+				const card : Card = mainGame.get.card(code);
+				if (card.is_token())
+					return mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_TYPE);
+				const cards = page.deck.main.concat(page.deck.extra, page.deck.side);
+				const ct = props.lflist ? mainGame.get.lflist(props.lflist, card.id) as number : mainGame.get.system(CONSTANT.KEYS.SETTING_CT_CARD) as number;
+				if (cards.filter(i => i.code === code).length >= ct)
+					return mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_MAX, ct.toString());
+				switch (deck) {
+					case 0:
+						if (page.deck.main.length >= 60)
+							return mainGame.get.text(I18N_KEYS.DECK_RULE_DECK_MAX, mainGame.get.system(CONSTANT.KEYS.SETTING_CT_DECK_MAIN) as number);
+						else if (card.is_ex())
+							return mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_TYPE);
+						return true;
+					case 1:
+						if (page.deck.extra.length >= 15)
+							return mainGame.get.text(I18N_KEYS.DECK_RULE_DECK_MAX, mainGame.get.system(CONSTANT.KEYS.SETTING_CT_DECK_EX) as number);
+						else if (!card.is_ex())
+							return mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_TYPE);
+						return true;
+					case 2:
+						if (page.deck.side.length >= 15)
+							return mainGame.get.text(I18N_KEYS.DECK_RULE_DECK_MAX, mainGame.get.system(CONSTANT.KEYS.SETTING_CT_DECK_SIDE) as number);
+						return true;
+				}
+			}
 		},
 		title : {
 			main : '',
@@ -145,7 +189,7 @@
 			},
 			color : {
 				deck : -1,
-				err : true as boolean | string
+				err : true as true | string
 			},
 			main : [] as CardPics,
 			extra : [] as CardPics,
@@ -160,36 +204,19 @@
 						i.index = v;
 				});
 			},
-			check : (code : number | string, deck : 0 | 1 | 2) : boolean | string => {
-				const card : Card = mainGame.get.card(code);
-				if (card.is_token())
-					return mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_TYPE);
-				const cards = page.deck.main.concat(page.deck.extra, page.deck.side);
-				const ct = props.lflist ? mainGame.get.lflist(props.lflist, card.id) as number : mainGame.get.system(CONSTANT.KEYS.SETTING_CT_CARD) as number;
-				if (cards.filter(i => i.code === code).length >= ct)
-					return mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_MAX, ct.toString());
-				switch (deck) {
-					case 0:
-						if (page.deck.main.length >= 60)
-							return mainGame.get.text(I18N_KEYS.DECK_RULE_DECK_MAX, mainGame.get.system(CONSTANT.KEYS.SETTING_CT_DECK_MAIN) as number);
-						else if (card.is_ex())
-							return mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_TYPE);
-						return true;
-					case 1:
-						if (page.deck.extra.length >= 15)
-							return mainGame.get.text(I18N_KEYS.DECK_RULE_DECK_MAX, mainGame.get.system(CONSTANT.KEYS.SETTING_CT_DECK_EX) as number);
-						else if (!card.is_ex())
-							return mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_TYPE);
-						return true;
-					case 2:
-						if (page.deck.side.length >= 15)
-							return mainGame.get.text(I18N_KEYS.DECK_RULE_DECK_MAX, mainGame.get.system(CONSTANT.KEYS.SETTING_CT_DECK_SIDE) as number);
-						return true;
-				}
-			},
-			start : (target : HTMLElement, x : number, y : number) => {
+			start : (target : HTMLElement, x : number, y : number, code ?: number) => {
 				const v : number = cards.value?.findIndex(i => i.contains(target)) ?? -1;
-				if (v < 0) return;
+				if (v < 0) {
+					if (code) {
+						page.move.x = x;
+						page.move.y = y;
+						page.move.card = { code: code, index: 0, y: 0, loc: 0, key: code.toString() + 0 + Math.random() };
+						page.move.main = page.deck.main.slice().sort(page.move.sort);
+						page.move.extra = page.deck.extra.slice().sort(page.move.sort);
+						page.move.side = page.deck.side.slice().sort(page.move.sort);
+					}
+					return;
+				}
 				cards.value![v].style.transition = 'none';
 				page.move.x = x;
 				page.move.y = y;
@@ -254,7 +281,7 @@
 						}
 						const decks = [page.move.main, page.move.extra, page.move.side];
 						if (pic_y < page.size.main) {
-							const err = page.move.check(page.move.card.code, 0);
+							const err = page.deck.check(page.move.card.code, 0);
 							if (page.move.color.deck !== 0)
 								page.move.color = {
 									deck : 0,
@@ -268,7 +295,7 @@
 							page.move.index.deck = 0;
 							sort(page.move.main, index);
 						} else if (pic_y < page.size.main + page.size.extra) {
-							const err = page.move.check(page.move.card.code, 1);
+							const err = page.deck.check(page.move.card.code, 1);
 							if (page.move.color.deck !== 1)
 								page.move.color = {
 									deck : 1,
@@ -282,7 +309,7 @@
 							page.move.index.deck = 1;
 							sort(page.move.extra, index);
 						} else {
-							const err = page.move.check(page.move.card.code, 2);
+							const err = page.deck.check(page.move.card.code, 2);
 							if (page.move.color.deck !== 2)
 								page.move.color = {
 									deck : 2,
@@ -299,16 +326,19 @@
 					}
 				}
 			},
-			end : async (target : HTMLElement) : Promise<void> => {
+			end : async (target ?: HTMLElement) : Promise<void> => {
 				if (page.move.index.deck !== page.move.index.from && page.move.index.deck >= 0 && page.move.index.from >= 0) {
 					const decks = [page.deck.main, page.deck.extra, page.deck.side];
 					decks[page.move.index.deck].push(page.move.card!);
-					const ct = decks[page.move.index.from].indexOf(page.move.card!);
-					decks[page.move.index.from].splice(ct, 1);
-					page.move.resort(decks[page.move.index.from]);
+					if (page.move.index.from > -1) {
+						const ct = decks[page.move.index.from].indexOf(page.move.card!);
+						decks[page.move.index.from].splice(ct, 1);
+						page.move.resort(decks[page.move.index.from]);
+					}
 					page.size.resize();
 				}
-				setTimeout(() => target.style.transition = 'all 0.1s ease', 150);
+				if (target)
+					setTimeout(() => target.style.transition = 'all 0.1s ease', 150);
 				await mainGame.sleep(100);
 				page.move.color = {
 					deck : -1,
@@ -329,15 +359,9 @@
 			},
 			touchstart : () => {},
 			touchend : () => {},
-			mousedown : (e : MouseEvent) => {
-				page.move.start(e.target as HTMLElement, e.clientX, e.clientY);
-			},
-			mousemove : (e : MouseEvent) => {
-				page.move.move(e.clientX, e.clientY);
-			},
-			mouseup : async (e : MouseEvent) : Promise<void> => {
-				await page.move.end(e.target as HTMLElement);
-			}
+			mousedown : (e : MouseEvent) => page.move.start(e.target as HTMLElement, e.clientX, e.clientY),
+			mousemove : (e : MouseEvent) => page.move.move(e.clientX, e.clientY),
+			mouseup : async (e : MouseEvent) : Promise<void> => await page.move.end(e.target as HTMLElement)
 		}
 	});
 
