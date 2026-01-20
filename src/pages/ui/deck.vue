@@ -33,7 +33,13 @@
 					'--url' : `url('${mainGame.get.card(i.code).pic}')`,
 				}"
 				ref = 'cards'
-			></div>
+			>
+				<var-badge
+					type = 'info'
+					v-if = 'props.lflist && mainGame.get.lflist(props.lflist, i.code) !== mainGame.get.system(CONSTANT.KEYS.SETTING_CT_CARD)'
+					:value = 'mainGame.get.lflist(props.lflist, i.code)'
+				/>
+			</div>
 			<span ref = 'main_title'>{{ page.title.main }}&nbsp;:&nbsp;{{ page.deck.main.length }}</span>
 			<div class = 'box'
 				ref = 'main'
