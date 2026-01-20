@@ -392,7 +392,7 @@
 		window.removeEventListener("mouseup", page.move.mouseup);
 	});
 
-	const props = defineProps<{ height: number; deck: Deck; lflist ?: string }>();
+	const props = defineProps<{ height : number; deck : Deck; lflist ?: string }>();
 </script>
 <style scoped lang = 'scss'>
 	main {
