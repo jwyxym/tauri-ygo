@@ -40,31 +40,31 @@
 	onBeforeMount(async () => {
 		switch (props.name) {
 			case 'category':
-				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_SEARCH_CATEGORY);
+				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_INFO_CATEGORY);
 				select.map = mainGame.strings.get(CONSTANT.KEYS.CATEGORY) ?? new Map;
 				break;
 			case 'race':
-				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_SEARCH_RACE);
+				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_INFO_RACE);
 				select.map = mainGame.strings.get(CONSTANT.KEYS.RACE) ?? new Map;
 				break;
 			case 'attribute':
-				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_SEARCH_ATTRIBUTE);
+				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_INFO_ATTRIBUTE);
 				select.map = mainGame.strings.get(CONSTANT.KEYS.ATTRIBUTE) ?? new Map;
 				break;
 			case 'ot':
-				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_SEARCH_OT);
+				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_INFO_OT);
 				select.map = mainGame.strings.get(CONSTANT.KEYS.OT) ?? new Map;
 				break;
 			case 'type':
-				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_SEARCH_TYPE);
+				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_INFO_TYPE);
 				select.map = mainGame.strings.get(CONSTANT.KEYS.TYPE) ?? new Map;
 				break;
 			case 'link':
-				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_SEARCH_LINK);
+				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_INFO_LINK);
 				select.map = mainGame.strings.get(CONSTANT.KEYS.LINK) ?? new Map;
 				break;
 			case 'forbidden':
-				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_SEARCH_FORBIDDEN);
+				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_INFO_FORBIDDEN);
 				select.map = new Map([
 					[0, mainGame.get.text(I18N_KEYS.DECK_LFLIST_FORBIDDEN)],
 					[1, mainGame.get.text(I18N_KEYS.DECK_LFLIST_LIMIT)],
@@ -73,7 +73,7 @@
 				]);
 				break;
 			case 'lflist':
-				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_SEARCH_LFLIST);
+				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_INFO_LFLIST);
 				select.map = mainGame.lflist ?? new Map;
 				select.label = true;
 				break;

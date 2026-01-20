@@ -1,7 +1,7 @@
 <template>
 	<div class = 'search' ref = 'dom'>
 		<Input
-			:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_SEARCH_NAME)'
+			:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_INFO_NAME)'
 			:variant = 'true'
 			v-model = 'search.info.desc'
 			@keydown = 'page.press'
@@ -112,22 +112,22 @@
 				</TransitionGroup>
 				<div class = 'input'>
 					<Input
-						:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_SEARCH_ATK)'
+						:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_INFO_ATK)'
 						:rules = 'search.rule.atk'
 						v-model = 'search.info.atk'
 					/>
 					<Input
-						:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_SEARCH_DEF)'
+						:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_INFO_DEF)'
 						:rules = 'search.rule.atk'
 						v-model = 'search.info.def'
 					/>
 					<Input
-						:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_SEARCH_LV)'
+						:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_INFO_LV)'
 						:rules = 'search.rule.level'
 						v-model = 'search.info.level'
 					/>
 					<Input
-						:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_SEARCH_SCALE)'
+						:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_INFO_SCALE)'
 						:rules = 'search.rule.level'
 						v-model = 'search.info.scale'
 					/>

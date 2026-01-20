@@ -136,23 +136,24 @@
 					return mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_TYPE);
 				const cards = page.deck.main.concat(page.deck.extra, page.deck.side);
 				const ct = props.lflist ? mainGame.get.lflist(props.lflist, card.id) as number : mainGame.get.system(CONSTANT.KEYS.SETTING_CT_CARD) as number;
-				if (cards.filter(i => i.code === code).length >= ct)
+				const chk = page.move.index.from === deck ? 1 : 0;
+				if (cards.filter(i => i.code === code).length >= ct + chk)
 					return mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_MAX, ct.toString());
 				switch (deck) {
 					case 0:
-						if (page.deck.main.length >= 60)
+						if (page.deck.main.length >= 60 + chk)
 							return mainGame.get.text(I18N_KEYS.DECK_RULE_DECK_MAX, mainGame.get.system(CONSTANT.KEYS.SETTING_CT_DECK_MAIN) as number);
 						else if (card.is_ex())
 							return mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_TYPE);
 						return true;
 					case 1:
-						if (page.deck.extra.length >= 15)
+						if (page.deck.extra.length >= 15 + chk)
 							return mainGame.get.text(I18N_KEYS.DECK_RULE_DECK_MAX, mainGame.get.system(CONSTANT.KEYS.SETTING_CT_DECK_EX) as number);
 						else if (!card.is_ex())
 							return mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_TYPE);
 						return true;
 					case 2:
-						if (page.deck.side.length >= 15)
+						if (page.deck.side.length >= 15 + chk)
 							return mainGame.get.text(I18N_KEYS.DECK_RULE_DECK_MAX, mainGame.get.system(CONSTANT.KEYS.SETTING_CT_DECK_SIDE) as number);
 						return true;
 				}
