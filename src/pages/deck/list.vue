@@ -1,5 +1,5 @@
 <template>
-	<div class = 'body'>
+	<main>
 		<transition name = 'opacity'>
 			<div class = 'deck_list' v-if = 'page.list'>
 				<div class = 'list'>
@@ -90,7 +90,7 @@
 				<Button_List :confirm = 'page.popup.url.confirm' :cancel = 'page.popup.url.cancel'></Button_List>
 			</var-form>
 		</var-popup>
-	</div>
+	</main>
 </template>
 <script setup lang = 'ts'>
 	import { reactive, onBeforeMount, TransitionGroup } from 'vue';

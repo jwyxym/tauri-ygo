@@ -89,7 +89,7 @@
 	</main>
 </template>
 <script setup lang = 'ts'>
-	import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
+	import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 	import mainGame from '@/script/game';
 	import * as CONSTANT from '@/script/constant';
 	import { I18N_KEYS } from '@/script/language/i18n';
@@ -399,6 +399,14 @@
 		window.removeEventListener("mouseup", page.move.mouseup);
 	});
 
+	const emit = defineEmits<{ card : [card : number]; }>();
+
+	watch(() => page.move.card, (n) => {
+		if (!n || !(page.deck.main.includes(n) || page.deck.extra.includes(n) || page.deck.side.includes(n)))
+			return;
+		emit('card', n.code);
+	});
+
 	const props = defineProps<{ height : number; deck : Deck; lflist ?: string }>();
 </script>
 <style scoped lang = 'scss'>
@@ -454,8 +462,8 @@
 				width: var(--card_width);
 				transform: translate(var(--position_x), var(--position_y));
 				background-image: var(--url);
-				z-index: 0;
 				background-size: cover;
+				z-index: 0;
 				transition: all 0.1s ease;
 			}
 			.show {

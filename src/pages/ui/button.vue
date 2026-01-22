@@ -34,9 +34,39 @@
 	import Clear from './svg/clear.vue';
 	import Sort from './svg/sort.vue';
 	import Disrupt from './svg/disrupt.vue';
+	import Collapse from './svg/collapse.vue';
 
-	const props = defineProps(['icon_name', 'content']);
-	const svgs : Map<string, Component> = new Map ([
+	type Icon = 'cards'
+		| 'deck'
+		| 'save'
+		| 'delete'
+		| 'share'
+		| 'home'
+		| 'add'
+		| 'search'
+		| 'setting'
+		| 'exit'
+		| 'cancel'
+		| 'confirm'
+		| 'download'
+		| 'refresh'
+		| 'socket'
+		| 'chat'
+		| 'flag'
+		| 'add_person'
+		| 'info'
+		| 'microphone'
+		| 'clear'
+		| 'sort'
+		| 'disrupt'
+		| 'collapse'
+	;
+
+	const props = defineProps<{
+		icon_name ?: Icon;
+		content ?: string;
+	}>();
+	const svgs : Map<Icon, Component> = new Map ([
 		['cards', Cards],
 		['deck', Deck],
 		['save', Save],
@@ -60,6 +90,7 @@
 		['clear', Clear],
 		['sort', Sort],
 		['disrupt', Disrupt],
+		['collapse', Collapse]
 	]);
-	const svg : null | Component = svgs.get(props.icon_name) ?? null;
+	const svg : null | Component = props.icon_name ? svgs.get(props.icon_name)! : null;
 </script>

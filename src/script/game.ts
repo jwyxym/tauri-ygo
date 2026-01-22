@@ -14,6 +14,7 @@ import TAURI_STR from './language/string';
 import voice from '@/pages/voice/voice';
 import Deck from '@/pages/deck/deck';
 import { LOCATION } from '@/pages/server/post/network';
+import { reactive } from 'vue';
 
 class Game {
 	strings : Map<string, Map<number, string>> = new Map([
@@ -213,7 +214,7 @@ class Game {
 		},
 		card : (key : string | number) : Card => {
 			key = typeof key == 'string' ? parseInt(key) : key;
-			return this.cards.get(key) ?? this.unknown;
+			return reactive(this.cards.get(key) ?? this.unknown);
 		},
 		expansions : async () : Promise<{
 			loading : Array<string>;

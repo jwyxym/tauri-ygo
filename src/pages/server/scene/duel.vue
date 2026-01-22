@@ -3,7 +3,7 @@
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { ref, onMounted, Ref, onUnmounted, watch } from 'vue';
+	import { ref, onMounted, Ref, onUnmounted, watch, reactive } from 'vue';
 	import * as THREE from 'three';
 	import * as CSS from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 	
@@ -371,7 +371,7 @@
 			hand_gap : 0.05,
 			float : 60,
 			card : (src : string) : Client_Card => {
-				return new Client_Card(src, three.create.size, hover);
+				return reactive(new Client_Card(src, three.create.size, hover));
 			},
 			back : (srcs : Array<string> = []) : CSS.CSS3DObject => {
 				const dom = document.createElement('div');
