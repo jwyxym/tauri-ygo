@@ -136,7 +136,7 @@
 					return mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_TYPE);
 				const cards = page.deck.main.concat(page.deck.extra, page.deck.side);
 				const ct = props.lflist ? mainGame.get.lflist(props.lflist, card.id) as number : mainGame.get.system(CONSTANT.KEYS.SETTING_CT_CARD) as number;
-				const chk = page.move.index.from === deck ? 1 : 0;
+				const chk = page.move.index.from > -1 ? 1 : 0;
 				if (cards.filter(i => i.code === code).length >= ct + chk)
 					return mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_MAX, ct.toString());
 				switch (deck) {
