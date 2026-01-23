@@ -20,26 +20,17 @@
 				}px`
 			}"
 		>
-			<div class = 'card'
+			<Pic
 				v-for = 'i in [...page.deck.main, ...page.deck.extra, ...page.deck.side]'
 				:key = 'i.key'
 				:id = 'i.key'
-				:class = "{ 'hover' : page.move.card === i, 'show' : !!i.loc }"
-				:style = "{
-					'--position_x' :  `${(i.index % 10) * page.size.width + 2}px`,
-					'--position_y' :  `${(Math.trunc(i.index / 10) + i.y) * page.size.height + i.loc}px`,
-					'--hover_x' :  `${page.move.x}px`,
-					'--hover_y' :  `${page.move.y}px`,
-					'--url' : `url('${mainGame.get.card(i.code).pic}')`,
-				}"
+				:i = 'i'
+				:hover = 'page.move'
+				:size = 'page.size'
+				:hover_card = 'page.move.card'
+				:lflist = 'lflist'
 				ref = 'cards'
-			>
-				<var-badge
-					type = 'info'
-					v-if = 'props.lflist && mainGame.get.lflist(props.lflist, i.code) !== mainGame.get.system(CONSTANT.KEYS.SETTING_CT_CARD)'
-					:value = 'mainGame.get.lflist(props.lflist, i.code)'
-				/>
-			</div>
+			/>
 			<span ref = 'main_title'>{{ page.title.main }}&nbsp;:&nbsp;{{ page.deck.main.length }}</span>
 			<div class = 'box'
 				:style = "{
@@ -86,22 +77,20 @@
 	</main>
 </template>
 <script setup lang = 'ts'>
-	import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+	import { computed, onMounted, onUnmounted, reactive, ref, watch, type ComponentPublicInstance } from 'vue';
 	import mainGame from '@/script/game';
 	import * as CONSTANT from '@/script/constant';
 	import { I18N_KEYS } from '@/script/language/i18n';
 	import Card from '@/script/card';
 	import toast from '@/script/toast';
 	import Deck from '@/pages/deck/deck';
+	import Pic, { CardPic, CardPics } from './pic.vue';
 
 	const deck = ref<HTMLElement | null>(null);
 	const main_title = ref<HTMLElement | null>(null);
 	const extra_title = ref<HTMLElement | null>(null);
 	const side_title = ref<HTMLElement | null>(null);
-	const cards = ref<Array<HTMLElement> | null>(null);
-
-	interface CardPic { code : number; index : number; y : number; loc : number; key : string; };
-	type CardPics = Array<CardPic>;	
+	const cards = ref<Array<ComponentPublicInstance> | null>(null);
 	
 	const page = reactive({
 		deck : {
@@ -166,7 +155,6 @@
 			side : computed(() : number => Math.max((Math.trunc(page.deck.side.length / 10) + 1), 2)),
 			resize : async () : Promise<void> => {
 				page.size.width = (props.width - 20) / props.count;
-				console.log(page.size.width, props.width)
 				page.size.height = page.size.width * 1.45;
 				
 				const extra_y = page.size.main;
@@ -205,7 +193,7 @@
 				});
 			},
 			start : (target : HTMLElement, x : number, y : number, code ?: number) => {
-				const v : number = cards.value?.findIndex(i => i.contains(target)) ?? -1;
+				const v : number = cards.value?.findIndex(i => i.$el.contains(target)) ?? -1;
 				if (v < 0) {
 					if (code) {
 						page.move.x = x;
@@ -217,7 +205,7 @@
 					}
 					return;
 				}
-				cards.value![v].style.transition = 'none';
+				cards.value![v].$el.style.transition = 'none';
 				page.move.x = x;
 				page.move.y = y;
 				page.move.main = page.deck.main.slice().sort(page.move.sort);
@@ -451,29 +439,6 @@
 					height: 100%;
 					background: rgba(255, 255, 255, 0.3);
 				}
-			}
-			.card {
-				position: absolute;
-				left: 0;
-				top: 0;
-				opacity: 0;
-				height: var(--card_height);
-				width: var(--card_width);
-				transform: translate(var(--position_x), var(--position_y));
-				background-image: var(--url);
-				background-size: cover;
-				z-index: 0;
-				transition: all 0.1s ease;
-			}
-			.show {
-				opacity: 1;
-			}
-			.hover {
-				position: fixed;
-				left: 0;
-				top: 0;
-				transform: translate(var(--hover_x), var(--hover_y));
-				z-index: 1;
 			}
 		}
 		&::-webkit-scrollbar {
