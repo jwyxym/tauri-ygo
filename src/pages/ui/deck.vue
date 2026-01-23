@@ -3,9 +3,9 @@
 		ref = 'deck'
 		:style = "{
 			'--height' : `${height}px`,
+			'--width' : `${width}px`,
 			'--card_height' : `${page.size.height}px`,
-			'--card_width' : `${page.size.width}px`,
-			'--box_width' : `${page.size.width * 10}px`
+			'--card_width' : `${page.size.width}px`
 		}"
 	>
 		<div
@@ -42,7 +42,6 @@
 			</div>
 			<span ref = 'main_title'>{{ page.title.main }}&nbsp;:&nbsp;{{ page.deck.main.length }}</span>
 			<div class = 'box'
-				ref = 'main'
 				:style = "{
 					'--box_height' : `${page.size.main * page.size.height}px`,
 				}"
@@ -57,7 +56,6 @@
 			</div>
 			<span ref = 'extra_title'>{{ page.title.extra }}&nbsp;:&nbsp;{{ page.deck.extra.length }}</span>
 			<div class = 'box'
-				ref = 'extra'
 				:style = "{
 					'--box_height' : `${ page.size.extra * page.size.height}px`
 				}"
@@ -72,7 +70,6 @@
 			</div>
 			<span ref = 'side_title'>{{ page.title.side }}&nbsp;:&nbsp;{{ page.deck.side.length }}</span>
 			<div class = 'box'
-				ref = 'side'
 				:style = "{
 					'--box_height' : `${page.size.side * page.size.height}px`
 				}"
@@ -98,9 +95,6 @@
 	import Deck from '@/pages/deck/deck';
 
 	const deck = ref<HTMLElement | null>(null);
-	const main = ref<HTMLElement | null>(null);
-	const extra = ref<HTMLElement | null>(null);
-	const side = ref<HTMLElement | null>(null);
 	const main_title = ref<HTMLElement | null>(null);
 	const extra_title = ref<HTMLElement | null>(null);
 	const side_title = ref<HTMLElement | null>(null);
@@ -165,16 +159,15 @@
 			side : ''
 		},
 		size : {
-			count : 10,
 			width : 0,
 			height : 0,
 			main : computed(() : number => Math.max((Math.trunc(page.deck.main.length / 10) + 1), 6)),
 			extra : computed(() : number => Math.max((Math.trunc(page.deck.extra.length / 10) + 1), 2)),
 			side : computed(() : number => Math.max((Math.trunc(page.deck.side.length / 10) + 1), 2)),
 			resize : async () : Promise<void> => {
-				const width = Math.max(window.innerWidth * 0.04, 30);
-				page.size.width = width;
-				page.size.height = width * 1.45;
+				page.size.width = (props.width - 20) / props.count;
+				console.log(page.size.width, props.width)
+				page.size.height = page.size.width * 1.45;
 				
 				const extra_y = page.size.main;
 				const side_y = extra_y + page.size.extra;
@@ -385,7 +378,6 @@
 		page.title.extra = mainGame.get.text(I18N_KEYS.DECK_EXTRA);
 		page.title.side = mainGame.get.text(I18N_KEYS.DECK_SIDE);
 		page.size.resize();
-		window.addEventListener("resize", page.size.resize);
 		window.addEventListener("mousedown", page.move.mousedown);
 		window.addEventListener("mousemove", page.move.mousemove);
 		window.addEventListener("mouseup", page.move.mouseup);
@@ -393,7 +385,6 @@
 	});
 
 	onUnmounted(() => {
-		window.removeEventListener("resize", page.size.resize);
 		window.removeEventListener("mousedown", page.move.mousedown);
 		window.removeEventListener("mousemove", page.move.mousemove);
 		window.removeEventListener("mouseup", page.move.mouseup);
@@ -401,17 +392,25 @@
 
 	const emit = defineEmits<{ card : [card : number]; }>();
 
+	const props = defineProps<{
+		height : number;
+		width : number;
+		count : number;
+		deck : Deck;
+		lflist ?: string
+	}>();
+
 	watch(() => page.move.card, (n) => {
 		if (!n || !(page.deck.main.includes(n) || page.deck.extra.includes(n) || page.deck.side.includes(n)))
 			return;
 		emit('card', n.code);
 	});
 
-	const props = defineProps<{ height : number; deck : Deck; lflist ?: string }>();
+	watch(() => props.width, page.size.resize);
 </script>
 <style scoped lang = 'scss'>
 	main {
-		width: calc(var(--box_width) + 20px);
+		width: var(--width);
 		height: var(--height);
 		overflow-y: auto;
 		overflow-x: hidden;
@@ -419,7 +418,7 @@
 		color: white;
 		> div {
 			position: relative;
-			width: var(--box_width);
+			width: calc(var(--width) - 20px);
 			height: var(--height);
 			.box {
 				height: var(--box_height);

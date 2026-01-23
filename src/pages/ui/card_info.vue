@@ -2,6 +2,7 @@
 	<main
 		:style = "{
 			'--height' : `${height}px`,
+			'--width' : `${width}px`,
 		}"
 		class = 'no-scrollbar'
 	>
@@ -94,7 +95,11 @@
 		}
 	})
 
-	const props = defineProps<{ height : number; code ?: string | number | Card | Client_Card; }>();
+	const props = defineProps<{
+		height : number;
+		width : number;
+		code ?: string | number | Card | Client_Card;
+	}>();
 
 	watch(() => props.code, (n) => {
 		if (!n)
@@ -140,7 +145,7 @@
 <style lang = 'scss' scoped>
 	$color-sub : rgb(203, 203, 203);
 	main {
-		width: min(calc(var(--vw) * 0.3), calc(var(--vw) / 2 - 150px));
+		width: var(--width);
 		height: var(--height);
 		overflow-y: auto;
 		overflow-x: hidden;
