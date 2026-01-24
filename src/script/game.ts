@@ -179,6 +179,9 @@ class Game {
 	};
 
 	get = {
+		icon : (type : string, key : number) : string => {
+			return (this.get.textures((this.icons.get(type)!.get(key) ?? '') + '.png') as string | undefined) ?? '';
+		},
 		text : (key : number, replace : string | number | Array<string> | Array<number> | Array<string | number> = []) : string => {
 			switch (this.i18n) {
 				case CONSTANT.LANGUAGE.Zh_CN:

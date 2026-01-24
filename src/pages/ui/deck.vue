@@ -151,7 +151,7 @@
 			extra : computed(() : number => Math.max((Math.trunc(page.deck.extra.length / 10) + 1), 2)),
 			side : computed(() : number => Math.max((Math.trunc(page.deck.side.length / 10) + 1), 2)),
 			resize : async () : Promise<void> => {
-				page.size.width = (props.width - 20) / props.count;
+				page.size.width = (props.width - 30) / props.count;
 				page.size.height = page.size.width * 1.45;
 				
 				const extra_y = page.size.main;
@@ -436,7 +436,7 @@
 		color: white;
 		> div {
 			position: relative;
-			width: calc(var(--width) - 20px);
+			width: calc(var(--width) - 30px);
 			height: var(--height);
 			.box {
 				height: var(--box_height);

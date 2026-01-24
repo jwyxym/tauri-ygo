@@ -134,10 +134,10 @@ class Card {
 				result.race = mainGame.get.textures(race + '.png') as string | undefined ?? ''
 			result.info.push({
 				icon : mainGame.get.textures((() : string => {
-					return this.is_link() ? CONSTANT.FILES.TEXTURE_TYPE_LINK
-						: this.is_xyz() ? CONSTANT.FILES.TEXTURE_TYPE_RANK
-							: this.is_tuner() ? CONSTANT.FILES.TEXTURE_TYPE_TUNER
-								: CONSTANT.FILES.TEXTURE_TYPE_LV
+					return this.is_link() ? CONSTANT.FILES.TEXTURE_INFO_LINK
+						: this.is_xyz() ? CONSTANT.FILES.TEXTURE_INFO_RANK
+							: this.is_tuner() ? CONSTANT.FILES.TEXTURE_INFO_TUNER
+								: CONSTANT.FILES.TEXTURE_INFO_LV
 					;
 				})()) as string | undefined ?? '',
 				content : this.level
@@ -153,7 +153,7 @@ class Card {
 				});
 			if (this.is_pendulum())
 				result.info.push({
-					icon : mainGame.get.textures(CONSTANT.FILES.TEXTURE_TYPE_SCALE) as string | undefined ?? '',
+					icon : mainGame.get.textures(CONSTANT.FILES.TEXTURE_INFO_SCALE) as string | undefined ?? '',
 					content : this.scale
 				});
 		} else if (this.is_spell()) {

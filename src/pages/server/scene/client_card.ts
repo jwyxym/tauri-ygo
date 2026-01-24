@@ -134,12 +134,12 @@ class Client_Card {
 				userSelect: 'none'
 			});
 			for (const [key, src] of [
-				['link', CONSTANT.FILES.TEXTURE_TYPE_LINK],
-				['rank', CONSTANT.FILES.TEXTURE_TYPE_RANK],
-				['overlay', CONSTANT.FILES.TEXTURE_TYPE_OVERLAY],
-				['scale', CONSTANT.FILES.TEXTURE_TYPE_SCALE],
-				['tuner', CONSTANT.FILES.TEXTURE_TYPE_TUNER],
-				['level', CONSTANT.FILES.TEXTURE_TYPE_LV],
+				['link', CONSTANT.FILES.TEXTURE_INFO_LINK],
+				['rank', CONSTANT.FILES.TEXTURE_INFO_RANK],
+				['overlay', CONSTANT.FILES.TEXTURE_INFO_OVERLAY],
+				['scale', CONSTANT.FILES.TEXTURE_INFO_SCALE],
+				['tuner', CONSTANT.FILES.TEXTURE_INFO_TUNER],
+				['level', CONSTANT.FILES.TEXTURE_INFO_LV],
 			]) {
 				const div = document.createElement('div');
 				div.classList.add(key);
