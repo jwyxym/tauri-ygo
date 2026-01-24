@@ -1,6 +1,6 @@
 <template>
 	<var-input
-		:variant = "variant ? 'outlined' : 'standard'"
+		:variant = "variant ? variant : 'standard'"
 		:placeholder = 'placeholder'
 		:rules = 'rules'
 		:clearable = 'true'
@@ -10,5 +10,9 @@
 	/>
 </template>
 <script setup lang = 'ts'>
-	defineProps(['placeholder', 'rules', 'variant']);
+	defineProps<{
+		placeholder ?: string;
+		variant ?: 'outlined' | 'standard';
+		rules ?: (value : string) => string | boolean
+	}>();
 </script>

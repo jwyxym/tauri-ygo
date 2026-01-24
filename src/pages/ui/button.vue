@@ -93,4 +93,6 @@
 		['collapse', Collapse]
 	]);
 	const svg : null | Component = props.icon_name ? svgs.get(props.icon_name)! : null;
+
+	export type { Icon };
 </script>

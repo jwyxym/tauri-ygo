@@ -1,51 +1,5 @@
-.deck_body {
-	position: relative;
-	width: 100%;
-	height: 100%;
-	.deck_show {
-		position: absolute;
-		transform: translateY(10px);
-		width: 100%;
-		height: 100%;
-		display: flex;
-		.deck {
-			width: 90%;
-			height: 100%;
-			overflow-y: auto;
-			color: white;
-			&::-webkit-scrollbar {
-				display: none;
-			}
-			.main, .side, .extra {
-				width: 100%;
-				transition: all 0.4s ease;
-				min-height: var(--height);
-				.card {
-					height: var(--card_height);
-					width: var(--card_width);
-					display: inline-block;
-					img {
-						width: 100%;
-						height: 100%;
-					}
-				}
-			}
-		}
-	}
-	.card {
-		div {
-			position: relative;
-			.var-badge {
-				position: absolute;
-				right: 0;
-			}
-		}
-	}
-}
-
-.move_left {
-	&-enter-active,
-	&-leave-active {
-		transition: transform 0.2s ease;
-	}
+main {
+	display: flex;
+	align-self: center;
+	justify-items: flex-start;
 }

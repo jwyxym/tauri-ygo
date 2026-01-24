@@ -3,9 +3,7 @@
 		ref = 'deck'
 		:style = "{
 			'--height' : `${height}px`,
-			'--width' : `${width}px`,
-			'--card_height' : `${page.size.height}px`,
-			'--card_width' : `${page.size.width}px`
+			'--width' : `${width}px`
 		}"
 	>
 		<div
@@ -27,7 +25,6 @@
 				:i = 'i'
 				:hover = 'page.move'
 				:size = 'page.size'
-				:hover_card = 'page.move.card'
 				:lflist = 'lflist'
 				ref = 'cards'
 			/>
@@ -77,7 +74,7 @@
 	</main>
 </template>
 <script setup lang = 'ts'>
-	import { computed, onMounted, onUnmounted, reactive, ref, watch, type ComponentPublicInstance } from 'vue';
+	import { computed, onBeforeMount, onMounted, onUnmounted, reactive, ref, watch, ComponentPublicInstance } from 'vue';
 	import mainGame from '@/script/game';
 	import * as CONSTANT from '@/script/constant';
 	import { I18N_KEYS } from '@/script/language/i18n';
@@ -172,8 +169,8 @@
 			index : {
 				x : 0,
 				y : 0,
-				deck : -1,
-				from : -1
+				deck : -1 as -1 | 0 | 1 | 2,
+				from : -1 as -1 | 0 | 1 | 2
 			},
 			color : {
 				deck : -1,
@@ -202,6 +199,7 @@
 						page.move.main = page.deck.main.slice().sort(page.move.sort);
 						page.move.extra = page.deck.extra.slice().sort(page.move.sort);
 						page.move.side = page.deck.side.slice().sort(page.move.sort);
+						emit('move', x, y);
 					}
 					return;
 				}
@@ -214,14 +212,26 @@
 				page.move.card = page.move.main.concat(page.move.extra, page.move.side).find(i => target.id === i.key);
 				[page.deck.main, page.deck.extra, page.deck.side].forEach((i, v) => {
 					if (i.includes(page.move.card!))
-						page.move.index.from = v;
+						page.move.index.from = v as 0 | 1 | 2;
 				});
+				page.move.index.deck = page.move.index.from;
 			},
 			move : (x : number, y : number) => {
 				if (!page.move.card) return;
 				page.move.x = x;
 				page.move.y = y;
+				emit('move', x, y);
 				if (!deck.value) return;
+				const decks = [page.move.main, page.move.extra, page.move.side];
+				const moveout = () => {
+					if (page.move.index.deck > -1)
+						page.move.resort(decks[page.move.index.deck]);
+					page.move.index.deck = -1;
+					page.move.color = {
+						deck : -1,
+						err : true
+					};
+				}
 				const pos = deck.value.getBoundingClientRect();
 				if (y > pos.bottom && !page.move.on) {
 					deck.value!.scrollTop += window.innerHeight;
@@ -267,8 +277,9 @@
 							});
 							page.move.card!.index = index;
 						}
-						const decks = [page.move.main, page.move.extra, page.move.side];
-						if (pic_y < page.size.main) {
+						if (pic_y < 0)
+							moveout();
+						else if (pic_y < page.size.main) {
 							const err = page.deck.check(page.move.card.code, 0);
 							if (page.move.color.deck !== 0)
 								page.move.color = {
@@ -311,19 +322,28 @@
 							page.move.index.deck = 2;
 							sort(page.move.side, index);
 						}
-					}
+					} else moveout();
 				}
 			},
 			end : async (target ?: HTMLElement) : Promise<void> => {
-				if (page.move.index.deck !== page.move.index.from && page.move.index.deck >= 0 && page.move.index.from >= 0) {
-					const decks = [page.deck.main, page.deck.extra, page.deck.side];
-					decks[page.move.index.deck].push(page.move.card!);
+				if (!page.move.card) return;
+				const decks = [page.deck.main, page.deck.extra, page.deck.side];
+				if (page.move.index.deck !== page.move.index.from && page.move.index.deck >= 0) {
+					decks[page.move.index.deck].push(page.move.card);
 					if (page.move.index.from > -1) {
 						const ct = decks[page.move.index.from].indexOf(page.move.card!);
 						decks[page.move.index.from].splice(ct, 1);
 						page.move.resort(decks[page.move.index.from]);
 					}
 					page.size.resize();
+				} else if (page.move.index.deck < 0 && page.move.index.from > -1) {
+					if (target)
+						target.style.transition = 'all 0.1s ease';
+					const ct = decks[page.move.index.from].indexOf(page.move.card!);
+					decks[page.move.index.from][ct].loc = 0;
+					await mainGame.sleep(100);
+					decks[page.move.index.from].splice(ct, 1);
+					page.move.resort(decks[page.move.index.from]);
 				}
 				if (target)
 					setTimeout(() => target.style.transition = 'all 0.1s ease', 150);
@@ -335,6 +355,7 @@
 				page.move.card = undefined;
 				page.move.x = 0;
 				page.move.y = 0;
+				emit('move', 0, 0);
 				page.move.main.length = 0;
 				page.move.extra.length = 0;
 				page.move.side.length = 0;
@@ -352,6 +373,8 @@
 			mouseup : async (e : MouseEvent) : Promise<void> => await page.move.end(e.target as HTMLElement)
 		}
 	});
+
+	onBeforeMount(() => emit('hover', page.move.start));
 
 	onMounted(async () => {
 		await mainGame.load.pic(props.deck);
@@ -378,7 +401,11 @@
 		window.removeEventListener("mouseup", page.move.mouseup);
 	});
 
-	const emit = defineEmits<{ card : [card : number]; }>();
+	const emit = defineEmits<{
+		card : [card : number];
+		hover : [hover : Hover];
+		move : [x : number, y : number];
+	}>();
 
 	const props = defineProps<{
 		height : number;
@@ -395,6 +422,9 @@
 	});
 
 	watch(() => props.width, page.size.resize);
+
+	type Hover = (target : HTMLElement, x : number, y : number, code ?: number) => void;
+	export type { Hover };
 </script>
 <style scoped lang = 'scss'>
 	main {

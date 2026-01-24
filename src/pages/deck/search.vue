@@ -2,7 +2,7 @@
 	<div class = 'search' ref = 'dom'>
 		<Input
 			:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_INFO_NAME)'
-			:variant = 'true'
+			variant = 'outlined'
 			v-model = 'search.info.desc'
 			@keydown = 'page.press'
 		/>

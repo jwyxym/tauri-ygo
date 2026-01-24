@@ -3,18 +3,12 @@
 		<Input
 			:placeholder = 'mainGame.get.text(I18N_KEYS.DECK_NAME)'
 			:rules = 'deck.name_rule'
-			:variant = 'true'
+			variant = 'outlined'
 			v-model = 'deck.name'
 		/>
 		<div class = 'btn'>
 			<div
-				v-for = "i in [
-					{ icon : 'save', key : I18N_KEYS.DECK_SETTING_SAVE, func : deck.save },
-					{ icon : 'share', key : I18N_KEYS.DECK_SETTING_SHARE, func : deck.copy },
-					{ icon : 'sort', key : I18N_KEYS.DECK_SETTING_SORT, func : deck.sort },
-					{ icon : 'disrupt', key : I18N_KEYS.DECK_SETTING_DISRUPT, func : deck.disrupt },
-					{ icon : 'clear', key : I18N_KEYS.DECK_SETTING_CLEAR, func : deck.clear },
-				]"
+				v-for = "i in page.btns"
 			>
 				<Button
 					:icon_name = 'i.icon'
@@ -30,7 +24,7 @@
 	import mainGame from '@/script/game';
 	import { I18N_KEYS } from '@/script/language/i18n';
 	import Input from '@/pages/ui/input.vue';
-	import Button from '@/pages/ui/button.vue';
+	import Button, { Icon } from '@/pages/ui/button.vue';
 
 	const dom = ref<HTMLElement | null>(null);
 	const props = defineProps(['deck', 'except', 'unshow']);
@@ -47,7 +41,14 @@
 		keydown : (e : KeyboardEvent) => {
 			if (e.key === 'Escape' && !props.deck.show.setting.block)
 				props.unshow();
-		}
+		},
+		btns : [
+			{ icon : 'save', key : I18N_KEYS.DECK_SETTING_SAVE, func : props.deck.save },
+			{ icon : 'share', key : I18N_KEYS.DECK_SETTING_SHARE, func : props.deck.copy },
+			{ icon : 'sort', key : I18N_KEYS.DECK_SETTING_SORT, func : props.deck.sort },
+			{ icon : 'disrupt', key : I18N_KEYS.DECK_SETTING_DISRUPT, func : props.deck.disrupt },
+			{ icon : 'clear', key : I18N_KEYS.DECK_SETTING_CLEAR, func : props.deck.clear },
+		] as Array<{ icon : Icon; key : number; func : Function; }>
 	};
 
 	defineExpose({

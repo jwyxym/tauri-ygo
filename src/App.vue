@@ -222,11 +222,14 @@
 	.font-menu {
 		font-family: 'menu' !important;
 	}
-
 	.var-picker__picked {
 		border: 1px solid white !important;
 	}
-
+	.no-scrollbar {
+		&::-webkit-scrollbar {
+			display: none;
+		}
+	}
 	:root {
 		--picker-mask-background-image: transparent !important;
 		--picker-background: transparent !important;

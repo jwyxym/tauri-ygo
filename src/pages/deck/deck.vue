@@ -1,160 +1,31 @@
 <template>
-	<div class = 'deck_body'>
-		<transition name = 'move_right'>
-			<Float_Buttons
-				ref = 'float_buttons'
-				:list = "[
-					{
-						click : deck.show.setting.select,
-						icon : 'deck',
-						show : true
-					}, {
-						click : deck.show.searcher.select,
-						icon : 'search',
-						show : true
-					}, {
-						click : deck.exit,
-						icon : 'exit',
-						show : true
-					}
-				]"
-				v-show = '!deck.show.setting.chk && !deck.show.searcher.chk'
-			/>
-		</transition>
-		<transition name = 'move_left'>
-			<Card_Drawer
-				:card = 'cardinfo.card'
-				:deck = 'deck'
-				:except = '[
-					...(cards ?? []),
-					float_buttons?.dom,
-					deck_search?.dom
-				]'
-				:unshow = 'cardinfo.off'
-				v-if = "cardinfo.card !== ''"
-				ref = 'card_drawer'
-			/>
-		</transition>
-		<transition name = 'move_right'>
-			<Deck_Setting
-				:deck = 'deck'
-				:except = '[
-					...(cards ?? []),
-					float_buttons?.dom,
-					card_drawer?.dom
-				]'
-				:unshow = 'deck.show.setting.unselect'
-				v-if = 'deck.show.setting.chk'
-			/>
-		</transition>
-		<transition name = 'move_right'>
-			<Deck_Search
-				:deck = 'deck'
-				:search = 'search'
-				:cardinfo = 'cardinfo'
-				:add = 'deck.push.main'
-				:except = '[
-					...(cards ?? []),
-					float_buttons?.dom,
-					card_drawer?.dom
-				]'
-				:unshow = 'deck.show.searcher.unselect'
-				v-if = 'deck.show.searcher.chk'
-				ref = 'deck_search'
-			/>
-		</transition>
-		<div class = 'deck_show'>
-			<div class = 'deck'>
-				<span>{{ `${mainGame.get.text(I18N_KEYS.DECK_MAIN)} : ${deck.main.length}` }}</span>
-				<div
-					class = 'main'
-					ref = 'main'
-					:style = "{
-						'--height' : `${(Math.trunc(deck.main.length / 20) + 1) * (deck.size.height + 5)}px`,
-						'--card_height' : `${deck.size.height}px`,
-						'--card_width' : `${deck.size.width}px`
-					}"
-				>
-					<TransitionGroup tag = 'div' name = 'scale' class = 'deck_main'>
-						<div
-							v-for = '(i, v) in deck.main'
-							:data-swapy-slot = "swapy.random('main_card', v, i)"
-							class = 'card'
-							ref = 'cards'
-							:key = 'i'
-						>
-								<div :data-swapy-item = "swapy.random('main_card', v, i)" @click = 'cardinfo.on(i)' @contextmenu = 'deck.remove.main(i)'>
-									<img :src = 'mainGame.get.card(i).pic' ref = 'main_card' :alt = 'i.toString()'></img>
-									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
-										<template #value>
-											{{ deck.get_ct(i) }}
-										</template>
-									</var-badge>
-								</div>
-						</div>
-					</TransitionGroup>
-				</div>
-				<span>{{ `${mainGame.get.text(I18N_KEYS.DECK_EXTRA)} : ${deck.extra.length}` }}</span>
-				<div
-					class = 'extra'
-					ref = 'extra'
-					:style = "{
-						'--height' : `${(Math.trunc(deck.extra.length / 20) + 1) * (deck.size.height + 5)}px`,
-						'--card_height' : `${deck.size.height}px`,
-						'--card_width' : `${deck.size.width}px`
-					}"
-				>
-					<TransitionGroup tag = 'div' name = 'scale' class = 'deck_extra'>
-						<div
-							v-for = '(i, v) in deck.extra'
-							:data-swapy-slot = "swapy.random('extra_card', v, i)"
-							class = 'card'
-							ref = 'cards'
-							:key = 'i'
-						>
-								<div :data-swapy-item = "swapy.random('extra_card', v, i)" @click = 'cardinfo.on(i)' @contextmenu = 'deck.remove.main(i)'>
-									<img :src = 'mainGame.get.card(i).pic' ref = 'extra_card' :alt = 'i.toString()'></img>
-									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
-										<template #value>
-											{{ deck.get_ct(i) }}
-										</template>
-									</var-badge>
-								</div>
-						</div>
-					</TransitionGroup>
-				</div>
-				<span>{{ `${mainGame.get.text(I18N_KEYS.DECK_SIDE)} : ${deck.side.length}` }}</span>
-				<div
-					class = 'side'
-					ref = 'side'
-					:style = "{
-						'--height' : `${(Math.trunc(deck.side.length / 20) + 1) * (deck.size.height + 5)}px`,
-						'--card_height' : `${deck.size.height}px`,
-						'--card_width' : `${deck.size.width}px`
-					}"
-				>
-					<TransitionGroup tag = 'div' name = 'scale' class = 'deck_side'>
-						<div
-							v-for = '(i, v) in deck.side'
-							:data-swapy-slot = "swapy.random('side_card', v, i)"
-							class = 'card'
-							:key = 'i'
-							ref = 'cards'
-						>
-								<div :data-swapy-item = "swapy.random('side_card', v, i)" @click = 'cardinfo.on(i)' @contextmenu = 'deck.remove.side(i)'>
-									<img :src = 'mainGame.get.card(i).pic' ref = 'side_card' :alt = 'i.toString()'></img>
-									<var-badge type = 'primary' v-show = 'deck.get_ct(i) < 3'>
-										<template #value>
-											{{ deck.get_ct(i) }}
-										</template>
-									</var-badge>
-								</div>
-						</div>
-					</TransitionGroup>
-				</div>
-			</div>
-		</div>
-	</div>
+	<main class = 'deck'>
+		<Card_Box
+			:height = 'page.height'
+			:width = 'page.width[0]'
+			:code = 'page.card'
+			@card = 'page.oncard'
+		/>
+		<Deck_Box
+			:height = 'page.height'
+			:width = 'page.width[1]'
+			:count = '10'
+			:deck = 'this_deck'
+			:lflist = 'search.info.lflist'
+			@card = 'page.oncard'
+			@move = 'page.move.on'
+			@hover = '(hover : Hover) => page.hover = hover'
+		/>
+		<Search_Box
+			:height = 'page.height'
+			:width = 'page.width[0]'
+			:count = '10'
+			:hover = 'page.hover!'
+			:move = 'page.move'
+			@card = 'page.oncard'
+			@lflist = '(lflist : string) => search.info.lflist = lflist'
+		/>
+	</main>
 </template>
 <script setup lang = 'ts'>
 	import { ref, reactive, onMounted, Ref, watch, onBeforeMount, onUnmounted } from "vue";
@@ -170,12 +41,37 @@
 	import fs from '@/script/fs';
 
 	import Dialog from '@/pages/ui/dialog';
+	import Deck_Box, { Hover } from "@/pages/ui/deck.vue";
+	import Card_Box from "@/pages/ui/card_info.vue";
+	import Search_Box from "@/pages/ui/searcher.vue";
 	import Float_Buttons from '@/pages/ui/float_buttons.vue';
 	import Card_Drawer from './card.vue';
 	import Deck_Setting from './setting.vue';
 	import Deck_Search from './search.vue';
 
 	import Deck from './deck';
+
+	const page = reactive({
+		height : 0,
+		width : new Array(2).fill(0),
+		resize : () : void => {
+			page.height = window.innerHeight * 0.9;
+			const width = Math.max(window.innerWidth * 0.4, 300) + 20;
+			page.width[0] = (window.innerWidth - width) / 2;
+			page.width[1] = width;
+		},
+		card : 0,
+		move : {
+			x : 0,
+			y : 0,
+			on : (x : number, y : number) => {
+				page.move.x = x;
+				page.move.y = y;
+			}
+		},
+		hover : undefined as undefined | Hover,
+		oncard : (card : number) => page.card = card
+	});
 
 	const props = defineProps(['this_deck', 'offdeck', 'update']);
 
@@ -492,31 +388,12 @@
 	});
 
 	onBeforeMount(async () : Promise<void> => {
-		const d = props.this_deck;
-		await mainGame.load.pic(deck.main.concat(deck.extra, deck.side));
-		if (props.this_deck) {
-			deck.main = d.main;
-			deck.extra = d.extra;
-			deck.side = d.side;
-			deck.name = d.name;
-		}
-	});
-
-	onMounted(() : void => {
-		if (mainGame.get.system(CONSTANT.KEYS.SETTING_SELECT_SORT) === 1) {
-			for (const i of [main, extra, side]) {
-				Sortable.create(i.value!.children[0], {
-					animation : 150,
-					draggable : '.card'
-				});
-			}
-		}
-		deck.size.resize();
-		window.addEventListener("resize", deck.size.resize);
+		page.resize();
+		window.addEventListener("resize", page.resize);
 	});
 
 	onUnmounted(() => {
-		window.removeEventListener("resize", deck.size.resize);
+		window.removeEventListener("resize", page.resize);
 	});
 
 	watch(() => { return search.form.ot; }, (n) => {
