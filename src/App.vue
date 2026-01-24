@@ -172,7 +172,7 @@
 <style lang = 'scss'>
 	@use './style/toast.scss';
 	@use './style/transition.scss';
-	.var-icon {
+	.var-icon, .cursor {
 		&:hover {
 			cursor: pointer;
 		}

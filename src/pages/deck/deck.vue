@@ -41,22 +41,22 @@
 	import fs from '@/script/fs';
 
 	import Dialog from '@/pages/ui/dialog';
-	import Deck_Box, { Hover } from "@/pages/ui/deck.vue";
-	import Card_Box from "@/pages/ui/card_info.vue";
-	import Search_Box from "@/pages/ui/searcher.vue";
+	import Deck_Box, { Hover } from '@/pages/ui/deck.vue';
+	import Card_Box from '@/pages/ui/card_info.vue';
 	import Float_Buttons from '@/pages/ui/float_buttons.vue';
 	import Card_Drawer from './card.vue';
 	import Deck_Setting from './setting.vue';
 	import Deck_Search from './search.vue';
 
 	import Deck from './deck';
+	import Search_Box from './searcher.vue';
 
 	const page = reactive({
 		height : 0,
 		width : new Array(2).fill(0),
 		resize : () : void => {
 			page.height = window.innerHeight * 0.9;
-			const width = Math.max(window.innerWidth * 0.4, 300) + 20;
+			const width = Math.max(window.innerWidth * 0.4, 300) + 30;
 			page.width[0] = (window.innerWidth - width) / 2;
 			page.width[1] = width;
 		},
