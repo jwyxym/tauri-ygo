@@ -79,6 +79,7 @@ const FILES = {
 	TEXTURE_BTN_PSUMMON : ['btn_psummon.png', 'btn_hover_psummon.png'],
 	TEXTURE_BTN_SPSUMMON : ['btn_spsummon.png', 'btn_hover_spsummon.png'],
 	TEXTURE_BTN_SUMMON : ['btn_summon.png', 'btn_hover_summon.png'],
+	TEXTURE_LINK_PIC : ['arrow-{:?}-off.png', 'arrow-{:?}-on.png'],
 	TEXTURE_BACK : ['backI.jpg', 'backII.jpg'],
 	TEXTURE_DECK : ['deck.png', 'deck_ex.png'],
 	STRING_CONF : new Map([

@@ -59,8 +59,9 @@
 				v-for = "j in [
 					{ span : I18N_KEYS.CARD_INFO_OT, results : search.info.ot, cards : search.list.ot, key : KEYS.OT, strings : mainGame.get.strings.ot, class : 'ot' },
 					{ span : I18N_KEYS.CARD_INFO_TYPE, results : search.info.type[0], cards : search.list.card, key : KEYS.TYPE, strings : mainGame.get.strings.type, value : (i : number) => i - ((i & 0x3) === i ? 0 : (i & 0x3)) },
-					{ span : I18N_KEYS.CARD_INFO_SPELL_TRAP_TYPE,  results : search.info.type[2], cards : search.list.spell, key : KEYS.TYPE, strings : mainGame.get.strings.type, value : (i : number) => i - ((i & 0x3) === i ? 0 : (i & 0x3)) },
-					{ span : I18N_KEYS.CARD_INFO_MONSTER_TYPE,  results : search.info.type[1], cards : search.list.monster, key : KEYS.TYPE, strings : mainGame.get.strings.type, value : (i : number) => i - ((i & 0x3) === i ? 0 : (i & 0x3)) },
+					{ span : I18N_KEYS.CARD_INFO_SPELL_TRAP_TYPE,  results : search.info.type[1], cards : search.list.spell, key : KEYS.TYPE, strings : mainGame.get.strings.type, value : (i : number) => i - ((i & 0x3) === i ? 0 : (i & 0x3)) },
+					{ span : I18N_KEYS.CARD_INFO_MONSTER_TYPE,  results : search.info.type[2], cards : search.list.monster, key : KEYS.TYPE, strings : mainGame.get.strings.type, value : (i : number) => i - ((i & 0x3) === i ? 0 : (i & 0x3)) },
+					{ span : I18N_KEYS.CARD_INFO_EXCEPT_TYPE,  results : search.info.type[3], cards : search.list.except, key : KEYS.TYPE, strings : mainGame.get.strings.type, value : (i : number) => i - ((i & 0x3) === i ? 0 : (i & 0x3)) },
 					{ span : I18N_KEYS.CARD_INFO_ATTRIBUTE, results : search.info.attribute, cards : search.list.attribute, key : KEYS.ATTRIBUTE, strings : mainGame.get.strings.attribute },
 					{ span : I18N_KEYS.CARD_INFO_RACE, results : search.info.race, cards : search.list.race, key : KEYS.RACE, strings : mainGame.get.strings.race },
 					{ span : I18N_KEYS.CARD_INFO_CATEGORY, results : search.info.category, cards : search.list.category, key : KEYS.CATEGORY, strings : mainGame.get.strings.category },
@@ -78,6 +79,22 @@
 						<img :src = 'mainGame.get.icon(j.key, i)!'/>
 						<span>{{ j.strings(j.value ? j.value(i) : i)}}</span>
 					</div>
+				</div>
+			</div>
+			<div class = 'link'>
+				<div></div>
+				<div>
+					<img
+						v-for = '(i, v) in search.list.link[0]'
+						:src = "(mainGame.get.textures(FILES.TEXTURE_LINK_PIC[search.info.link.includes(i) ? 1 : 0].replace('{:?}', (v + 1).toString())) as string)"
+						@click = 'search.select(search.info.link, i)'
+					/>
+					<div></div>
+					<img
+						v-for = '(i, v) in search.list.link[1]'
+						:src = "(mainGame.get.textures(FILES.TEXTURE_LINK_PIC[search.info.link.includes(i) ? 1 : 0].replace('{:?}', (v + 5).toString())) as string)"
+						@click = 'search.select(search.info.link, i)'
+					/>
 				</div>
 			</div>
 			<div
@@ -188,6 +205,25 @@
 		}
 	});
 
+	const monster_type = [
+		TYPE.NORMAL,
+		TYPE.EFFECT,
+		TYPE.FUSION,
+		TYPE.XYZ,
+		TYPE.SYNCHRO,
+		TYPE.PENDULUM,
+		TYPE.LINK,
+		TYPE.RITUAL,
+		TYPE.TUNER,
+		TYPE.SPSUMMON,
+		TYPE.SPIRIT,
+		TYPE.TOON,
+		TYPE.UNION,
+		TYPE.DUAL,
+		TYPE.FLIP,
+		TYPE.TOKEN
+	];
+
 	const search = reactive({
 		x : '100vw',
 		on : () => search.x = '-50%',
@@ -212,24 +248,7 @@
 				TYPE.SPELL,
 				TYPE.TRAP
 			],
-			monster : [
-				TYPE.NORMAL,
-				TYPE.EFFECT,
-				TYPE.FUSION,
-				TYPE.XYZ,
-				TYPE.SYNCHRO,
-				TYPE.PENDULUM,
-				TYPE.LINK,
-				TYPE.RITUAL,
-				TYPE.TUNER,
-				TYPE.SPSUMMON,
-				TYPE.SPIRIT,
-				TYPE.TOON,
-				TYPE.UNION,
-				TYPE.DUAL,
-				TYPE.FLIP,
-				TYPE.TOKEN
-			],
+			monster : monster_type,
 			spell : [
 				TYPE.NORMAL | TYPE.SPELL,
 				TYPE.QUICKPLAY,
@@ -243,13 +262,22 @@
 			race : Array.from(mainGame.strings.get(KEYS.RACE)?.keys() ?? []) as Array<number>,
 			category : Array.from(mainGame.strings.get(KEYS.CATEGORY)?.keys() ?? []) as Array<number>,
 			ot : Array.from(mainGame.strings.get(KEYS.OT)?.keys() ?? []) as Array<number>,
+			except : monster_type.slice(),
+			link : (() => {
+				const arr = Array.from(mainGame.strings.get(KEYS.LINK)?.keys() ?? []);
+				return [
+					arr.slice(0, Math.ceil(arr.length / 2)),
+					arr.slice(Math.ceil(arr.length / 2))
+				];
+			})()
 		},
 		info : {
 			ot : [] as Array<number>,
-			type : [[], [], []] as [Array<number>, Array<number>, Array<number>],
+			type : [[], [], [], []] as [Array<number>, Array<number>, Array<number>, Array<number>],
 			attribute : [] as Array<number>,
 			race : [] as Array<number>,
 			category : [] as Array<number>,
+			link : [] as Array<number>,
 			lv : '',
 			atk : '',
 			def : '',
@@ -310,6 +338,7 @@
 		window.addEventListener("mousedown", page.mousedown);
 		window.addEventListener("mouseup", page.mouseup);
 		await search.search();
+		console.log(search.list.link)
 	});
 
 	onUnmounted(() => {
@@ -361,6 +390,7 @@
 						}
 						> span:last-child {
 							color: rgb(203, 203, 203);
+							font-size: 12px;
 						}
 					}
 				}
@@ -379,9 +409,9 @@
 			width: calc(var(--vw) / 2);
 			height: calc(var(--vh) * 0.9);
 			background-color: rgba(0, 0, 0, 0.8);
-			display: flex;
-			flex-direction: column;
-			gap: 10px;
+			// display: flex;
+			// flex-direction: column;
+			// gap: 10px;
 			color: white;
 			overflow-y: auto;
 			transition: all 0.1s ease;
@@ -421,6 +451,32 @@
 							width: 50px;
 							height: 40px;
 						}
+					}
+				}
+			}
+			.link {
+				width: 120px;
+				height: 120px;
+				position: relative;
+				> div:first-child {
+					position: absolute;
+					width: 70%;
+					height: 70%;
+					border: 1px solid rgba($color: white, $alpha: 0.5);
+					top: 50%;
+					left: 50%;
+					transform: translate(var(--x), -50%);
+				}
+				> div:last-child {
+					position: absolute;
+					width: 100%;
+					height: 100%;
+					display: grid;
+					grid-template-rows: repeat(3, 1fr);
+					grid-template-columns: repeat(3, 1fr);
+					img {
+						width: 40px;
+						height: 40px;
 					}
 				}
 			}

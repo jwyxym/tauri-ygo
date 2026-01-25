@@ -144,6 +144,7 @@
 </script>
 <style lang = 'scss' scoped>
 	$color-sub : rgb(203, 203, 203);
+	$size: clamp(8px, 2vh, 16px);
 	main {
 		width: var(--width);
 		height: var(--height);
@@ -181,14 +182,17 @@
 				flex-direction: column;
 				> span:first-child {
 					font-weight: bold;
+					font-size: 16px;
 				}
 				> span:last-child {
 					color: $color-sub;
+					font-size: 12px;
 				}
 			}
 			+ div {
 				display: flex;
 				flex-wrap: wrap;
+				font-size: $size;
 				> div {
 					min-width: 50%;
 					display: flex;
@@ -201,6 +205,7 @@
 		}
 		> p {
 			white-space: pre-line;
+			font-size: $size;
 			> span:first-child {
 				color: $color-sub;
 			}
