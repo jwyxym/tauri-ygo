@@ -1,5 +1,6 @@
 <template>
 	<div class = 'main' @contextmenu = 'page.contextmenu'>
+		<!-- <Duel :connect = "{deck_count : [60, 15, 15, 60, 15, 15], phase : {phase : 0}}" v-if = 'page.show.menu'/> -->
 		<starry-sky :stars-count = '1500' :distance = '800' id = 'back'/>
 		<Voice v-if = 'page.show.voice'></Voice>
 		<div>
@@ -50,6 +51,7 @@
 	import { I18N_KEYS } from './script/language/i18n';
 	import Dialog from './pages/ui/dialog';
 	import listen from './script/tauri-api/listen';
+import Duel from "./pages/server/scene/duel.vue";
 
 	const page = reactive({
 		show : {

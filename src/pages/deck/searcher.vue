@@ -82,7 +82,7 @@
 				<div>
 					<span>{{ mainGame.get.text(j.span) }}&nbsp;:</span>
 					<var-switch v-model = 'search.switchs[j.switchs as keyof typeof search.switchs]' v-if = 'j.switchs !== undefined'/>
-					<span v-if = 'j.switchs !== undefined'>{{ search.switchs[j.switchs as keyof typeof search.switchs] ? 'and' : 'or' }}</span>
+					<span v-if = 'j.switchs !== undefined' class = 'switch'>{{ search.switchs[j.switchs as keyof typeof search.switchs] ? 'and' : 'or' }}</span>
 				</div>
 				<div>
 					<div
@@ -100,7 +100,7 @@
 				<div>
 					<span>{{ mainGame.get.text(I18N_KEYS.CARD_INFO_LINK) }}&nbsp;:</span>
 					<var-switch v-model = "search.switchs['link' as keyof typeof search.switchs]"/>
-					<span>{{ search.switchs['link' as keyof typeof search.switchs] ? 'and' : 'or' }}</span>
+					<span class = 'switch'>{{ search.switchs['link' as keyof typeof search.switchs] ? 'and' : 'or' }}</span>
 				</div>
 				<div></div>
 				<div>
@@ -441,16 +441,16 @@
 			color: white;
 			overflow-y: auto;
 			transition: all 0.1s ease;
+			> div {
+				margin-left: 10px;
+				max-width: calc(100% - 10px);
+			}
 			.lflist {
 				height: 120px;
 				gap: 10px;
 				.var-select, .var-input {
-					margin-left: 10px;
-					width: calc(40% - 10px);
+					width: 40%;
 				}
-				// .var-input {
-				// 	width: 40%;
-				// }
 			}
 			.select, .input, .lflist {
 				display: flex;
@@ -462,7 +462,7 @@
 					display: flex;
 					align-items: center;
 					gap: 5px;
-					> span:last-child {
+					.switch {
 						color: rgb(203, 203, 203);
 						font-size: 12px;
 					}
