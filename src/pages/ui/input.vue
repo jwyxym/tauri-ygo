@@ -4,6 +4,7 @@
 		:placeholder = 'placeholder'
 		:rules = 'rules'
 		:clearable = 'true'
+		:type = "type ?? 'text'"
 		text-color = 'white'
 		blur-color = 'white'
 		size = 'small'
@@ -13,6 +14,7 @@
 	defineProps<{
 		placeholder ?: string;
 		variant ?: 'outlined' | 'standard';
-		rules ?: (value : string) => string | boolean
+		rules ?: (value : string) => string | boolean;
+		type ?: 'text' | 'password' | 'number' | 'tel'
 	}>();
 </script>

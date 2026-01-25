@@ -156,11 +156,11 @@
 				
 				const extra_y = page.size.main;
 				const side_y = extra_y + page.size.extra;
-				const loc = main_title.value!.getBoundingClientRect().height + 2;
+				const loc = main_title.value!.getBoundingClientRect().height + 4;
 				await mainGame.sleep(100);
 				page.deck.main.forEach(i => { i.y = 0; i.loc = loc; }); 
-				page.deck.extra.forEach(i => { i.y = extra_y; i.loc = loc * 2 + 4; }); 
-				page.deck.side.forEach(i => { i.y = side_y; i.loc = loc * 3 + 6; });
+				page.deck.extra.forEach(i => { i.y = extra_y; i.loc = loc * 2; }); 
+				page.deck.side.forEach(i => { i.y = side_y; i.loc = loc * 3; });
 			}
 		},
 		move : {

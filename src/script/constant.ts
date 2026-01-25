@@ -21,8 +21,8 @@ const REG = {
 	FONT : /\.(ttf)$/i,
 	JSON : /\.(json)$/i,
 	DECK : /\.(ydk)$/i,
-	ATK : /^[0-9?\s]*$/,
-	LV : /^[0-9 ]*$/,
+	ATK : /^[0-9?\s<>=.]*$/,
+	LV : /^[0-9<>=.]*$/,
 	LINE_FEED : /\r?\n/,
 	NUMBER : /^\d+$/
 };
@@ -67,6 +67,7 @@ const FILES = {
 	TEXTURE_INFO_LINK : 'info_link.png',
 	TEXTURE_INFO_SCALE : 'info_scale.png',
 	TEXTURE_INFO_OVERLAY : 'info_overlay.png',
+	TEXTURE_INFO_LV_RANK_LINK : 'info_star_rank_link.png',
 	TEXTURE_BTN_ACTIVATE : ['btn_activate.png', 'btn_hover_activate.png'],
 	TEXTURE_BTN_ATTACK : ['btn_attack.png', 'btn_hover_attack.png'],
 	TEXTURE_BTN_MSET : ['btn_mset.png', 'btn_hover_mset.png'],

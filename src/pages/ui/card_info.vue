@@ -166,7 +166,7 @@
 			> div:first-child {
 				width: 60%;
 				aspect-ratio: 1/1.45;
-				max-width: 100px;
+				max-width: 80px;
 				box-shadow: 0 0 10px white;
 				background-image: var(--url);
 				background-size: cover;

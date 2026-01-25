@@ -55,22 +55,65 @@
 			:style = "{ '--x' : search.x }"
 			ref = 'search_div'
 		>
-			<div v-for = 'j in [
-				{ span : I18N_KEYS.CARD_INFO_TYPE, ct : 0, cards : search.list.card},
-				{ span : I18N_KEYS.CARD_INFO_SPELL_TRAP_TYPE, ct : 2, cards : search.list.spell},
-				{ span : I18N_KEYS.CARD_INFO_MONSTER_TYPE, ct : 1, cards : search.list.monster},
-			]'>
+			<div
+				v-for = "j in [
+					{ span : I18N_KEYS.CARD_INFO_OT, results : search.info.ot, cards : search.list.ot, key : KEYS.OT, strings : mainGame.get.strings.ot, class : 'ot' },
+					{ span : I18N_KEYS.CARD_INFO_TYPE, results : search.info.type[0], cards : search.list.card, key : KEYS.TYPE, strings : mainGame.get.strings.type, value : (i : number) => i - ((i & 0x3) === i ? 0 : (i & 0x3)) },
+					{ span : I18N_KEYS.CARD_INFO_SPELL_TRAP_TYPE,  results : search.info.type[2], cards : search.list.spell, key : KEYS.TYPE, strings : mainGame.get.strings.type, value : (i : number) => i - ((i & 0x3) === i ? 0 : (i & 0x3)) },
+					{ span : I18N_KEYS.CARD_INFO_MONSTER_TYPE,  results : search.info.type[1], cards : search.list.monster, key : KEYS.TYPE, strings : mainGame.get.strings.type, value : (i : number) => i - ((i & 0x3) === i ? 0 : (i & 0x3)) },
+					{ span : I18N_KEYS.CARD_INFO_ATTRIBUTE, results : search.info.attribute, cards : search.list.attribute, key : KEYS.ATTRIBUTE, strings : mainGame.get.strings.attribute },
+					{ span : I18N_KEYS.CARD_INFO_RACE, results : search.info.race, cards : search.list.race, key : KEYS.RACE, strings : mainGame.get.strings.race },
+					{ span : I18N_KEYS.CARD_INFO_CATEGORY, results : search.info.category, cards : search.list.category, key : KEYS.CATEGORY, strings : mainGame.get.strings.category },
+				]"
+				class = 'select'
+			>
 				<span>{{ mainGame.get.text(j.span) }}&nbsp;:</span>
 				<div>
 					<div
 						v-for = 'i in j.cards'
-						:class = "{ 'selected' : search.info.type[j.ct].includes(i) }"
+						:class = "{ 'selected' : j.results.includes(i), 'ot' : j.class === 'ot' }"
 						class = 'cursor'
-						@click = 'search.select(i)'
+						@click = 'search.select(j.results, i)'
 					>
-						<img :src = 'mainGame.get.icon(KEYS.TYPE, i)!'/>
-						<span>{{ mainGame.get.strings.type(i - ((i & 0x3) === i ? 0 : (i & 0x3)))}}</span>
+						<img :src = 'mainGame.get.icon(j.key, i)!'/>
+						<span>{{ j.strings(j.value ? j.value(i) : i)}}</span>
 					</div>
+				</div>
+			</div>
+			<div
+				class = 'input'
+			>
+				<div>
+					<img :src = '(mainGame.get.textures(FILES.TEXTURE_INFO_LV_RANK_LINK) as string)'/>
+					<Input
+						variant = 'outlined'
+						:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_INFO_LV)'
+						:rules = 'search.rule.level'
+						v-model = search.info.lv
+					/>
+				</div>
+				<div>
+					<img :src = '(mainGame.get.textures(FILES.TEXTURE_INFO_SCALE) as string)'/>
+					<Input
+						variant = 'outlined'
+						:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_INFO_SCALE)'
+						:rules = 'search.rule.scale'
+						v-model = search.info.scale
+					/>
+				</div>
+				<div>
+					<Input
+						variant = 'outlined'
+						:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_INFO_ATK)'
+						:rules = 'search.rule.atk'
+						v-model = search.info.atk
+					/>
+					<Input
+						variant = 'outlined'
+						:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_INFO_DEF)'
+						:rules = 'search.rule.atk'
+						v-model = search.info.def
+					/>
 				</div>
 			</div>
 		</div>
@@ -82,7 +125,7 @@
 	import mainGame from '@/script/game';
 	import Card, { TYPE } from '@/script/card';
 	import { I18N_KEYS } from '@/script/language/i18n';
-	import { KEYS } from '@/script/constant';
+	import { FILES, KEYS, REG } from '@/script/constant';
 
 	import Input from '@/pages/ui/input.vue';
 	import Button from '@/pages/ui/button.vue';
@@ -156,26 +199,12 @@
 			}
 			return false;
 		},
-		select : (i : number) => {
-			let ct : number;
-			const push = (v : number) : void => {
-				ct = search.info.type[v].indexOf(i);
-				if (ct > -1)
-					search.info.type[v].splice(ct, 1);
-				else
-					search.info.type[v].push(i);
-			}
-			switch (true) {
-				case search.list.card.includes(i):
-					push(0);
-					break;
-				case search.list.monster.includes(i):
-					push(1);
-					break;
-				case search.list.spell.includes(i):
-					push(2);
-					break;
-			}
+		select : (results : Array<number>, i : number) => {
+			const ct = results.indexOf(i);
+			if (ct > -1)
+				results.splice(ct, 1);
+			else
+				results.push(i);
 		},
 		list : {
 			card : [
@@ -209,10 +238,39 @@
 				TYPE.EQUIP,
 				TYPE.FIELD,
 				TYPE.COUNTER
-			]
+			],
+			attribute : Array.from(mainGame.strings.get(KEYS.ATTRIBUTE)?.keys() ?? []) as Array<number>,
+			race : Array.from(mainGame.strings.get(KEYS.RACE)?.keys() ?? []) as Array<number>,
+			category : Array.from(mainGame.strings.get(KEYS.CATEGORY)?.keys() ?? []) as Array<number>,
+			ot : Array.from(mainGame.strings.get(KEYS.OT)?.keys() ?? []) as Array<number>,
 		},
 		info : {
-			type : [[], [], []] as [Array<number>, Array<number>, Array<number>]
+			ot : [] as Array<number>,
+			type : [[], [], []] as [Array<number>, Array<number>, Array<number>],
+			attribute : [] as Array<number>,
+			race : [] as Array<number>,
+			category : [] as Array<number>,
+			lv : '',
+			atk : '',
+			def : '',
+			scale : ''
+		},
+		rule : {
+			level : (lv : string) : string | boolean => {
+				if (!lv.match(REG.LV))
+					return mainGame.get.text(I18N_KEYS.DECK_RULE_SEARCH_LV);
+				return true;
+			},
+			atk : (lv : string) : string | boolean => {
+				if (!lv.match(REG.ATK))
+					return mainGame.get.text(I18N_KEYS.DECK_RULE_SEARCH_ATK);
+				return true;
+			},
+			scale : (lv : string) : string | boolean => {
+				if (!lv.match(REG.LV))
+					return mainGame.get.text(I18N_KEYS.DECK_RULE_SEARCH_LV);
+				return true;
+			}
 		},
 		search : async () : Promise<void> => {
 			// if (typeof props.search.rule.level(props.search.info.scale ?? '') !== 'boolean'
@@ -320,16 +378,18 @@
 			transform: translate(var(--x), -50%);
 			width: calc(var(--vw) / 2);
 			height: calc(var(--vh) * 0.9);
-			background-color: rgba(0, 0, 0, 0.5);
+			background-color: rgba(0, 0, 0, 0.8);
 			display: flex;
 			flex-direction: column;
-			gap: 5px;
+			gap: 10px;
 			color: white;
 			overflow-y: auto;
 			transition: all 0.1s ease;
-			> div {
+			.select, .input {
 				display: flex;
 				flex-direction: column;
+			}
+			.select {
 				> div {
 					display: flex;
 					flex-wrap: wrap;
@@ -353,6 +413,25 @@
 					}
 					> .selected {
 						border: 2px solid #2196f3;
+					}
+					> .ot {
+						width: 60px;
+						img {
+							width: 50px;
+							height: 40px;
+						}
+					}
+				}
+			}
+			.input {
+				> div {
+					display: flex;
+					flex-wrap: wrap;
+					gap: 10px;
+					height: 50px;
+					img {
+						width: 40px;
+						height: 40px;
 					}
 				}
 			}

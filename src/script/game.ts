@@ -269,37 +269,37 @@ class Game {
 			},
 			race : (data : number) : string => {
 				return Array.from(this.strings.get(CONSTANT.KEYS.RACE)!)
-					.filter(i => (i[0] & data) === i[0])
+					.filter(i => Math.abs(i[0] & data) === i[0])
 					.map(i => i[1])
 					.join('|');
 			},
 			attribute : (data : number) : string => {
 				return Array.from(this.strings.get(CONSTANT.KEYS.ATTRIBUTE)!)
-					.filter(i => (i[0] & data) === i[0])
+					.filter(i => Math.abs(i[0] & data) === i[0])
 					.map(i => i[1])
 					.join('|');
 			},
 			ot : (data : number) : string => {
 				return Array.from(this.strings.get(CONSTANT.KEYS.OT)!)
-					.filter(i => (i[0] & data) === i[0])
+					.filter(i => Math.abs(i[0] & data) === i[0])
 					.map(i => i[1])
 					.join('|');
 			},
 			type : (data : number) : string => {
 				return Array.from(this.strings.get(CONSTANT.KEYS.TYPE)!)
-					.filter(i => (i[0] & data) === i[0])
+					.filter(i => Math.abs(i[0] & data) === i[0])
 					.map(i => i[1])
 					.join('|');
 			},
 			category : (data : number) : string => {
 				return Array.from(this.strings.get(CONSTANT.KEYS.CATEGORY)!)
-					.filter(i => (i[0] & data) === i[0])
+					.filter(i => Math.abs(i[0] & data) === i[0])
 					.map(i => i[1])
 					.join('|');
 			},
 			link : (data : number) : string => {
 				return Array.from(this.strings.get(CONSTANT.KEYS.LINK)!)
-					.filter(i => (i[0] & data) === i[0])
+					.filter(i => Math.abs(i[0] & data) === i[0])
 					.map(i => i[1])
 					.join('|');
 			},
@@ -710,6 +710,14 @@ class Game {
 							key,
 							key_value[2]
 						);
+						if (key_value[3]) {
+							this.icons.get(
+								CONSTANT.KEYS.CATEGORY
+							)!.set(
+								key,
+								key_value[3]
+							);
+						}
 						break;
 					case CONSTANT.KEYS.RACE:
 						this.strings.get(
