@@ -57,18 +57,22 @@
 		>
 			<div
 				v-for = "j in [
-					{ span : I18N_KEYS.CARD_INFO_OT, results : search.info.ot, cards : search.list.ot, key : KEYS.OT, strings : mainGame.get.strings.ot, class : 'ot' },
+					{ span : I18N_KEYS.CARD_INFO_OT, results : search.info.ot, cards : search.list.ot, key : KEYS.OT, strings : mainGame.get.strings.ot, class : 'ot', switchs : 'ot' },
 					{ span : I18N_KEYS.CARD_INFO_TYPE, results : search.info.type[0], cards : search.list.card, key : KEYS.TYPE, strings : mainGame.get.strings.type, value : (i : number) => i - ((i & 0x3) === i ? 0 : (i & 0x3)) },
 					{ span : I18N_KEYS.CARD_INFO_SPELL_TRAP_TYPE,  results : search.info.type[1], cards : search.list.spell, key : KEYS.TYPE, strings : mainGame.get.strings.type, value : (i : number) => i - ((i & 0x3) === i ? 0 : (i & 0x3)) },
-					{ span : I18N_KEYS.CARD_INFO_MONSTER_TYPE,  results : search.info.type[2], cards : search.list.monster, key : KEYS.TYPE, strings : mainGame.get.strings.type, value : (i : number) => i - ((i & 0x3) === i ? 0 : (i & 0x3)) },
+					{ span : I18N_KEYS.CARD_INFO_MONSTER_TYPE,  results : search.info.type[2], cards : search.list.monster, key : KEYS.TYPE, strings : mainGame.get.strings.type, value : (i : number) => i - ((i & 0x3) === i ? 0 : (i & 0x3)), switchs : 'type' },
 					{ span : I18N_KEYS.CARD_INFO_EXCEPT_TYPE,  results : search.info.type[3], cards : search.list.except, key : KEYS.TYPE, strings : mainGame.get.strings.type, value : (i : number) => i - ((i & 0x3) === i ? 0 : (i & 0x3)) },
 					{ span : I18N_KEYS.CARD_INFO_ATTRIBUTE, results : search.info.attribute, cards : search.list.attribute, key : KEYS.ATTRIBUTE, strings : mainGame.get.strings.attribute },
 					{ span : I18N_KEYS.CARD_INFO_RACE, results : search.info.race, cards : search.list.race, key : KEYS.RACE, strings : mainGame.get.strings.race },
-					{ span : I18N_KEYS.CARD_INFO_CATEGORY, results : search.info.category, cards : search.list.category, key : KEYS.CATEGORY, strings : mainGame.get.strings.category },
+					{ span : I18N_KEYS.CARD_INFO_CATEGORY, results : search.info.category, cards : search.list.category, key : KEYS.CATEGORY, strings : mainGame.get.strings.category, switchs : 'category' },
 				]"
 				class = 'select'
 			>
-				<span>{{ mainGame.get.text(j.span) }}&nbsp;:</span>
+				<div>
+					<span>{{ mainGame.get.text(j.span) }}&nbsp;:</span>
+					<var-switch v-model = 'search.switchs[j.switchs as keyof typeof search.switchs]' v-if = 'j.switchs !== undefined'/>
+					<span v-if = 'j.switchs !== undefined'>{{ search.switchs[j.switchs as keyof typeof search.switchs] ? 'and' : 'or' }}</span>
+				</div>
 				<div>
 					<div
 						v-for = 'i in j.cards'
@@ -82,6 +86,11 @@
 				</div>
 			</div>
 			<div class = 'link'>
+				<div>
+					<span>{{ mainGame.get.text(I18N_KEYS.CARD_INFO_LINK) }}&nbsp;:</span>
+					<var-switch v-model = "search.switchs['link' as keyof typeof search.switchs]"/>
+					<span>{{ search.switchs['link' as keyof typeof search.switchs] ? 'and' : 'or' }}</span>
+				</div>
 				<div></div>
 				<div>
 					<img
@@ -283,6 +292,12 @@
 			def : '',
 			scale : ''
 		},
+		switchs : {
+			'ot' : false,
+			'type' : false,
+			'category' : false,
+			'link' : false,
+		},
 		rule : {
 			level : (lv : string) : string | boolean => {
 				if (!lv.match(REG.LV))
@@ -409,9 +424,6 @@
 			width: calc(var(--vw) / 2);
 			height: calc(var(--vh) * 0.9);
 			background-color: rgba(0, 0, 0, 0.8);
-			// display: flex;
-			// flex-direction: column;
-			// gap: 10px;
 			color: white;
 			overflow-y: auto;
 			transition: all 0.1s ease;
@@ -419,8 +431,20 @@
 				display: flex;
 				flex-direction: column;
 			}
+			.select, .link {
+				> div:first-child {
+					width: calc(var(--vw) / 2);
+					display: flex;
+					align-items: center;
+					gap: 5px;
+					> span:last-child {
+						color: rgb(203, 203, 203);
+						font-size: 12px;
+					}
+				}
+			}
 			.select {
-				> div {
+				> div:last-child {
 					display: flex;
 					flex-wrap: wrap;
 					gap: 10px;
@@ -456,21 +480,21 @@
 			}
 			.link {
 				width: 120px;
-				height: 120px;
+				height: 150px;
 				position: relative;
-				> div:first-child {
+				> div:nth-child(2) {
 					position: absolute;
-					width: 70%;
-					height: 70%;
-					border: 1px solid rgba($color: white, $alpha: 0.5);
-					top: 50%;
+					width: 84px;
+					height: 84px;
+					border: 1px solid rgba($color: white, $alpha: 1);
+					top: calc(50% + 8px);
 					left: 50%;
-					transform: translate(var(--x), -50%);
+					transform: translate(-50%, -50%);
 				}
 				> div:last-child {
 					position: absolute;
-					width: 100%;
-					height: 100%;
+					width: 120px;
+					height: 120px;
 					display: grid;
 					grid-template-rows: repeat(3, 1fr);
 					grid-template-columns: repeat(3, 1fr);
@@ -483,9 +507,8 @@
 			.input {
 				> div {
 					display: flex;
-					flex-wrap: wrap;
 					gap: 10px;
-					height: 50px;
+					min-height: 50px;
 					img {
 						width: 40px;
 						height: 40px;
