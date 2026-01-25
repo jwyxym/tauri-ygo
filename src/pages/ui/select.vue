@@ -20,11 +20,12 @@
 	</var-select>
 </template>
 <script setup lang = 'ts'>
-	import { reactive, Reactive, onBeforeMount } from 'vue'
+	import { reactive, onBeforeMount } from 'vue'
 	import mainGame from '@/script/game';
-	import * as CONSTANT from '@/script/constant';
 	import { I18N_KEYS } from '@/script/language/i18n';
-	const props = defineProps(['name']);
+	const props = defineProps<{
+		name : 'lflist' | 'deck';
+	}>();
 
 	interface items {
 		placeholder : string;
@@ -33,45 +34,12 @@
 		label ?: boolean; 
 	};
 
-	const select : Reactive<items> = reactive({
+	const select = reactive<items>({
 		placeholder : '',
 	});
 
 	onBeforeMount(async () => {
 		switch (props.name) {
-			case 'category':
-				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_INFO_CATEGORY);
-				select.map = mainGame.strings.get(CONSTANT.KEYS.CATEGORY) ?? new Map;
-				break;
-			case 'race':
-				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_INFO_RACE);
-				select.map = mainGame.strings.get(CONSTANT.KEYS.RACE) ?? new Map;
-				break;
-			case 'attribute':
-				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_INFO_ATTRIBUTE);
-				select.map = mainGame.strings.get(CONSTANT.KEYS.ATTRIBUTE) ?? new Map;
-				break;
-			case 'ot':
-				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_INFO_OT);
-				select.map = mainGame.strings.get(CONSTANT.KEYS.OT) ?? new Map;
-				break;
-			case 'type':
-				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_INFO_TYPE);
-				select.map = mainGame.strings.get(CONSTANT.KEYS.TYPE) ?? new Map;
-				break;
-			case 'link':
-				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_INFO_LINK);
-				select.map = mainGame.strings.get(CONSTANT.KEYS.LINK) ?? new Map;
-				break;
-			case 'forbidden':
-				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_INFO_FORBIDDEN);
-				select.map = new Map([
-					[0, mainGame.get.text(I18N_KEYS.DECK_LFLIST_FORBIDDEN)],
-					[1, mainGame.get.text(I18N_KEYS.DECK_LFLIST_LIMIT)],
-					[2, mainGame.get.text(I18N_KEYS.DECK_LFLIST_SEMI_LIMIT)],
-					[3, mainGame.get.text(I18N_KEYS.DECK_LFLIST_UNLIMIT)]
-				]);
-				break;
 			case 'lflist':
 				select.placeholder = mainGame.get.text(I18N_KEYS.CARD_INFO_LFLIST);
 				select.map = mainGame.lflist ?? new Map;

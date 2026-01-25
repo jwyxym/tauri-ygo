@@ -110,11 +110,20 @@
 				class = 'input'
 			>
 				<div>
+					<Select name = 'lflist' v-model = 'search.info.lflist'/>
+					<Input
+						variant = 'outlined'
+						:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_INFO_FORBIDDEN)'
+						:rules = 'search.rule.number'
+						v-model = 'search.info.forbidden'
+					/>
+				</div>
+				<div>
 					<img :src = '(mainGame.get.textures(FILES.TEXTURE_INFO_LV_RANK_LINK) as string)'/>
 					<Input
 						variant = 'outlined'
 						:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_INFO_LV)'
-						:rules = 'search.rule.level'
+						:rules = 'search.rule.number'
 						v-model = search.info.lv
 					/>
 				</div>
@@ -123,7 +132,7 @@
 					<Input
 						variant = 'outlined'
 						:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_INFO_SCALE)'
-						:rules = 'search.rule.scale'
+						:rules = 'search.rule.number'
 						v-model = search.info.scale
 					/>
 				</div>
@@ -157,6 +166,7 @@
 	import Button from '@/pages/ui/button.vue';
 	import Pic, { CardPic } from '@/pages/ui/pic.vue';
 	import { Hover } from '@/pages/ui/deck.vue';
+import Select from '../ui/select.vue';
 
 	const search_div = ref<HTMLDivElement | null>(null);
 
@@ -287,6 +297,8 @@
 			race : [] as Array<number>,
 			category : [] as Array<number>,
 			link : [] as Array<number>,
+			lflist : '',
+			forbidden : '',
 			lv : '',
 			atk : '',
 			def : '',
@@ -299,7 +311,7 @@
 			'link' : false,
 		},
 		rule : {
-			level : (lv : string) : string | boolean => {
+			number : (lv : string) : string | boolean => {
 				if (!lv.match(REG.LV))
 					return mainGame.get.text(I18N_KEYS.DECK_RULE_SEARCH_LV);
 				return true;
@@ -307,11 +319,6 @@
 			atk : (lv : string) : string | boolean => {
 				if (!lv.match(REG.ATK))
 					return mainGame.get.text(I18N_KEYS.DECK_RULE_SEARCH_ATK);
-				return true;
-			},
-			scale : (lv : string) : string | boolean => {
-				if (!lv.match(REG.LV))
-					return mainGame.get.text(I18N_KEYS.DECK_RULE_SEARCH_LV);
 				return true;
 			}
 		},

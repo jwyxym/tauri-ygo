@@ -59,56 +59,11 @@
 					}"
 				>
 					<Select
-						key = 'attribute'
-						name = 'attribute'
-						v-model = 'search.info.attribute'
-					></Select>
-					<Select
-						key = 'race'
-						name = 'race'
-						v-model = 'search.info.race'
-					></Select>
-					<Select
-						key = 'ot'
-						name = 'ot'
-						v-model = 'search.form.ot'
-						:multiple = 'true'
-						:chip = 'true'
-					></Select>
-					<Select
-						key = 'type'
-						name = 'type'
-						v-model = 'search.form.type'
-						:multiple = 'true'
-						:chip = 'true'
-					></Select>
-					<Select
-						key = 'link'
-						name = 'link'
-						v-model = 'search.form.link'
-						:multiple = 'true'
-						:chip = 'true'
-					></Select>
-					<Select
-						key = 'category'
-						name = 'category'
-						v-model = 'search.form.category'
-						:multiple = 'true'
-						:chip = 'true'
-					></Select>
-					<Select
 						key = 'lflist'
 						name = 'lflist'
 						v-model = 'search.info.lflist'
 					></Select>
-					<Select
-						key = 'forbidden'
-						name = 'forbidden'
-						v-model = 'search.info.forbidden'
-						:multiple = 'true'
-						:chip = 'true'
-						v-show = '!search.rule.forbidden()'
-					></Select>
+			
 				</TransitionGroup>
 				<div class = 'input'>
 					<Input
