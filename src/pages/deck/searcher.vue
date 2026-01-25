@@ -413,6 +413,7 @@
 					}
 					> .selected {
 						border: 2px solid #2196f3;
+						box-shadow: 0 0 10px white;
 					}
 					> .ot {
 						width: 60px;
