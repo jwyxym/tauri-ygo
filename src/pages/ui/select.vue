@@ -3,6 +3,7 @@
 		:clearable = 'true'
 		text-color = 'white'
 		:placeholder = 'select.placeholder'
+		:variant = "variant ? variant : 'standard'"
 		blur-color = 'white'
 	>
 		<var-option
@@ -25,6 +26,7 @@
 	import { I18N_KEYS } from '@/script/language/i18n';
 	const props = defineProps<{
 		name : 'lflist' | 'deck';
+		variant ?: 'outlined' | 'standard';
 	}>();
 
 	interface items {

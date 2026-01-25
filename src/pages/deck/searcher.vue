@@ -55,6 +55,17 @@
 			:style = "{ '--x' : search.x }"
 			ref = 'search_div'
 		>
+			<div class = 'lflist'>
+				<Select
+					name = 'lflist'
+					v-model = 'search.info.lflist'
+				/>
+				<Input
+					:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_INFO_FORBIDDEN)'
+					:rules = 'search.rule.number'
+					v-model = 'search.info.forbidden'
+				/>
+			</div>
 			<div
 				v-for = "j in [
 					{ span : I18N_KEYS.CARD_INFO_OT, results : search.info.ot, cards : search.list.ot, key : KEYS.OT, strings : mainGame.get.strings.ot, class : 'ot', switchs : 'ot' },
@@ -97,27 +108,20 @@
 						v-for = '(i, v) in search.list.link[0]'
 						:src = "(mainGame.get.textures(FILES.TEXTURE_LINK_PIC[search.info.link.includes(i) ? 1 : 0].replace('{:?}', (v + 1).toString())) as string)"
 						@click = 'search.select(search.info.link, i)'
+						class = 'cursor'
 					/>
 					<div></div>
 					<img
 						v-for = '(i, v) in search.list.link[1]'
 						:src = "(mainGame.get.textures(FILES.TEXTURE_LINK_PIC[search.info.link.includes(i) ? 1 : 0].replace('{:?}', (v + 5).toString())) as string)"
 						@click = 'search.select(search.info.link, i)'
+						class = 'cursor'
 					/>
 				</div>
 			</div>
 			<div
 				class = 'input'
 			>
-				<div>
-					<Select name = 'lflist' v-model = 'search.info.lflist'/>
-					<Input
-						variant = 'outlined'
-						:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_INFO_FORBIDDEN)'
-						:rules = 'search.rule.number'
-						v-model = 'search.info.forbidden'
-					/>
-				</div>
 				<div>
 					<img :src = '(mainGame.get.textures(FILES.TEXTURE_INFO_LV_RANK_LINK) as string)'/>
 					<Input
@@ -162,11 +166,11 @@
 	import { I18N_KEYS } from '@/script/language/i18n';
 	import { FILES, KEYS, REG } from '@/script/constant';
 
+	import Pic, { CardPic } from '@/pages/ui/pic.vue';
 	import Input from '@/pages/ui/input.vue';
 	import Button from '@/pages/ui/button.vue';
-	import Pic, { CardPic } from '@/pages/ui/pic.vue';
 	import { Hover } from '@/pages/ui/deck.vue';
-import Select from '../ui/select.vue';
+	import Select from '../ui/select.vue';
 
 	const search_div = ref<HTMLDivElement | null>(null);
 
@@ -248,7 +252,10 @@ import Select from '../ui/select.vue';
 		on : () => search.x = '-50%',
 		off : (e : MouseEvent) : boolean => {
 			const target = e.target as HTMLElement;
-			if (search.x !== '100vw' && search_div.value && !search_div.value.contains(target)) {
+			if (search.x !== '100vw'
+				&& search_div.value && !search_div.value.contains(target)
+				&& !target.classList.contains('var-option__cover')
+			) {
 				search.x = '100vw';
 				return true;
 			}
@@ -434,7 +441,18 @@ import Select from '../ui/select.vue';
 			color: white;
 			overflow-y: auto;
 			transition: all 0.1s ease;
-			.select, .input {
+			.lflist {
+				height: 120px;
+				gap: 10px;
+				.var-select, .var-input {
+					margin-left: 10px;
+					width: calc(40% - 10px);
+				}
+				// .var-input {
+				// 	width: 40%;
+				// }
+			}
+			.select, .input, .lflist {
 				display: flex;
 				flex-direction: column;
 			}
@@ -516,6 +534,7 @@ import Select from '../ui/select.vue';
 					display: flex;
 					gap: 10px;
 					min-height: 50px;
+					width: calc(var(--vw) / 2);
 					img {
 						width: 40px;
 						height: 40px;
