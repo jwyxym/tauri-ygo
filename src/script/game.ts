@@ -5,7 +5,7 @@ import { fetch } from '@tauri-apps/plugin-http';
 import fs from './fs';
 import * as CONSTANT from './constant';
 import invoke from './tauri-api/invoke';
-import Card, { Search } from './card';
+import Card from './card';
 import { I18N_KEYS } from './language/i18n';
 import Zh_CN from './language/Zh-CN';
 import TAURI_STR from './language/string';
@@ -755,85 +755,6 @@ class Game {
 			}
 		}
 	};
-
-	search = {
-		cards : (search : Search) : Array<Card> => {
-			let result : Array<Card> = [];
-
-			const ot = search.ot === undefined ? 0 : search.ot;
-			const type  = search.type === undefined ? 0 : search.type;
-			const attribute  = search.attribute === undefined ? 0 : search.attribute;
-			const race  = search.race === undefined ? 0 : search.race;
-			const category  = search.category === undefined ? 0 : search.category;
-			const desc = search.desc?.split(' ') ?? [];
-			const level = search.level?.split(' ') ?? [];
-			const scale = search.scale?.split(' ') ?? [];
-			const atk = search.atk?.split(' ') ?? [];
-			const def = search.def?.split(' ') ?? [];
-			const link = search.link === undefined ? 0 : search.link;
-			const lflist = search.lflist !== undefined && this.lflist.has(search.lflist) ? this.lflist.get(search.lflist)!.map : new Map;
-			const forbidden = search.forbidden ?? [];
-			const filter = (card : Card) : boolean => {
-				if (forbidden.length > 0) {
-					const ct = lflist.get(card.id) as number;
-					if (ct === undefined ? !forbidden.includes(3) : !forbidden.includes(ct))
-						return false;
-				}
-				if ((search.desc ?? '').length > 0) {
-					for (const i of desc) {
-						const id = Number(i);
-						if (
-							(i !== '' && !card.name.toLowerCase().includes(i.toLowerCase()) && !card.desc.toLowerCase().includes(i.toLowerCase()))
-								&& (isNaN(id) ? true : card.id !== id && card.alias !== id && desc.length == 1)
-						)
-							return false;
-					}
-					if (desc.length == 2 && desc.every(i => {
-						const id = Number(i);
-						return !isNaN(id);
-					})) {
-						const id = desc.map(i => Number(i)).sort((a, b) => { return a - b; });
-						if ((card.id < id[0] || card.id > id[1]) && (card.alias < id[0] || card.alias > id[1]))
-							return false;
-					}
-				}
-
-				if ((ot > 0 && card.ot !== ot)
-					|| (type > 0 && (card.type & type) !== type)
-					|| (attribute > 0 && (card.attribute & attribute) !== attribute)
-					|| (race > 0 && (card.race & race) !== race)
-					|| (category > 0 && (card.category & category) !== category)
-				)
-					return false;
-
-				if ((search.level ?? '').length > 0 && !level.includes(card.level.toString()))
-					return false;
-
-				if ((search.scale ?? '').length > 0 && (!card.is_pendulum() || !scale.includes(card.scale.toString())))
-					return false;
-
-				if ((search.atk ?? '').length > 0 && (card.atk < 0 ? !atk.includes('?') : !atk.includes(card.atk.toString())))
-					return false;
-
-				if (card.is_link()) {
-					if ((search.def ?? '').length > 0 || (card.def & link) !== link)
-						return false;
-				} else {
-					if (link > 0)
-						return false;
-					if ((search.def ?? '').length > 0 && (card.def < 0 ? !def.includes('?') : !def.includes(card.def.toString())))
-						return false;
-				}
-
-				return true;
-			};
-			for (const [_, card] of this.cards) {
-				if (filter(card))
-					result.push(card);
-			}
-			return result;
-		}
-	}
 
 	push = {
 		system : (key : string, n : string | number | boolean) : void => {

@@ -265,7 +265,7 @@
 			}
 			page.list = [];
 			page.button_loading = true;
-			page.result = mainGame.search.cards(props.search.info);
+			// page.result = mainGame.search.cards(props.search.info);
 			page.finished = false;
 			await page.load_on();
 			page.button_loading = false;

@@ -36,7 +36,7 @@
 	import mainGame from '@/script/game';
 	import * as CONSTANT from '@/script/constant';
 	import { I18N_KEYS } from "@/script/language/i18n";
-	import Card, { Search } from '@/script/card';
+	import Card from '@/script/card';
 	import toast from '@/script/toast';
 	import fs from '@/script/fs';
 
@@ -367,7 +367,7 @@
 			desc : '',
 			forbidden : [],
 			lflist : ''
-		} as Search
+		}
 	});
 
 	const swapy = reactive({

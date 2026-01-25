@@ -29,41 +29,6 @@ const TYPE = {
 	LINK : 0x4000000
 }
 
-interface Info {
-	icon : string;
-	content : string | number;
-}
-
-interface CardInfo {
-	ot : string;
-	atk : string;
-	def : string;
-	type : string;
-	race : string;
-	attribute : string;
-	category : string;
-	setcode : string;
-	info : Array<Info>;
-}
-
-interface Search {
-	ot ?: number;
-	alias ?: number;
-	level ?: string;
-	scale ?: string;
-	atk ?: string;
-	def ?: string;
-	link ?: number;
-	type ?: number;
-	race ?: number;
-	attribute ?: number;
-	category ?: number;
-	setcode ?: number;
-	desc ?: string;
-	forbidden ?: Array<number>;
-	lflist ?: string;
-}
-
 class Card {
 	ot : number;
 	id : number;
@@ -111,58 +76,6 @@ class Card {
 	update_pic = (url : string) : void => {
 		this.clear();
 		this.pic = url;
-	};
-
-	get_info = () : CardInfo => {
-		const result = {
-			ot :  mainGame.get.strings.ot(this.ot),
-			atk : this.atk >= 0 ? this.atk.toString() : '?',
-			def : this.is_link() ? '-' : this.def >= 0 ? this.def.toString() : '?',
-			type : mainGame.get.strings.type(this.type),
-			race : '',
-			attribute : '',
-			category : mainGame.get.strings.category(this.category),
-			setcode : this.setcode.filter(i => i > 0).map(i => mainGame.get.strings.setcode(i)).join('|'),
-			info : []
-		} as CardInfo
-		if (this.is_monster()) {
-			const attr = mainGame.icons.get(CONSTANT.KEYS.ATTRIBUTE)!.get(this.attribute)
-			if (attr)
-				result.attribute = mainGame.get.textures(attr + '.png') as string | undefined ?? ''
-			const race = mainGame.icons.get(CONSTANT.KEYS.RACE)!.get(this.race)
-			if (race)
-				result.race = mainGame.get.textures(race + '.png') as string | undefined ?? ''
-			result.info.push({
-				icon : mainGame.get.textures((() : string => {
-					return this.is_link() ? CONSTANT.FILES.TEXTURE_INFO_LINK
-						: this.is_xyz() ? CONSTANT.FILES.TEXTURE_INFO_RANK
-							: this.is_tuner() ? CONSTANT.FILES.TEXTURE_INFO_TUNER
-								: CONSTANT.FILES.TEXTURE_INFO_LV
-					;
-				})()) as string | undefined ?? '',
-				content : this.level
-			});
-			result.info.push({
-				icon : mainGame.get.textures(CONSTANT.FILES.TEXTURE_ATK) as string | undefined ?? '',
-				content : this.atk >= 0 ? this.atk : '?'
-			});
-			if (!this.is_link())
-				result.info.push({
-					icon : mainGame.get.textures(CONSTANT.FILES.TEXTURE_DEF) as string | undefined ?? '',
-					content : this.def >= 0 ? this.def : '?'
-				});
-			if (this.is_pendulum())
-				result.info.push({
-					icon : mainGame.get.textures(CONSTANT.FILES.TEXTURE_INFO_SCALE) as string | undefined ?? '',
-					content : this.scale
-				});
-		} else if (this.is_spell()) {
-			result.race = mainGame.get.textures(CONSTANT.FILES.TEXTURE_SPELL) as string | undefined ?? ''
-		} else if (this.is_trap()) {
-			result.race = mainGame.get.textures(CONSTANT.FILES.TEXTURE_TRAP) as string | undefined ?? ''
-		}
-		
-		return result;
 	};
 
 	clear = () : void => {
@@ -214,4 +127,3 @@ class Card {
 
 export default Card;
 export { TYPE };
-export type { Search, CardInfo, Info };
