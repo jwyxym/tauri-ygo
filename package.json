@@ -37,6 +37,7 @@
 		"@varlet/ui": "^3.11.3",
 		"conversation-vue": "github:jwyxym/conversation-vue",
 		"gsap": "^3.13.0",
+		"mathjs": "^15.1.0",
 		"sortablejs": "^1.15.6",
 		"sql.js": "^1.13.0",
 		"swapy": "^1.0.5",

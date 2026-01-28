@@ -219,6 +219,7 @@ class Game {
 			key = typeof key == 'string' ? parseInt(key) : key;
 			return reactive(this.cards.get(key) ?? this.unknown);
 		},
+		cards : () : Array<Card> => Array.from(this.cards.values()),
 		expansions : async () : Promise<{
 			loading : Array<string>;
 			ypk :  Array<DirEntry>;
@@ -251,9 +252,6 @@ class Game {
 				return name[0];
 			}
 		},
-		pics : () : Array<string> => {
-			return Array.from(this.cards.values()).filter(i => i.has_pic()).map(i => i.pic);
-		},
 		strings : {
 			system : (key : number, replace : Array<string | number> | string | number = []) : string => {
 				const value = this.strings.get(CONSTANT.KEYS.SYSTEM)!.get(key) ?? this.get.text(I18N_KEYS.UNKNOW);
@@ -280,14 +278,12 @@ class Game {
 					.join('|');
 			},
 			ot : (data : number) : string => {
-				return Array.from(this.strings.get(CONSTANT.KEYS.OT)!)
-					.filter(i => Math.abs(i[0] & data) === i[0])
-					.map(i => i[1])
-					.join('|');
+				return this.strings.get(CONSTANT.KEYS.OT)!
+					.get(data) ?? '';
 			},
 			type : (data : number) : string => {
 				return Array.from(this.strings.get(CONSTANT.KEYS.TYPE)!)
-					.filter(i => Math.abs(i[0] & data) === i[0])
+					.filter(i => ![0x81, 0x82].includes(i[0]) && Math.abs(i[0] & data) === i[0])
 					.map(i => i[1])
 					.join('|');
 			},

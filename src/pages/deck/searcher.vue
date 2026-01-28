@@ -9,6 +9,7 @@
 			<Input
 				variant = 'outlined'
 				:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_INFO_NAME)'
+				v-model = 'search.info.desc'
 			/>
 		</div>
 		<div class = 'no-scrollbar'>
@@ -45,7 +46,7 @@
 			</var-list>
 		</div>
 		<div>
-			<Button icon_name = 'search'/>
+			<Button icon_name = 'search' @click = 'search.search'/>
 			<Button icon_name = 'setting' @click = 'search.on'/>
 			<Button icon_name = 'deck'/>
 			<Button icon_name = 'exit'/>
@@ -68,7 +69,7 @@
 			</div>
 			<div
 				v-for = "j in [
-					{ span : I18N_KEYS.CARD_INFO_OT, results : search.info.ot, cards : search.list.ot, key : KEYS.OT, strings : mainGame.get.strings.ot, class : 'ot', switchs : 'ot' },
+					{ span : I18N_KEYS.CARD_INFO_OT, results : search.info.ot, cards : search.list.ot, key : KEYS.OT, strings : mainGame.get.strings.ot, class : 'ot' },
 					{ span : I18N_KEYS.CARD_INFO_TYPE, results : search.info.type[0], cards : search.list.card, key : KEYS.TYPE, strings : mainGame.get.strings.type, value : (i : number) => i - ((i & 0x3) === i ? 0 : (i & 0x3)) },
 					{ span : I18N_KEYS.CARD_INFO_SPELL_TRAP_TYPE,  results : search.info.type[1], cards : search.list.spell, key : KEYS.TYPE, strings : mainGame.get.strings.type, value : (i : number) => i - ((i & 0x3) === i ? 0 : (i & 0x3)) },
 					{ span : I18N_KEYS.CARD_INFO_MONSTER_TYPE,  results : search.info.type[2], cards : search.list.monster, key : KEYS.TYPE, strings : mainGame.get.strings.type, value : (i : number) => i - ((i & 0x3) === i ? 0 : (i & 0x3)), switchs : 'type' },
@@ -87,9 +88,9 @@
 				<div>
 					<div
 						v-for = 'i in j.cards'
-						:class = "{ 'selected' : j.results.includes(i), 'ot' : j.class === 'ot' }"
+						:class = "{ 'selected' : j.results.includes(j.value ? j.value(i) : i), 'ot' : j.class === 'ot' }"
 						class = 'cursor'
-						@click = 'search.select(j.results, i)'
+						@click = 'search.select(j.results, j.value ? j.value(i) : i)'
 					>
 						<img :src = 'mainGame.get.icon(j.key, i)!'/>
 						<span>{{ j.strings(j.value ? j.value(i) : i)}}</span>
@@ -165,6 +166,7 @@
 	import Card, { TYPE } from '@/script/card';
 	import { I18N_KEYS } from '@/script/language/i18n';
 	import { FILES, KEYS, REG } from '@/script/constant';
+	import Search from '@/script/search';
 
 	import Pic, { CardPic } from '@/pages/ui/pic.vue';
 	import Input from '@/pages/ui/input.vue';
@@ -219,7 +221,7 @@
 		load : async () : Promise<void> => {
 			const length = page.list.length;
 			if (page.list.length < page.result.length) {
-				const cards = page.result.slice(length, Math.max(page.result.length, length + 100));
+				const cards = page.result.slice(length, Math.min(page.result.length, length + 100));
 				await mainGame.load.pic(cards.map(i => i.pic.code));
 				page.list.push(...cards);
 			}
@@ -309,10 +311,10 @@
 			lv : '',
 			atk : '',
 			def : '',
-			scale : ''
+			scale : '',
+			desc : ''
 		},
 		switchs : {
-			'ot' : false,
 			'type' : false,
 			'category' : false,
 			'link' : false,
@@ -341,10 +343,29 @@
 			// }
 			page.list = [];
 			page.button_loading = true;
-			page.result = [
-				{ card : mainGame.get.card(92559258), pic : { code : 92559258, index : 0, y : 0, loc : 1, key : '0'} },
-			];
 			page.finished = false;
+			const searcher = new Search()
+				.set.cards(mainGame.get.cards())
+				.set.ot(search.info.ot)
+				.set.type(search.info.type)
+				.set.race(search.info.race)
+				.set.attribute(search.info.attribute)
+				.set.category(search.info.category)
+				.set.link(search.info.link)
+				.set.lflist(search.info.lflist)
+				.set.forbidden(search.info.forbidden)
+				.set.lv(search.info.lv)
+				.set.scale(search.info.scale)
+				.set.atk(search.info.atk)
+				.set.def(search.info.def)
+				.set.desc(search.info.desc)
+				.set.and_or(search.switchs);
+			page.result = searcher.search().map(i => {
+				return {
+					card : i,
+					pic : { code : i.id, index : 0, y : 0, loc : 1, key : Math.random().toString() }
+				};
+			});
 			await page.load_on();
 			page.button_loading = false;
 		}
@@ -367,7 +388,8 @@
 		window.addEventListener("mousedown", page.mousedown);
 		window.addEventListener("mouseup", page.mouseup);
 		await search.search();
-		console.log(search.list.link)
+		console.log(0x2.toString(2))
+		console.log(0x3.toString(2))
 	});
 
 	onUnmounted(() => {
