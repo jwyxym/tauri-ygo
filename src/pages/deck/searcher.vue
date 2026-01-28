@@ -43,6 +43,7 @@
 						<span>{{ i.card.id }}</span>
 					</div>
 				</div>
+				<var-back-top :duration = '300'/>
 			</var-list>
 		</div>
 		<div>
@@ -332,15 +333,6 @@
 			}
 		},
 		search : async () : Promise<void> => {
-			// if (typeof props.search.rule.level(props.search.info.scale ?? '') !== 'boolean'
-			// 	|| typeof props.search.rule.level(props.search.info.level ?? '') !== 'boolean'
-			// 	|| typeof props.search.rule.atk(props.search.info.atk ?? '') !== 'boolean'
-			// 	|| typeof props.search.rule.atk(props.search.info.def ?? '') !== 'boolean'
-			// ) {
-			// 	search.on();
-			// 	toast.error(mainGame.get.text(I18N_KEYS.DECK_RULE_SEARCH_INFO))
-			// 	return;
-			// }
 			page.list = [];
 			page.button_loading = true;
 			page.finished = false;
@@ -388,8 +380,6 @@
 		window.addEventListener("mousedown", page.mousedown);
 		window.addEventListener("mouseup", page.mouseup);
 		await search.search();
-		console.log(0x2.toString(2))
-		console.log(0x3.toString(2))
 	});
 
 	onUnmounted(() => {
@@ -564,5 +554,10 @@
 				}
 			}
 		}
+	}
+</style>
+<style lang = 'scss'>
+	.var-back-top  {
+		transform: translateY(-100%);
 	}
 </style>

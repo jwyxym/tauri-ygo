@@ -47,7 +47,6 @@ Zh_CN[I18N_KEYS.DECK_DELETE_MESSAGR] = '[{:?}]将会永久消失！（真的很�
 Zh_CN[I18N_KEYS.DECK_RULE_NAME_EXIST] = '卡组已存在';
 Zh_CN[I18N_KEYS.DECK_RULE_NAME_UNLAWFUL] = '文件名非法';
 Zh_CN[I18N_KEYS.DECK_RULE_NAME_LEN] = '文件名不可为空';
-Zh_CN[I18N_KEYS.DECK_RULE_SEARCH_INFO] = '搜索词不合规';
 Zh_CN[I18N_KEYS.DECK_RULE_SEARCH_ATK] = '允许输入的字符：' + ['数字', '?', '>', '=', '<', '..'].toString();
 Zh_CN[I18N_KEYS.DECK_RULE_SEARCH_LV] = '允许输入的字符：' + ['数字', '>', '=', '<', '..'].toString();
 Zh_CN[I18N_KEYS.DECK_RULE_DECK_MAX] = '卡组已达最大数量 {:?}';
