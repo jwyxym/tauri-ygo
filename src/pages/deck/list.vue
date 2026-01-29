@@ -70,7 +70,13 @@
 			</div>
 		</transition>
 		<transition name = 'opacity'>
-			<DeckPage v-if = 'page.deck' :this_deck = 'page.this_deck' :offdeck = 'page.offdeck' :update = 'page.update'></DeckPage>
+			<DeckPage
+				v-if = 'page.deck'
+				:this_deck = 'page.this_deck!'
+				:offdeck = 'page.offdeck'
+				@update = 'page.update'
+				@exit = 'page.offdeck'
+			/>
 		</transition>
 		<var-popup v-model:show = 'page.popup.code.show' position = 'center' :close-on-click-overlay = 'false'>
 			<var-form>

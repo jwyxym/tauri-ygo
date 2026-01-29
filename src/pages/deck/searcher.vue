@@ -47,10 +47,10 @@
 			</var-list>
 		</div>
 		<div>
-			<Button icon_name = 'search' @click = 'search.search'/>
+			<Button icon_name = 'search' @click = 'search.search' :loading = 'page.loading'/>
 			<Button icon_name = 'setting' @click = 'search.on'/>
-			<Button icon_name = 'deck'/>
-			<Button icon_name = 'exit'/>
+			<Button icon_name = 'deck' @click = 'setting.on'/>
+			<Button icon_name = 'exit' @click = "emit('exit')"/>
 		</div>
 		<div
 			class = 'search no-scrollbar'
@@ -158,6 +158,28 @@
 				</div>
 			</div>
 		</div>
+		<div class = 'setting no-scrollbar'
+			:style = "{ '--y' : setting.y }"
+			ref = 'setting_div'
+		>
+			<Input
+				:placeholder = 'mainGame.get.text(I18N_KEYS.DECK_NAME)'
+				:rules = 'setting.name_rule'
+				variant = 'outlined'
+				v-model = 'setting.name'
+			/>
+			<div class = 'btn'>
+				<div
+					v-for = "i in setting.btns"
+				>
+					<Button
+						:icon_name = 'i.icon'
+						:content = 'mainGame.get.text(i.key)'
+						@click = 'i.func'
+					/>
+				</div>
+			</div>
+		</div>
 	</main>
 </template>
 <script setup lang = 'ts'>
@@ -171,11 +193,14 @@
 
 	import Pic, { CardPic } from '@/pages/ui/pic.vue';
 	import Input from '@/pages/ui/input.vue';
-	import Button from '@/pages/ui/button.vue';
+	import Button, { Icon } from '@/pages/ui/button.vue';
 	import { Hover } from '@/pages/ui/deck.vue';
-	import Select from '../ui/select.vue';
+	import Select from '@/pages/ui/select.vue';
+	import Deck from './deck';
+import toast from '@/script/toast';
 
 	const search_div = ref<HTMLDivElement | null>(null);
+	const setting_div = ref<HTMLDivElement | null>(null);
 
 	const cards = ref<Array<ComponentPublicInstance> | null>(null);
 	const page = reactive({
@@ -193,6 +218,7 @@
 		},
 		mousedown : (e : MouseEvent) : void => {
 			if (search.off(e)) return;
+			if (setting.off(e)) return;
 			const target = e.target as HTMLElement;
 			const v : number = cards.value?.findIndex(i => i.$el.contains(target)) ?? -1;
 			if (v < 0) return;
@@ -228,6 +254,44 @@
 			}
 			page.loading = false;
 			page.finished = page.list.length >= page.result.length;
+		}
+	});
+
+	const setting = reactive({
+		y : '200vh',
+		name : '',
+		on : () => setting.y = '-50%',
+		off : (e : MouseEvent) : boolean => {
+			const target = e.target as HTMLElement;
+			if (setting.y !== '200vh'
+				&& setting_div.value && !setting_div.value.contains(target)
+			) {
+				setting.y = '200vh';
+				return true;
+			}
+			return false;
+		},
+		btns : [
+			{ icon : 'save', key : I18N_KEYS.DECK_SETTING_SAVE, func : async () => {
+				const rule = await setting.name_rule(setting.name);
+				typeof rule == 'boolean' ? emit('save', setting.name) : toast.error(rule);
+			} },
+			{ icon : 'share', key : I18N_KEYS.DECK_SETTING_SHARE, func : async () => {
+				const rule = await setting.name_rule(setting.name);
+				typeof rule == 'boolean' ? emit('share', setting.name) : toast.error(rule);
+			} },
+			{ icon : 'sort', key : I18N_KEYS.DECK_SETTING_SORT, func : () => emit('sort') },
+			{ icon : 'disrupt', key : I18N_KEYS.DECK_SETTING_DISRUPT, func : () => emit('disrupt') },
+			{ icon : 'clear', key : I18N_KEYS.DECK_SETTING_CLEAR, func : () => emit('clear') },
+		] as Array<{ icon : Icon; key : number; func : Function; }>,
+		name_rule : async (name ?: string) : Promise<string | boolean> => {
+			if (name === undefined || name.length === 0)
+				return mainGame.get.text(I18N_KEYS.DECK_RULE_NAME_LEN);
+			if (name.match(REG.NAME))
+				return mainGame.get.text(I18N_KEYS.DECK_RULE_NAME_UNLAWFUL);
+			if ((await mainGame.load.deck()).filter(i => i.name === name).length > (props.deck.new || (props.deck.name!.length > 0 && props.deck.name !== name) ? 0 : 1))
+				return mainGame.get.text(I18N_KEYS.DECK_RULE_NAME_EXIST);
+			return true;
 		}
 	});
 
@@ -333,8 +397,7 @@
 			}
 		},
 		search : async () : Promise<void> => {
-			page.list = [];
-			page.button_loading = true;
+			page.list.length = 0;
 			page.finished = false;
 			const searcher = new Search()
 				.set.cards(mainGame.get.cards())
@@ -359,13 +422,18 @@
 				};
 			});
 			await page.load_on();
-			page.button_loading = false;
 		}
 	});
 
 	const emit = defineEmits<{
 		card : [card : number];
 		lflist : [lflist : string];
+		save : [name : string];
+		share : [name : string];
+		sort : [];
+		disrupt : [];
+		clear : [];
+		exit : [];
 	}>();
 
 	const props = defineProps<{
@@ -374,6 +442,7 @@
 		count : number;
 		move : { x : number; y : number; };
 		hover : Hover;
+		deck : Deck;
 	}>();
 
 	onMounted(async () => {
@@ -388,6 +457,7 @@
 	});
 
 	watch(() => props.width, page.size.resize, { immediate : true });
+	watch(() => props.deck.name, (n) => setting.name = n ?? '', { immediate : true });
 </script>
 <style lang = 'scss' scoped>
 	$head-height: 60px;
@@ -452,7 +522,7 @@
 			background-color: rgba(0, 0, 0, 0.8);
 			color: white;
 			overflow-y: auto;
-			transition: all 0.1s ease;
+			transition: all 0.2s ease;
 			> div {
 				margin-left: 10px;
 				max-width: calc(100% - 10px);
@@ -551,6 +621,39 @@
 						width: 40px;
 						height: 40px;
 					}
+				}
+			}
+		}
+		.setting {
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, var(--y));
+			width: calc(var(--vw) / 2);
+			height: calc(var(--vh) / 2);
+			background-color: rgba(0, 0, 0, 0.8);
+			color: white;
+			overflow-y: auto;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			transition: all 0.2s ease;
+			.var-input {
+				margin-top: 15px;
+				width: 90%;
+				height: 70px;
+			}
+			.btn {
+				width: 90%;
+				display: flex;
+				flex-wrap: wrap;
+				&::-webkit-scrollbar {
+					display: none;
+				}
+				> div {
+					flex: 1;
+					min-width: 85px;
+					height: 30px;
 				}
 			}
 		}

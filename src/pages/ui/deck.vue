@@ -374,7 +374,10 @@
 		}
 	});
 
-	onBeforeMount(() => emit('hover', page.move.start));
+	onBeforeMount(() => {
+		emit('hover', page.move.start);
+		emit('deck', [page.deck.main, page.deck.extra, page.deck.side]);
+	});
 
 	onMounted(async () => {
 		await mainGame.load.pic(props.deck);
@@ -405,6 +408,7 @@
 		card : [card : number];
 		hover : [hover : Hover];
 		move : [x : number, y : number];
+		deck : [deck : [CardPics, CardPics, CardPics]];
 	}>();
 
 	const props = defineProps<{
@@ -412,7 +416,7 @@
 		width : number;
 		count : number;
 		deck : Deck;
-		lflist ?: string
+		lflist ?: string;
 	}>();
 
 	watch(() => page.move.card, (n) => {

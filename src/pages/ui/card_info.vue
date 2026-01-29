@@ -102,22 +102,23 @@
 	}>();
 
 	watch(() => props.code, (n) => {
+		page.card = {
+			pic : mainGame.unknown.pic,
+			name : '',
+			id : 0,
+			ot : '',
+			lv : '',
+			type : '',
+			attribute : '',
+			race : '',
+			description : '',
+			setcode : '',
+			scale : '',
+			atk : '',
+			def : ''
+		}
 		if (!n)
-			return page.card = {
-				pic : mainGame.unknown.pic,
-				name : '',
-				id : 0,
-				ot : '',
-				lv : '',
-				type : '',
-				attribute : '',
-				race : '',
-				description : '',
-				setcode : '',
-				scale : '',
-				atk : '',
-				def : ''
-			};
+			return ;
 		if (typeof n === 'string') n = Number(n);
 		let card : Card;
 		if (typeof n === 'number' || n instanceof Card) {

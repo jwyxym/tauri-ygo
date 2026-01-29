@@ -59,8 +59,8 @@ class Card {
 		this.atk = row[5] as number;
 		this.def = row[6] as number;
 		const level = row[7].toString(16).padStart(7, '0')
-		this.level = parseInt(level.slice(-4)) | 0;
-		this.scale = parseInt(level.slice(-6, -4)) | 0;
+		this.level = parseInt(level.slice(-4), 16) | 0;
+		this.scale = parseInt(level.slice(-6, -4), 16) | 0;
 		this.race = row[8] as number;
 		this.attribute = row[9] as number;
 		this.category = row[10] as number;
