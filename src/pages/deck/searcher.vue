@@ -1,10 +1,5 @@
 <template>
-	<main
-		:style = "{
-			'--height' : `${height}px`,
-			'--width' : `${width}px`,
-		}"
-	>
+	<main>
 		<div>
 			<Input
 				variant = 'outlined'
@@ -12,7 +7,7 @@
 				v-model = 'search.info.desc'
 			/>
 		</div>
-		<div class = 'no-scrollbar'>
+		<div class = 'no-scrollbar' ref = 'list'>
 			<var-list
 				:finished = 'page.finished'
 				v-model:loading = 'page.loading'
@@ -34,7 +29,7 @@
 						:i = 'i.pic'
 						:hover = '{ x : move.x, y : move.y, card : page.card }'
 						:size = 'page.size'
-						:lflist = 'page.search.lflist'
+						:lflist = 'search.info.lflist'
 						ref = 'cards'
 					/>
 					<div>
@@ -43,7 +38,6 @@
 						<span>{{ i.card.id }}</span>
 					</div>
 				</div>
-				<var-back-top :duration = '300'/>
 			</var-list>
 		</div>
 		<div>
@@ -51,6 +45,7 @@
 			<Button icon_name = 'setting' @click = 'search.on'/>
 			<Button icon_name = 'deck' @click = 'setting.on'/>
 			<Button icon_name = 'exit' @click = "emit('exit')"/>
+			<p @click = 'page.back' class = 'pointer'><span>&#9650;</span></p>
 		</div>
 		<div
 			class = 'search no-scrollbar'
@@ -189,6 +184,7 @@
 	import Card, { TYPE } from '@/script/card';
 	import { I18N_KEYS } from '@/script/language/i18n';
 	import { FILES, KEYS, REG } from '@/script/constant';
+	import GLOBAL from '@/script/global';
 	import Search from '@/script/search';
 
 	import Pic, { CardPic } from '@/pages/ui/pic.vue';
@@ -196,11 +192,12 @@
 	import Button, { Icon } from '@/pages/ui/button.vue';
 	import { Hover } from '@/pages/ui/deck.vue';
 	import Select from '@/pages/ui/select.vue';
+	import toast from '@/pages/toast/toast';
 	import Deck from './deck';
-import toast from '@/script/toast';
 
 	const search_div = ref<HTMLDivElement | null>(null);
 	const setting_div = ref<HTMLDivElement | null>(null);
+	const list = ref<HTMLDivElement | null>(null);
 
 	const cards = ref<Array<ComponentPublicInstance> | null>(null);
 	const page = reactive({
@@ -209,26 +206,24 @@ import toast from '@/script/toast';
 			width : 0,
 			height : 0,
 			resize : () : void => {
-				page.size.width = (window.innerWidth - props.width * 2 - 30) / props.count;
+				page.size.width = (GLOBAL.WIDTH * 0.9 / 3) / props.count;
 				page.size.height = page.size.width * 1.45;
 			}
 		},
-		search : {
-			lflist : ''
-		},
-		mousedown : (e : MouseEvent) : void => {
-			if (search.off(e)) return;
-			if (setting.off(e)) return;
-			const target = e.target as HTMLElement;
+		touchstart : (e : TouchEvent) : void => page.start(e.target as HTMLElement, e.touches[0].clientX, e.touches[0].clientY),
+		mousedown : (e : MouseEvent) : void => page.start(e.target as HTMLElement, e.clientX, e.clientY),
+		start : (target : HTMLElement, x : number, y : number) : void => {
+			if (search.off(target)) return;
+			if (setting.off(target)) return;
 			const v : number = cards.value?.findIndex(i => i.$el.contains(target)) ?? -1;
 			if (v < 0) return;
 			cards.value![v].$el.style.transition = 'none';
 			const card = page.list[v].pic;
 			emit('card', card.code);
-			props.hover(target, e.clientX, e.clientY, card.code);
+			props.hover(target, x, y, card.code);
 			page.card = card;
 		},
-		mouseup : () : void => page.card = undefined,
+		end : () : void => page.card = undefined,
 		finished : false,
 		loading : false,
 		button_loading : false,
@@ -254,19 +249,23 @@ import toast from '@/script/toast';
 			}
 			page.loading = false;
 			page.finished = page.list.length >= page.result.length;
+		},
+		back : () => {
+			if (list.value)
+				list.value.scrollTop = 0;
 		}
 	});
 
 	const setting = reactive({
-		y : '200vh',
+		y : `${200 / GLOBAL.SCALE}vh`,
 		name : '',
 		on : () => setting.y = '-50%',
-		off : (e : MouseEvent) : boolean => {
-			const target = e.target as HTMLElement;
-			if (setting.y !== '200vh'
+		off : (target : HTMLElement) : boolean => {
+			const vh = `${200 / GLOBAL.SCALE}vh`;
+			if (setting.y !== vh
 				&& setting_div.value && !setting_div.value.contains(target)
 			) {
-				setting.y = '200vh';
+				setting.y = vh;
 				return true;
 			}
 			return false;
@@ -315,15 +314,15 @@ import toast from '@/script/toast';
 	];
 
 	const search = reactive({
-		x : '100vw',
+		x : `${200 / GLOBAL.SCALE}vw`,
 		on : () => search.x = '-50%',
-		off : (e : MouseEvent) : boolean => {
-			const target = e.target as HTMLElement;
-			if (search.x !== '100vw'
+		off : (target : HTMLElement) : boolean => {
+			const vw = `${200 / GLOBAL.SCALE}vw`;
+			if (search.x !== vw
 				&& search_div.value && !search_div.value.contains(target)
 				&& !target.classList.contains('var-option__cover')
 			) {
-				search.x = '100vw';
+				search.x = vw;
 				return true;
 			}
 			return false;
@@ -437,8 +436,6 @@ import toast from '@/script/toast';
 	}>();
 
 	const props = defineProps<{
-		height : number;
-		width : number;
 		count : number;
 		move : { x : number; y : number; };
 		hover : Hover;
@@ -446,25 +443,28 @@ import toast from '@/script/toast';
 	}>();
 
 	onMounted(async () => {
-		window.addEventListener("mousedown", page.mousedown);
-		window.addEventListener("mouseup", page.mouseup);
+		page.size.resize();
+		window.addEventListener('mousedown', page.mousedown);
+		window.addEventListener('touchstart', page.touchstart);
+		window.addEventListener('mouseup', page.end);
 		await search.search();
 	});
 
 	onUnmounted(() => {
-		window.removeEventListener("mousedown", page.mousedown);
-		window.removeEventListener("mouseup", page.mouseup);
+		window.removeEventListener('mousedown', page.mousedown);
+		window.removeEventListener('touchstart', page.touchstart);
+		window.removeEventListener('mouseup', page.end);
 	});
 
-	watch(() => props.width, page.size.resize, { immediate : true });
 	watch(() => props.deck.name, (n) => setting.name = n ?? '', { immediate : true });
+	watch(() => search.info.lflist, (n) => emit('lflist', n));
 </script>
 <style lang = 'scss' scoped>
 	$head-height: 60px;
 	$foot-height: 30px;
 	main {
-		width: var(--width);
-		height: var(--height);
+		width: calc((var(--width) * 0.9) / 3 - 20px);
+		height: calc(var(--height) * 0.9);
 		border-radius: 4px;
 		background: rgba(255, 255, 255, 0.1);
 		color: white;
@@ -482,6 +482,7 @@ import toast from '@/script/toast';
 			width: calc(100% - 10px);
 			overflow-y: auto;
 			overflow-x: hidden;
+			scroll-behavior: smooth;
 			.list {
 				position: relative;
 				width: calc(100% - 15px);
@@ -508,17 +509,30 @@ import toast from '@/script/toast';
 			}
 		}
 		> div:nth-child(3) {
+			position: relative;
 			height: $foot-height;
 			display: flex;
 			gap: 5px;
+			> p {
+				position: absolute;
+				border: 1px solid white;
+				border-radius: 4px;
+				height: 30px;
+				width: 30px;
+				right: 5px;
+				transform: translateY(- $foot-height);
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
 		}
 		.search {
 			position: fixed;
 			top: 50%;
 			left: 50%;
 			transform: translate(var(--x), -50%);
-			width: calc(var(--vw) / 2);
-			height: calc(var(--vh) * 0.9);
+			width: calc(var(--width) / 2);
+			height: calc(var(--height) * 0.9);
 			background-color: rgba(0, 0, 0, 0.8);
 			color: white;
 			overflow-y: auto;
@@ -615,7 +629,7 @@ import toast from '@/script/toast';
 				> div {
 					display: flex;
 					gap: 10px;
-					min-height: 50px;
+					min-height: 100px;
 					width: calc(var(--vw) / 2);
 					img {
 						width: 40px;
@@ -629,8 +643,8 @@ import toast from '@/script/toast';
 			top: 50%;
 			left: 50%;
 			transform: translate(-50%, var(--y));
-			width: calc(var(--vw) / 2);
-			height: calc(var(--vh) / 2);
+			width: 500px;
+			height: 130px;
 			background-color: rgba(0, 0, 0, 0.8);
 			color: white;
 			overflow-y: auto;
@@ -647,6 +661,7 @@ import toast from '@/script/toast';
 				width: 90%;
 				display: flex;
 				flex-wrap: wrap;
+				gap: 5px;
 				&::-webkit-scrollbar {
 					display: none;
 				}
@@ -657,10 +672,5 @@ import toast from '@/script/toast';
 				}
 			}
 		}
-	}
-</style>
-<style lang = 'scss'>
-	.var-back-top  {
-		transform: translateY(-100%);
 	}
 </style>

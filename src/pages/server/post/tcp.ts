@@ -6,12 +6,12 @@ import fs from '@/script/fs';
 import * as CONSTANT from '@/script/constant';
 import invoke from '@/script/tauri-api/invoke';
 import { I18N_KEYS } from '@/script/language/i18n';
-import toast from '@/script/toast';
 
 import Client_Card from '@/pages/server/scene/client_card';
 import Plaid from '@/pages/server/scene/plaid';
 import { Idle } from '@/pages/server/idle';
 import Deck from '@/pages/deck/deck';
+import toast from '@/pages/toast/toast';
 
 import Message from './message';
 import { CTOS, STOC, LOCATION, MSG, ERROR, PLAYERCHANGE, HINT, QUERY, PHASE, COMMAND, EDESC, POS } from './network';
@@ -826,6 +826,7 @@ class Tcp {
 						}],
 						[MSG.MOVE, async () => {
 							const pack = to_package<number>(buffer, data, [32].concat(new Array(8).fill(8), [32]), pos);
+							console.log(pack)
 							const code = pack[0];
 							const from = {
 								player : to_player(pack[1]),

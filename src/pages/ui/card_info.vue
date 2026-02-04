@@ -1,11 +1,5 @@
 <template>
-	<main
-		:style = "{
-			'--height' : `${height}px`,
-			'--width' : `${width}px`,
-		}"
-		class = 'no-scrollbar'
-	>
+	<main class = 'no-scrollbar'>
 		<div>
 			<div :style = "{ '--url' : `url('${page.card.pic}')` }"></div>
 			<Button v-show = 'page.card.id' icon_name = 'collapse' @click = 'page.clear'/>
@@ -96,8 +90,6 @@
 	})
 
 	const props = defineProps<{
-		height : number;
-		width : number;
 		code ?: string | number | Card | Client_Card;
 	}>();
 
@@ -145,10 +137,9 @@
 </script>
 <style lang = 'scss' scoped>
 	$color-sub : rgb(203, 203, 203);
-	$size: clamp(8px, 2vh, 16px);
 	main {
-		width: var(--width);
-		height: var(--height);
+		width: calc((var(--width) * 0.9) / 3 - 20px);
+		height: calc(var(--height) * 0.9);
 		overflow-y: auto;
 		overflow-x: hidden;
 		border-radius: 4px;
@@ -167,7 +158,7 @@
 			gap: 10px;
 			> div:first-child {
 				width: 60%;
-				aspect-ratio: 1/1.45;
+				aspect-ratio: 1 / 1.45;
 				max-width: 80px;
 				box-shadow: 0 0 10px white;
 				background-image: var(--url);
@@ -183,17 +174,17 @@
 				flex-direction: column;
 				> span:first-child {
 					font-weight: bold;
-					font-size: 16px;
+					font-size: 20px;
 				}
 				> span:last-child {
 					color: $color-sub;
-					font-size: 12px;
+					font-size: 16px;
 				}
 			}
 			+ div {
 				display: flex;
 				flex-wrap: wrap;
-				font-size: $size;
+				font-size: 16px;
 				> div {
 					min-width: 50%;
 					display: flex;
@@ -206,7 +197,7 @@
 		}
 		> p {
 			white-space: pre-line;
-			font-size: $size;
+			font-size: 16px;
 			> span:first-child {
 				color: $color-sub;
 			}

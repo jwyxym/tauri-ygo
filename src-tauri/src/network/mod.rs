@@ -127,11 +127,14 @@ pub async fn download(
 			}
 		}
 		if let Some(content_length) = response.headers().get("content-length") {
-       		if let Ok(size) = content_length.to_str() {
-				app.emit("download-started", size)?;
-			}
+			let size: i64 = content_length
+				.to_str()
+				.ok()
+				.and_then(|s| s.parse::<i64>().ok())
+				.unwrap_or(0);
+			app.emit("started", size)?;
 		} else {
-			app.emit("download-started", "0")?;
+			app.emit("started", 0)?;
 		}
 		if name.len() == 0 {
 			let mut rng: ThreadRng = rand::rng();
@@ -152,9 +155,10 @@ pub async fn download(
 			if bytes == 0 {
 				break;
 			}
-			app.emit("download-progress", 8192)?;
+			app.emit("progress", 8192)?;
 			file.write_all(&buffer[..bytes])?;
 		}
+		app.emit("end", 0)?;
 		Ok(name)
 	} else {
 		Err(anyhow!("{}", response.status()))

@@ -1,5 +1,5 @@
 import initSqlJs, { Database, QueryExecResult } from 'sql.js';
-import wasmUrl from "sql.js/dist/sql-wasm.wasm?url";
+import wasmUrl from 'sql.js/dist/sql-wasm.wasm?url';
 
 import fs from './fs';
 

@@ -1,54 +1,23 @@
 import mainGame from '@/script/game';
-import * as CONSTANT from '@/script/constant';
 
 class Voice {
-	audio : Array<HTMLAudioElement> = [];
+	playing ?: HTMLAudioElement = undefined;
+	audio : Map<string, HTMLAudioElement> = new Map();
 
-	update = (key : string) : void => {
-		this.audio.forEach(i => {
-			i.volume = mainGame.get.system(key) as number;
-		});
-	};
+	set_elements = (el : HTMLAudioElement | null, key : string) => el ? this.audio.set(key, el) : this.audio.delete(key);
 
-	back = {
-		play : () : void => {
-			this.update(CONSTANT.KEYS.SETTING_VOICE_BACK_BGM);
-			this.get.music(CONSTANT.FILES.BACK_BGM)?.play();
-		},
-		stop : () : void => {
-			const audio = this.get.music(CONSTANT.FILES.BACK_BGM);
-			if (audio) {
-				audio.pause();
-				audio.currentTime = 0;
-			}
-		},
-	};
+	update = (key : string) : void => this.audio.forEach(i => i.volume = mainGame.get.system(key) as number);
 
-	battle = {
-		play : () : void => {
-			this.update(CONSTANT.KEYS.SETTING_VOICE_BACK_BGM);
-			this.get.music(CONSTANT.FILES.BATTLE_BGM)?.play();
-		},
-		stop : () : void => {
-			const audio = this.get.music(CONSTANT.FILES.BATTLE_BGM);
-			if (audio) {
-				audio.pause();
-				audio.currentTime = 0;
-			}
-		},
-	};
-
-	get = {
-		music : (key : string) : HTMLAudioElement | undefined => {
-			return this.audio.find(i => i.id === key);
+	play = (key : string) : void => {
+		if (this.playing) {
+			this.playing.pause();
+			this.playing.currentTime = 0;
 		}
+		this.playing = this.audio.get(key);
+		this.playing?.play();
 	};
-
-	push = {
-		music : (audio : Array<HTMLAudioElement>) : void => {
-			this.audio = audio;
-		}
-	}
 }
 
-export default new Voice();
+const voice = new Voice();
+
+export default voice;

@@ -1,13 +1,22 @@
 <template>
-	<div class = 'main' @contextmenu = 'page.contextmenu'>
-		<!-- <Duel :connect = "{deck_count : [60, 15, 15, 60, 15, 15], phase : {phase : 0}}" v-if = 'page.show.menu'/> -->
+	<div class = 'main' @contextmenu = 'page.contextmenu'
+		:style = "{
+			'--scale' : GLOBAL.SCALE,
+			'--height' : `${GLOBAL.HEIGHT}px`,
+			'--width' : `${GLOBAL.WIDTH}px`,
+			'--left' : `${GLOBAL.LEFT}px`,
+			'--top' : `${GLOBAL.TOP}px`,
+		}"
+	>
 		<starry-sky :stars-count = '1500' :distance = '800' id = 'back'/>
 		<Voice v-if = 'page.show.voice'></Voice>
+		<Loading/>
+		<Toast/>
 		<div>
 			<transition name = 'opacity'>
 				<Deck
 					v-if = 'page.show.deck'
-					:select = 'page.select'
+					@exit = 'page.select.menu'
 				/>
 			</transition>
 			<transition name = 'opacity'>
@@ -23,40 +32,33 @@
 			<transition name = 'opacity'>
 				<YGOMenu
 					v-if = 'page.show.menu'
-					:select = 'page.select'
-				/>
-			</transition>
-			<transition name = 'opacity'>
-				<Loading
-					v-if = 'page.show.loading'
-					:now = 'page.loading.progress'
-					:all = 'page.loading.start'
+					@deck = 'page.select.deck'
+					@server = 'page.select.server'
+					@setting = 'page.select.setting'
 				/>
 			</transition>
 		</div>
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { reactive, onBeforeMount, onMounted } from "vue";
+	import { reactive, onBeforeMount, onMounted } from 'vue';
 
 	import YGOMenu from './pages/menu/menu.vue';
-	import Deck from './pages/deck/list.vue';
+	import Deck from './pages/deck/deck_list.vue';
 	import Server from './pages/server/server.vue';
 	import Setting from './pages/setting/setting.vue';
 	import Loading from './pages/loading/loading.vue';
 	import Voice from './pages/voice/voice.vue';
+	import Toast from './pages/toast/toast.vue';
 
 	import mainGame from './script/game';
 	import fs from './script/fs';
 	import { I18N_KEYS } from './script/language/i18n';
+	import GLOBAL from './script/global';
 	import Dialog from './pages/ui/dialog';
-	import listen from './script/tauri-api/listen';
-import Duel from "./pages/server/scene/duel.vue";
 
 	const page = reactive({
 		show : {
-			readme : false,
-			loading : false,
 			voice : false,
 			dialog : false,
 			menu : false,
@@ -101,17 +103,7 @@ import Duel from "./pages/server/scene/duel.vue";
 
 	onBeforeMount(async () : Promise<void> => {
 		const on = async (chk : boolean = true) : Promise<void> => {
-			page.show.loading = true;
-			const start = await listen.unzip.start((i : number) => {
-				page.loading.start = i - 1;
-			});
-			const progress = await listen.unzip.progress((i : number) => {
-				page.loading.progress = i;
-			});
 			await mainGame.init(chk);
-			start();
-			progress();
-			page.show.loading = false;
 			setTimeout(() => {
 				page.loading.start = 0;
 				page.loading.progress = 0;
@@ -120,22 +112,11 @@ import Duel from "./pages/server/scene/duel.vue";
 			page.show.voice = true;
 		}
 		const download = async () : Promise<void> => {
-			page.show.readme = true;
-			page.show.loading = true;
-			const start = await listen.download.start((i : number) => {
-				page.loading.start = i;
-			});
-			const progress = await listen.download.progress((i : number) => {
-				page.loading.progress += i;
-			});
 			if (await fs.init()) {
-				start();
-				progress();
 				page.loading.start = 0;
 				page.loading.progress = 0;
 				await on(false);
 			} else {
-				page.show.loading = false;
 				await dialog();
 			}
 		}
@@ -159,12 +140,15 @@ import Duel from "./pages/server/scene/duel.vue";
 	.main {
 		position: relative;
 		> div:last-child {
-			overflow: hidden;
-			height: calc(var(--vh) * 0.98);
-			width: calc(var(--vw) * 0.98);
+			position: fixed;
+			left: 50%;
+			top: 50%;
+			height: var(--height);
+			width: var(--width);
+			transform: translate(-50%, -50%) scale(var(--scale));
 			display: flex;
-			gap: 10%;
-			justify-content: flex-start;
+			justify-content: center;
+			align-items: center;
 		}
 		#back {
 			background: linear-gradient(#1c1a2e, #2f2434);
@@ -197,16 +181,10 @@ import Duel from "./pages/server/scene/duel.vue";
 	}
 	.var-button {
 		height: 32px !important;
-		max-height: 8vh !important;
 		overflow: hidden;
 		svg {
-			width: calc(8vh - 2px);
-			height: calc(8vh - 2px);
-			max-width: 30px;
-			max-height: 30px;
-		}
-		span {
-			font-size: min(4vh, var(--font-size-md)) !important;
+			width: 30px;
+			height: 30px;
 		}
 	}
 	.var-menu-select--scrollable, .var-select__scroller, .ConversationBlock {
@@ -230,6 +208,11 @@ import Duel from "./pages/server/scene/duel.vue";
 	.no-scrollbar {
 		&::-webkit-scrollbar {
 			display: none;
+		}
+	}
+	.pointer {
+		&:hover {
+			cursor: pointer;
 		}
 	}
 	:root {
@@ -264,8 +247,6 @@ import Duel from "./pages/server/scene/duel.vue";
 		--picker-picked-border:	5px solid white;
 		--cell-padding: 1vh 20px !important;
 		--field-decorator-line-size: 0.5px !important;
-		--card-title-font-size: max(2.5vh, 10px) !important;
-		--card-subtitle-font-size: max(1.5vh, 6px) !important;
 		user-select: none;
 	}
 </style>

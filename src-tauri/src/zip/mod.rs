@@ -12,9 +12,9 @@ pub async fn unzip(app: AppHandle, path: String, file: String, chk: bool) -> Res
 	let mut archive: ZipArchive<File> = ZipArchive::new(file)?;
 
 	let len: usize = archive.len();
-	app.emit("unzip-started", len)?;
+	app.emit("started", len)?;
 	for i in 0..len {
-		app.emit("unzip-progress", i)?;
+		app.emit("progress", 1)?;
 		if let Ok(mut file) = archive.by_index(i) {
 			let file_name: String = file.name().to_string();
 			let path: PathBuf = Path::new(&path).join(Path::new(&file_name));
@@ -33,6 +33,7 @@ pub async fn unzip(app: AppHandle, path: String, file: String, chk: bool) -> Res
 			}
 		}
 	}
+	app.emit("end", 0)?;
 
 	Ok(())
 }

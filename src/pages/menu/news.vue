@@ -12,11 +12,12 @@
 </template>
 <script setup lang = 'ts'>
 	import { onMounted, reactive } from 'vue';
+	import * as Opener from '@tauri-apps/plugin-opener';
 
 	import { URL } from '@/script/constant';
+	import fs from '@/script/fs';
 	import http from '@/script/tauri-api/http';
-
-	import open from './open';
+	import toast from '@/pages/toast/toast';
 
 	interface swipe {
 		url : string;
@@ -29,7 +30,13 @@
 		show : false,
 		swipe : [] as Array<swipe>,
 		open : async (url : string) => {
-			await open.url(url);
+			try {
+				await Opener.openUrl(url);
+				return true;
+			} catch (e) {
+				toast.error(e);
+				fs.write.log(e);
+			}
 		}
 	});
 
@@ -38,13 +45,13 @@
 			const data = await http.get<Array<{
 				id : string;
 				news : {
-					["zh-CN"] : Array<swipe>;
+					['zh-CN'] : Array<swipe>;
 				};
 			}>>(URL.MYCARD_NEWS);
 			if (data) {
 				const news = data.filter(i => i.id === 'ygopro' && i.news);
 				if (news.length > 0)
-					page.swipe = news[0].news["zh-CN"].slice(0, 8);
+					page.swipe = news[0].news['zh-CN'].slice(0, 8);
 			}
 		}
 		page.show = true;
@@ -52,13 +59,9 @@
 </script>
 <style scoped lang = 'scss'>
 	.swipe {
-		position: fixed;
-		top: 0;
-		left: 0;
-		transform: translate(2vw, 50vh);
 		overflow: hidden;
-		width: 60vw;
-		height: 40vh;
+		width: 100%;
+		height: 50%;
 		div {
 			width: 100%;
 			height: 100%;
@@ -70,7 +73,7 @@
 			img {
 				position: absolute;
 				object-fit: cover;
-				width: 60%;
+				width: 100%;
 				height: 80%;
 			}
 			span {
@@ -88,17 +91,17 @@
 	.move_left {
 		&-enter-active,
 		&-leave-active {
-			transition: transform 0.5s ease;
+			transition: transform 0.2s ease;
 		}
 
 		&-enter-from,
 		&-leave-to {
-			transform: translate(-200vw, 50vh);
+			transform: translateX(-var(--width));
 		}
 
 		&-enter-to,
 		&-leave-from {
-			transform: translate(2vw, 50vh);
+			transform: initial;
 		}
 	}
 </style>

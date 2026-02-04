@@ -96,6 +96,7 @@ const FILES = {
 };
 
 const URL = {
+	DECK_SHARE : 'http://deck.ourygo.top',
 	SUPER_PRE : 'https://cdn02.moecube.com:444/ygopro-super-pre/archive/ygopro-super-pre.ypk',
 	SUPER_PRE_VERSION : 'https://cdn02.moecube.com:444/ygopro-super-pre/data/version.txt',
 	ASSETS : new Map([

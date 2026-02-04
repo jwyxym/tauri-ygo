@@ -28,7 +28,7 @@
 			@lflist = '(lflist : string) => page.lflist = lflist'
 			@save = 'page.save'
 			@sort = 'page.sort'
-			@share = 'page.share'
+			@share = 'page.copy'
 			@disrupt = 'page.disrupt'
 			@clear = 'page.clear'
 			@exit = "emit('exit')"
@@ -37,18 +37,17 @@
 </template>
 <script setup lang = 'ts'>
 	import { reactive, onBeforeMount, onUnmounted } from 'vue';
-	import { writeText } from '@tauri-apps/plugin-clipboard-manager';
 
 	import mainGame from '@/script/game';
 	import * as CONSTANT from '@/script/constant';
-	import { I18N_KEYS } from "@/script/language/i18n";
-	import toast from '@/script/toast';
+	import { I18N_KEYS } from '@/script/language/i18n';
 	import fs from '@/script/fs';
 
 	import Dialog from '@/pages/ui/dialog';
 	import Deck_Box, { Hover } from '@/pages/ui/deck.vue';
 	import Card_Box from '@/pages/ui/card_info.vue';
-	import { CardPic, CardPics } from "@/pages/ui/pic.vue";
+	import { CardPic, CardPics } from '@/pages/ui/pic.vue';
+	import toast from '@/pages/toast/toast';
 
 	import Deck from './deck';
 	import Search_Box from './searcher.vue';
@@ -85,7 +84,7 @@
 			const deck = page.to_deck(name);
 			const write = await fs.write.ydk(name, deck);
 			let rename = true;
-			if (write && props.this_deck.name && name !== props.this_deck.name && (props.this_deck.name?.length ?? 0 > 0))
+			if (write && !props.this_deck.new && props.this_deck.name && name !== props.this_deck.name && (props.this_deck.name?.length ?? 0 > 0))
 				rename = await fs.rename.ydk(props.this_deck.name, name);
 			if (write && rename)
 				toast.info(mainGame.get.text(I18N_KEYS.DECK_SAVE_COMPELETE));
@@ -108,11 +107,7 @@
 				});
 			});
 		},
-		share : async (name : string) => {
-			const text = page.to_deck(name).toYGOMobileDeckURL();
-			await writeText(text);
-			toast.info(mainGame.get.text(I18N_KEYS.DECK_COPY_COMPELETE));
-		},
+		copy : async (name : string) => emit('copy', page.to_deck(name)),
 		disrupt : async () : Promise<void> => {
 			const on = async () : Promise<void> => {
 				const sort = () : number =>  Math.random() - 0.5;
@@ -157,6 +152,7 @@
 
 	const emit = defineEmits<{
 		update : [name : string];
+		copy : [deck : Deck];
 		exit : [];
 	}>();
 

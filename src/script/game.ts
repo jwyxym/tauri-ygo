@@ -243,10 +243,11 @@ class Game {
 			if (typeof key === 'string' && card) {
 				const lflist = this.lflist.get(key);
 				if (lflist) {
-					card = typeof card == 'string' ? parseInt(card) : card;
-					return lflist.map.get(card) ?? 3;
+					const c = this.get.card(card);
+					card = Math.abs(c.alias - c.id) <= 20 ? c.alias : c.id;
+					return lflist.map.get(card) ?? this.get.system(CONSTANT.KEYS.SETTING_CT_CARD) as number;
 				}
-				return 3;
+				return this.get.system(CONSTANT.KEYS.SETTING_CT_CARD) as number;
 			} else {
 				const name = Array.from(this.lflist).find(i => i[1].hash === key) ?? [this.get.text(I18N_KEYS.UNKNOW)];
 				return name[0];
@@ -761,15 +762,21 @@ class Game {
 			const obj_key = Object.entries(CONSTANT.KEYS).find(([_, v]) => v === key);
 			if (obj_key === undefined)
 				return undefined;
-			if (key === CONSTANT.KEYS.SETTING_LOADING_EXPANSION) {
-				this.system.set(key, to_string(n as string));
-			} else if (key === CONSTANT.KEYS.SETTING_VOICE_BACK_BGM || key.startsWith('SETTING_CT_')) {
-				this.system.set(key, `${n ?? 0}`);
-				voice.update(key);
-			} else if (obj_key[0].startsWith('SETTING_CHK_')) {
-				this.system.set(key, n ? '1' : '0');
-			} else {
-				this.system.set(key, n as string);
+			switch (key) {
+				case CONSTANT.KEYS.SETTING_LOADING_EXPANSION:
+					this.system.set(key, to_string(n as string));
+					break;
+				case CONSTANT.KEYS.SETTING_VOICE_BACK_BGM:
+					this.system.set(key, `${n ?? 0}`);
+					voice.update(key);
+					break;
+				default:
+					if (key.startsWith('SETTING_CT_'))
+						this.system.set(key, `${n ?? 0}`);
+					else if (obj_key[0].startsWith('SETTING_CHK_'))
+						this.system.set(key, n ? '1' : '0');
+					else
+						this.system.set(key, n as string);
 			}
 		}
 	};
@@ -838,8 +845,10 @@ class Game {
 		return this.is_android();
 	};
 
-	sleep = async (time : number, reduce : number = 0) : Promise<void> => {
-		return new Promise(resolve => setTimeout(resolve, Math.max(0, time - reduce)));
+	sleep = async (time : number, func : Function = () => {}, para : Array<any> = []) : Promise<void> => {
+		const data = Date.now();
+		await func(...para);
+		return new Promise(resolve => setTimeout(resolve, Math.max(0, time - (Date.now() - data))));
 	}
 };
 

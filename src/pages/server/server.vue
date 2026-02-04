@@ -317,7 +317,6 @@
 	import { I18N_KEYS } from '@/script/language/i18n';
 	import * as CONSTANT from '@/script/constant';
 	import fs from '@/script/fs';
-	import toast from '@/script/toast';
 	import Tcp, * as TCP from './post/tcp';
 	import voice_input from './voice_input';
 
@@ -329,6 +328,7 @@
 	import Float_Buttons from '@/pages/ui/float_buttons.vue';
 	import Picker from '@/pages/ui/picker';
 	import Deck from '@/pages/deck/deck';
+	import toast from '@/pages/toast/toast';
 
 	import Duel from './scene/duel.vue';
 	import RPS from './scene/rps.vue';
@@ -971,7 +971,7 @@
 		};
 		const start = async () => {
 			page.wait = false;
-			await mainGame.sleep(200, await mainGame.load.pic(connect.deck ?? []));
+			await mainGame.sleep(200, mainGame.load.pic, [connect.deck ?? []]);
 			page.duel = true;
 			page.loading = false;
 		};

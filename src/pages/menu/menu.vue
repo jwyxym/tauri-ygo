@@ -1,39 +1,32 @@
 <template>
-	<div class = 'menu font-menu'>
-		<div class = 'time'>
-			<span>
-				{{ page.time.hour }} : {{ page.time.minute }} : {{ page.time.second }}
-			</span>
-			<span>{{ page.time.year }} - {{ page.time.month }} - {{ page.time.day }}</span>
+	<main class = 'font-menu'>
+		<div>
+			<div>
+				<span>
+					{{ page.time.hour }} : {{ page.time.minute }} : {{ page.time.second }}
+				</span>
+				<span>{{ page.time.year }} - {{ page.time.month }} - {{ page.time.day }}</span>
+			</div>
+			<News/>
 		</div>
-		<div class = 'menu-items'>
+		<div>
 			<span
 				v-for = '(i, v) in page.menu'
-				:style = "{ '--shadow' : `${page.items[v]}` }"
+				:class = "{ 'select' : page.select === v }"
 				ref = 'items'
 				@click = 'page.click(v, true)'
+				class = 'pointer'
 			>{{ mainGame.get.text(i) }}</span>
 		</div>
-		<div class = 'menu-pointer'
-			:style = "{ '--x' : `${page.pointer[0] + 5}px`, '--y' : `${page.pointer[1]}px` }"
-		>
-			<span>&lt;</span>
-		</div>
-		<News/>
-	</div>
+	</main>
 </template>
 <script setup lang = 'ts'>
-	import { ref, Ref, onMounted, reactive, watch, onUnmounted, onBeforeMount } from "vue";
+	import { reactive, onUnmounted, onBeforeMount } from 'vue';
 
 	import mainGame from '@/script/game';
-	import { I18N_KEYS } from "@/script/language/i18n";
+	import { I18N_KEYS } from '@/script/language/i18n';
 
-	import News from "./news.vue";
-	import position from "./position";
-
-	const props = defineProps(['select']);
-
-	const items : Ref<Array<HTMLElement> | null> = ref(null);
+	import News from './news.vue';
 
 	const page = reactive({
 		time : {
@@ -46,9 +39,8 @@
 			second : '',
 			interval : null as null | NodeJS.Timeout
 		},
-		select : -1,
+		select : 0,
 		menu : [I18N_KEYS.MENU_SINGLE, I18N_KEYS.MENU_CONENCT, I18N_KEYS.MENU_DECK, I18N_KEYS.MENU_SETTING, I18N_KEYS.MENU_EXIT],
-		items : [] as Array<string>,
 		pointer : new Array(2).fill(-1000),
 		click : (v : number, item : boolean = false) : void => {
 			if (item && page.select === v) {
@@ -56,18 +48,6 @@
 				return;
 			}
 			page.select = v;
-		},
-		pointer_size : () : void => {
-			if (items.value) {
-				const pos = position.get(items.value[page.select]);
-				page.pointer[0] = pos.right;
-				page.pointer[1] = pos.top - pos.height / 7;
-				if (page.time.y < 0)
-					page.time.y = pos.top
-			}
-		},
-		resize : () : void => {
-			page.pointer_size();
 		},
 		keydown : (event : KeyboardEvent) : void => {
 			const len = page.menu.length - 1;
@@ -83,13 +63,13 @@
 				case 0:
 					break;
 				case 1:
-					await props.select.server();
+					emit('server');
 					break;
 				case 2:
-					await props.select.deck();
+					emit('deck');
 					break;
 				case 3:
-					await props.select.setting();
+					emit('setting');
 					break;
 				case 4:
 					await mainGame.exit();
@@ -98,9 +78,7 @@
 		}
 	});
 
-	onBeforeMount(() : void => {
-		page.items = new Array(page.menu.length).fill('');
-		window.addEventListener('resize', page.resize);
+	onBeforeMount(async () : Promise<void> => {
 		window.addEventListener('keydown', page.keydown);
 		const time = () => {
 			const now = new Date();
@@ -121,31 +99,72 @@
 		page.time.interval = setInterval(time, 1000);
 	})
 
-	onMounted(async () => {
-		await mainGame.sleep(200);
-		page.select = 0;
-	});
-
 	onUnmounted(() => {
-		window.removeEventListener('resize', page.resize);
 		window.removeEventListener('keydown', page.keydown);
 		if (page.time.interval)
 			clearInterval(page.time.interval);
 	});
 
-	watch(() => { return page.select; }, (v) => {
-		page.items.forEach((_, vaule) => {
-			page.items[vaule] = vaule === v ? `
-					0 0 5px #00ffff,
-					0 0 10px #00ffff,
-					0 0 20px #00ffff,
-					0 0 40px #00ffff
-			` : '';
-		});
-		page.pointer_size();
-	}, { immediate : true });
-
+	const emit = defineEmits<{
+		server : [];
+		deck : [];
+		setting : [];
+	}>();
 </script>
 <style scoped lang = 'scss'>
-	@use './menu.scss';
+	main {
+		height: calc(var(--height) * 0.9);
+		width: calc(var(--width) * 0.9);
+		display: flex;
+		color: white;
+		font-size: 48px;
+		> div {
+			width: 50%;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+		> div:first-child {
+			> div:first-child {
+				width: 100%;
+				height: 50%;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				text-shadow:
+					0 0 5px aqua,
+					0 0 10px aqua,
+					0 0 20px aqua,
+					0 0 40px aqua;
+			}
+		}
+		> div:nth-child(2) {
+			justify-content: center;
+			span {
+				width: 300px;
+				position: relative;
+				transition: all 0.2s ease;
+				&::after {
+					transition: all 0.2s ease;
+					content: '<';
+					position: absolute;
+					right: 0;
+					opacity: 0;
+					transform: translateX(-100px);
+				}
+			}
+			.select {
+				text-shadow:
+					0 0 5px aqua,
+					0 0 10px aqua,
+					0 0 20px aqua,
+					0 0 40px aqua;
+				&::after {
+					opacity: 1;
+					transform: translateX(-55px);
+				}
+			}
+		}
+	}
 </style>

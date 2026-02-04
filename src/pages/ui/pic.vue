@@ -37,6 +37,7 @@
 </script>
 <style lang = 'scss' scoped>
 	.card {
+		will-change: transform;
 		position: absolute;
 		left: 0;
 		top: 0;
@@ -56,7 +57,7 @@
 		position: fixed;
 		left: 0;
 		top: 0;
-		transform: translate(var(--hover_x), var(--hover_y));
+		transform: translate(calc(var(--hover_x) - 50%), calc(var(--hover_y) - 50%));
 		z-index: 1;
 	}
 </style>
