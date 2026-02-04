@@ -195,12 +195,14 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: tauri-ygo-windows-${{ matrix.target }}.exe
+        retention-days: 7
         path: .\build\tauri-ygo.exe
 
     - name: Upload File
       uses: actions/upload-artifact@v4
       with:
         name: tauri-ygo-windows-${{ matrix.target }}.msi
+        retention-days: 7
         path: .\build\tauri-ygo.msi
 
   build-macos:
@@ -263,12 +265,14 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: tauri-ygo-macos-${{ matrix.target }}.dmg
+        retention-days: 7
         path: ./build/tauri-ygo.dmg
 
     - name: Upload File
       uses: actions/upload-artifact@v4
       with:
         name: tauri-ygo-macos-${{ matrix.target }}.app
+        retention-days: 7
         path: ./src-tauri/target/release/bundle/macos/
 
   build-linux:
@@ -359,12 +363,14 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: tauri-ygo-linux-${{ matrix.target }}.deb
+        retention-days: 7
         path: ./build/tauri-ygo.deb
 
     - name: Upload File
       uses: actions/upload-artifact@v4
       with:
         name: tauri-ygo-linux-${{ matrix.target }}.AppImage
+        retention-days: 7
         path: ./build/tauri-ygo.AppImage
 
   create-release:
