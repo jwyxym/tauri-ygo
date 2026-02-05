@@ -17,7 +17,7 @@
 				:key = 'i.key'
 				:id = 'i.key'
 				:i = 'i'
-				:hover = 'page.move'
+				:hover = 'page.move.card === i'
 				:size = 'page.size'
 				:lflist = 'lflist'
 				ref = 'cards'
@@ -200,11 +200,10 @@
 						page.move.main = page.deck.main.slice().sort(page.move.sort);
 						page.move.extra = page.deck.extra.slice().sort(page.move.sort);
 						page.move.side = page.deck.side.slice().sort(page.move.sort);
-						emit('move', x, y);
 					}
 					return;
 				}
-				cards.value![v].$el.style.transition = 'none';
+				// cards.value![v].$el.style.transition = 'none';
 				page.move.x = (x / GLOBAL.SCALE) - GLOBAL.LEFT * 2;
 				page.move.y = (y / GLOBAL.SCALE) - GLOBAL.TOP * 2;
 				page.move.main = page.deck.main.slice().sort(page.move.sort);
@@ -219,12 +218,10 @@
 				page.move.index.deck = page.move.index.from;
 			},
 			move : (x : number, y : number) => {
-				if (!page.move.card) return;
+				if (!page.move.card || !deck.value || page.move.moving) return;
+				page.move.moving = true;
 				page.move.x = (x / GLOBAL.SCALE) - GLOBAL.LEFT * 2;
 				page.move.y = (y / GLOBAL.SCALE) - GLOBAL.TOP * 2;
-				emit('move', x, y);
-				if (!deck.value || page.move.moving) return;
-				page.move.moving = true;
 				const decks = [page.move.main, page.move.extra, page.move.side];
 				const moveout = () => {
 					if (page.move.index.deck > -1)
@@ -333,8 +330,8 @@
 					}
 					page.size.resize();
 				} else if (page.move.index.deck < 0 && page.move.index.from > -1) {
-					if (page.move.target)
-						page.move.target.style.transition = 'all 0.1s ease';
+					// if (page.move.target)
+						// page.move.target.style.transition = 'all 0.1s ease';
 					const ct = decks[page.move.index.from].indexOf(page.move.card!);
 					decks[page.move.index.from][ct].loc = 0;
 					await mainGame.sleep(100);
@@ -344,7 +341,7 @@
 				if (page.move.target) {
 					const target = page.move.target;
 					page.move.target = undefined;
-					setTimeout(() => target.style.transition = 'all 0.1s ease', 150);
+					// setTimeout(() => target.style.transition = 'all 0.1s ease', 150);
 				}
 				await mainGame.sleep(100);
 				page.move.now.deck = -1;
@@ -352,7 +349,6 @@
 				page.move.card = undefined;
 				page.move.x = 0;
 				page.move.y = 0;
-				emit('move', 0, 0);
 				page.move.main.length = 0;
 				page.move.extra.length = 0;
 				page.move.side.length = 0;
@@ -411,7 +407,6 @@
 	const emit = defineEmits<{
 		card : [card : number];
 		hover : [hover : Hover];
-		move : [x : number, y : number];
 		deck : [deck : [CardPics, CardPics, CardPics]];
 	}>();
 

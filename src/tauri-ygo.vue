@@ -156,7 +156,6 @@
 	}
 </style>
 <style lang = 'scss'>
-	@use './style/toast.scss';
 	@use './style/transition.scss';
 	.var-icon, .cursor {
 		&:hover {

@@ -20,8 +20,8 @@ const tauriConfig = {
 		windows: [
 			{
 				title: "tauri-ygo",
-				width: 1600,
-				height: 800
+				width: 1280,
+				height: 720
 			}
 		],
 		security: {

@@ -27,7 +27,7 @@
 				>
 					<Pic
 						:i = 'i.pic'
-						:hover = '{ x : move.x, y : move.y, card : page.card }'
+						:hover = 'page.card === i.pic'
 						:size = 'page.size'
 						:lflist = 'search.info.lflist'
 						ref = 'cards'
@@ -437,7 +437,6 @@
 
 	const props = defineProps<{
 		count : number;
-		move : { x : number; y : number; };
 		hover : Hover;
 		deck : Deck;
 	}>();
