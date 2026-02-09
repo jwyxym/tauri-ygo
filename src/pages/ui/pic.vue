@@ -1,11 +1,9 @@
 <template>
 	<div class = 'card'
-		:class = "{ 'hover' : hover.card === i, 'show' : !!i.loc }"
+		:class = "{ 'hover' : hover, 'show' : !!i.loc }"
 		:style = "{
 			'--position_x' :  `${(i.index % 10) * size.width + 2}px`,
 			'--position_y' :  `${(Math.trunc(i.index / 10) + i.y) * size.height + i.loc}px`,
-			'--hover_x' :  `${hover.x}px`,
-			'--hover_y' :  `${hover.y}px`,
 			'--url' : `url('${mainGame.get.card(i.code).pic}')`,
 			'--card_height' : `${size.height}px`,
 			'--card_width' : `${size.width}px`
@@ -28,7 +26,7 @@
 
 	defineProps<{
 		i : CardPic;
-		hover : { x : number; y : number; card ?: CardPic; };
+		hover : boolean;
 		size : { width : number; height : number; }
 		lflist ?: string;
 	}>();
@@ -48,16 +46,17 @@
 		background-image: var(--url);
 		background-size: cover;
 		z-index: 0;
-		transition: all 0.1s ease;
+		transition: transform 0.1s ease;
 	}
 	.show {
 		opacity: 1;
 	}
 	.hover {
 		position: fixed;
+		opacity: 0;
 		left: 0;
 		top: 0;
-		transform: translate(calc(var(--hover_x) - 50%), calc(var(--hover_y) - 50%));
+		transform: initial;
 		z-index: 1;
 	}
 </style>

@@ -182,7 +182,7 @@ class Tcp {
 						if (proto !== STOC.GAME_MSG)
 							this.msg = 0;
 						const func = funcs.get(proto);
-						// console.log('0x'+proto.toString(16), messages.pos, len)
+						console.log('0x'+proto.toString(16), messages.pos, len)
 						if (func)
 							await func(buffer, data, len, connect, messages.pos);
 						messages.pos += len + 2;
