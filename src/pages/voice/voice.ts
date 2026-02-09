@@ -1,12 +1,16 @@
+import { KEYS } from '@/script/constant';
 import mainGame from '@/script/game';
 
 class Voice {
 	playing ?: HTMLAudioElement = undefined;
 	audio : Map<string, HTMLAudioElement> = new Map();
 
-	set_elements = (el : HTMLAudioElement | null, key : string) => el ? this.audio.set(key, el) : this.audio.delete(key);
+	set_elements = (el : HTMLAudioElement | null, key : string) => el ? (() => {
+			this.audio.set(key, el);
+			el.volume = mainGame.get.system(KEYS.SETTING_VOICE_BACK_BGM) as number;
+		})() : this.audio.delete(key);
 
-	update = (key : string) : void => this.audio.forEach(i => i.volume = mainGame.get.system(key) as number);
+	update = () : void => this.audio.forEach(i => i.volume = mainGame.get.system(KEYS.SETTING_VOICE_BACK_BGM) as number);
 
 	play = (key : string) : void => {
 		if (this.playing) {

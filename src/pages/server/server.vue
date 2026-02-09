@@ -325,7 +325,7 @@
 	import Input from '@/pages/ui/input.vue';
 	import AutoInput from '@/pages/ui/auto_input.vue';
 	import Dialog from '@/pages/ui/dialog';
-	import Float_Buttons from '@/pages/ui/float_buttons.vue';
+	// import Float_Buttons from '@/pages/ui/float_buttons.vue';
 	import Picker from '@/pages/ui/picker';
 	import Deck from '@/pages/deck/deck';
 	import toast from '@/pages/toast/toast';

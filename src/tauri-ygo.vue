@@ -1,13 +1,5 @@
 <template>
-	<div class = 'main' @contextmenu = 'page.contextmenu'
-		:style = "{
-			'--scale' : GLOBAL.SCALE,
-			'--height' : `${GLOBAL.HEIGHT}px`,
-			'--width' : `${GLOBAL.WIDTH}px`,
-			'--left' : `${GLOBAL.LEFT}px`,
-			'--top' : `${GLOBAL.TOP}px`,
-		}"
-	>
+	<div class = 'main' @contextmenu = 'page.contextmenu'>
 		<starry-sky :stars-count = '1500' :distance = '800' id = 'back'/>
 		<Voice v-if = 'page.show.voice'></Voice>
 		<Loading/>
@@ -54,8 +46,9 @@
 	import mainGame from './script/game';
 	import fs from './script/fs';
 	import { I18N_KEYS } from './script/language/i18n';
-	import GLOBAL from './script/global';
+	import voice from './pages/voice/voice';
 	import Dialog from './pages/ui/dialog';
+	import { FILES } from './script/constant';
 
 	const page = reactive({
 		show : {
@@ -130,6 +123,7 @@
 			}, true)
 		};
 		await mainGame.chk.file() ? await on() : await dialog();
+		voice.play(FILES.BACK_BGM);
 	});
 
 	onMounted(async () => {
@@ -156,7 +150,6 @@
 	}
 </style>
 <style lang = 'scss'>
-	@use './style/toast.scss';
 	@use './style/transition.scss';
 	.var-icon, .cursor {
 		&:hover {
@@ -215,6 +208,9 @@
 			cursor: pointer;
 		}
 	}
+	.var-menu__menu {
+		transform: scale(var(--scale));
+	}
 	:root {
 		--picker-mask-background-image: transparent !important;
 		--picker-background: transparent !important;
@@ -248,5 +244,8 @@
 		--cell-padding: 1vh 20px !important;
 		--field-decorator-line-size: 0.5px !important;
 		user-select: none;
+	}
+	body {
+		overflow: hidden;
 	}
 </style>

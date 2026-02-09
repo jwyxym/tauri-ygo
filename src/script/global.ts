@@ -7,6 +7,11 @@ const resize = () => {
 		: width / GLOBAL.WIDTH);
 	GLOBAL.LEFT = (width - GLOBAL.WIDTH * GLOBAL.SCALE) / 2;
 	GLOBAL.TOP = (height - GLOBAL.HEIGHT * GLOBAL.SCALE) / 2;
+	document.documentElement.style.setProperty('--scale', `${GLOBAL.SCALE}`);
+	document.documentElement.style.setProperty('--height', `${GLOBAL.HEIGHT}px`);
+	document.documentElement.style.setProperty('--width', `${GLOBAL.WIDTH}px`);
+	document.documentElement.style.setProperty('--left', `${GLOBAL.LEFT}px`);
+	document.documentElement.style.setProperty('--top', `${GLOBAL.TOP}px`);
 };
 
 const GLOBAL = reactive({

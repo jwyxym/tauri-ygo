@@ -125,8 +125,6 @@ class Game {
 					this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_EX, 15);
 				if (!this.system.has(CONSTANT.KEYS.SETTING_CT_DECK_SIDE))
 					this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_SIDE, 15);
-				if (!this.system.has(CONSTANT.KEYS.SETTING_CT_CLICK_TIME))
-					this.push.system(CONSTANT.KEYS.SETTING_CT_CLICK_TIME, this.is_windows() ? 150 : 200);
 				if (!this.system.has(CONSTANT.KEYS.SETTING_SELECT_SORT))
 					this.push.system(CONSTANT.KEYS.SETTING_SELECT_SORT, this.is_windows() ? 0 : 1);
 				if (!this.system.has(CONSTANT.KEYS.SETTING_SELECT_SLIDER))
@@ -141,7 +139,6 @@ class Game {
 				this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_MAIN, 60);
 				this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_EX, 15);
 				this.push.system(CONSTANT.KEYS.SETTING_CT_DECK_SIDE, 15);
-				this.push.system(CONSTANT.KEYS.SETTING_CT_CLICK_TIME, this.is_windows() ? 150 : 200);
 				this.push.system(CONSTANT.KEYS.SETTING_SELECT_SORT, this.is_windows() ? 0 : 1);
 				this.push.system(CONSTANT.KEYS.SETTING_SELECT_SLIDER, this.is_windows() ? 0 : 1);
 				this.push.system(CONSTANT.KEYS.SETTING_SELECT_VOICE, this.is_windows() ? 0 : 1);
@@ -768,7 +765,7 @@ class Game {
 					break;
 				case CONSTANT.KEYS.SETTING_VOICE_BACK_BGM:
 					this.system.set(key, `${n ?? 0}`);
-					voice.update(key);
+					voice.update();
 					break;
 				default:
 					if (key.startsWith('SETTING_CT_'))
