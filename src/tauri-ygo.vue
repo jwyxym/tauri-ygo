@@ -126,7 +126,9 @@
 		voice.play(FILES.BACK_BGM);
 	});
 
+import { invoke } from '@tauri-apps/api/core';
 	onMounted(async () => {
+		invoke<any>('init').then(r => console.log(r))
 	});
 
 </script>

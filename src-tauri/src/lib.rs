@@ -4,7 +4,15 @@ mod network;
 use read::{FileContent, Pic};
 use network::{Srv, Resp};
 
+mod game;
+use game::Game;
+
 use tauri::AppHandle;
+
+#[tauri::command]
+async fn init() -> Result<(), String> {
+	Ok(Game::init().await.map_err(|e| e.to_string())?)
+}
 
 #[tauri::command]
 async fn unzip(app: AppHandle, path: String, file: String, chk: bool) -> Result<(), String> {
@@ -88,6 +96,7 @@ pub fn run() {
 		.plugin(tauri_plugin_fs::init())
 		.plugin(tauri_plugin_opener::init())
 		.invoke_handler(tauri::generate_handler![
+			init,
 			unzip,
 			read_zip,
 			read_texts,
