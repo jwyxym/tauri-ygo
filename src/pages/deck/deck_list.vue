@@ -221,6 +221,7 @@
 			display: flex;
 			flex-direction: column;
 			.input {
+				margin-top: 10px;
 				width: 50%;
 				height: 100px;
 				display: flex;
@@ -234,7 +235,7 @@
 				}
 			}
 			> div:last-child {
-				height: calc(100% - 100px);
+				height: calc(100% - 110px);
 				overflow-y: auto;
 				h2 {
 					font-size: 18px;

@@ -25,7 +25,7 @@
 	import mainGame from '@/script/game';
 	import { I18N_KEYS } from '@/script/language/i18n';
 	const props = defineProps<{
-		name : 'lflist' | 'deck';
+		name : 'lflist' | 'deck' | 'model';
 		variant ?: 'outlined' | 'standard';
 	}>();
 
@@ -50,6 +50,10 @@
 			case 'deck':
 				select.placeholder = mainGame.get.text(I18N_KEYS.SERVER_DECK);
 				select.array = (await mainGame.load.deck()).map(i => [i, i.name]);
+				break;
+			case 'model':
+				select.placeholder = mainGame.get.text(I18N_KEYS.SERVER_MODEL);
+				select.map = mainGame.duel_model ?? new Map;
 				break;
 		}
 	});

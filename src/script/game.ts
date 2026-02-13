@@ -43,6 +43,11 @@ class Game {
 	cards : Map<number, Card> = new Map;
 	textures : Map<string, string> = new Map;
 	bgm : Map<string, string> = new Map;
+	duel_model : Map<string, string> = new Map([
+		['T', '双打'],
+		['S', '单局'],
+		['M', '比赛'],
+	]);
 	version = 0x1362;
 	max_card_id = 0x0fffffff;
 	max_string_id = 2047;

@@ -12,9 +12,9 @@
 				/>
 			</transition>
 			<transition name = 'opacity'>
-				<Server
+				<Duel
 					v-if = 'page.show.server'
-					:select = 'page.select'
+					@exit = 'page.select.menu'
 				/>
 			</transition>
 			<Setting
@@ -37,7 +37,7 @@
 
 	import YGOMenu from './pages/menu/menu.vue';
 	import Deck from './pages/deck/deck_list.vue';
-	import Server from './pages/server/server.vue';
+	import Duel from './pages/duel/duel.vue';
 	import Setting from './pages/setting/setting.vue';
 	import Loading from './pages/loading/loading.vue';
 	import Voice from './pages/voice/voice.vue';
@@ -148,9 +148,25 @@
 			background: linear-gradient(#1c1a2e, #2f2434);
 		}
 	}
+
+	.opacity {
+		&-enter-active,
+		&-leave-active {
+			transition: opacity 0.2s ease;
+		}
+
+		&-enter-from,
+		&-leave-to {
+			opacity: 0;
+		}
+
+		&-enter-to,
+		&-leave-from {
+			opacity: 1;
+		}
+	}
 </style>
 <style lang = 'scss'>
-	@use './style/transition.scss';
 	.var-icon, .cursor {
 		&:hover {
 			cursor: pointer;

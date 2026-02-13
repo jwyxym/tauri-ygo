@@ -57,7 +57,7 @@ class Deck extends YGOProDeck {
 				}
 			}
 		} catch (e) {
-			fs.write.log(mainGame.get.text(I18N_KEYS.DECK_FROM_CODE_ERROR))
+			fs.write.log(mainGame.get.text(I18N_KEYS.DECK_INPUT_ERROR))
 			return new Deck();
 		}
 		return deck;
@@ -73,7 +73,7 @@ class Deck extends YGOProDeck {
 				name : deck.name
 			})
 		} catch (e) {
-			fs.write.log(mainGame.get.text(I18N_KEYS.DECK_FROM_URL_ERROR))
+			fs.write.log(mainGame.get.text(I18N_KEYS.DECK_INPUT_ERROR))
 			return new Deck();
 		}
 	}
