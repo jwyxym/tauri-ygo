@@ -95,35 +95,35 @@
 	});
 
 	onBeforeMount(async () : Promise<void> => {
-		const on = async (chk : boolean = true) : Promise<void> => {
-			await mainGame.init(chk);
-			setTimeout(() => {
-				page.loading.start = 0;
-				page.loading.progress = 0;
-			}, 500);
-			page.show.menu = true;
-			page.show.voice = true;
-		}
-		const download = async () : Promise<void> => {
-			if (await fs.init()) {
-				page.loading.start = 0;
-				page.loading.progress = 0;
-				await on(false);
-			} else {
-				await dialog();
-			}
-		}
-		const dialog = async () : Promise<void> => {
-			await Dialog({
-				title : mainGame.get.text(I18N_KEYS.START_TITLE),
-				message : mainGame.get.text(I18N_KEYS.START_MESSAGE),
-				onConfirm : download,
-				onCancel : mainGame.exit,
-				closeOnClickOverlay : false
-			}, true)
-		};
-		await mainGame.chk.file() ? await on() : await dialog();
-		voice.play(FILES.BACK_BGM);
+		// const on = async (chk : boolean = true) : Promise<void> => {
+		// 	await mainGame.init(chk);
+		// 	setTimeout(() => {
+		// 		page.loading.start = 0;
+		// 		page.loading.progress = 0;
+		// 	}, 500);
+		// 	page.show.menu = true;
+		// 	page.show.voice = true;
+		// }
+		// const download = async () : Promise<void> => {
+		// 	if (await fs.init()) {
+		// 		page.loading.start = 0;
+		// 		page.loading.progress = 0;
+		// 		await on(false);
+		// 	} else {
+		// 		await dialog();
+		// 	}
+		// }
+		// const dialog = async () : Promise<void> => {
+		// 	await Dialog({
+		// 		title : mainGame.get.text(I18N_KEYS.START_TITLE),
+		// 		message : mainGame.get.text(I18N_KEYS.START_MESSAGE),
+		// 		onConfirm : download,
+		// 		onCancel : mainGame.exit,
+		// 		closeOnClickOverlay : false
+		// 	}, true)
+		// };
+		// await mainGame.chk.file() ? await on() : await dialog();
+		// voice.play(FILES.BACK_BGM);
 	});
 
 import { invoke } from '@tauri-apps/api/core';

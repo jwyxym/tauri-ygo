@@ -4,14 +4,20 @@ use regex::Regex;
 
 #[derive(Serialize, Clone, Debug)]
 pub struct Server {
-	address: String,
-	name: String
+	content: BTreeMap<String, String>
 }
 
 impl Server {
-	pub fn new (text: String) -> Vec<Server> {
-		let mut content: Vec<Server> = vec![];
+	pub fn new (text: String) -> Self {
+		Self {
+			content: BTreeMap::new()
+		}
+	}
 
-		content
+	pub fn init (&mut self, text: String) -> () {
+	}
+
+	pub fn to_array (&self) -> Vec<(String, String)> {
+		self.content.clone().into_iter().collect()
 	}
 }

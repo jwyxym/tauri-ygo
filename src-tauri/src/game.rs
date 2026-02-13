@@ -2,10 +2,12 @@ mod strings;
 mod system;
 mod server;
 mod card;
+mod pic;
 use strings::Strings;
 use system::System;
 use server::Server;
 use card::Card;
+use pic::Pic;
 
 use urlencoding::encode;
 use std::fs::read_to_string;
@@ -35,6 +37,11 @@ impl Game  {
 	}
 
 	pub async fn init () -> Result<(), Error> {
+		let mut strings: Strings = Strings::new();
+		//这里得写一个绝对路径用于调试
+		let text: String = read_to_string("E://strings.conf")?;
+		strings.init(text);
+		// println!("{:?}", strings);
 		Ok(())
 	}
 }
