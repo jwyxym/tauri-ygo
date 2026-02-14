@@ -12,6 +12,7 @@ use std::{
 
 #[derive(Serialize, Clone, Debug)]
 pub struct Zip {
+	path: String,
 	pics: BTreeMap<i64, String>,
 	db: Vec<Vec<u8>>,
 	ini: Vec<String>,
@@ -30,7 +31,7 @@ impl Zip {
 
 			let db_regex: Regex = Regex::new(r"^[^/]+\.(cdb)$")?;
 			let conf_regex: Regex = Regex::new(r"^[^/]+\.(conf|ini)$")?;
-			let _ = Self::read(path, |name, mut zip| {
+			let _ = Self::read(&path, |name, mut zip| {
 				if let Some(read_pic) = &read_pic {
 					if let Some(_match) = Regex::new(r"^pics/(\d+)\.(jpg|png|jpeg)$")?
 						.captures(&name)
@@ -56,6 +57,7 @@ impl Zip {
 				Ok(())
 			});
 			Ok::<Self, Error>(Self {
+				path: path,
 				pics: pics,
 				db: db,
 				ini: ini,
@@ -65,10 +67,10 @@ impl Zip {
 		})
 	}
 	pub fn read (
-		path: String,
+		path: &str,
 		mut callback: impl FnMut(String, ZipFile) -> Result<(), Error>
 	) -> Result<(), Error> {
-		let file: File = File::open(&path)?;
+		let file: File = File::open(path)?;
 		let mut archive: ZipArchive<File> = ZipArchive::new(file)?;
 		for i in 0..archive.len() {
 			let file: ZipFile<'_> = archive.by_index(i)?;
@@ -78,5 +80,8 @@ impl Zip {
 			}
 		}
 		Ok(())
+	}
+	pub fn path (&self) -> &str {
+		&self.path
 	}
 }
