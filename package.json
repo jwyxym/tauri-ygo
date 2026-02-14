@@ -12,6 +12,7 @@
 		"json:linux:deb": "node .ci/tauri.conf.json.cjs linux deb",
 		"json:linux:rpm": "node .ci/tauri.conf.json.cjs linux rpm",
 		"json:macos": "node .ci/tauri.conf.json.cjs macos",
+		"json:dev": "node .ci/tauri.conf.json.cjs android",
 		"icon": "npm run tauri icon -p src-tauri/icons/icon.jpg",
 		"dev": "vite",
 		"build": "vite build",

@@ -35,7 +35,9 @@ cd tauri-ygo
 <h5>初始化tauri项目所需的config文件</h5>
 
 ```bash
-# dev模式或编译android
+# dev模式或
+npm run json:dev
+# 编译android
 npm run json:android
 # 编译windows
 npm run json:windows
