@@ -117,6 +117,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: tauri-ygo.apk
+        retention-days: 7
         path: ./build/tauri-ygo.apk
 
   build-windows:
