@@ -1,6 +1,7 @@
 use serde::{Serialize, Deserialize};
 use basic_toml::{from_str, to_string};
 use std::collections::BTreeMap;
+
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct System {
 	string: BTreeMap<String, String>,

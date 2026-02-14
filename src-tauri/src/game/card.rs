@@ -1,5 +1,6 @@
-use rusqlite::{Connection, Result, Error, Statement};
+use tokio_rusqlite::Connection;
 use std::{collections::BTreeMap};
+use anyhow::{Result, Error, anyhow};
 
 pub struct Card {
 	content: BTreeMap<i64, (Vec<i64>, Vec<String>)>
@@ -11,27 +12,34 @@ impl Card  {
 			content: BTreeMap::new()
 		}
 	}
-	pub fn init (&mut self, path: String) -> Result<(), Error> {
-		let conn: Connection = Connection::open(path)?;
-		let mut stmt: Statement<'_> = conn.prepare("SELECT * FROM datas, texts WHERE datas.id = texts.id")?;
+	pub async fn init (&mut self, path: String) -> Result<(), Error> {
+		let conn: Connection = Connection::open(path).await?;
+		let results: Vec<(i64, (Vec<i64>, Vec<String>))> = conn
+			.call(|conn| {
+				let mut stmt = conn.prepare("SELECT * FROM datas, texts WHERE datas.id = texts.id")?;
+				
+				let result = stmt.query_map([], |row| {
+					let int: Vec<i64> = (0..12)
+						.map(|i| row.get::<_, i64>(i))
+						.collect::<Result<Vec<i64>, _>>()?;
+					
+					let string: Vec<String> = (12..30)
+						.map(|i| row.get::<_, String>(i))
+						.collect::<Result<Vec<String>, _>>()?;
+					
+					Ok((int[0], (int, string)))
+				})?;
 
-		let iter = stmt
-			.query_map([], |row| {
-				let int: Vec<i64> = (0..12)
-					.map(|i| row.get::<_, i64>(i))
-					.collect::<Result<Vec<i64>, _>>()?;
+				Ok::<Vec<(i64, (Vec<i64>, Vec<std::string::String>))>, Error>(result
+					.filter_map(Result::ok)
+					.collect()
+				)
+			})
+			.await
+			.map_err(|e| anyhow!("{}", e))?;
 
-				let string: Vec<String> = (12..30)
-					.map(|i| row.get::<_, String>(i))
-					.collect::<Result<Vec<String>, _>>()?;
-
-				Ok((int, string))
-			})?;
-
-		iter.into_iter().for_each(|i| {
-			if let Ok(i) = i {
-				self.content.insert(i.0[0], i);
-			}
+		results.into_iter().for_each(|i| {
+			self.content.insert(i.0, i.1);
 		});
 		
 		Ok(())

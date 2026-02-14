@@ -1,6 +1,5 @@
 mod types;
 mod file;
-mod sql;
 pub use types::{FileContent, Pic};
 
 use std::{
@@ -9,7 +8,7 @@ use std::{
 	path::{Path, PathBuf},
 	time::{SystemTime, UNIX_EPOCH, Duration}
 };
-use anyhow::{Error, Result};
+use anyhow::{Error, Result, anyhow};
 use chrono::{DateTime, Utc};
 use regex::Regex;
 use zip::ZipArchive;
@@ -129,19 +128,11 @@ pub async fn zip(
 }
 
 pub async fn databases(dirs: Vec<String>) -> Result<Vec<Vec<(Vec<i64>, Vec<String>)>>, Error> {
-	let mut entries: Vec<Vec<(Vec<i64>, Vec<String>)>> = Vec::new();
-	file::walk(dirs, |ext, _stem, path| {
-		if ext == String::from("cdb") {
-			if let Ok(db) = sql::read(path) {
-				entries.push(db);
-			}
-		}
-	});
-	Ok(entries)
+	Err(anyhow!("cdb读取修改中"))
 }
 
 pub async fn database(path: String) -> Result<Vec<(Vec<i64>, Vec<String>)>, Error> {
-	Ok(sql::read(path)?)
+	Err(anyhow!("cdb读取修改中"))
 }
 
 pub async fn time(time : String) -> Result<String, Error> {

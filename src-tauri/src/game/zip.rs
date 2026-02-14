@@ -23,19 +23,19 @@ impl Zip {
 	pub fn new () -> Self {
 		Self {
 			pics: BTreeMap::new(),
-			db: vec![],
-			ini: vec![],
-			lflist: vec![],
-			strings: vec![]
+			db: Vec::new(),
+			ini: Vec::new(),
+			lflist: Vec::new(),
+			strings: Vec::new()
 		}
 	}
 	pub fn open (path: String, read_pic: Option<Vec<i64>>) -> JoinHandle<Result<Self, Error>> {
 		spawn_blocking(move || {
 			let mut pics: BTreeMap<i64, String> = BTreeMap::new();
-			let mut db: Vec<Vec<u8>>= vec![];
-			let mut ini: Vec<String>= vec![];
-			let mut lflist: Vec<String>= vec![];
-			let mut strings: Vec<String>= vec![];
+			let mut db: Vec<Vec<u8>>= Vec::new();
+			let mut ini: Vec<String>= Vec::new();
+			let mut lflist: Vec<String>= Vec::new();
+			let mut strings: Vec<String>= Vec::new();
 
 			let db_regex: Regex = Regex::new(r"^[^/]+\.(cdb)$")?;
 			let conf_regex: Regex = Regex::new(r"^[^/]+\.(conf|ini)$")?;
