@@ -29,10 +29,8 @@ impl Zip {
 			let mut lflist: Vec<String>= Vec::new();
 			let mut strings: Vec<String>= Vec::new();
 
-			let db_regex: Regex = Regex::new(r"^[^/]+\.(cdb)$")?;
-			let conf_regex: Regex = Regex::new(r"^[^/]+\.(conf|ini)$")?;
-			let _ = Self::read(&path, |name, mut zip| {
-				if let Some(read_pic) = &read_pic {
+			if let Some(read_pic) = &read_pic {
+				let _ = Self::read(&path, |name, mut zip| {
 					if let Some(_match) = Regex::new(r"^pics/(\d+)\.(jpg|png|jpeg)$")?
 						.captures(&name)
 						.and_then(|i| Some(i)?
@@ -50,12 +48,36 @@ impl Zip {
 							));
 						}
 					}
-				} else {
-
-				}
 				
-				Ok(())
-			});
+					Ok(())
+				});
+			} else {
+				let _ = Self::read(&path, |name, mut zip| {
+					if name.ends_with("ini") {
+						let mut content: String = String::new();
+						if zip.read_to_string(&mut content).is_ok() {
+							ini.push(content);
+						}
+					} else if name.ends_with("strings.conf") {
+						let mut content: String = String::new();
+						if zip.read_to_string(&mut content).is_ok() {
+							strings.push(content);
+						}
+					} else if name.ends_with("lflist.conf") {
+						let mut content: String = String::new();
+						if zip.read_to_string(&mut content).is_ok() {
+							lflist.push(content);
+						}
+					} else if name.ends_with("cdb") {
+						let mut content: Vec<u8> = Vec::new();
+						if zip.read_to_end(&mut content).is_ok() {
+							db.push(content);
+						}
+					}
+				
+					Ok(())
+				});
+			}
 			Ok::<Self, Error>(Self {
 				path: path,
 				pics: pics,
