@@ -73,6 +73,8 @@ jobs:
           patchelf \
           xdg-utils
 
+        pkg-config --modversion glib-2.0
+
     - name: Write Tauri Config
       run: |
         npm run json:dev
