@@ -21,7 +21,7 @@ pub struct Zip {
 }
 
 impl Zip {
-	pub fn new (path: String, read_pic: Option<Vec<i64>>) -> JoinHandle<Result<Self, Error>> {
+	pub fn new (path: String) -> JoinHandle<Result<Self, Error>> {
 		spawn_blocking(move || {
 			let mut pics: BTreeMap<i64, String> = BTreeMap::new();
 			let mut db: Vec<Vec<u8>>= Vec::new();
@@ -29,55 +29,47 @@ impl Zip {
 			let mut lflist: Vec<String>= Vec::new();
 			let mut strings: Vec<String>= Vec::new();
 
-			if let Some(read_pic) = &read_pic {
-				let _ = Self::read(&path, |name, mut zip| {
-					if let Some(_match) = Regex::new(r"^pics/(\d+)\.(jpg|png|jpeg)$")?
-						.captures(&name)
-						.and_then(|i| Some(i)?
-						.get(1))
-					{
-						let mut content: Vec<u8> = Vec::new();
-						if let Ok(code) = _match.as_str().parse::<i64>()
-							&& read_pic.contains(&code)
-							&& !pics.contains_key(&code)
-							&& zip.read_to_end(&mut content).is_ok() {
-							pics.insert(code, format!(
-								"data:image/{};base64,{}",
-								if content.starts_with(&[0xFF, 0xD8, 0xFF]) { "jpeg" } else { "png" },
-								general_purpose::STANDARD.encode(&content)
-							));
-						}
+			let regex: Regex = Regex::new(r"^pics/(\d+)\.(jpg|png|jpeg)$")?;
+			let _ = Self::read(&path, |name, mut zip| {
+				if let Some(_match) = regex
+					.captures(&name)
+					.and_then(|i| Some(i)?
+					.get(1))
+				{
+					let mut content: Vec<u8> = Vec::new();
+					if let Ok(code) = _match.as_str().parse::<i64>()
+						&& zip.read_to_end(&mut content).is_ok() {
+						pics.insert(code, format!(
+							"data:image/{};base64,{}",
+							if content.starts_with(&[0xFF, 0xD8, 0xFF]) { "jpeg" } else { "png" },
+							general_purpose::STANDARD.encode(&content)
+						));
 					}
-				
-					Ok(())
-				});
-			} else {
-				let _ = Self::read(&path, |name, mut zip| {
-					if name.ends_with("ini") {
-						let mut content: String = String::new();
-						if zip.read_to_string(&mut content).is_ok() {
-							ini.push(content);
-						}
-					} else if name.ends_with("strings.conf") {
-						let mut content: String = String::new();
-						if zip.read_to_string(&mut content).is_ok() {
-							strings.push(content);
-						}
-					} else if name.ends_with("lflist.conf") {
-						let mut content: String = String::new();
-						if zip.read_to_string(&mut content).is_ok() {
-							lflist.push(content);
-						}
-					} else if name.ends_with("cdb") {
-						let mut content: Vec<u8> = Vec::new();
-						if zip.read_to_end(&mut content).is_ok() {
-							db.push(content);
-						}
+				}
+				else if name.ends_with("ini") {
+					let mut content: String = String::new();
+					if zip.read_to_string(&mut content).is_ok() {
+						ini.push(content);
 					}
-				
-					Ok(())
-				});
-			}
+				} else if name.ends_with("strings.conf") {
+					let mut content: String = String::new();
+					if zip.read_to_string(&mut content).is_ok() {
+						strings.push(content);
+					}
+				} else if name.ends_with("lflist.conf") {
+					let mut content: String = String::new();
+					if zip.read_to_string(&mut content).is_ok() {
+						lflist.push(content);
+					}
+				} else if name.ends_with("cdb") {
+					let mut content: Vec<u8> = Vec::new();
+					if zip.read_to_end(&mut content).is_ok() {
+						db.push(content);
+					}
+				}
+			
+				Ok(())
+			});
 			Ok::<Self, Error>(Self {
 				path: path,
 				pics: pics,
