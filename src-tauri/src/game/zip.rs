@@ -20,16 +20,7 @@ pub struct Zip {
 }
 
 impl Zip {
-	pub fn new () -> Self {
-		Self {
-			pics: BTreeMap::new(),
-			db: Vec::new(),
-			ini: Vec::new(),
-			lflist: Vec::new(),
-			strings: Vec::new()
-		}
-	}
-	pub fn open (path: String, read_pic: Option<Vec<i64>>) -> JoinHandle<Result<Self, Error>> {
+	pub fn new (path: String, read_pic: Option<Vec<i64>>) -> JoinHandle<Result<Self, Error>> {
 		spawn_blocking(move || {
 			let mut pics: BTreeMap<i64, String> = BTreeMap::new();
 			let mut db: Vec<Vec<u8>>= Vec::new();
