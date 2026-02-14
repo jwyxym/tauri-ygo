@@ -40,26 +40,7 @@ impl Game  {
 
 	pub async fn init () -> Result<(), Error> {
 		let start = std::time::Instant::now();
-		let mut tasks = Vec::new();
-		for entry in WalkDir::new(r"E:\github\Rust\tauri-ygo\src-tauri\target\debug\expansions") {
-			if let Ok(e) = entry {
-				let path = e.path();
-				if path.is_file() {
-					if let Some(stem) = path.file_stem().and_then(|n| n.to_str()) {
-						if let Some(ext) = path.extension().and_then(|n| n.to_str()) {
-							if let Some(path) = path.as_os_str().to_str() {
-								println!("{} {} {}", ext.to_string(), stem.to_string(), path.to_string());
-								tasks.push(Zip::open(path.to_string(), None));
-							}
-						}
-					}
-				}
-			}
-		}
-		for task in tasks {
-			let zip = task.await??;
-			// println!("{:?}", zip);
-		}
+
 		let duration = start.elapsed();
 		println!("耗时: {:?}", duration);
 		// let mut strings: Strings = Strings::new();
