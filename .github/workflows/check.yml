@@ -72,7 +72,6 @@ jobs:
           xdg-utils
 
     - name: Write Tauri Config
-      shell: cmd
       run: |
         npm run json:dev
 
