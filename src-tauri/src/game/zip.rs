@@ -29,7 +29,7 @@ impl Zip {
 			strings: vec![]
 		}
 	}
-	pub fn open (path: String) -> JoinHandle<Result<Self, Error>> {
+	pub fn open (path: String, read_pic: Option<Vec<i64>>) -> JoinHandle<Result<Self, Error>> {
 		spawn_blocking(move || {
 			let mut pics: BTreeMap<i64, String> = BTreeMap::new();
 			let mut db: Vec<Vec<u8>>= vec![];
@@ -40,18 +40,28 @@ impl Zip {
 			let db_regex: Regex = Regex::new(r"^[^/]+\.(cdb)$")?;
 			let conf_regex: Regex = Regex::new(r"^[^/]+\.(conf|ini)$")?;
 			let _ = Self::read(path, |name, mut zip| {
-				if let Some(_match) = Regex::new(r"^pics/(\d+)\.(jpg|png|jpeg)$")?
-					.captures(&name)
-					.and_then(|i| Some(i)?
-					.get(1))
-				{
+				if let Some(read_pic) = &read_pic {
+					if let Some(_match) = Regex::new(r"^pics/(\d+)\.(jpg|png|jpeg)$")?
+						.captures(&name)
+						.and_then(|i| Some(i)?
+						.get(1))
+					{
 						let mut content: Vec<u8> = Vec::new();
 						if let Ok(code) = _match.as_str().parse::<i64>()
+							&& read_pic.contains(&code)
+							&& !pics.contains_key(&code)
 							&& zip.read_to_end(&mut content).is_ok() {
-							let content = general_purpose::STANDARD.encode(&content);
-							pics.insert(code, content);
+							pics.insert(code, format!(
+								"data:image/{};base64,{}",
+								if content.starts_with(&[0xFF, 0xD8, 0xFF]) { "jpeg" } else { "png" },
+								general_purpose::STANDARD.encode(&content)
+							));
 						}
+					}
+				} else {
+
 				}
+				
 				Ok(())
 			});
 			Ok::<Self, Error>(Self {
