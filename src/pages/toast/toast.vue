@@ -8,7 +8,9 @@
 			:style = "{ '--top' : `${i.top}px`, '--time' : `${toast.time}s` }"
 			:ref = '($el) => toast.set_elements($el as HTMLDivElement | null, i)'
 		>
-			{{ i.text }}
+			<div>
+				<p>{{ i.text }}</p>
+			</div>
 			<div class = 'pointer' @click = 'toast.splice(v)'>
 				<span>&times;</span>
 			</div>
@@ -44,16 +46,27 @@
 			backdrop-filter: blur(10px);
 			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 			border-radius: 10px;
-			overflow: hidden;
-			overflow-wrap: break-word;
 			display: flex;
-			justify-content: center;
 			align-items: center;
+			justify-content: center;
+			> div:first-child {
+				width: 300px;
+				padding-right: 20px;
+				display: flex;
+				justify-content: right;
+				align-items: center;
+				> p {
+					width: 90%;
+					overflow: hidden;
+					overflow-wrap: break-word;
+				}
+			}
 			> div:last-child {
-				position: absolute;
-				right: 0;
-				top: 50%;
-				transform: translate(-5px, -50%);
+				width: 50px;
+				height: 70px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
 				pointer-events: auto;
 				&:hover {
 					color: rgb(39, 39, 39);
