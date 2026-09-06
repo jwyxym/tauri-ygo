@@ -28,18 +28,22 @@ pub struct GamePack {
 
 
 impl Game {
-	pub async fn unzip (app: &AppHandle, overwrite: bool) -> Result<Vec<(String, String)>, Error> {
+	pub async fn unzip (overwrite: bool) -> Result<Vec<(String, String)>, Error> {
 		let path: &PathBuf = PATH.get().ok_or(anyhow!("get path error"))?;
 		let resource_path: &PathBuf = RESOURCE_PATH.get().ok_or(anyhow!("get path error"))?;
 		let assets: PathBuf = resource_path.join("assets");
 		metadata(&assets)?;
-		let version: String = app.package_info().version.to_string();
+		let version: String = progress::app()
+			.ok_or(anyhow!("get app error"))?
+			.package_info()
+			.version
+			.to_string();
 		let cache: String = read_to_string(path.join("cache"))
 			.await
 			.unwrap_or(String::new());
 		let mut result: Vec<(String, String)> = Vec::new();
 		if version != cache || overwrite {
-			let mut tasks: Vec<JoinHandle<Result<Option<(String, String)>, Error>>> = Zip::unzip(app, path, &assets).await?;
+			let mut tasks: Vec<JoinHandle<Result<Option<(String, String)>, Error>>> = Zip::unzip(path, &assets).await?;
 			tasks.push(spawn(async {
 				write(path
 					.join("cache"), 
@@ -47,9 +51,9 @@ impl Game {
 				)?;
 				Ok(None)
 			}));
-			progress::emit(app, Event::Progress, 1);
+			progress::emit(Event::Progress, 1);
 			for task in tasks {
-				progress::emit(app, Event::Progress, 1);
+				progress::emit(Event::Progress, 1);
 				if let Some(i) = task.await?? {
 					result.push(i)
 				}
@@ -58,26 +62,26 @@ impl Game {
 		Ok(result)
 	}
 
-	pub async fn init (app: &AppHandle, overwrite: bool) -> Result<Self, Error> {
+	pub async fn init (overwrite: bool) -> Result<Self, Error> {
 		let path: &PathBuf = PATH.get().ok_or(anyhow!("get path error"))?;
 
 		let i = join!(
-			Self::unzip(app, overwrite),
+			Self::unzip(overwrite),
 			create_dir_all(path.join("config"))
 		);
 		let config: Vec<(String, String)> = i.0?;
 		i.1?;
-		progress::emit(app, Event::Progress, 1);
+		progress::emit(Event::Progress, 1);
 
 		let (system, resource, lflist, server, room, setcode, mut tasks) = load::config(path, &config).await;
-		progress::emit(app, Event::Progress, 1);
+		progress::emit(Event::Progress, 1);
 		
 		let (mut pack, (card_info, db, strings, task)) = join!(
 			load::expansion(path, &system),
 			load::i18n(path, system.i18n(), &config)
 		);
 		let db: Cdb = db.add_ex_code(setcode.code());
-		progress::emit(app, Event::Progress, 1);
+		progress::emit(Event::Progress, 1);
 
 		tasks.push(task);
 		for i in vec!["deck", "expansions", "replay", "plugin"] {
@@ -88,12 +92,12 @@ impl Game {
 		for task in tasks {
 			let _ = task.await;
 		}
-		progress::emit(app, Event::Progress, 1);
+		progress::emit(Event::Progress, 1);
 
 		let scripts: Script = Script::new().read_dir(path.join("script"));
 		let pics: Pic = Pic::new().read_dir(path.join("pics"));
 		let sound: Sound = Sound::new().read_dir(path.join("sound"), resource.sound());
-		progress::emit(app, Event::Progress, 1);
+		progress::emit(Event::Progress, 1);
 		
 		pack.insert(String::from("./"), GamePack {
 			on: true,
@@ -106,9 +110,16 @@ impl Game {
 			pics,
 			archive: None
 		});
-		progress::emit(app, Event::End, 0);
+		progress::emit(Event::End, 0);
 		Ok(Self {
-			version: format!("YGOPro3://{}", app.package_info().version.to_string()),
+			version: format!(
+				"YGOPro3://{}",
+				progress::app()
+					.ok_or(anyhow!("get app error"))?
+					.package_info()
+					.version
+					.to_string()
+			),
 			room: room,
 			system: system,
 			sound: sound,

@@ -9,7 +9,8 @@ use bincode::{encode_to_vec, decode_from_slice, config::{standard, Configuration
 use serde_json::{Value::{self, Array}, Number};
 use std::{borrow::Cow, fs::metadata};
 use tauri::{
-	AppHandle, ipc::{Response, Request, InvokeBody::{Raw, Json}}
+	AppHandle,
+	ipc::{Response, Request, InvokeBody::{Raw, Json}}
 };
 use parking_lot::{RwLock, RwLockReadGuard};
 use std::{path::PathBuf, fs::exists};
@@ -22,17 +23,17 @@ fn default_response () -> Response {
 }
 
 #[tauri::command]
-pub async fn init (app: AppHandle) -> Result<(), String> {
-	ygopro3_game::init(&app).await.map_err(|e| e.to_string())
+pub async fn init () -> Result<(), String> {
+	ygopro3_game::init().await.map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub async fn reload (app: AppHandle, overwrite: bool) -> Result<(), String> {
-	ygopro3_game::reload(&app, overwrite).await.map_err(|e| e.to_string())
+pub async fn reload (overwrite: bool) -> Result<(), String> {
+	ygopro3_game::reload(overwrite).await.map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub async fn download (app: AppHandle, url: String, name: String, chunk: usize) -> Result<String, String> {
+pub async fn download (url: String, name: String, chunk: usize) -> Result<String, String> {
 	let path: &PathBuf = PATH.get().ok_or(String::from("get path error"))?;
 	let (_, max_retries) = ygopro3_game::get::system()
 		.await
@@ -43,7 +44,7 @@ pub async fn download (app: AppHandle, url: String, name: String, chunk: usize) 
 			i.0 == "CT_DOWNLOADCHUNKS_RETRIES"
 		)
 		.unwrap_or((String::new(), 8.0));
-	ygopro3_network::download(&app, path.join("expansions"), &url, &name, chunk, max_retries)
+	ygopro3_network::download(path.join("expansions"), &url, &name, chunk, max_retries)
 		.await
 		.map_err(|e| e.to_string())
 }
@@ -58,8 +59,8 @@ pub async fn get_ypk () -> Response {
 }
 
 #[tauri::command]
-pub async fn load_ypk (app: AppHandle, name: String) -> Result<(), String> {
-	game::load::zip(&app, name).await.map_err(|e| e.to_string())
+pub async fn load_ypk (name: String) -> Result<(), String> {
+	game::load::zip(name).await.map_err(|e| e.to_string())
 }
 
 #[tauri::command]

@@ -7596,6 +7596,7 @@ dependencies = [
  "ygopro3_const",
  "ygopro3_deck",
  "ygopro3_duel",
+ "ygopro3_emit",
  "ygopro3_game",
  "ygopro3_log",
  "ygopro3_macros",

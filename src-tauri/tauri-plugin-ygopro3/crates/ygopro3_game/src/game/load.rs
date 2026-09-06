@@ -380,7 +380,7 @@ pub async fn expansion (path: &Path, system: &System) -> IndexMap<String, GamePa
 	packs
 }
 
-pub async fn zip (app: &AppHandle, name: String) -> Result<(), Error> {
+pub async fn zip (name: String) -> Result<(), Error> {
 	let game: &RwLock<Game> = GAME.get().ok_or(anyhow!(""))?;
 	let mut game: RwLockWriteGuard<'_, Game> = game.write();
 	if let Some((_, pack)) = game.pack
@@ -394,7 +394,7 @@ pub async fn zip (app: &AppHandle, name: String) -> Result<(), Error> {
 			.as_os_str()
 			.to_str()
 			.ok_or(anyhow!("get path error"))?;
-		let zip: Zip = Zip::new_with_emit(app, String::from(path), name.clone())?;
+		let zip: Zip = Zip::new_with_emit(String::from(path), name.clone())?;
 		let mut lflist: LFList = LFList::new();
 		let mut strings: Strings = Strings::new();
 		let mut db: Vec<Cdb> = Vec::new();
@@ -433,7 +433,7 @@ pub async fn zip (app: &AppHandle, name: String) -> Result<(), Error> {
 			scripts,
 			archive: Some(zip.archive())
 		});
-		progress::emit(app, Event::End, 0);
+		progress::emit(Event::End, 0);
 	}
 	Ok(())
 }

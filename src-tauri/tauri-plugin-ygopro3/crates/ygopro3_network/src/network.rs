@@ -1,4 +1,3 @@
-use tauri::AppHandle;
 use anyhow::{Result, Error, anyhow};
 use content_disposition::parse_content_disposition;
 use uuid::Uuid;
@@ -40,7 +39,6 @@ pub async fn chk_version (url: &str, version: &str) -> bool {
 	}).await.ok().and_then(|r| r.ok()).unwrap_or(false)
 }
 pub async fn download_chunks (
-	app: &AppHandle,
 	url: &str,
 	name: String,
 	path: &Path,
@@ -109,7 +107,7 @@ pub async fn download_chunks (
 		while let Some(task) = tasks.next().await {
 			let (key, value) = task??;
 			map.insert(key, value);
-			progress::emit(app, Event::Progress, step);
+			progress::emit(Event::Progress, step);
 		}
 		Ok(map)
 	})().await {
@@ -122,10 +120,10 @@ pub async fn download_chunks (
 		}
 		Err(e) => Err(e)
 	};
-	progress::emit(app, Event::End, 0);
+	progress::emit(Event::End, 0);
 	res
 }
-pub async fn download<P: AsRef<Path>> (app: &AppHandle, path: P, url: &str, name: &str, step: usize, max_retries: f64) -> Result<String, Error> {
+pub async fn download<P: AsRef<Path>> (path: P, url: &str, name: &str, step: usize, max_retries: f64) -> Result<String, Error> {
 	create_dir_all(&path)?;
 	let mut chunk: usize = 0;
 	let body: RequestBuilder<WithoutBody> = if step > 0 {
@@ -139,7 +137,7 @@ pub async fn download<P: AsRef<Path>> (app: &AppHandle, path: P, url: &str, name
 		let headers: &HeaderMap = response.headers();
 		let name: String = get_name(name, headers);
 		let size: usize = get_size(headers, status);
-		progress::emit(app, Event::Start, size);
+		progress::emit(Event::Start, size);
 		let path: &Path = path.as_ref();
 
 		let mut body: Body = response.into_body();
@@ -148,7 +146,7 @@ pub async fn download<P: AsRef<Path>> (app: &AppHandle, path: P, url: &str, name
 		if status == 206 {
 			let mut buffer: Vec<u8> = Vec::new();
 			reader.read_to_end(&mut buffer)?;
-			download_chunks(app, url, name, path, size, step, chunk, buffer, max_retries)
+			download_chunks(url, name, path, size, step, chunk, buffer, max_retries)
 				.await
 		} else {
 			let mut file: File = File::create(path.join(&name)).await?;
@@ -158,10 +156,10 @@ pub async fn download<P: AsRef<Path>> (app: &AppHandle, path: P, url: &str, name
 				if bytes == 0 {
 					break;
 				}
-				progress::emit(app, Event::Progress, 8192);
+				progress::emit(Event::Progress, 8192);
 				file.write_all(&buffer[..bytes]).await?;
 			}
-			progress::emit(app, Event::End, 0);
+			progress::emit(Event::End, 0);
 			Ok(name)
 		}
 	} else {

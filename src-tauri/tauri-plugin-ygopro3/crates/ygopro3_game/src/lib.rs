@@ -37,24 +37,22 @@ use std::{
 	path::{Path, PathBuf},
 	io::Read
 };
-use tauri::AppHandle;
-
 #[cfg(not(target_os = "android"))]
 use std::env;
 
 pub static GAME: OnceCell<RwLock<Game>> = OnceCell::const_new();
 
-pub async fn init (app: &AppHandle) -> Result<(), Error> {
+pub async fn init () -> Result<(), Error> {
 	if !GAME.get().is_some() {
-		let game: RwLock<Game> = RwLock::new(Game::init(app, false).await?);
+		let game: RwLock<Game> = RwLock::new(Game::init(false).await?);
 		GAME.set(game)?;
 	}
 	Ok(())
 }
-pub async fn reload (app: &AppHandle, overwrite: bool) -> Result<(), Error> {
+pub async fn reload (overwrite: bool) -> Result<(), Error> {
 	let game: &RwLock<Game> = GAME.get().ok_or(anyhow!("get game error"))?;
-	progress::emit(app, Event::Start, 5);
-	let new_game: Game = Game::init(app, overwrite).await?;
+	progress::emit(Event::Start, 5);
+	let new_game: Game = Game::init(overwrite).await?;
 	let mut game: RwLockWriteGuard<'_, Game> = game.write();
 	*game = new_game;
 	Ok(())

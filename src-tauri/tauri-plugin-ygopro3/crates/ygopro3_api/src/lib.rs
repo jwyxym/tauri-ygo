@@ -10,6 +10,7 @@ use tauri::{
 use std::path::PathBuf;
 
 use ygopro3_const::{PATH, RESOURCE_PATH};
+use ygopro3_emit::progress;
 use ygopro3_log::log;
 
 pub fn init () -> TauriPlugin<Wry> {
@@ -64,6 +65,7 @@ pub fn init () -> TauriPlugin<Wry> {
 			api::plugin_write,
 		])
 		.setup(|app, _api| {
+			progress::init(app);
 			#[cfg(target_os = "android")]
 			{
 				let path: PathBuf = app.path().resolve("./", BaseDirectory::Public)?;

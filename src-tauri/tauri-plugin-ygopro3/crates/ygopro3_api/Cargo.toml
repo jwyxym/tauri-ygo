@@ -14,6 +14,7 @@ parking_lot.workspace = true
 
 ygopro3_log.workspace = true
 ygopro3_const.workspace = true
+ygopro3_emit.workspace = true
 ygopro3_network.workspace = true
 ygopro3_game.workspace = true
 ygopro3_deck.workspace = true

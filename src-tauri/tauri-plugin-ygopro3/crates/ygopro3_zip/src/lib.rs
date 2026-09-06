@@ -14,7 +14,6 @@ use std::{
 	collections::BTreeMap,
 	path::{Path, PathBuf}
 };
-use tauri::AppHandle;
 use zip::{ZipArchive as Archive, read::ZipFile};
 
 pub type ZipArchive = Archive<File>;
@@ -60,7 +59,7 @@ impl Zip {
 			})
 		})
 	}
-	pub fn new_with_emit<P: AsRef<Path>> (app: &AppHandle, path: P, name: String) -> Result<Self, Error> {
+	pub fn new_with_emit<P: AsRef<Path>> (path: P, name: String) -> Result<Self, Error> {
 		let mut scripts: BTreeMap<String, usize> = BTreeMap::new();
 		let mut pics: BTreeMap<u32, usize> = BTreeMap::new();
 		let mut db: Vec<Cdb>= Vec::new();
@@ -69,10 +68,10 @@ impl Zip {
 		let mut strings: Vec<String>= Vec::new();
 		let mut servers: Vec<String>= Vec::new();
 		let start_callback = |len: usize| {
-			progress::emit(app, Event::Start, len);
+			progress::emit(Event::Start, len);
 		};
 		let archive: ZipArchive = Self::read(path, |index: usize, name: String, mut file: ZipFile<'_>| {
-			progress::emit(app, Event::Progress, 1);
+			progress::emit(Event::Progress, 1);
 			Self::init(&mut file, index, &name, &mut scripts, &mut pics, &mut db, &mut ini, &mut lflist, &mut strings, &mut servers);
 			Ok(())
 		}, Some(&start_callback))?;
@@ -88,14 +87,14 @@ impl Zip {
 			archive
 		})
 	}
-	pub async fn unzip<P: AsRef<Path>> (app: &AppHandle, path: P, assets: P) -> Result<Vec<JoinHandle<Result<Option<(String, String)>, Error>>>, Error> {
+	pub async fn unzip<P: AsRef<Path>> (path: P, assets: P) -> Result<Vec<JoinHandle<Result<Option<(String, String)>, Error>>>, Error> {
 		let mut tasks: Vec<JoinHandle<Result<Option<(String, String)>, Error>>> = Vec::new();
 		let path: &Path = path.as_ref();
 		let assets: &Path = assets.as_ref();
 		let zip: ZipArchive = Archive::new(File::open(&assets)?)?;
-		progress::emit(app, Event::Start, zip.len() * 2 + 6);
+		progress::emit(Event::Start, zip.len() * 2 + 6);
 		let _ = Self::read(&assets, |_: usize, name: String, mut file: ZipFile<'_>| {
-			progress::emit(app, Event::Progress, 1);
+			progress::emit(Event::Progress, 1);
 			let path: PathBuf = path.join(&name);
 			if !file.is_dir() {
 				if name.starts_with("config") {
