@@ -16,6 +16,7 @@
 
 	import listen from '@/script/listen';
 	import mainGame from '@/script/game';
+	import invoke from '@/script/invoke';
 
 	const emit = defineEmits<{ 'update:loading' : [boolean]; }>();
 	const props = defineProps<{
@@ -54,6 +55,7 @@
 			page.all = 0;
 			page.now = 0;
 		}));
+		page.funcs.push(await listen.debug(invoke.log.write));
 	});
 
 	onUnmounted(() => {

@@ -7650,6 +7650,7 @@ dependencies = [
  "tokio-stream",
  "tokio-util",
  "ygopro3_card",
+ "ygopro3_emit",
  "ygopro3_ex_code",
  "ygopro3_game",
  "ygopru",

@@ -6,6 +6,8 @@ class Listen {
 	progress = async (f : Function) : Promise<UnlistenFn> => await listen<number>('progress', async (event) => await f(event.payload));
 	
 	end = async (f : Function) : Promise<UnlistenFn> => await listen<number>('end', async () => await f());
+	
+	debug = async (f : Function) : Promise<UnlistenFn> => await listen<string>('debug', async (event) => await f(event.payload));
 };
 
 const listenner = new Listen();

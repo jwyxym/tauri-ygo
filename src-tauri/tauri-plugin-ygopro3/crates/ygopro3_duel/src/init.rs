@@ -26,6 +26,7 @@ use ygopru::{
 		data::{CoreCard, Card},
 	},
 };
+use ygopro3_emit::progress::*;
 
 static SCRIPT_BUFFER: Mutex<[u8; 0x100000]> = Mutex::new([0u8; 0x100000]);
 
@@ -125,10 +126,7 @@ extern "C" fn core_message_handler (pduel: isize, message_type: u32) -> u32 {
 		get_log_message(pduel, buffer.as_mut_ptr());
 	}
 	let c_message: &CStr = unsafe { CStr::from_ptr(buffer.as_ptr() as *const c_char) };
-	println!(
-		"core message[{}]: {}",
-		message_type,
-		c_message.to_string_lossy()
-	);
+	let msg: Cow<'_, str> = c_message.to_string_lossy();
+	emit(Event::Debug, msg);
 	0
 }

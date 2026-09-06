@@ -65,12 +65,15 @@ impl Game {
 	pub async fn init (overwrite: bool) -> Result<Self, Error> {
 		let path: &PathBuf = PATH.get().ok_or(anyhow!("get path error"))?;
 
-		let i = join!(
+		let (i, _) = join!(
 			Self::unzip(overwrite),
 			create_dir_all(path.join("config"))
 		);
-		let config: Vec<(String, String)> = i.0?;
-		i.1?;
+		
+		let config: Vec<(String, String)> = i?;
+		if config.len() == 0 {
+			progress::emit(Event::Start, 5);
+		}
 		progress::emit(Event::Progress, 1);
 
 		let (system, resource, lflist, server, room, setcode, mut tasks) = load::config(path, &config).await;

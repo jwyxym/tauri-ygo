@@ -7,7 +7,8 @@ static APP: OnceLock<AppHandle> = OnceLock::new();
 pub enum Event {
 	Start,
 	Progress,
-	End
+	End,
+	Debug
 }
 
 pub fn init (app: &AppHandle) {
@@ -28,7 +29,8 @@ pub fn emit_with_app<S: Serialize + Clone> (app: &AppHandle, event: Event, paylo
 	let event: &str = match event {
 		Event::Start => "started",
 		Event::Progress => "progress",
-		Event::End => "end"
+		Event::End => "end",
+		Event::Debug => "debug"
 	};
 	if let Err(error) = app.emit(event, payload) {
 		eprintln!("failed to emit {event}: {error}");
