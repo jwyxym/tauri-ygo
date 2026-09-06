@@ -315,12 +315,12 @@ pub async fn windbot_stop () -> Result<(), String> {
 
 #[ygopro3_macros::windbot]
 #[tauri::command]
-pub async fn windbot_list () -> Response {
-	ygopro3_windbot::list().await
+pub async fn windbot_list () -> Result<Response, String> {
+	Ok(ygopro3_windbot::list().await
 		.ok()
 		.and_then(|i| encode_to_vec(i, CONFIG).ok())
 		.map(Response::new)
-		.unwrap_or_else(default_response)
+		.unwrap_or_else(default_response))
 }
 
 #[tauri::command]
