@@ -120,7 +120,7 @@ extern "C" fn script_reader (script_path: *const c_char, slen: *mut c_int) -> *m
 	}
 }
 
-extern "C" fn core_message_handler (pduel: isize, message_type: u32) -> u32 {
+extern "C" fn core_message_handler (pduel: isize, _message_type: u32) -> u32 {
 	let mut buffer: [u8; 1024] = [0u8; 1024];
 	unsafe {
 		get_log_message(pduel, buffer.as_mut_ptr());
