@@ -314,20 +314,19 @@ pub async fn windbot_stop () -> Result<(), String> {
 
 #[ygopro3_macros::windbot]
 #[tauri::command]
-pub async fn windbot_list () -> Result<Response, String> {
-	Ok(ygopro3_windbot::list().await
+pub async fn windbot_list () -> Response {
+	ygopro3_windbot::list().await
 		.ok()
 		.and_then(|i| encode_to_vec(i, CONFIG).ok())
 		.map(Response::new)
-		.unwrap_or_else(default_response))
+		.unwrap_or_else(default_response)
 }
 
 #[tauri::command]
-pub async fn replay_read (name: String) -> Response {
-	yrp::read(name).await
-		.ok()
-		.map(Response::new)
-		.unwrap_or(Response::new(Vec::new()))
+pub async fn replay_read (name: String) -> Result<Response, String> {
+	Ok(Response::new(yrp::read(name)
+		.await
+		.map_err(|e| e.to_string())?))
 }
 
 #[tauri::command]
@@ -373,7 +372,9 @@ pub async fn replay_del (name: String) -> Result<(), String>{
 
 #[tauri::command]
 pub async fn get_hash () -> Result<Response, String> {
-	Ok(Response::new(ygopro3_game::get::hash().await.map_err(|e| e.to_string())?))
+	Ok(Response::new(ygopro3_game::get::hash()
+		.await
+		.map_err(|e| e.to_string())?))
 }
 
 #[ygopro3_macros::plugin]

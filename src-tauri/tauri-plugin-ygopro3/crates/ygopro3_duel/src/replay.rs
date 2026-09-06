@@ -60,7 +60,7 @@ use ygopru::{
 	ygopro_handler::RoomProvider,
 };
 
-const RESPONSE_TIMEOUT: Duration = Duration::from_secs(30);
+const RESPONSE_TIMEOUT: Duration = Duration::from_millis(300);
 const DRAIN_TIMEOUT: Duration = Duration::from_millis(100);
 const YRP3D_SIBYL_NAME: u8 = 235;
 const YRP3D_NAME_FIELD_CHARS: usize = 50;
@@ -83,7 +83,7 @@ pub async fn collect_messages (yrp: Vec<u8>) -> Result<Vec<u8>, Error> {
 	let mut host: DuelHost = DuelHost::new(replay.host_info(), configuration);
 	let (mut player1, mut player2) = start_duel(&replay, &mut host, &mut messages).await?;
 
-	for data in &replay.body.datas {
+	'replay: for data in &replay.body.datas {
 		let response: Response = Response {
 			response: data.data.clone(),
 		};
@@ -105,9 +105,7 @@ pub async fn collect_messages (yrp: Vec<u8>) -> Result<Vec<u8>, Error> {
 						break;
 					}
 				}
-				_ = sleep(RESPONSE_TIMEOUT) => {
-					return Err(anyhow!("timed out while replaying response"));
-				}
+				_ = sleep(RESPONSE_TIMEOUT) => break 'replay
 			}
 		}
 	}

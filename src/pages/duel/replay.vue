@@ -45,6 +45,7 @@
 				<var-cell>
 					<template #extra>
 						<Button
+							:loading = 'page.loading'
 							@click = 'page.connect'
 							:content = 'mainGame.get.text(I18N_KEYS.REPLAY_ON)'
 						/>
@@ -69,6 +70,7 @@
 
 	const page = reactive({
 		name : '',
+		loading : false,
 		selected : -1,
 		list : [] as Array<{ name : string; key : number; }>,
 		select : async (v : number) => {
@@ -85,6 +87,7 @@
 		connect : () => {
 			const selected = page.list[page.selected];
 			if (!selected) return;
+			page.loading = true;
 			emit('connect', {
 				replay : page.list[page.selected].name
 			});
