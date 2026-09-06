@@ -91,7 +91,7 @@ class DG {
 			this.target_id = result.targetId;
 			this.secret = result.secret;
 			if (mainGame.get.system(KEYS.SETTING_CHK_DGLAB_SCRIPT))
-				this.script = await invoke.js.load(KEYS.EXTEND_DGLAB);
+				this.script = await invoke.js.load(KEYS.PLUGIN_DGLAB);
 			return;
 		} catch (error) {
 			await Promise.all([

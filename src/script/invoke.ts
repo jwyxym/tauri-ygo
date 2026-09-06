@@ -582,7 +582,7 @@ class Invoke {
 			}
 		}
 	};
-	extend = {
+	plugin = {
 		write : async (name : string, content : string) : Promise<boolean> => {
 			try {
 				const buffer = new ArrayBuffer(20480);
@@ -591,7 +591,7 @@ class Invoke {
 					[name, content],
 					buffer
 				);
-				await _invoke<void>('extend_write', new Uint8Array(buffer));
+				await _invoke<void>('plugin_write', new Uint8Array(buffer));
 				return true
 			} catch (error) {
 				await this.log.write(error);
@@ -600,7 +600,7 @@ class Invoke {
 		},
 		read : async (name : string) : Promise<string> => {
 			try {
-				return _invoke<string>('extend_read', { name });
+				return _invoke<string>('plugin_read', { name });
 			} catch (error) {
 				await this.log.write(error);
 				return '';

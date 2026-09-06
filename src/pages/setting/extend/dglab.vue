@@ -203,7 +203,7 @@
 			code : '',
 			blur : async function () {
 				if (this.code !== code
-					&& await invoke.extend.write(KEYS.EXTEND_DGLAB, this.code))
+					&& await invoke.plugin.write(KEYS.PLUGIN_DGLAB, this.code))
 					code = this.code;
 			}
 		},
@@ -332,7 +332,7 @@
 		});
 		page.custom.show = mainGame.get.system(KEYS.SETTING_CHK_DGLAB_SCRIPT) as boolean;
 		page.waveform.array = mainGame.get.system(KEYS.SETTING_DGLAB_WAVEFORM) as Array<string>;
-		code = await invoke.extend.read(KEYS.EXTEND_DGLAB);
+		code = await invoke.plugin.read(KEYS.PLUGIN_DGLAB);
 		page.custom.code = code;
 	});
 
