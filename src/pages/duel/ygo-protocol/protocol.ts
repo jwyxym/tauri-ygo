@@ -133,7 +133,8 @@ class Protocol {
 					card.clear.self();
 					return [];
 				}
-				result.push([card, code]);
+				if ((card.pos & POS.FACEDOWN) || !(card.location & LOCATION.HAND) || card.owner)
+					result.push([card, code]);
 			}
 			if (flag & QUERY.POSITION) {
 				const pdata = msg.read.int32();
