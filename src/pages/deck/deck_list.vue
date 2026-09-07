@@ -228,7 +228,7 @@
 				directory: false,
 				filters: [{
 					name : 'Image',
-					extensions : ['png', 'jpeg', 'jpg']
+					extensions : ['png', 'jpeg', 'jpg', 'webp']
 				}]
 			});
 			if (file) {
