@@ -7,6 +7,8 @@
 
 ```javascript
 function main () {}
+//或者
+async function main () {}
 ```
 <h3>关于入口函数的描述</h3>
 <table>
@@ -37,7 +39,11 @@ function main () {}
 
 ```javascript
 try {
-	YGOPro3.log('hello world')
+	await YGOPro3.log('hello world')
+	const text = await YGOPro3.get('https://example.com')
+	const result = await YGOPro3.post('https://example.com/api', JSON.stringify({
+		name: 'YGOPro3'
+	}))
 } catch (e) {
 	// ......
 }
@@ -55,9 +61,65 @@ try {
 	<tr>
 		<td>log</td>
 		<td>是</td>
-		<td>在error.log写入string</td>
+		<td>在error.log写入文本，非成功状态会抛出异常</td>
 		<th>1</th>
 		<th>string</th>
-		<th>void</th>
+		<th>Promise&lt;void&gt;</th>
+	</tr>
+	<tr>
+		<td>get</td>
+		<td>否</td>
+		<td>发送GET请求，返回响应文本，非成功状态会抛出异常</td>
+		<th>1</th>
+		<th>string</th>
+		<th>Promise&lt;string&gt;</th>
+	</tr>
+	<tr>
+		<td>post</td>
+		<td>否</td>
+		<td>发送POST请求，返回响应文本，非成功状态会抛出异常</td>
+		<th>2</th>
+		<th>string,<br/>string</th>
+		<th>Promise&lt;string&gt;</th>
+	</tr>
+	<tr>
+		<td>put</td>
+		<td>否</td>
+		<td>发送PUT请求，返回响应文本，非成功状态会抛出异常</td>
+		<th>2</th>
+		<th>string,<br/>string</th>
+		<th>Promise&lt;string&gt;</th>
+	</tr>
+	<tr>
+		<td>patch</td>
+		<td>否</td>
+		<td>发送PATCH请求，返回响应文本，非成功状态会抛出异常</td>
+		<th>2</th>
+		<th>string,<br/>string</th>
+		<th>Promise&lt;string&gt;</th>
+	</tr>
+	<tr>
+		<td>delete</td>
+		<td>否</td>
+		<td>发送DELETE请求，返回响应文本，非成功状态会抛出异常</td>
+		<th>1</th>
+		<th>string</th>
+		<th>Promise&lt;string&gt;</th>
+	</tr>
+	<tr>
+		<td>head</td>
+		<td>否</td>
+		<td>发送HEAD请求，返回响应文本，非成功状态会抛出异常</td>
+		<th>1</th>
+		<th>string</th>
+		<th>Promise&lt;string&gt;</th>
+	</tr>
+	<tr>
+		<td>options</td>
+		<td>否</td>
+		<td>发送OPTIONS请求，返回响应文本，非成功状态会抛出异常</td>
+		<th>1</th>
+		<th>string</th>
+		<th>Promise&lt;string&gt;</th>
 	</tr>
 </table>

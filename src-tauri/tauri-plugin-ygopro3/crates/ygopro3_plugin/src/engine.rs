@@ -2,16 +2,17 @@ mod runner;
 mod global;
 
 use anyhow::{anyhow, Error, Result};
-use std::sync::mpsc;
+use std::{sync::mpsc, collections::BTreeMap};
 
-pub fn load (name: String, script: &str) -> Result<String, Error> {
+pub fn load (name: String, script: &str, map: &BTreeMap<String, bool>) -> Result<String, Error> {
 	let (reply, rx) = mpsc::channel();
 
 	runner::sender()
 		.send(runner::Command::Load {
 			name: name.clone(),
 			script: script.to_string(),
-			reply
+			reply,
+			map: map.clone()
 		})
 		.map_err(|err| anyhow!("extend worker disconnected: {}", err))?;
 
