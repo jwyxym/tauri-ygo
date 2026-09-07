@@ -29,7 +29,12 @@ $boder-color: #9ed3ff;
 		.ygopro3__duel__back {
 			width: calc(var(--width) * 12);
 			position: relative;
-
+			&.turn_self {
+				box-shadow: 0 0 15px $boder-color;
+			}
+			&.turn_oppo {
+				box-shadow: 0 0 15px red;
+			}
 			&.turn_self::after {
 				background: conic-gradient(
 					from var(--angle),
@@ -65,12 +70,6 @@ $boder-color: #9ed3ff;
 				-webkit-mask-composite: xor;
 				mask-composite: exclude;
 				animation: rotate 2s linear infinite;
-			}
-			&.turn_self {
-				box-shadow: 0 0 15px $boder-color;
-			}
-			&.turn_oppo {
-				box-shadow: 0 0 15px red;
 			}
 			> img {
 				display: block;
@@ -304,11 +303,11 @@ $boder-color: #9ed3ff;
 }
 
 @property --angle {
-  syntax: '<angle>';
-  initial-value: 0deg;
-  inherits: false;
+	syntax: '<angle>';
+	initial-value: 0deg;
+	inherits: false;
 }
 
 @keyframes rotate {
-  to { --angle: 360deg; }
+  	to { --angle: 360deg; }
 }

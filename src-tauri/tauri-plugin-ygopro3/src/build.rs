@@ -22,6 +22,7 @@ const COMMANDS: &[&str] = &[
 	"get_time",
 	"get_version",
 	"set_system",
+	"set_textures",
 	"write_deck",
 	"rename_deck",
 	"del_deck",

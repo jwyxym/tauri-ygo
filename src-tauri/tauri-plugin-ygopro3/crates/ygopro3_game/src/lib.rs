@@ -39,6 +39,8 @@ use std::{
 };
 #[cfg(not(target_os = "android"))]
 use std::env;
+#[cfg(target_os = "android")]
+use tokio::try_join;
 
 pub static GAME: OnceCell<RwLock<Game>> = OnceCell::const_new();
 

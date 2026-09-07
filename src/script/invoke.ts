@@ -73,6 +73,31 @@ class Invoke {
 				return false;
 			}
 		},
+		set_textures : async (key : string, value : string, content ?: Uint8Array<ArrayBuffer>) : Promise<boolean> => {
+			try {
+				const buffer = new ArrayBuffer(256);
+				bincode.encode(
+					bincode.Tuple(bincode.String, bincode.String),
+					[key, value],
+					buffer
+				);
+				const bytes = (() => {
+					if (__ANDROID__) {
+						const encoded = new Uint8Array(buffer);
+						const bytes = new Uint8Array(encoded.length + content!.length);
+						bytes.set(encoded, 0);
+						bytes.set(content!, encoded.length);
+						return bytes;
+					} else
+						return new Uint8Array(buffer);
+				})();
+				await _invoke<void>('set_textures', bytes);
+				return true;
+			} catch (error) {
+				await this.log.write(error);
+				return false;
+			}
+		},
 		get_srv : async (url : string) : Promise<string> => {
 			try {
 				const result = await _invoke<Srv>('get_srv', { url : url });

@@ -225,7 +225,11 @@
 		by_pic : async () => {
 			const file = await open({
 				multiple: false,
-				directory: false
+				directory: false,
+				filters: [{
+					name : 'Image',
+					extensions : ['png', 'jpeg', 'jpg']
+				}]
 			});
 			if (file) {
 				input.loading = true;

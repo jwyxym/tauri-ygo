@@ -221,8 +221,8 @@
 [other]
 "COVER" = "other/cover.webp"
 "UNKNOWN" = "other/unknown.webp"
-"BACKI" = "other/back_I.webp"
-"BACKII" = "other/back_II.webp"
+"BACKI" = ""
+"BACKII" = ""
 "S" = "other/s.webp"
 "R" = "other/r.webp"
 "P" = "other/p.webp"
