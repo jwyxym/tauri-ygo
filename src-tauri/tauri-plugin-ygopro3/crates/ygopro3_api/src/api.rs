@@ -395,7 +395,9 @@ pub async fn get_hash () -> Result<Response, String> {
 #[tauri::command]
 pub async fn js_load (name: String) -> Result<String, String> {
 	let script: String = plugin_read(&name).await?;
-	ygopro3_plugin::engine::load(name, &script)
+	let game: &RwLock<Game> = GAME.get().ok_or(String::new())?;
+	let game: RwLockReadGuard<'_, Game> = game.read();
+	ygopro3_plugin::engine::load(name, &script, game.system.boolean())
 		.map_err(|e| e.to_string())
 }
 

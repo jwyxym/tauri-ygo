@@ -48,6 +48,9 @@ impl System {
 			.get("I18N")
 			.map_or_else(|| "zh-CN".to_string(), Clone::clone)
 	}
+	pub fn boolean (&self) -> &BTreeMap<String, bool> {
+		&self.boolean
+	}
 	pub fn set (&mut self, key: String, ct: i8, value: String) -> Result<(), Error> {
 		Ok(match ct {
 			0 => {
@@ -76,7 +79,17 @@ impl System {
 					.entry(String::from(i))
 					.or_insert(Vec::new());
 			});
-		["HIDDEN_NAME", "HIDDEN_CHAT"]
+		[
+			"HIDDEN_NAME",
+			"HIDDEN_CHAT",
+			"PLUGIN_GET",
+			"PLUGIN_POST",
+			"PLUGIN_PUT",
+			"PLUGIN_PATCH",
+			"PLUGIN_DELETE",
+			"PLUGIN_HEAD",
+			"PLUGIN_OPTIONS"
+		]
 			.into_iter().for_each(|i| {
 				self.boolean
 					.entry(String::from(i))
@@ -91,8 +104,8 @@ impl System {
 			"SORT_DECK",
 			"DISRUPT_DECK",
 			"CLEAR_DECK",
-			"SELECT_SORT",
 			"EXIT_SERVER",
+			"SURRENDER",
 			"DGLAB_SCRIPT"
 		]
 			.into_iter().for_each(|i| {

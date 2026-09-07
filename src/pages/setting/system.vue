@@ -41,7 +41,8 @@
 				<template #extra>
 					<var-switch
 						v-model = 'i.value'
-						@change = 'page.change(i)'/>
+						@change = 'page.change(i)'
+					/>
 				</template>
 			</var-cell>
 			<var-cell
@@ -86,6 +87,11 @@
 					/>
 				</template>
 			</var-cell>
+			<Plugin
+				class = 'extend'
+				@change = 'page.change'
+				@open = 'page.scroll'
+			/>
 			<Dglab
 				class = 'extend'
 				v-if = 'page.extend.dglab'
@@ -100,7 +106,7 @@
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { onBeforeMount, reactive, ref, useTemplateRef, watch } from 'vue';
+	import { nextTick, onBeforeMount, reactive, ref, useTemplateRef, watch } from 'vue';
 	import { toUpper } from 'lodash';
 	import PQueue from 'p-queue';
 
@@ -114,6 +120,7 @@
 	import Slider from '@/ui/slider.vue';
 	import Button from '@/ui/button.vue';
 
+	import Plugin from './extend/plugin.vue';
 	import Dglab from './extend/dglab.vue';
 
 	const system = useTemplateRef('system');
@@ -223,7 +230,10 @@
 				obj.value = '%%';
 				return;
 			}
-			queue.add(async () => await mainGame.set.system(obj.key, obj.value));
+			queue.add(async () => {
+				await nextTick();
+				await mainGame.set.system(obj.key, obj.value)
+			});
 		},
 		scroll : (value : number) => setTimeout(
 			() => system.value
