@@ -42,6 +42,7 @@ pub fn init () -> TauriPlugin<Wry> {
 			api::get_time,
 			api::get_version,
 			api::set_system,
+			api::set_textures,
 			api::write_deck,
 			api::rename_deck,
 			api::del_deck,

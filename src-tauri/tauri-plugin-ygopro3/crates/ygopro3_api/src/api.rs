@@ -22,6 +22,23 @@ fn default_response () -> Response {
 	Response::new(encode_to_vec(Vec::<u8>::new(), CONFIG).unwrap())
 }
 
+fn request_bytes<'a> (request: &'a Request<'_>) -> Result<Cow<'a, Vec<u8>>, String> {
+	match request.body() {
+		Raw(data) => Ok(Cow::Borrowed(data)),
+		Json(Array(data)) => Ok(Cow::Owned(
+			data.iter()
+				.flat_map(|v: &Value| v
+					.as_number()
+					.and_then(|v: &Number| v
+						.as_u64()
+						.map(|v: u64| v as u8)
+					))
+				.collect(),
+		)),
+		_ => Err(String::from("unexpected invoke body")),
+	}
+}
+
 #[tauri::command]
 pub async fn init () -> Result<(), String> {
 	ygopro3_game::init().await.map_err(|e| e.to_string())
@@ -73,6 +90,28 @@ pub async fn set_system (key: String, ct: i8, value: String, write: bool) -> Res
 	ygopro3_game::set::system(key, ct, value, write).await.map_err(|e| e.to_string())
 }
 
+
+#[tauri::command]
+pub async fn set_textures (request: Request<'_>) -> Result<(), String> {
+	let bytes: Cow<'_, Vec<u8>> = request_bytes(&request)?;
+	#[cfg(target_os = "android")]
+	{
+		let ((key, value), _) = decode_from_slice::<(String, String), Configuration>(&bytes[0..256], CONFIG)
+			.map_err(|e: DecodeError| e.to_string())?;
+		let content: &[u8] = &bytes[256..];
+		ygopro3_game::set::textures(key, value, content).await
+			.map_err(|e| e.to_string())?;
+	}
+	#[cfg(not(target_os = "android"))]
+	{
+		let ((key, value), _) = decode_from_slice::<(String, String), Configuration>(&bytes, CONFIG)
+			.map_err(|e: DecodeError| e.to_string())?;
+		ygopro3_game::set::textures(key, value).await
+			.map_err(|e| e.to_string())?;
+	}
+	Ok(())
+}
+
 #[tauri::command]
 pub async fn chk_version () -> Result<bool, String> {
 	let game: &RwLock<Game> = GAME.get().ok_or(String::new())?;
@@ -87,20 +126,7 @@ pub fn get_srv (url: String) -> Result<Srv, String> {
 
 #[tauri::command]
 pub async fn get_pic (request: Request<'_>) -> Result<Response, String> {
-	let bytes: Cow<'_, Vec<u8>> = match request.body() {
-		Raw(data) => Cow::Borrowed(data),
-		Json(Array(data)) => Cow::Owned(
-			data.iter()
-				.flat_map(|v: &Value| v
-					.as_number()
-					.and_then(|v: &Number| v
-						.as_u64()
-						.map(|v| v as u8)
-					))
-				.collect(),
-		),
-		_ => return Err(String::from("unexpected invoke body")),
-	};
+	let bytes: Cow<'_, Vec<u8>> = request_bytes(&request)?;
 	let (deck, _) = decode_from_slice::<Vec<u32>, Configuration>(&bytes, CONFIG)
 		.map_err(|e: DecodeError| e.to_string())?;
 	Ok(ygopro3_game::get::pic(deck).await
@@ -332,20 +358,7 @@ pub async fn replay_read (name: String) -> Result<Response, String> {
 
 #[tauri::command]
 pub async fn replay_save (request: Request<'_>) -> Result<String, String> {
-	let bytes: Cow<'_, Vec<u8>> = match request.body() {
-		Raw(data) => Cow::Borrowed(data),
-		Json(Array(data)) => Cow::Owned(
-			data.iter()
-				.flat_map(|v: &Value| v
-					.as_number()
-					.and_then(|v: &Number| v
-						.as_u64()
-						.map(|v| v as u8)
-					))
-				.collect(),
-		),
-		_ => return Err(String::from("unexpected invoke body")),
-	};
+	let bytes: Cow<'_, Vec<u8>> = request_bytes(&request)?;
 	let (name, _) = decode_from_slice::<String, Configuration>(&bytes[0..256], CONFIG)
 		.map_err(|e: DecodeError| e.to_string())?;
 	let content: &[u8] = &bytes[256..];
@@ -412,20 +425,7 @@ pub async fn plugin_read (name: &str) -> Result<String, String> {
 #[tauri::command]
 pub async fn plugin_write (request: Request<'_>) -> Result<(), String> {
 	let path: &PathBuf = PATH.get().ok_or(String::from("get path error"))?;
-	let bytes: Cow<'_, Vec<u8>> = match request.body() {
-		Raw(data) => Cow::Borrowed(data),
-		Json(Array(data)) => Cow::Owned(
-			data.iter()
-				.flat_map(|v: &Value| v
-					.as_number()
-					.and_then(|v: &Number| v
-						.as_u64()
-						.map(|v: u64| v as u8)
-					))
-				.collect(),
-		),
-		_ => return Err(String::from("unexpected invoke body")),
-	};
+	let bytes: Cow<'_, Vec<u8>> = request_bytes(&request)?;
 	let ((name, content), _) = decode_from_slice::<(String, String), Configuration>(&bytes, CONFIG)
 		.map_err(|e: DecodeError| e.to_string())?;
 	ygopro3_plugin::write(path, &name, content)

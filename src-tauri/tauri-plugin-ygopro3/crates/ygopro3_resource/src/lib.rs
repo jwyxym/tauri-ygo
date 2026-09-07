@@ -1,6 +1,6 @@
 use ygopro3_fs::File;
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use basic_toml::{from_str, to_string};
 use std::{path::{Path, PathBuf}, collections::HashSet};
 use indexmap::{IndexMap, map::Entry};
@@ -223,46 +223,73 @@ impl Resource {
 	pub fn to_string (&self) -> Result<String, Error> {
 		Ok(to_string(&self)?)
 	}
+	pub fn set (&mut self, key: String, value: String) -> bool {
+		match self.other.entry(key) {
+			Entry::Occupied(mut entry) => {
+				if entry.get() == &value {
+					false
+				} else {
+					*entry.get_mut() = value;
+					true
+				}
+			},
+			Entry::Vacant(entry) => {
+				entry.insert(value);
+				true
+			}
+		}
+	}
 	fn to_url (&mut self, path: &Path) {
 		[
-			self.ot.iter_mut(),
-			self.attribute.iter_mut(),
-			self.category.iter_mut(),
-			self.race.iter_mut(),
-			self.types.iter_mut(),
-			self.info.iter_mut(),
-			self.counter.iter_mut(),
-			self.other.iter_mut()
+			&mut self.ot,
+			&mut self.attribute,
+			&mut self.category,
+			&mut self.race,
+			&mut self.types,
+			&mut self.info,
+			&mut self.counter,
+			&mut self.other
 		]
-			.into_iter().for_each(|i|
-				for (_, value) in i {
+			.into_iter().for_each(|i| {
+				i.retain(|_, value| {
 					let p: PathBuf = path.join(&value);
 					if let Some(p) = File::new(&p) {
 						*value = p.url();
+						true
+					} else {
+						false
 					}
-				}
-			);
+				});
+			});
 		if let Some(avatar) = self.avatar.get_mut("AVATAR") {
-			avatar.iter_mut().for_each(|i| {
+			avatar.retain_mut(|i| {
 				let p: PathBuf = path.join(i.clone());
 				if let Some(p) = File::new(&p) {
 					*i = p.url();
+					true
+				} else {
+					false
 				}
 			});
 		}
 
-		[self.link.iter_mut(), self.btn.iter_mut()]
-			.into_iter().for_each(|i|
-				for (_, (value_i, value_ii)) in i {
+		[&mut self.link, &mut self.btn]
+			.into_iter().for_each(|i| {
+				i.retain(|_, (value_i, value_ii)| {
 					let p: PathBuf = path.join(&value_i);
 					if let Some(p) = File::new(&p) {
 						*value_i = p.url();
+					} else {
+						return false;
 					}
 					let p: PathBuf = path.join(&value_ii);
 					if let Some(p) = File::new(&p) {
 						*value_ii = p.url();
+						true
+					} else {
+						false
 					}
-				}
-			);
+				});
+			});
 	}
 }

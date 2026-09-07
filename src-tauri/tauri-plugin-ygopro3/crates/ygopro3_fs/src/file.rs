@@ -35,7 +35,7 @@ impl File {
 		}
 		let name: &str = path.file_name().and_then(|n| n.to_str())?;
 		let stem: &str = path.file_stem().and_then(|n| n.to_str())?;
-		let ext: &str = path.extension().and_then(|n| n.to_str())?;
+		let ext: &str = path.extension().and_then(|n| n.to_str()).unwrap_or("");
 		let path: &str = path.as_os_str().to_str()?;
 		Some(Self {
 			name: String::from(name),

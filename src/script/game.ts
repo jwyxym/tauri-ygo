@@ -80,6 +80,14 @@ class Game {
 			this.strings.set(CONSTANT.KEYS.RACE, new Map(info.race));
 			this.strings.set(CONSTANT.KEYS.TYPE, new Map(info.types));
 
+			const other = new Map(textures.other);
+			const t = Date.now();
+			for (const i of [CONSTANT.KEYS.BACKI, CONSTANT.KEYS.BACKII]) {
+				const url = other.get(i);
+				if (url)
+					other.set(i, `${url}?t=${t}`);
+			}
+
 			this.textures.set(CONSTANT.KEYS.OT, new Map(textures.ot));
 			this.textures.set(CONSTANT.KEYS.ATTRIBUTE, new Map(textures.attribute));
 			this.textures.set(CONSTANT.KEYS.CATEGORY, new Map(textures.category));
@@ -88,7 +96,7 @@ class Game {
 			this.textures.set(CONSTANT.KEYS.LINK, new Map(textures.link));
 			this.textures.set(CONSTANT.KEYS.COUNTER, new Map(textures.counter));
 			this.textures.set(CONSTANT.KEYS.INFO, new Map(textures.info));
-			this.textures.set(CONSTANT.KEYS.OTHER, new Map(textures.other));
+			this.textures.set(CONSTANT.KEYS.OTHER, other);
 			this.textures.set(CONSTANT.KEYS.BTN, new Map(textures.btn));
 
 			this.avatars = textures.avatar;
@@ -271,7 +279,14 @@ class Game {
 		}
 	};
 
-	clear = () : void => this.cards.forEach(i => i.clear());
+	clear = () : void => {
+		this.cards.forEach(i => i.clear());
+		for (const i of [CONSTANT.KEYS.BACKI, CONSTANT.KEYS.BACKII]) {
+			const url = this.get.textures(CONSTANT.KEYS.OTHER, i) as string;
+			if (url.startsWith('blob:http'))
+				URL.revokeObjectURL(url);
+		}
+	};
 
 	load = {
 		pic : async (deck : Deck | Array<number | string>) : Promise<void> => {

@@ -35,7 +35,7 @@ class Pic_Recognizer {
 				if (__ANDROID__) {
 					const { readFile } = await import('@tauri-apps/plugin-fs');
 					const buffer = await readFile(file);
-					return URL.createObjectURL(new Blob([new Uint8Array(buffer)]));
+					return URL.createObjectURL(new Blob([buffer]));
 				} else {
 					const { convertFileSrc } = await import('@tauri-apps/api/core');
 					return convertFileSrc(file);
