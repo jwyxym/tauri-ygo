@@ -26,11 +26,10 @@
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { computed, onBeforeMount, onMounted, reactive, ref, watch } from 'vue';
+	import { computed, onBeforeMount, reactive, ref, watch } from 'vue';
 
 	import mainGame from '@/script/game';
 	import { I18N_KEYS } from '@/script/language/i18n';
-	import GLOBAL from '@/script/scale';
 	import { KEYS } from '@/script/constant';
 
 	import Head from './head.vue';
@@ -38,9 +37,13 @@
 		
 	const arr = ref<Array<{ i18n : number, key : string; value : boolean; }>>([]);
 	const page = reactive({
-		height : computed(() => arr.value.length * (GLOBAL.SCALE < 0.6 ? 100 : 60) + 1),
+		height : computed(() => arr.value.length * props.height + 1),
 		show : false
 	});
+
+	const props = defineProps<{
+		height : number;
+	}>();
 
 	const emit = defineEmits<{
 		change : [{ i18n : number, key : string; value : any; }]
@@ -63,9 +66,6 @@
 				value : mainGame.get.system(KEYS[i as keyof typeof KEYS]) as boolean
 			};
 		});
-	});
-
-	onMounted(() => {
 	});
 
 	watch(() => page.show, (n : boolean) => {
