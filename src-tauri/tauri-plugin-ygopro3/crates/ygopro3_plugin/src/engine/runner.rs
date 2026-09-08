@@ -1,7 +1,7 @@
 use super::global;
 
 use anyhow::{Error, Result, anyhow};
-use rquickjs::{AsyncContext, AsyncRuntime, Promise, prelude::Ctx};
+use rquickjs::{AsyncContext, AsyncRuntime, Exception, Error as JsError, Promise, Value, prelude::Ctx};
 use std::{
 	collections::BTreeMap,
 	sync::{
@@ -114,6 +114,37 @@ pub fn receive<T> (rx: mpsc::Receiver<Result<T, String>>) -> Result<T, Error> {
 		.map_err(Error::msg)
 }
 
+fn js_value_message<'js> (ctx: &Ctx<'js>, value: Value<'js>) -> String {
+	if let Ok(exception) = Exception::from_value(value.clone()) {
+		if let Some(stack) = exception.stack() {
+			return stack;
+		}
+		if let Some(message) = exception.message() {
+			return message;
+		}
+	}
+
+	if let Some(value) = value.as_string() {
+		if let Ok(value) = value.to_string() {
+			return value;
+		}
+	}
+
+	ctx.json_stringify(value.clone())
+		.ok()
+		.flatten()
+		.and_then(|value| value.to_string().ok())
+		.unwrap_or_else(|| format!("<{}>", value.type_name()))
+}
+
+fn js_error (ctx: &Ctx<'_>, stage: &str, err: JsError) -> Error {
+	if err.is_exception() {
+		anyhow!("{}: {}", stage, js_value_message(ctx, ctx.catch()))
+	} else {
+		anyhow!("{}: {}", stage, err)
+	}
+}
+
 async fn load (
 	extends: &mut BTreeMap<String, Extend>,
 	name: String,
@@ -124,8 +155,10 @@ async fn load (
 	let ctx: AsyncContext = AsyncContext::full(&rt).await?;
 
 	ctx.async_with(async |ctx: Ctx<'_>| {
-		global::init(ctx.clone(), map)?;
+		global::init(ctx.clone(), map)
+			.map_err(|err| js_error(&ctx, "plugin global init failed", err))?;
 		ctx.eval::<(), _>(script)
+			.map_err(|err| js_error(&ctx, "plugin script eval failed", err))
 	})
 	.await?;
 
@@ -150,18 +183,26 @@ async fn call (
 
 			globals.set("__ygopro3_args", args)?;
 
-			let result: Promise<'_> = ctx.eval_promise(
+			let result: Promise<'_> = ctx.eval(
 				r#"
-			(async () => JSON.stringify(
-				await main.apply(
-					undefined,
-					JSON.parse(__ygopro3_args)
-				)
-			))()
-		"#,
-			)?;
+					(async () => {
+						if (typeof main !== "function") {
+							throw new TypeError("plugin entry `main` is not a function");
+						}
+						const value = await main.apply(
+							undefined,
+							JSON.parse(__ygopro3_args)
+						);
+						return JSON.stringify(value ?? null);
+					})()
+				"#,
+			)
+			.map_err(|err| js_error(&ctx, "plugin call eval failed", err))?;
 
-			result.into_future().await
+			result
+				.into_future()
+				.await
+				.map_err(|err| js_error(&ctx, "plugin call failed", err))
 		})
 		.await?;
 
