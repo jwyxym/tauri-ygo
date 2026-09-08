@@ -33,6 +33,10 @@
 		</transition>
 		<transition name = 'opacity'>
 			<div v-show = 'page.select === 2' class = 'no-scrollbar'>
+				<Plugin
+					:height = '60'
+					@change = 'page.change'
+				/>
 				<Dglab
 					v-if = 'page.dglab'
 					:height = '60'
@@ -58,6 +62,7 @@
 	import Msg from '@/pages/duel/ygo-protocol/msg';
 	import { CTOS } from '@/pages/duel/ygo-protocol/network';
 	import Dglab from '@/pages/setting/extend/dglab.vue';
+	import Plugin from '@/pages/setting/extend/plugin.vue';
 
 	import Chat, { chat } from './chat';
 	import History, { history } from './history/history';
@@ -72,7 +77,10 @@
 		input : '',
 		dglab : false,
 		change : (obj : { key : string; value : any; }) => queue
-			.add(async () => await mainGame.set.system(obj.key, obj.value)),
+			.add(async () => {
+				await nextTick();
+				await mainGame.set.system(obj.key, obj.value)
+			}),
 		send : async () => {
 			if (!page.input) return;
 			const send = connect.send?.(new Msg()
