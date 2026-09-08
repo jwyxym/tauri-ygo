@@ -89,6 +89,7 @@
 			</var-cell>
 			<Plugin
 				class = 'extend'
+				:height = 'GLOBAL.SCALE < 0.6 ? 100 : 60'
 				@change = 'page.change'
 				@open = 'page.scroll'
 			/>
