@@ -43,7 +43,7 @@ rquickjs = { version = "0.12.0", features = ["bindgen", "futures"] }
 syn = { version = "3.0.4", features = ["full"] }
 quote = "1.0.47"
 
-ygopru = { path = "./crates/ygopru", default-features = false }
+ygopru = { path = "./crates/ygopru", default-features = false, features = ["koishi"] }
 ygopro3_api = { path = "./crates/ygopro3_api", default-features = false }
 ygopro3_card = { path = "./crates/ygopro3_card" }
 ygopro3_const = { path = "./crates/ygopro3_const" }
