@@ -22,15 +22,24 @@
 							/>
 						</div>
 					</div>
-					<TransitionGroup tag = 'div' name = 'move_left' class = 'no-scrollbar'>
-						<h2
-							v-for = '(i, v) in list.decks'
-							:key = 'i.name'
-							:class = "{ 'selected' : list.selected === v }"
-							@click = 'list.select(v)'
-							class = 'pointer'
-						>{{ i.name }}</h2>
-					</TransitionGroup>
+					<RecycleScroller
+						class = 'deck-list no-scrollbar'
+						key-field = 'name'
+						:items = 'list.decks'
+						:item-size = 'list.size'
+					>
+						<template v-slot = '{ item, index }'>
+							<div class = 'item'>
+								<h2
+									:class = "{ 'selected' : list.selected === index }"
+									@click = 'list.select(index)'
+									class = 'pointer'
+								>
+									{{ item.name }}
+								</h2>
+							</div>
+						</template>
+					</RecycleScroller>
 				</div>
 				<TransitionGroup tag = 'div' name = 'opacity'>
 					<div v-if = 'list.selected > -1' key = '0' class = 'deck'>
@@ -108,7 +117,8 @@
 	</div>
 </template>
 <script setup lang = 'ts'>
-	import { reactive, onMounted } from 'vue';
+	import { computed, reactive, onMounted } from 'vue';
+	import { RecycleScroller } from 'vue-virtual-scroller';
 	import { writeText } from '@tauri-apps/plugin-clipboard-manager';
 	import { open } from '@tauri-apps/plugin-dialog';
 
@@ -121,6 +131,7 @@
 	import Deck from './deck';
 	import recognizer from './recognizer';
 	import mainGame from '@/script/game';
+	import GLOBAL from '@/script/scale';
 	import invoke from '@/script/invoke';
 	import * as CONSTANT from '@/script/constant';
 	import { I18N_KEYS } from '@/script/language/i18n';
@@ -162,6 +173,7 @@
 	const list = reactive({
 		decks : [] as Array<Deck>,
 		selected : -1,
+		size : computed(() => GLOBAL.SCALE < 0.6 ? 64 : 48),
 		select : async (n : number) => {
 			if (list.selected === n)
 				page.indeck(list.decks[list.selected]);
@@ -241,7 +253,7 @@
 		clear : () : void => {
 			input.value = '';
 		}
-	})
+	});
 
 	onMounted(list.load);
 	const emit = defineEmits<{ exit : []; }>();
@@ -299,7 +311,8 @@
 						gap: 30%;
 					}
 				}
-				> div:last-child {
+				.deck-list {
+					width: 100%;
 					overflow-y: auto;
 					[media = 'mobile'] & {
 						height: calc(100% - 150px);
@@ -307,22 +320,36 @@
 					[media = 'pc'] & {
 						height: calc(100% - 110px);
 					}
-					h2 {
-						transition: all 0.2s ease;
+					.item {
+						width: 100%;
 						[media = 'mobile'] & {
-							font-size: 24px;
+							height: 64px;
 						}
 						[media = 'pc'] & {
-							font-size: 18px;
+							height: 48px;
 						}
-					}
-					.selected {
-						text-shadow:
-							0 0 5px aqua,
-							0 0 10px aqua,
-							0 0 20px aqua,
-							0 0 40px aqua;
-						transform: translateX(10px);
+						> h2 {
+							width: 100%;
+							margin: 0;
+							overflow: hidden;
+							text-overflow: ellipsis;
+							transition: all 0.2s ease;
+							white-space: nowrap;
+							[media = 'mobile'] & {
+								font-size: 24px;
+								line-height: 64px;
+							}
+							[media = 'pc'] & {
+								font-size: 18px;
+								line-height: 48px;
+							}
+						}
+						.selected {
+							text-shadow:
+								0 0 5px aqua,
+								0 0 10px aqua;
+							transform: translateX(10px);
+						}
 					}
 				}
 			}
