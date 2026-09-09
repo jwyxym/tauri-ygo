@@ -16,20 +16,18 @@ use tokio::{
 		channel as shutdown_channel,
 	},
 };
-use ygopru::{
-	ygopro::{
-		DuelHost,
-		cli::{
-			build_duel_host,
-			start_local_server_with_listener
-		}
-	},
-	ygopro_core_wrapper::random::SEED_COUNT,
-	ygopro_data::{
-		constants::{MasterRule, Mode, Rule},
-		data::ReplayMode,
-		message::HostInfo,
-	},
+use ygopro_core_wrapper::random::SEED_COUNT;
+use ygopro::{
+	DuelHost,
+	cli::{
+		build_duel_host,
+		start_local_server_with_listener
+	}
+};
+use ygopro_data::{
+	constants::{MasterRule, Mode, Rule},
+	data::ReplayMode,
+	message::HostInfo,
 };
 
 static SERVER_CONTROL: OnceLock<Mutex<Option<ServerControl>>> = OnceLock::new();
