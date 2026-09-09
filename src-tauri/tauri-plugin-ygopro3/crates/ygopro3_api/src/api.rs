@@ -218,6 +218,13 @@ pub async fn get_room () -> Response {
 }
 
 #[tauri::command]
+pub async fn get_script (id: u32) -> Result<String, String> {
+	let name: String = format!("c{}.lua", id);
+	ygopro3_game::get::script_string(&name)
+		.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub async fn get_time (path: Vec<String>) -> Result<String, String> {
 	let p: Vec<String> = path;
 	let path: &PathBuf = PATH.get().ok_or(String::from("get path error"))?;

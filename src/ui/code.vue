@@ -82,7 +82,7 @@
 				--code-font-size: 16px !important;
 			}
 			[media = 'mobile'] & {
-				--code-font-size: 32px !important;
+				--code-font-size: 24px !important;
 			}
 		}
 		textarea {
@@ -95,7 +95,7 @@
 				font-size: 16px;
 			}
 			[media = 'mobile'] & {
-				font-size: 32px;
+				font-size: 24px;
 			}
 		}
 	}

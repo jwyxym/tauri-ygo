@@ -18,6 +18,7 @@ const COMMANDS: &[&str] = &[
 	"get_lflist",
 	"get_info",
 	"get_room",
+	"get_script",
 	"get_deck",
 	"get_time",
 	"get_version",

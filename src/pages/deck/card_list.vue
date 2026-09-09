@@ -16,7 +16,6 @@
 				:placeholder = 'mainGame.get.text(I18N_KEYS.CARD_INFO_NAME)'
 				v-model = 'search.desc'
 				@enter = 'search.search'
-				@clear = 'search.search'
 			/>
 			<Button
 				icon_name = 'search'

@@ -353,6 +353,14 @@ class Invoke {
 				return [];
 			}
 		},
+		get_script : async (id : number) : Promise<string> => {
+			try {
+				return await _invoke<string>('get_script', { id });
+			} catch (error) {
+				await this.log.write(error);
+				return '';
+			}
+		},
 		get_hash : async () : Promise<ArrayBuffer | undefined> => {
 			try {
 				return await _invoke<ArrayBuffer>('get_hash');

@@ -38,37 +38,44 @@ pub async fn pic (deck: Vec<u32>) -> Result<(Vec<(u32, String)>, Vec<(u32, Vec<u
 	Ok((path, buffer))
 }
 
-pub fn script (key: &str) -> Result<Vec<u8>, Error> {
-	let game: &RwLock<Game> = GAME.get().ok_or(anyhow!("get game error"))?;
-	let mut game: RwLockWriteGuard<'_, Game> = game.write();
-	let mut content: Vec<u8> = Vec::new();
-	for pack in game.pack.values_mut() {
-		if !pack.on {
-			continue;
-		}
-		if let Some(script) = pack.scripts.get(key) {
-			match script {
-				ScriptContent::ZipFile(index) => {
-					if let Some(archive) = pack.archive.as_mut() {
-						if let Ok(mut file) = archive.by_index(*index) {
-							file.read_to_end(&mut content)?;
+macro_rules! script_reader {
+	($name:ident, $content:ty, $archive_read:ident, $path_read:path) => {
+		pub fn $name (key: &str) -> Result<$content, Error> {
+			let game: &RwLock<Game> = GAME.get().ok_or(anyhow!("get game error"))?;
+			let mut game: RwLockWriteGuard<'_, Game> = game.write();
+			let mut content: $content = Default::default();
+			for pack in game.pack.values_mut() {
+				if !pack.on {
+					continue;
+				}
+				if let Some(script) = pack.scripts.get(key) {
+					match script {
+						ScriptContent::ZipFile(index) => {
+							if let Some(archive) = pack.archive.as_mut()
+								&& let Ok(mut file) = archive.by_index(*index)
+							{
+								file.$archive_read(&mut content)?;
+								break;
+							}
+						}
+						ScriptContent::Path(path) => {
+							content = $path_read(path)?;
 							break;
 						}
 					}
 				}
-				ScriptContent::Path(path) => {
-					content = read(path)?;
-					break;
-				}
+			}
+			if content.is_empty() {
+				Err(anyhow!("cannot find script"))
+			} else {
+				Ok(content)
 			}
 		}
 	};
-	if content.len() == 0 {
-		Err(anyhow!("cannot find script"))
-	} else {
-		Ok(content)
-	}
 }
+
+script_reader!(script_string, String, read_to_string, std::fs::read_to_string);
+script_reader!(script, Vec<u8>, read_to_end, std::fs::read);
 
 pub async fn sound () -> Result<Vec<(String, String)>, Error> {
 	let game: &RwLock<Game> = GAME.get().ok_or(anyhow!(""))?;
