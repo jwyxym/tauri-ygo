@@ -42,8 +42,11 @@ ygopro_cdb_reader = "0.1.5"
 rquickjs = { version = "0.12.0", features = ["bindgen", "futures"] }
 syn = { version = "3.0.4", features = ["full"] }
 quote = "1.0.47"
+ygopro = { version = "0.1.4", default-features = false, features = ["koishi"] }
+ygopro-data = { version = "0.1.1", default-features = false }
+ygopro-core-wrapper = { version = "0.1.3", default-features = false, features = ["koishi"] }
+ygopro-handler = "0.1.2"
 
-ygopru = { path = "./crates/ygopru", default-features = false, features = ["koishi"] }
 ygopro3_api = { path = "./crates/ygopro3_api", default-features = false }
 ygopro3_card = { path = "./crates/ygopro3_card" }
 ygopro3_const = { path = "./crates/ygopro3_const" }
@@ -74,9 +77,6 @@ ygopro3_zip = { path = "./crates/ygopro3_zip" }
 
 [workspace]
 resolver = "2"
-exclude = [
-	"crates/ygopru",
-]
 members = [
 	"crates/ygopro3_api",
 	"crates/ygopro3_card",

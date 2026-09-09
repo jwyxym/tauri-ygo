@@ -7,24 +7,20 @@ use std::{
 };
 use parking_lot::{Mutex, MutexGuard};
 use anyhow::{Error, Result, anyhow};
-use ygopru::{
-	ygopro::{
-		managers::{
-			config_manager::{ConfigManager, set_global as set_config_manager},
-			data_manager::{DataManager, card_reader, set_global as set_data_manager},
-			deck_manager::{DeckManager, set_global as set_deck_manager},
-		},
-	},
-	ygopro_core_wrapper::{
-		get_log_message,
-		set_card_reader,
-		set_message_handler,
-		set_script_reader,
-	},
-	ygopro_data::{
-		constants::{Attribute, Category, Linkmarkers, OT, Race, Type},
-		data::{CoreCard, Card},
-	},
+use ygopro::managers::{
+	config_manager::{ConfigManager, set_global as set_config_manager},
+	data_manager::{DataManager, card_reader, set_global as set_data_manager},
+	deck_manager::{DeckManager, set_global as set_deck_manager},
+};
+use ygopro_core_wrapper::{
+	get_log_message,
+	set_card_reader,
+	set_message_handler,
+	set_script_reader,
+};
+use ygopro_data::{
+	constants::{Attribute, Category, Linkmarkers, OT, Race, Type},
+	data::{CoreCard, Card},
 };
 use ygopro3_emit::progress::*;
 

@@ -5,7 +5,6 @@ edition = "2024"
 
 [dependencies]
 anyhow.workspace = true
-ygopru.workspace = true
 binrw.workspace = true
 futures.workspace = true
 hashbrown.workspace = true
@@ -14,6 +13,10 @@ tokio.workspace = true
 tokio-stream.workspace = true
 tokio-util.workspace = true
 arc-swap.workspace = true
+ygopro.workspace = true
+ygopro-data.workspace = true
+ygopro-core-wrapper.workspace = true
+ygopro-handler.workspace = true
 
 ygopro3_ex_code.workspace = true
 ygopro3_game.workspace = true

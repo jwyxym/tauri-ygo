@@ -40,17 +40,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ahash"
-version = "0.7.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "891477e0c6a8957309ee5c45a6368af3ae14bb510732d2684ffa19af310920f9"
-dependencies = [
- "getrandom 0.2.16",
- "once_cell",
- "version_check",
-]
-
-[[package]]
 name = "aho-corasick"
 version = "1.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -147,7 +136,7 @@ version = "1.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "40c48f72fd53cd289104fc64099abca73db4166ad86ea0b4341abe65af83dadc"
 dependencies = [
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -158,7 +147,7 @@ checksum = "291e6a250ff86cd4a820112fb8898808a366d8f9f58ce16d1f538353ad55747d"
 dependencies = [
  "anstyle",
  "once_cell_polyfill",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -173,7 +162,7 @@ version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fb5dfbc6d8d2675589ccbe4d0fd61df2419075625f8c1a62325e718e2b0049f9"
 dependencies = [
- "hashbrown 0.12.3",
+ "hashbrown 0.15.5",
 ]
 
 [[package]]
@@ -2101,9 +2090,6 @@ name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
-dependencies = [
- "ahash",
-]
 
 [[package]]
 name = "hashbrown"
@@ -2111,6 +2097,8 @@ version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9229cfe53dfd69f0609a49f65461bd93001ea1ef889cd5529dd176593f5338a1"
 dependencies = [
+ "allocator-api2",
+ "equivalent",
  "foldhash 0.1.5",
 ]
 
@@ -7485,7 +7473,9 @@ checksum = "ea6fc2961e4ef194dcbfe56bb845534d0dc8098940c7e5c012a258bfec6701bd"
 
 [[package]]
 name = "ygopro"
-version = "0.1.3"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6807edf7c8ff79a7829d9b7896e51097c96283bfb6d7a7226af58378d1209929"
 dependencies = [
  "anymap3",
  "arc-swap",
@@ -7515,7 +7505,9 @@ dependencies = [
 
 [[package]]
 name = "ygopro-core-wrapper"
-version = "0.1.1"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8208f3c9c6187867ce776e290176271f1e2e0abdd4e27c7a9780c959d8797cfc"
 dependencies = [
  "cc",
  "glob",
@@ -7527,7 +7519,9 @@ dependencies = [
 
 [[package]]
 name = "ygopro-data"
-version = "0.1.0"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4134c5355a623429cd42da9e3fc400a900ffbd2954ba77cc5eb03c1aa4b16fe4"
 dependencies = [
  "binrw",
  "bitflags 2.13.1",
@@ -7545,6 +7539,8 @@ dependencies = [
 [[package]]
 name = "ygopro-derive"
 version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0fafc5ad4406706d04ded3e863f402e111269ee74b99a0bb0e31fb274c41657c"
 dependencies = [
  "darling 0.14.4",
  "proc-macro2",
@@ -7553,25 +7549,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "ygopro-external-server-bridge"
-version = "0.1.1"
-dependencies = [
- "base64 0.22.1",
- "binrw",
- "bytes",
- "futures",
- "log",
- "tokio",
- "tokio-stream",
- "tokio-util",
- "ygopro-core-wrapper",
- "ygopro-data",
- "ygopro-handler",
-]
-
-[[package]]
 name = "ygopro-handler"
 version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d5d63e900d0c36e795b3e41ad778032ed0ccc8ca5fc5ab408539a43057289454"
 dependencies = [
  "anymap3",
  "binrw",
@@ -7652,11 +7633,14 @@ dependencies = [
  "tokio",
  "tokio-stream",
  "tokio-util",
+ "ygopro",
+ "ygopro-core-wrapper",
+ "ygopro-data",
+ "ygopro-handler",
  "ygopro3_card",
  "ygopro3_emit",
  "ygopro3_ex_code",
  "ygopro3_game",
- "ygopru",
 ]
 
 [[package]]
@@ -7908,18 +7892,6 @@ dependencies = [
  "rusqlite",
  "serde",
  "tokio-rusqlite",
-]
-
-[[package]]
-name = "ygopru"
-version = "0.1.0"
-dependencies = [
- "ygopro",
- "ygopro-core-wrapper",
- "ygopro-data",
- "ygopro-derive",
- "ygopro-external-server-bridge",
- "ygopro-handler",
 ]
 
 [[package]]
