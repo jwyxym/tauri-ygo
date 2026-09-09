@@ -46,6 +46,7 @@
 			I18N_KEYS.MENU_CONENCT,
 			I18N_KEYS.MENU_REPLAY,
 			I18N_KEYS.MENU_DECK,
+			I18N_KEYS.MENU_CARD,
 			I18N_KEYS.MENU_SETTING,
 			I18N_KEYS.MENU_EXIT
 		],
@@ -80,9 +81,12 @@
 					emit('deck');
 					break;
 				case 4:
-					emit('setting');
+					emit('card');
 					break;
 				case 5:
+					emit('setting');
+					break;
+				case 6:
 					await mainGame.exit();
 					break;
 			}
@@ -106,7 +110,7 @@
 			page.time.second = `${second.length > 1 ? '' : '0'}${second}`;
 		};
 		time();
-		page.time.interval = setInterval(time, 1000);
+		page.time.interval = setInterval(time, 1000) as any as number;
 	})
 
 	onUnmounted(() => {
@@ -119,6 +123,7 @@
 		server : [];
 		replay : [];
 		deck : [];
+		card : [];
 		setting : [];
 	}>();
 </script>

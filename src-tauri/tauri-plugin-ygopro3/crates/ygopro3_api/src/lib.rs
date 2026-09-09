@@ -38,6 +38,7 @@ pub fn init () -> TauriPlugin<Wry> {
 			api::get_lflist,
 			api::get_info,
 			api::get_room,
+			api::get_script,
 			api::get_deck,
 			api::get_time,
 			api::get_version,

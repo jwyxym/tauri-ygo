@@ -10,6 +10,10 @@
 				v-if = 'page.show.deck'
 				@exit = 'page.select.menu'
 			/>
+			<Card
+				v-if = 'page.show.card'
+				@exit = 'page.select.menu'
+			/>
 			<Duel
 				v-if = 'page.show.duel'
 				:model = 'page.duel.model'
@@ -23,6 +27,7 @@
 			<YGOMenu
 				v-if = 'page.show.menu'
 				@deck = 'page.select.deck'
+				@card = 'page.select.card'
 				@single = 'page.select.single'
 				@server = 'page.select.server'
 				@replay = 'page.select.replay'
@@ -36,6 +41,7 @@
 
 	import YGOMenu from './pages/menu/menu.vue';
 	import Deck from './pages/deck/deck_list.vue';
+	import Card from './pages/card/card_list.vue';
 	import Duel from './pages/duel/connect.vue';
 	import Setting from './pages/setting/setting.vue';
 	import Loading from './pages/loading/loading.vue';
@@ -55,6 +61,7 @@
 			menu : false,
 			duel : false,
 			deck : false,
+			card : false,
 			setting : false
 		},
 		select : {
@@ -64,6 +71,7 @@
 				f();
 			},
 			menu : () : void => {
+				page.show.card = false;
 				page.show.duel = false;
 				page.show.deck = false;
 				page.show.setting = false;
@@ -97,6 +105,12 @@
 				page.show.menu = false;
 				setTimeout(() => {
 					page.show.deck = true;
+				}, 600);
+			}),
+			card : () : void => page.select.lock(() => {
+				page.show.menu = false;
+				setTimeout(() => {
+					page.show.card = true;
 				}, 600);
 			}),
 			setting : () : void => {

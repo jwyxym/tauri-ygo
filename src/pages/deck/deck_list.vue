@@ -7,6 +7,7 @@
 						<Input
 							:placeholder = 'mainGame.get.text(I18N_KEYS.DECK_INPUT)'
 							variant = 'outlined'
+							@enter = 'input.confirm'
 							v-model = 'input.value'
 						/>
 						<div>
@@ -180,7 +181,6 @@
 			else {
 				list.selected = -1;
 				page.button = -1;
-				input.clear();
 				await mainGame.sleep(200, mainGame.load.pic, [list.decks[n]]);
 				list.selected = n;
 				page.button = 1;
