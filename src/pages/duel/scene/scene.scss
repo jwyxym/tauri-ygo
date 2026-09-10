@@ -5,6 +5,7 @@ $boder-color: #9ed3ff;
 		transition: all 0.5s ease;
 		transform: translateX(80px);
 		.ygopro3__duel__btn {
+			position: relative;
 			width: var(--height);
 			height: calc(var(--width) / 3);
 			color : $boder-color;
@@ -18,6 +19,11 @@ $boder-color: #9ed3ff;
 			align-items: center;
 			justify-content: center;
 			border: 2px solid $boder-color;
+			&::before {
+				content: '';
+				position: absolute;
+				inset: -12px;
+			}
 			> span {
 				opacity: 0;
 				transition: all 0.1s ease;

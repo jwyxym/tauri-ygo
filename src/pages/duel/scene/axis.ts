@@ -140,6 +140,7 @@ class Axis {
 	};
 
 	static computed = {
+		hand_z : (seq : number) : number => seq * SIZE.GAP.HAND + 60,
 		card : (card : Client_Card) : Axis => {
 			if (card.location === LOCATION.HAND) {
 				const width = SIZE.WIDTH * SIZE.MAX_HAND;
@@ -149,7 +150,7 @@ class Axis {
 					.length;
 				const x = (SIZE.HEIGHT + SIZE.GAP.SCENE) * axis.x + (SIZE.HEIGHT - SIZE.WIDTH) / 2 * (card.owner ? 1 : - 1) + Math.min(width / ct, SIZE.WIDTH) * card.seq * (!!card.owner ? - 1 : 1);
 				const y = (SIZE.HEIGHT + SIZE.GAP.SCENE) * axis.y;
-				const z = card.seq * SIZE.GAP.HAND + 60;
+				const z = Axis.computed.hand_z(card.seq);
 				return new Axis(x, y, z);
 			} else {
 				const loc = card.location & LOCATION.ONFIELD;

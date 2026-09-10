@@ -125,38 +125,45 @@ class Activate {
 		const axis = Axis.computed.card(c);
 		this.three.position.set(axis.x, axis.y + (c.location & LOCATION.HAND ? 80 : 5), 100);
 		this.btn.classList.add('show');
-		const ACTIVATE : Array<{ desc ?: number; index : number; }> = [];
-		const SUMMON : Array<{ desc ?: number; index : number; }> = [];
-		const SPSUMMON : Array<{ desc ?: number; index : number; }> = [];
-		const SSET : Array<{ desc ?: number; index : number; }> = [];
-		const MSET : Array<{ desc ?: number; index : number; }> = [];
-		const REPOS : Array<{ desc ?: number; index : number; }> = [];
-		const ATTACK : Array<{ desc ?: number; index : number; }> = [];
-		this.cards.forEach(i => {
-			ACTIVATE.push(...i.activatable.get(COMMAND.ACTIVATE)!);
-			SUMMON.push(...i.activatable.get(COMMAND.SUMMON)!);
-			SPSUMMON.push(...i.activatable.get(COMMAND.SPSUMMON)!);
-			SSET.push(...i.activatable.get(COMMAND.SSET)!);
-			MSET.push(...i.activatable.get(COMMAND.MSET)!);
-			REPOS.push(...i.activatable.get(COMMAND.REPOS)!);
-			ATTACK.push(...i.activatable.get(COMMAND.ATTACK)!);
-		});
+		let scale = false;
+		let activate = false;
+		let summon = false;
+		let spsummon = false;
+		let sset = false;
+		let mset = false;
+		let repos = false;
+		let attack = false;
+		for (const card of this.cards) {
+			if (!scale || !activate) {
+				for (const effect of card.activatable.get(COMMAND.ACTIVATE)!) {
+					if (effect.desc === 1160) scale = true;
+					else activate = true;
+					if (scale && activate) break;
+				}
+			}
+			summon ||= !!card.activatable.get(COMMAND.SUMMON)!.length;
+			spsummon ||= !!card.activatable.get(COMMAND.SPSUMMON)!.length;
+			sset ||= !!card.activatable.get(COMMAND.SSET)!.length;
+			mset ||= !!card.activatable.get(COMMAND.MSET)!.length;
+			repos ||= !!card.activatable.get(COMMAND.REPOS)!.length;
+			attack ||= !!card.activatable.get(COMMAND.ATTACK)!.length;
+		}
 		const elements : Array<[HTMLDivElement, number]> = [];
 		const is_pendulum = (c.location & LOCATION.SZONE) && [0, 4].includes(c.seq) && c.type & TYPE.PENDULUM;
 
-		elements.push([this.btns.get(KEYS.SCALE)!, Number(!!ACTIVATE.find(i => i.desc === 1160))]);
-		elements.push([this.btns.get(KEYS.ACTIVATE)!, Number(!!ACTIVATE.find(i => i.desc !== 1160))]);
-		elements.push([this.btns.get(KEYS.SUMMON)!, Number(!!SUMMON.length)]);
-		elements.push([this.btns.get(KEYS.PSUMMON)!, is_pendulum ? Number(!!SPSUMMON.length) : 0]);
-		elements.push([this.btns.get(KEYS.SPSUMMON)!, is_pendulum ? 0 : Number(!!SPSUMMON.length)]);
-		elements.push([this.btns.get(KEYS.SSET)!, Number(!!SSET.length)]);
-		elements.push([this.btns.get(KEYS.MSET)!, Number(!!MSET.length)]);
-		elements.push([this.btns.get(KEYS.ATTACK)!, Number(!!ATTACK.length)]);
+		elements.push([this.btns.get(KEYS.SCALE)!, Number(scale)]);
+		elements.push([this.btns.get(KEYS.ACTIVATE)!, Number(activate)]);
+		elements.push([this.btns.get(KEYS.SUMMON)!, Number(summon)]);
+		elements.push([this.btns.get(KEYS.PSUMMON)!, is_pendulum ? Number(spsummon) : 0]);
+		elements.push([this.btns.get(KEYS.SPSUMMON)!, is_pendulum ? 0 : Number(spsummon)]);
+		elements.push([this.btns.get(KEYS.SSET)!, Number(sset)]);
+		elements.push([this.btns.get(KEYS.MSET)!, Number(mset)]);
+		elements.push([this.btns.get(KEYS.ATTACK)!, Number(attack)]);
 		elements.push([this.btns.get(c.pos & POS.FACEDOWN
 				? KEYS.FLIP : c.pos & POS.ATTACK
 					? KEYS.POS_DEFENCE : KEYS.POS_ATTACK
 			)!,
-			Number(!!REPOS.length)]
+			Number(repos)]
 		);
 		elements.forEach(i => this.btnable && i[1]
 			? i[0].classList.add('show')

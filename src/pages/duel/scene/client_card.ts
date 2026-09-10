@@ -797,7 +797,7 @@ class Client_Card {
 	click = {
 		img : () : void => {
 			if (this.location & LOCATION.HAND) {
-				const z = Axis.computed.card(this).z ?? 0;
+				const z = Axis.computed.hand_z(this.seq);
 				const img = this.get.el.img();
 				img.classList.contains('selected')
 					? img.classList.remove('selected')
