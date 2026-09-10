@@ -665,7 +665,7 @@ class _Duel {
 					else
 						connect.duel.card = card;
 				} else {
-					const cards : Array<Client_Card> = [];
+					const cards : Array<Client_Card> | undefined = card.location & LOCATION.DECK ? undefined : [];
 					let c : Client_Card | undefined = undefined;
 					let max = - Infinity;
 					const is_mzone = !!(card.location & LOCATION.MZONE);
@@ -675,7 +675,7 @@ class _Duel {
 							|| (i.seq !== card.seq && (i.location & LOCATION.ONFIELD))
 						)
 							continue;
-						cards.push(i);
+						cards?.push(i);
 						const value = is_mzone ? i.overlay : i.seq;
 						if (!c || value > max) {
 							c = i;
@@ -686,7 +686,7 @@ class _Duel {
 						connect.duel.card = undefined;
 					else
 						connect.duel.card = c;
-					if (!(card.location & LOCATION.DECK)
+					if (cards
 						&& (cards.length > 1 || !(card.location & LOCATION.ONFIELD))
 					)
 						connect.duel.cards = cards;

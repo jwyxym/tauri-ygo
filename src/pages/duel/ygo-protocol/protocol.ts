@@ -241,6 +241,7 @@ class Protocol {
 				const link = msg.read.int32();
 				if (link === undefined) return result;
 				card.set.link(link);
+				msg.index += 4;
 			}
 			return result;
 		},
