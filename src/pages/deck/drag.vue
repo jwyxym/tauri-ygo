@@ -221,15 +221,23 @@
 				}
 				return card.id;
 			};
-			const card : Card = mainGame.get.card(el instanceof HTMLDivElement ? el.dataset.id! : el);
+			const is_element = el instanceof HTMLDivElement;
+			const card : Card = mainGame.get.card(is_element ? el.dataset.id! : el);
 			if (card.is_token())
 				return err(mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_TYPE));
 			const code = get_code(card);
-			const c = cards.flat();
-			const deck_cards = c.map(i => i.dataset.id!);
-			const chk = el instanceof HTMLDivElement ? Number(!c.includes(el)) : 1;
+			let chk = 1;
+			let count = 0;
+			for (const group of cards) {
+				for (const item of group) {
+					if (is_element && item === el)
+						chk = 0;
+					if (get_code(mainGame.get.card(item.dataset.id!)) === code)
+						count ++;
+				}
+			}
 			const ct = props.lflist?.get.lflist(card.id) ?? mainGame.get.system(KEYS.SETTING_CT_CARD) as number;
-			if (deck_cards.filter(i => get_code(mainGame.get.card(i)) === code).length + chk > ct)
+			if (count + chk > ct)
 				return err(mainGame.get.text(I18N_KEYS.DECK_RULE_CARD_MAX, ct.toString()));
 
 			const genesys = chk * (props.lflist?.genesys ? props.lflist.get.glist(card.id) : 0);
